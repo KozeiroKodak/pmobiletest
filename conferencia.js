@@ -1,49 +1,197 @@
-// ============================
-// FUNÇÕES DE CONFERÊNCIA
-// ============================
-// Cuida da tela "Conferência".
+// ============================================================
+// PMOBILE
+// ARQUIVO: conferencia.js
+// ============================================================
 //
-// Permite:
-// - Buscar materiais por código
-// - Buscar materiais por descrição
-// - Buscar materiais por referência
-// - Selecionar um material
-// - Informar a quantidade física
-// - Comparar a quantidade física com o estoque esperado
-// - Registrar o resultado da conferência
-// - Salvar a conferência no dispositivo
-
-
-// ============================
-// BUSCAR MATERIAL PARA CONFERÊNCIA
-// ============================
-// Localiza os materiais através de:
-// - Código
-// - Descrição
-// - Referência
+// OBJETIVO:
 //
-// Local e Marca são apenas informações
-// exibidas no resultado.
+// Controlar a tela "Conferência".
 //
-// Depois da busca, apresenta os materiais
-// encontrados para que o usuário possa
-// selecionar o produto desejado.
+// IMPORTANTE:
+//
+// A partir desta versão, os materiais utilizados na conferência
+// são consultados DIRETAMENTE no Supabase.
+//
+// O Supabase passa a ser a fonte central dos materiais.
+//
+// O IndexedDB / array "materiais" NÃO é mais utilizado para
+// buscar ou selecionar materiais nesta tela.
+//
+// ============================================================
+//
+// FLUXO:
+//
+// 1. Usuário pesquisa um material.
+// 2. PMOBILE consulta o Supabase.
+// 3. Supabase retorna os materiais encontrados.
+// 4. Usuário seleciona um material.
+// 5. PMOBILE guarda o ID do registro selecionado.
+// 6. Usuário informa a quantidade física.
+// 7. PMOBILE calcula a diferença.
+// 8. Conferência é registrada.
+// 9. Histórico continua sendo salvo localmente por enquanto.
+//
+// ============================================================
 
-function buscarMaterialConferencia() {
 
-    const busca = document
-        .getElementById("campoConferencia")
-        .value
-        .toLowerCase();
+
+// ============================================================
+// FUNÇÃO: obterClienteSupabaseConferencia()
+// ============================================================
+//
+// OBJETIVO:
+//
+// Garantir que o cliente Supabase esteja disponível.
+//
+// RETORNO:
+//
+// Retorna o cliente Supabase.
+//
+// ERRO:
+//
+// Caso o Supabase ainda não tenha sido inicializado,
+// interrompe a operação.
+//
+// ============================================================
+
+function obterClienteSupabaseConferencia() {
+
+    if (!window.clienteSupabase) {
+
+        throw new Error(
+            "Cliente Supabase não foi inicializado."
+        );
+
+    }
+
+    return window.clienteSupabase;
+}
+
+
+
+// ============================================================
+// FUNÇÃO: escaparBuscaILikeConferencia()
+// ============================================================
+//
+// OBJETIVO:
+//
+// Escapar caracteres especiais utilizados pelo ILIKE.
+//
+// Isso evita que "%" e "_" sejam interpretados como
+// curingas durante a pesquisa.
+//
+// ============================================================
+
+function escaparBuscaILikeConferencia(valor) {
+
+    return String(valor)
+
+        .replace(
+            /\\/g,
+            "\\\\"
+        )
+
+        .replace(
+            /%/g,
+            "\\%"
+        )
+
+        .replace(
+            /_/g,
+            "\\_"
+        );
+
+}
+
+
+
+// ============================================================
+// VARIÁVEL: materialConferenciaSelecionado
+// ============================================================
+//
+// OBJETIVO:
+//
+// Armazenar temporariamente o material escolhido pelo usuário.
+//
+// IMPORTANTE:
+//
+// Agora guardamos o objeto retornado pelo Supabase.
+//
+// Isso evita depender do array local "materiais".
+//
+// ============================================================
+
+let materialConferenciaSelecionado = null;
+
+
+
+// ============================================================
+// FUNÇÃO: buscarMaterialConferencia()
+// ============================================================
+//
+// OBJETIVO:
+//
+// Pesquisar materiais diretamente na tabela:
+//
+//     public.materiais
+//
+// CAMPOS PESQUISADOS:
+//
+// - código
+// - descrição
+// - referência
+//
+// NÃO PESQUISA:
+//
+// - Local
+// - Marca
+// - Quantidade
+//
+// A pesquisa é feita diretamente no Supabase.
+//
+// ============================================================
+
+async function buscarMaterialConferencia() {
+
+    const campo =
+        document.getElementById(
+            "campoConferencia"
+        );
+
 
     const areaResultado =
-        document.getElementById("resultadoConferencia");
+        document.getElementById(
+            "resultadoConferencia"
+        );
 
 
-    // Verifica se o campo de pesquisa
-    // está vazio.
+    // ========================================================
+    // VERIFICAR ELEMENTOS DA TELA
+    // ========================================================
 
-    if (busca.trim() === "") {
+    if (!campo || !areaResultado) {
+
+        console.error(
+            "Elementos da tela de conferência não encontrados."
+        );
+
+        return;
+    }
+
+
+    // ========================================================
+    // OBTER TEXTO DA PESQUISA
+    // ========================================================
+
+    const buscaOriginal =
+        campo.value.trim();
+
+
+    // ========================================================
+    // VERIFICAR PESQUISA VAZIA
+    // ========================================================
+
+    if (buscaOriginal === "") {
 
         areaResultado.innerHTML =
             "<p>Digite um código, descrição ou referência.</p>";
@@ -52,21 +200,151 @@ function buscarMaterialConferencia() {
     }
 
 
-    // Procura os materiais cujo código,
-    // descrição ou referência contenha
-    // o texto pesquisado.
+    // ========================================================
+    // ESCAPAR CARACTERES ESPECIAIS
+    // ========================================================
 
-    const resultados = materiais.filter(material =>
-        (material.codigo || "").toLowerCase().includes(busca) ||
-        (material.descricao || "").toLowerCase().includes(busca) ||
-        (material.referencia || "").toLowerCase().includes(busca)
-    );
+    const busca =
+        escaparBuscaILikeConferencia(
+            buscaOriginal
+        );
 
 
-    // Caso nenhum material seja encontrado,
-    // informa o usuário.
+    // ========================================================
+    // MOSTRAR STATUS
+    // ========================================================
 
-    if (resultados.length === 0) {
+    areaResultado.innerHTML =
+        "<p>Pesquisando no Supabase...</p>";
+
+
+    try {
+
+        // ====================================================
+        // OBTER CLIENTE SUPABASE
+        // ====================================================
+
+        const clienteSupabase =
+            obterClienteSupabaseConferencia();
+
+
+        // ====================================================
+        // CONSULTAR SUPABASE
+        // ====================================================
+        //
+        // Procuramos o texto em:
+        //
+        // codigo
+        // descricao
+        // referencia
+        //
+        // ====================================================
+
+        const { data, error } =
+            await clienteSupabase
+
+                .from("materiais")
+
+                .select(
+                    "id,codigo,descricao,referencia,marca,local,quantidade,quantidade_reservada,disponivel"
+                )
+
+                .or(
+                    "codigo.ilike.%" +
+                    busca +
+                    "%,descricao.ilike.%" +
+                    busca +
+                    "%,referencia.ilike.%" +
+                    busca +
+                    "%"
+                )
+
+                .order(
+                    "codigo",
+                    {
+                        ascending: true
+                    }
+                )
+
+                .limit(100);
+
+
+        // ====================================================
+        // VERIFICAR ERRO
+        // ====================================================
+
+        if (error) {
+
+            throw error;
+
+        }
+
+
+        // ====================================================
+        // EXIBIR RESULTADOS
+        // ====================================================
+
+        exibirResultadosConferencia(
+            data || [],
+            areaResultado
+        );
+
+
+    } catch (erro) {
+
+        console.error(
+            "Erro ao pesquisar material para conferência:",
+            erro
+        );
+
+
+        areaResultado.innerHTML =
+            "<p>❌ Erro ao consultar o Supabase.</p>";
+
+    }
+
+}
+
+
+
+// ============================================================
+// FUNÇÃO: exibirResultadosConferencia()
+// ============================================================
+//
+// OBJETIVO:
+//
+// Mostrar na tela os materiais encontrados pelo Supabase.
+//
+// PARÂMETROS:
+//
+// resultados
+//     Array de materiais retornados pelo Supabase.
+//
+// areaResultado
+//     Elemento HTML onde os resultados serão exibidos.
+//
+// ============================================================
+
+function exibirResultadosConferencia(
+    resultados,
+    areaResultado
+) {
+
+    // ========================================================
+    // LIMPAR RESULTADOS ANTERIORES
+    // ========================================================
+
+    areaResultado.innerHTML = "";
+
+
+    // ========================================================
+    // NENHUM RESULTADO
+    // ========================================================
+
+    if (
+        !Array.isArray(resultados) ||
+        resultados.length === 0
+    ) {
 
         areaResultado.innerHTML =
             "<p>Nenhum material encontrado.</p>";
@@ -75,111 +353,301 @@ function buscarMaterialConferencia() {
     }
 
 
-    // Limpa os resultados anteriores
-    // antes de mostrar a nova pesquisa.
+    // ========================================================
+    // FRAGMENTO
+    // ========================================================
+    //
+    // Utilizamos DocumentFragment para montar os resultados
+    // sem ficar alterando o DOM a cada material.
+    //
+    // ========================================================
 
-    areaResultado.innerHTML = "";
-
-
-    // Percorre todos os materiais encontrados
-    // e cria sua apresentação na tela.
-
-    resultados.forEach(material => {
-
-        areaResultado.innerHTML += `
-
-            <hr>
-
-            <h3>
-                ${material.descricao}
-            </h3>
-
-            <p>
-                <strong>Código:</strong>
-                ${material.codigo}
-            </p>
-
-            <p>
-                <strong>Referência:</strong>
-                ${material.referencia || "-"}
-            </p>
-
-            <p>
-                <strong>Local:</strong>
-                ${material.local || "-"}
-            </p>
-
-            <p>
-                <strong>Marca:</strong>
-                ${material.marca || "-"}
-            </p>
-
-            <p>
-                <strong>Estoque esperado:</strong>
-                ${material.quantidade}
-            </p>
-
-            <button
-                data-codigo="${material.codigo}"
-                class="botao-selecionar"
-            >
-                Selecionar
-            </button>
-        `;
-    });
+    const fragmento =
+        document.createDocumentFragment();
 
 
-    // Localiza todos os botões "Selecionar"
-    // que foram criados nos resultados.
+    // ========================================================
+    // PERCORRER RESULTADOS
+    // ========================================================
 
-    document
-        .querySelectorAll(".botao-selecionar")
-        .forEach(botao => {
-
-
-            // Adiciona uma ação ao clicar
-            // em cada botão.
-
-            botao.addEventListener("click", function () {
-
-                const codigo =
-                    this.getAttribute("data-codigo");
+    resultados.forEach(
+        function (material) {
 
 
-                // Envia o código do material
-                // para a função responsável
-                // por selecionar o produto.
+            // =================================================
+            // BLOCO DO MATERIAL
+            // =================================================
 
-                selecionarMaterialConferencia(codigo);
-            });
-        });
-}
+            const bloco =
+                document.createElement(
+                    "div"
+                );
 
 
-// ============================
-// SELECIONAR MATERIAL
-// ============================
-// Localiza o material escolhido através
-// do código.
-//
-// Depois apresenta as informações do produto
-// e disponibiliza o campo para que o usuário
-// informe a quantidade física encontrada.
+            // =================================================
+            // SEPARADOR
+            // =================================================
 
-function selecionarMaterialConferencia(codigo) {
+            const linha =
+                document.createElement(
+                    "hr"
+                );
 
-    const material = materiais.find(
-        material => material.codigo === codigo
+
+            // =================================================
+            // DESCRIÇÃO
+            // =================================================
+
+            const titulo =
+                document.createElement(
+                    "h3"
+                );
+
+            titulo.textContent =
+                material.descricao ||
+                "Material";
+
+
+            // =================================================
+            // CÓDIGO
+            // =================================================
+
+            const codigo =
+                document.createElement(
+                    "p"
+                );
+
+            codigo.innerHTML =
+                "<strong>Código:</strong> ";
+
+            codigo.appendChild(
+                document.createTextNode(
+                    material.codigo ?? "-"
+                )
+            );
+
+
+            // =================================================
+            // REFERÊNCIA
+            // =================================================
+
+            const referencia =
+                document.createElement(
+                    "p"
+                );
+
+            referencia.innerHTML =
+                "<strong>Referência:</strong> ";
+
+            referencia.appendChild(
+                document.createTextNode(
+                    material.referencia ?? "-"
+                )
+            );
+
+
+            // =================================================
+            // LOCAL
+            // =================================================
+
+            const local =
+                document.createElement(
+                    "p"
+                );
+
+            local.innerHTML =
+                "<strong>Local:</strong> ";
+
+            local.appendChild(
+                document.createTextNode(
+                    material.local ?? "-"
+                )
+            );
+
+
+            // =================================================
+            // MARCA
+            // =================================================
+
+            const marca =
+                document.createElement(
+                    "p"
+                );
+
+            marca.innerHTML =
+                "<strong>Marca:</strong> ";
+
+            marca.appendChild(
+                document.createTextNode(
+                    material.marca ?? "-"
+                )
+            );
+
+
+            // =================================================
+            // QUANTIDADE ESPERADA
+            // =================================================
+
+            const quantidade =
+                document.createElement(
+                    "p"
+                );
+
+            quantidade.innerHTML =
+                "<strong>Estoque esperado:</strong> ";
+
+            quantidade.appendChild(
+                document.createTextNode(
+                    material.quantidade ?? "-"
+                )
+            );
+
+
+            // =================================================
+            // BOTÃO SELECIONAR
+            // =================================================
+
+            const botao =
+                document.createElement(
+                    "button"
+                );
+
+            botao.type =
+                "button";
+
+            botao.textContent =
+                "Selecionar";
+
+
+            // =================================================
+            // GUARDAR O MATERIAL DIRETAMENTE NO BOTÃO
+            // =================================================
+            //
+            // Não utilizamos mais o array "materiais".
+            //
+            // O botão recebe o objeto retornado pelo Supabase.
+            //
+            // =================================================
+
+            botao.addEventListener(
+                "click",
+                function () {
+
+                    selecionarMaterialConferencia(
+                        material
+                    );
+
+                }
+            );
+
+
+            // =================================================
+            // MONTAR BLOCO
+            // =================================================
+
+            bloco.appendChild(
+                linha
+            );
+
+            bloco.appendChild(
+                titulo
+            );
+
+            bloco.appendChild(
+                codigo
+            );
+
+            bloco.appendChild(
+                referencia
+            );
+
+            bloco.appendChild(
+                local
+            );
+
+            bloco.appendChild(
+                marca
+            );
+
+            bloco.appendChild(
+                quantidade
+            );
+
+            bloco.appendChild(
+                botao
+            );
+
+
+            // =================================================
+            // ADICIONAR AO FRAGMENTO
+            // =================================================
+
+            fragmento.appendChild(
+                bloco
+            );
+
+        }
     );
 
 
-    // Caso o material não seja encontrado,
-// encerra a função.
+    // ========================================================
+    // ADICIONAR TUDO À TELA
+    // ========================================================
+
+    areaResultado.appendChild(
+        fragmento
+    );
+
+}
+
+
+
+// ============================================================
+// FUNÇÃO: selecionarMaterialConferencia()
+// ============================================================
+//
+// OBJETIVO:
+//
+// Receber o material escolhido pelo usuário.
+//
+// IMPORTANTE:
+//
+// O material já veio diretamente do Supabase.
+//
+// Portanto, não precisamos procurar novamente dentro
+// do array local "materiais".
+//
+// ============================================================
+
+function selecionarMaterialConferencia(
+    material
+) {
+
+    // ========================================================
+    // VALIDAR MATERIAL
+    // ========================================================
 
     if (!material) {
+
+        console.error(
+            "Material inválido para conferência."
+        );
+
         return;
     }
 
+
+    // ========================================================
+    // GUARDAR MATERIAL SELECIONADO
+    // ========================================================
+
+    materialConferenciaSelecionado =
+        material;
+
+
+    // ========================================================
+    // LOCALIZAR ÁREA DE RESULTADO
+    // ========================================================
 
     const areaResultado =
         document.getElementById(
@@ -187,182 +655,449 @@ function selecionarMaterialConferencia(codigo) {
         );
 
 
-    // Mostra as informações do material
-    // selecionado e o campo para informar
-    // a quantidade física.
+    if (!areaResultado) {
 
-    areaResultado.innerHTML = `
+        return;
 
-        <h3>
-            ${material.descricao}
-        </h3>
-
-        <p>
-            <strong>Código:</strong>
-            ${material.codigo}
-        </p>
-
-        <p>
-            <strong>Referência:</strong>
-            ${material.referencia || "-"}
-        </p>
-
-        <p>
-            <strong>Local:</strong>
-            ${material.local || "-"}
-        </p>
-
-        <p>
-            <strong>Marca:</strong>
-            ${material.marca || "-"}
-        </p>
-
-        <p>
-            <strong>Estoque esperado:</strong>
-            ${material.quantidade}
-        </p>
-
-        <hr>
-
-        <input
-            type="number"
-            id="campoQuantidadeFisica"
-            placeholder="Quantidade física"
-        >
-
-        <button id="botaoConfirmarContagem">
-            CONFIRMAR
-        </button>
-    `;
+    }
 
 
-    // Localiza o botão CONFIRMAR
-    // que acabou de ser criado.
+    // ========================================================
+    // LIMPAR RESULTADO
+    // ========================================================
 
-    const botaoConfirmar =
-        document.getElementById(
-            "botaoConfirmarContagem"
+    areaResultado.innerHTML =
+        "";
+
+
+    // ========================================================
+    // DESCRIÇÃO
+    // ========================================================
+
+    const titulo =
+        document.createElement(
+            "h3"
+        );
+
+    titulo.textContent =
+        material.descricao ||
+        "Material";
+
+
+    // ========================================================
+    // CÓDIGO
+    // ========================================================
+
+    const codigo =
+        document.createElement(
+            "p"
+        );
+
+    codigo.innerHTML =
+        "<strong>Código:</strong> ";
+
+    codigo.appendChild(
+        document.createTextNode(
+            material.codigo ?? "-"
+        )
+    );
+
+
+    // ========================================================
+    // REFERÊNCIA
+    // ========================================================
+
+    const referencia =
+        document.createElement(
+            "p"
+        );
+
+    referencia.innerHTML =
+        "<strong>Referência:</strong> ";
+
+    referencia.appendChild(
+        document.createTextNode(
+            material.referencia ?? "-"
+        )
+    );
+
+
+    // ========================================================
+    // LOCAL
+    // ========================================================
+
+    const local =
+        document.createElement(
+            "p"
+        );
+
+    local.innerHTML =
+        "<strong>Local:</strong> ";
+
+    local.appendChild(
+        document.createTextNode(
+            material.local ?? "-"
+        )
+    );
+
+
+    // ========================================================
+    // MARCA
+    // ========================================================
+
+    const marca =
+        document.createElement(
+            "p"
+        );
+
+    marca.innerHTML =
+        "<strong>Marca:</strong> ";
+
+    marca.appendChild(
+        document.createTextNode(
+            material.marca ?? "-"
+        )
+    );
+
+
+    // ========================================================
+    // ESTOQUE ESPERADO
+    // ========================================================
+
+    const quantidade =
+        document.createElement(
+            "p"
+        );
+
+    quantidade.innerHTML =
+        "<strong>Estoque esperado:</strong> ";
+
+    quantidade.appendChild(
+        document.createTextNode(
+            material.quantidade ?? "-"
+        )
+    );
+
+
+    // ========================================================
+    // SEPARADOR
+    // ========================================================
+
+    const linha =
+        document.createElement(
+            "hr"
         );
 
 
-    // Adiciona a ação do botão.
-    //
-    // Em vez de colocar a função diretamente
-    // dentro do HTML, usamos addEventListener.
-    //
-    // Isso evita problemas com aspas e caracteres
-    // especiais no código do produto.
+    // ========================================================
+    // CAMPO DE QUANTIDADE FÍSICA
+    // ========================================================
+
+    const campoQuantidade =
+        document.createElement(
+            "input"
+        );
+
+    campoQuantidade.type =
+        "number";
+
+    campoQuantidade.id =
+        "campoQuantidadeFisica";
+
+    campoQuantidade.placeholder =
+        "Quantidade física";
+
+    campoQuantidade.min =
+        "0";
+
+    campoQuantidade.step =
+        "1";
+
+
+    // ========================================================
+    // BOTÃO CONFIRMAR
+    // ========================================================
+
+    const botaoConfirmar =
+        document.createElement(
+            "button"
+        );
+
+    botaoConfirmar.type =
+        "button";
+
+    botaoConfirmar.id =
+        "botaoConfirmarContagem";
+
+    botaoConfirmar.textContent =
+        "CONFIRMAR";
+
+
+    // ========================================================
+    // EVENTO DO BOTÃO
+    // ========================================================
 
     botaoConfirmar.addEventListener(
         "click",
         function () {
 
-            registrarContagem(codigo);
+            registrarContagem();
 
         }
     );
+
+
+    // ========================================================
+    // MONTAR TELA
+    // ========================================================
+
+    areaResultado.appendChild(
+        titulo
+    );
+
+    areaResultado.appendChild(
+        codigo
+    );
+
+    areaResultado.appen
+    // ========================================================
+    // MONTAR TELA
+    // ========================================================
+
+    areaResultado.appendChild(
+        titulo
+    );
+
+    areaResultado.appendChild(
+        codigo
+    );
+
+    areaResultado.appendChild(
+        referencia
+    );
+
+    areaResultado.appendChild(
+        local
+    );
+
+    areaResultado.appendChild(
+        marca
+    );
+
+    areaResultado.appendChild(
+        quantidade
+    );
+
+    areaResultado.appendChild(
+        linha
+    );
+
+    areaResultado.appendChild(
+        campoQuantidade
+    );
+
+    areaResultado.appendChild(
+        botaoConfirmar
+    );
+
+
+    // ========================================================
+    // COLOCAR CURSOR NO CAMPO
+    // ========================================================
+
+    campoQuantidade.focus();
+
 }
 
 
-// ============================
-// REGISTRAR CONTAGEM
-// ============================
-// Recebe o código do material selecionado
-// e a quantidade física informada.
+
+// ============================================================
+// FUNÇÃO: registrarContagem()
+// ============================================================
 //
-// Depois:
-// - Valida a quantidade informada
-// - Calcula a diferença
-// - Define o status
-// - Registra a conferência
-// - Salva os dados no dispositivo
-// - Mostra o resultado para o usuário
+// OBJETIVO:
+//
+// Registrar a contagem física do material selecionado.
+//
+// FLUXO:
+//
+// Material selecionado
+//       ↓
+// Quantidade física
+//       ↓
+// Diferença
+//       ↓
+// Status
+//       ↓
+// Histórico de conferências
+//
+// IMPORTANTE:
+//
+// O material utilizado aqui é o material recebido
+// diretamente do Supabase.
+//
+// ============================================================
 
-function registrarContagem(codigo) {
+function registrarContagem() {
 
-    const material = materiais.find(
-        material => material.codigo === codigo
-    );
+    // ========================================================
+    // VERIFICAR MATERIAL SELECIONADO
+    // ========================================================
 
+    const material =
+        materialConferenciaSelecionado;
 
-    // Verifica se o material existe.
 
     if (!material) {
+
+        alert(
+            "Nenhum material foi selecionado."
+        );
+
         return;
     }
 
 
-    // Obtém a quantidade física digitada
-    // pelo usuário.
+    // ========================================================
+    // LOCALIZAR CAMPO
+    // ========================================================
 
-    const quantidadeFisica = parseInt(
-        document
-            .getElementById("campoQuantidadeFisica")
-            .value
-    );
-
-
-    // Verifica se foi informada
-    // uma quantidade válida.
-
-    if (isNaN(quantidadeFisica)) {
-
+    const campoQuantidade =
         document.getElementById(
-            "resultadoConferencia"
-        ).innerHTML =
-            "<p>Informe uma quantidade válida.</p>";
+            "campoQuantidadeFisica"
+        );
+
+
+    if (!campoQuantidade) {
+
+        return;
+
+    }
+
+
+    // ========================================================
+    // LER QUANTIDADE FÍSICA
+    // ========================================================
+
+    const valor =
+        campoQuantidade.value.trim();
+
+
+    // ========================================================
+    // VALIDAR CAMPO VAZIO
+    // ========================================================
+
+    if (valor === "") {
+
+        alert(
+            "Informe a quantidade física."
+        );
 
         return;
     }
 
 
-    // Calcula a diferença entre a quantidade
-    // física encontrada e o estoque esperado.
+    // ========================================================
+    // CONVERTER PARA NÚMERO
+    // ========================================================
+
+    const quantidadeFisica =
+        Number(valor);
+
+
+    // ========================================================
+    // VALIDAR NÚMERO
+    // ========================================================
+
+    if (
+        !Number.isFinite(
+            quantidadeFisica
+        ) ||
+        quantidadeFisica < 0
+    ) {
+
+        alert(
+            "Informe uma quantidade válida."
+        );
+
+        return;
+    }
+
+
+    // ========================================================
+    // QUANTIDADE ESPERADA
+    // ========================================================
+
+    const quantidadeEsperada =
+        Number(
+            material.quantidade ?? 0
+        );
+
+
+    // ========================================================
+    // CALCULAR DIFERENÇA
+    // ========================================================
     //
-    // Resultado:
-    //  0 = quantidade correta
-    // <0 = falta
-    // >0 = sobra
+    // Física - Esperada
+    //
+    // 0  = OK
+    // <0 = FALTA
+    // >0 = SOBRA
+    //
+    // ========================================================
 
     const diferenca =
-        quantidadeFisica - material.quantidade;
+        quantidadeFisica -
+        quantidadeEsperada;
 
 
-    // Cria as variáveis utilizadas
-    // para apresentar o status.
+    // ========================================================
+    // DEFINIR STATUS
+    // ========================================================
 
-    let status = "";
-    let emoji = "";
+    let status =
+        "";
 
-
-    // Se a diferença for zero,
-    // o estoque físico está de acordo
-    // com o estoque esperado.
-
-    if (diferenca === 0) {
-
-        status = "OK / CONFERIDO";
-        emoji = "✅";
+    let emoji =
+        "";
 
 
-    // Caso exista diferença,
-    // o item será considerado divergente.
+    if (
+        diferenca === 0
+    ) {
+
+        status =
+            "OK / CONFERIDO";
+
+        emoji =
+            "✅";
 
     } else {
 
-        status = "DIVERGÊNCIA";
-        emoji = "❌";
+        status =
+            "DIVERGÊNCIA";
+
+        emoji =
+            "❌";
+
     }
 
 
-    // Adiciona a conferência à lista
-    // mantida pelo PMOBILE.
+    // ========================================================
+    // CRIAR REGISTRO DA CONFERÊNCIA
+    // ========================================================
     //
-    // As informações continuam armazenadas
-    // mesmo que algumas delas não sejam
-    // exibidas na tela de divergências.
+    // O ID do Supabase também é armazenado.
+    //
+    // Isso será importante posteriormente quando
+    // migrarmos o histórico para o próprio Supabase.
+    //
+    // ========================================================
 
-    conferencias.push({
+    const registroConferencia = {
+
+        materialId:
+            material.id,
 
         codigo:
             material.codigo,
@@ -373,8 +1108,14 @@ function registrarContagem(codigo) {
         referencia:
             material.referencia || "",
 
+        marca:
+            material.marca || "",
+
+        local:
+            material.local || "",
+
         quantidadeEsperada:
-            material.quantidade,
+            quantidadeEsperada,
 
         quantidadeFisica:
             quantidadeFisica,
@@ -383,23 +1124,88 @@ function registrarContagem(codigo) {
             diferenca,
 
         status:
-            status
-    });
+            status,
+
+        data:
+            new Date().toISOString()
+
+    };
 
 
-    // Salva a conferência no dispositivo.
+    // ========================================================
+    // ADICIONAR AO HISTÓRICO ATUAL
+    // ========================================================
     //
-    // Essa função pertence ao arquivo
-    // "conferencias.js".
+    // Por enquanto, o histórico ainda utiliza
+    // o sistema local existente.
     //
-    // Dessa forma, a conferência não é perdida
-    // quando o PMOBILE for recarregado.
+    // Depois faremos a migração desse histórico
+    // para o Supabase.
+    //
+    // ========================================================
+
+    if (
+        !Array.isArray(
+            conferencias
+        )
+    ) {
+
+        conferencias = [];
+
+    }
+
+
+    conferencias.push(
+        registroConferencia
+    );
+
+
+    // ========================================================
+    // SALVAR HISTÓRICO
+    // ========================================================
 
     salvarConferencias();
 
 
-    // Obtém a área onde o resultado
-    // da conferência será apresentado.
+    // ========================================================
+    // MOSTRAR RESULTADO
+    // ========================================================
+
+    mostrarResultadoConferencia(
+        material,
+        quantidadeEsperada,
+        quantidadeFisica,
+        diferenca,
+        status,
+        emoji
+    );
+
+}
+
+
+// ============================================================
+// FUNÇÃO: mostrarResultadoConferencia()
+// ============================================================
+//
+// OBJETIVO:
+//
+// Mostrar o resultado da contagem realizada.
+//
+// Esta função não consulta o IndexedDB.
+//
+// Todos os dados utilizados vieram do material
+// selecionado no Supabase.
+//
+// ============================================================
+
+function mostrarResultadoConferencia(
+    material,
+    quantidadeEsperada,
+    quantidadeFisica,
+    diferenca,
+    status,
+    emoji
+) {
 
     const areaResultado =
         document.getElementById(
@@ -407,92 +1213,369 @@ function registrarContagem(codigo) {
         );
 
 
-    // Exibe o resultado completo
-    // da conferência realizada.
+    if (!areaResultado) {
 
-    areaResultado.innerHTML = `
+        return;
 
-        <h3>
-            ${material.descricao}
-        </h3>
-
-        <p>
-            <strong>Código:</strong>
-            ${material.codigo}
-        </p>
-
-        <p>
-            <strong>Referência:</strong>
-            ${material.referencia || "-"}
-        </p>
-
-        <p>
-            <strong>Estoque esperado:</strong>
-            ${material.quantidade}
-        </p>
-
-        <p>
-            <strong>Quantidade física:</strong>
-            ${quantidadeFisica}
-        </p>
-
-        <p>
-            <strong>Diferença:</strong>
-            ${diferenca}
-        </p>
-
-        <hr>
-
-        <p>
-            <strong>
-                ${emoji} ${status}
-            </strong>
-        </p>
-
-        <p>
-            📌 Contagem registrada.
-        </p>
-
-        <button id="botaoNovaConsulta">
-            Nova consulta
-        </button>
-    `;
+    }
 
 
-    // Localiza o botão "Nova consulta".
+    // ========================================================
+    // LIMPAR TELA
+    // ========================================================
 
-    const botaoNovaConsulta =
-        document.getElementById(
-            "botaoNovaConsulta"
+    areaResultado.innerHTML =
+        "";
+
+
+    // ========================================================
+    // DESCRIÇÃO
+    // ========================================================
+
+    const titulo =
+        document.createElement(
+            "h3"
+        );
+
+    titulo.textContent =
+        material.descricao ||
+        "Material";
+
+
+    // ========================================================
+    // CÓDIGO
+    // ========================================================
+
+    const codigo =
+        document.createElement(
+            "p"
+        );
+
+    codigo.innerHTML =
+        "<strong>Código:</strong> ";
+
+    codigo.appendChild(
+        document.createTextNode(
+            material.codigo ?? "-"
+        )
+    );
+
+
+    // ========================================================
+    // REFERÊNCIA
+    // ========================================================
+
+    const referencia =
+        document.createElement(
+            "p"
+        );
+
+    referencia.innerHTML =
+        "<strong>Referência:</strong> ";
+
+    referencia.appendChild(
+        document.createTextNode(
+            material.referencia ?? "-"
+        )
+    );
+
+
+    // ========================================================
+    // ESTOQUE ESPERADO
+    // ========================================================
+
+    const esperado =
+        document.createElement(
+            "p"
+        );
+
+    esperado.innerHTML =
+        "<strong>Estoque esperado:</strong> ";
+
+    esperado.appendChild(
+        document.createTextNode(
+            quantidadeEsperada
+        )
+    );
+
+
+    // ========================================================
+    // QUANTIDADE FÍSICA
+    // ========================================================
+
+    const fisico =
+        document.createElement(
+            "p"
+        );
+
+    fisico.innerHTML =
+        "<strong>Quantidade física:</strong> ";
+
+    fisico.appendChild(
+        document.createTextNode(
+            quantidadeFisica
+        )
+    );
+
+
+    // ========================================================
+    // DIFERENÇA
+    // ========================================================
+
+    const diferencaElemento =
+        document.createElement(
+            "p"
+        );
+
+    diferencaElemento.innerHTML =
+        "<strong>Diferença:</strong> ";
+
+    diferencaElemento.appendChild(
+        document.createTextNode(
+            diferenca
+        )
+    );
+
+
+    // ========================================================
+    // LINHA
+    // ========================================================
+
+    const linha =
+        document.createElement(
+            "hr"
         );
 
 
-    // Adiciona a ação para iniciar
-    // uma nova pesquisa.
+    // ========================================================
+    // STATUS
+    // ========================================================
+
+    const resultado =
+        document.createElement(
+            "p"
+        );
+
+
+    const statusTexto =
+        document.createElement(
+            "strong"
+        );
+
+    statusTexto.textContent =
+        emoji +
+        " " +
+        status;
+
+
+    resultado.appendChild(
+        statusTexto
+    );
+
+
+    // ========================================================
+    // MENSAGEM
+    // ========================================================
+
+    const mensagem =
+        document.createElement(
+            "p"
+        );
+
+    mensagem.textContent =
+        "📌 Contagem registrada.";
+
+
+    // ========================================================
+    // BOTÃO NOVA CONSULTA
+    // ========================================================
+
+    const botaoNovaConsulta =
+        document.createElement(
+            "button"
+        );
+
+    botaoNovaConsulta.type =
+        "button";
+
+    botaoNovaConsulta.id =
+        "botaoNovaConsulta";
+
+    botaoNovaConsulta.textContent =
+        "Nova consulta";
+
+
+    // ========================================================
+    // EVENTO NOVA CONSULTA
+    // ========================================================
 
     botaoNovaConsulta.addEventListener(
         "click",
         function () {
 
-            buscarMaterialConferencia();
+            iniciarNovaConsultaConferencia();
 
         }
     );
 
 
-    // Limpa o campo de pesquisa
-    // depois da conferência.
+    // ========================================================
+    // MONTAR RESULTADO
+    // ========================================================
 
-    document.getElementById(
-        "campoConferencia"
-    ).value = "";
+    areaResultado.appendChild(
+        titulo
+    );
+
+    areaResultado.appendChild(
+        codigo
+    );
+
+    areaResultado.appendChild(
+        referencia
+    );
+
+    areaResultado.appendChild(
+        esperado
+    );
+
+    areaResultado.appendChild(
+        fisico
+    );
+
+    areaResultado.appendChild(
+        diferencaElemento
+    );
+
+    areaResultado.appendChild(
+        linha
+    );
+
+    areaResultado.appendChild(
+        resultado
+    );
+
+    areaResultado.appendChild(
+        mensagem
+    );
+
+    areaResultado.appendChild(
+        botaoNovaConsulta
+    );
 
 
-    // Coloca novamente o cursor no campo
-    // de pesquisa para facilitar a próxima
-    // consulta.
+    // ========================================================
+    // LIMPAR MATERIAL SELECIONADO
+    // ========================================================
 
-    document.getElementById(
-        "campoConferencia"
-    ).focus();
+    materialConferenciaSelecionado =
+        null;
+
+
+    // ========================================================
+    // LIMPAR CAMPO DE PESQUISA
+    // ========================================================
+
+    const campoPesquisa =
+        document.getElementById(
+            "campoConferencia"
+        );
+
+
+    if (campoPesquisa) {
+
+        campoPesquisa.value =
+            "";
+
+    }
+
 }
+
+
+
+// ============================================================
+// FUNÇÃO: iniciarNovaConsultaConferencia()
+// ============================================================
+//
+// OBJETIVO:
+//
+// Preparar a tela para uma nova pesquisa.
+//
+// ============================================================
+
+function iniciarNovaConsultaConferencia() {
+
+    // ========================================================
+    // LIMPAR MATERIAL SELECIONADO
+    // ========================================================
+
+    materialConferenciaSelecionado =
+        null;
+
+
+    // ========================================================
+    // LIMPAR RESULTADO
+    // ========================================================
+
+    const areaResultado =
+        document.getElementById(
+            "resultadoConferencia"
+        );
+
+
+    if (areaResultado) {
+
+        areaResultado.innerHTML =
+            "<p>Digite um código, descrição ou referência.</p>";
+
+    }
+
+
+    // ========================================================
+    // LIMPAR CAMPO
+    // ========================================================
+
+    const campo =
+        document.getElementById(
+            "campoConferencia"
+        );
+
+
+    if (campo) {
+
+        campo.value =
+            "";
+
+        campo.focus();
+
+    }
+
+}
+
+
+
+// ============================================================
+// FIM DO ARQUIVO
+// ============================================================
+//
+// IMPORTANTE:
+//
+// Nesta versão:
+//
+// ✅ Materiais vêm do Supabase
+// ✅ Pesquisa da conferência usa Supabase
+// ✅ Seleção usa o registro retornado pelo Supabase
+// ✅ Quantidade esperada vem do Supabase
+// ✅ ID do material é preservado
+// ✅ Histórico continua funcionando localmente
+//
+// Ainda NÃO fazemos:
+//
+// ❌ Gravação das conferências no Supabase
+// ❌ Migração do histórico
+// ❌ Remoção do IndexedDB do restante do projeto
+// ❌ Alteração da importação Excel
+//
+// Essas serão etapas posteriores.
+//
+// ============================================================
