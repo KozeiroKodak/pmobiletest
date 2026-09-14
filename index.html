@@ -1,0 +1,435 @@
+<!DOCTYPE html><html lang="pt-BR"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Relação de estoque CBA RS</title>
+
+</head><body><!-- ========================================= -->
+<!-- TELA 1: INÍCIO                             -->
+<!-- Primeira tela exibida ao abrir o sistema  -->
+<!-- ========================================= -->
+<div id="inicio">
+
+    <h1>PMOBILE - ESTOQUE</h1>
+
+    <p>
+        Relação de estoque e contagem CBA DIESEL RS.
+    </p>
+
+    <button onclick="abrirSistema()">
+        Iniciar
+    </button>
+
+</div>
+
+
+<!-- ========================================= -->
+<!-- TELA 2: MENU PRINCIPAL                     -->
+<!-- Fica escondida até clicar em Iniciar      -->
+<!-- ========================================= -->
+<div id="sistema" style="display: none;">
+
+    <h1>Menu Principal</h1>
+
+    <button onclick="abrirPesquisa()">
+        🔎 Pesquisar material
+    </button>
+
+    <button onclick="abrirImportacao()">
+        📦 Importar inventário
+    </button>
+
+    <button onclick="abrirConferencia()">
+        📋 Conferência
+    </button>
+
+    <button onclick="abrirConferencias()">
+        🗂️ Conferências
+    </button>
+
+    <button onclick="abrirDivergencias()">
+        ⚠️ Divergências
+    </button>
+
+    <br><br>
+
+    <!-- ========================================= -->
+    <!-- CONFIGURAÇÕES                             -->
+    <!-- ========================================= -->
+
+    <button onclick="abrirConfiguracoes()">
+        ⚙️ Configurações
+    </button>
+
+</div>
+
+
+<!-- ========================================= -->
+<!-- TELA 3: PESQUISA                           -->
+<!-- Permite pesquisar materiais separadamente  -->
+<!-- por código, descrição ou referência.      -->
+<!-- ========================================= -->
+<div id="pesquisa" style="display: none;">
+
+    <h1>🔎 Pesquisar material</h1>
+
+
+    <!-- ========================================= -->
+    <!-- PESQUISA POR CÓDIGO                       -->
+    <!-- ========================================= -->
+
+    <h3>🔢 Código</h3>
+
+    <input
+        type="text"
+        id="campoPesquisaCodigo"
+        placeholder="Digite o código"
+    >
+
+    <button onclick="pesquisarPorCodigo()">
+        Pesquisar
+    </button>
+
+    <div id="resultadoPesquisaCodigo"></div>
+
+
+    <br><br>
+
+
+    <!-- ========================================= -->
+    <!-- PESQUISA POR DESCRIÇÃO                    -->
+    <!-- ========================================= -->
+
+    <h3>📝 Descrição</h3>
+
+    <input
+        type="text"
+        id="campoPesquisaDescricao"
+        placeholder="Digite a descrição"
+    >
+
+    <button onclick="pesquisarPorDescricao()">
+        Pesquisar
+    </button>
+
+    <div id="resultadoPesquisaDescricao"></div>
+
+
+    <br><br>
+
+
+    <!-- ========================================= -->
+    <!-- PESQUISA POR REFERÊNCIA                   -->
+    <!-- ========================================= -->
+
+    <h3>📚 Referência</h3>
+
+    <input
+        type="text"
+        id="campoPesquisaReferencia"
+        placeholder="Digite a referência"
+    >
+
+    <button onclick="pesquisarPorReferencia()">
+        Pesquisar
+    </button>
+
+    <div id="resultadoPesquisaReferencia"></div>
+
+
+    <br><br>
+
+
+    <!-- ========================================= -->
+    <!-- VOLTAR AO MENU                            -->
+    <!-- ========================================= -->
+
+    <button onclick="voltarMenu()">
+        Voltar
+    </button>
+
+</div>
+
+
+<!-- ========================================= -->
+<!-- TELA 4: CONFERÊNCIA                        -->
+<!-- ========================================= -->
+<div id="conferencia" style="display: none;">
+
+    <h1>📋 Conferência</h1>
+
+    <input
+        type="text"
+        id="campoConferencia"
+        placeholder="Código ou descrição"
+    >
+
+    <button onclick="buscarMaterialConferencia()">
+        Buscar
+    </button>
+
+    <div id="resultadoConferencia"></div>
+
+    <button onclick="voltarMenuConferencia()">
+        Voltar
+    </button>
+
+</div>
+
+
+<!-- ========================================= -->
+<!-- TELA 5: CONFERÊNCIAS REALIZADAS            -->
+<!-- ========================================= -->
+<div id="conferencias" style="display: none;">
+
+    <h1>🗂️ Conferências Realizadas</h1>
+
+    <div id="resultadoConferencias"></div>
+
+    <button onclick="voltarMenuConferencias()">
+        Voltar
+    </button>
+
+</div>
+
+
+<!-- ========================================= -->
+<!-- TELA 6: DIVERGÊNCIAS                       -->
+<!-- ========================================= -->
+<div id="divergencias" style="display: none;">
+
+    <h1>⚠️ Divergências</h1>
+
+    <div id="resultadoDivergencias"></div>
+
+    <button onclick="voltarMenuDivergencias()">
+        Voltar
+    </button>
+
+</div>
+
+
+<!-- ========================================= -->
+<!-- TELA 7: IMPORTAÇÃO DE INVENTÁRIO           -->
+<!-- ========================================= -->
+<div id="importacao" style="display: none;">
+
+    <h1>📦 Importar inventário</h1>
+
+    <p>
+        Selecione o arquivo Excel exportado do DOGO.
+    </p>
+
+    <input
+        type="file"
+        id="arquivoExcel"
+        accept=".xlsx, .xls"
+    >
+
+    <br><br>
+
+
+    <!-- ========================================= -->
+    <!-- BOTÃO: IMPORTAR PLANILHA                   -->
+    <!-- ========================================= -->
+
+    <button onclick="importarExcel()">
+        Importar planilha
+    </button>
+
+    <br><br>
+
+
+    <!-- ========================================= -->
+    <!-- BOTÃO: ZERAR INVENTÁRIO                    -->
+    <!-- ========================================= -->
+
+    <button onclick="abrirModalZerarInventario()">
+        🗑️ Zerar inventário
+    </button>
+
+
+    <!-- ========================================= -->
+    <!-- RESULTADO DA IMPORTAÇÃO / ZERAMENTO       -->
+    <!-- ========================================= -->
+
+    <div id="resultadoImportacao"></div>
+
+
+    <!-- ========================================= -->
+    <!-- MODAL: ZERAR INVENTÁRIO                   -->
+    <!-- ========================================= -->
+
+    <div
+        id="modalZerarInventario"
+        style="display: none;"
+    >
+
+        <h2>🗑️ Zerar inventário</h2>
+
+        <p>
+            ⚠️ <strong>Atenção!</strong>
+        </p>
+
+        <p>
+            Todos os materiais serão removidos
+            do inventário.
+        </p>
+
+        <p>
+            <strong>
+                Apagar conferências também?
+            </strong>
+        </p>
+
+
+        <!-- ========================================= -->
+        <!-- BOTÃO NÃO                                -->
+        <!-- ========================================= -->
+
+        <button onclick="confirmarZeramento(false)">
+            NÃO
+        </button>
+
+
+        <!-- ========================================= -->
+        <!-- BOTÃO SIM                                -->
+        <!-- ========================================= -->
+
+        <button onclick="confirmarZeramento(true)">
+            SIM
+        </button>
+
+
+        <br><br>
+
+
+        <!-- ========================================= -->
+        <!-- BOTÃO CANCELAR                            -->
+        <!-- ========================================= -->
+
+        <button onclick="fecharModalZerarInventario()">
+            CANCELAR
+        </button>
+
+    </div>
+
+
+    <!-- ========================================= -->
+    <!-- VOLTAR AO MENU                            -->
+    <!-- ========================================= -->
+
+    <br><br>
+
+    <button onclick="voltarMenuImportacao()">
+        Voltar
+    </button>
+
+</div>
+
+
+<!-- ========================================= -->
+<!-- TELA 8: CONFIGURAÇÕES                      -->
+<!-- ========================================= -->
+<div id="configuracoes" style="display: none;">
+
+    <h1>⚙️ Configurações</h1>
+
+
+    <!-- ========================================= -->
+    <!-- LIMPAR BANCO DE DADOS                     -->
+    <!-- ========================================= -->
+
+    <h2>🗄️ Limpar banco de dados</h2>
+
+    <p>
+        Gerenciamento dos dados armazenados
+        no Supabase.
+    </p>
+
+
+    <!-- ========================================= -->
+    <!-- MATERIAIS IMPORTADOS                      -->
+    <!-- ========================================= -->
+
+    <button onclick="limparMateriaisSupabase()">
+        🗑️ Materiais importados
+    </button>
+
+
+    <br><br>
+
+
+    <!-- ========================================= -->
+    <!-- VOLTAR AO MENU                            -->
+    <!-- ========================================= -->
+
+    <button onclick="voltarMenuConfiguracoes()">
+        Voltar
+    </button>
+
+</div>
+
+
+<!-- ========================================= -->
+<!-- BIBLIOTECAS EXTERNAS - SCRIPTS            -->
+<!-- ========================================= -->
+
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- SheetJS -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+
+<!-- ========================================= -->
+<!-- CONFIGURAÇÕES DO SISTEMA                  -->
+<!-- ========================================= -->
+
+<script src="supabase.js"></script>
+
+
+<!-- ========================================= -->
+<!-- NÚCLEO / DADOS                            -->
+<!-- ========================================= -->
+
+<script src="dados.js"></script>
+
+
+<!-- ========================================= -->
+<!-- IMPORTAÇÃO                                -->
+<!-- ========================================= -->
+
+<script src="bancoimportacao.js"></script>
+<script src="importacao.js"></script>
+
+
+<!-- ========================================= -->
+<!-- PESQUISA                                  -->
+<!-- ========================================= -->
+
+<script src="pesquisa.js"></script>
+
+
+<!-- ========================================= -->
+<!-- CONFERÊNCIA                               -->
+<!-- ========================================= -->
+
+<script src="conferencia.js"></script>
+<script src="conferencias.js"></script>
+<script src="conferenciasrealizadas.js"></script>
+
+
+<!-- ========================================= -->
+<!-- DIVERGÊNCIAS                              -->
+<!-- ========================================= -->
+
+<script src="divergencias.js"></script>
+
+
+<!-- ========================================= -->
+<!-- CONTROLE GERAL                            -->
+<!-- ========================================= -->
+
+<script src="script.js"></script>
+
+</body>
+</html>
