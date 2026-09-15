@@ -29,10 +29,9 @@
 // 6. Usuário informa a quantidade física.
 // 7. PMOBILE calcula a diferença.
 // 8. Conferência é registrada.
-// 9. Histórico continua sendo salvo localmente por enquanto.
+// 9. Conferência é enviada ao Supabase.
 //
 // ============================================================
-
 
 
 // ============================================================
@@ -147,8 +146,6 @@ let materialConferenciaSelecionado = null;
 // - Marca
 // - Quantidade
 //
-// A pesquisa é feita diretamente no Supabase.
-//
 // ============================================================
 
 async function buscarMaterialConferencia() {
@@ -231,14 +228,6 @@ async function buscarMaterialConferencia() {
         // ====================================================
         // CONSULTAR SUPABASE
         // ====================================================
-        //
-        // Procuramos o texto em:
-        //
-        // codigo
-        // descricao
-        // referencia
-        //
-        // ====================================================
 
         const { data, error } =
             await clienteSupabase
@@ -315,14 +304,6 @@ async function buscarMaterialConferencia() {
 //
 // Mostrar na tela os materiais encontrados pelo Supabase.
 //
-// PARÂMETROS:
-//
-// resultados
-//     Array de materiais retornados pelo Supabase.
-//
-// areaResultado
-//     Elemento HTML onde os resultados serão exibidos.
-//
 // ============================================================
 
 function exibirResultadosConferencia(
@@ -330,16 +311,8 @@ function exibirResultadosConferencia(
     areaResultado
 ) {
 
-    // ========================================================
-    // LIMPAR RESULTADOS ANTERIORES
-    // ========================================================
-
     areaResultado.innerHTML = "";
 
-
-    // ========================================================
-    // NENHUM RESULTADO
-    // ========================================================
 
     if (
         !Array.isArray(resultados) ||
@@ -353,30 +326,12 @@ function exibirResultadosConferencia(
     }
 
 
-    // ========================================================
-    // FRAGMENTO
-    // ========================================================
-    //
-    // Utilizamos DocumentFragment para montar os resultados
-    // sem ficar alterando o DOM a cada material.
-    //
-    // ========================================================
-
     const fragmento =
         document.createDocumentFragment();
 
 
-    // ========================================================
-    // PERCORRER RESULTADOS
-    // ========================================================
-
     resultados.forEach(
         function (material) {
-
-
-            // =================================================
-            // BLOCO DO MATERIAL
-            // =================================================
 
             const bloco =
                 document.createElement(
@@ -384,19 +339,11 @@ function exibirResultadosConferencia(
                 );
 
 
-            // =================================================
-            // SEPARADOR
-            // =================================================
-
             const linha =
                 document.createElement(
                     "hr"
                 );
 
-
-            // =================================================
-            // DESCRIÇÃO
-            // =================================================
 
             const titulo =
                 document.createElement(
@@ -407,10 +354,6 @@ function exibirResultadosConferencia(
                 material.descricao ||
                 "Material";
 
-
-            // =================================================
-            // CÓDIGO
-            // =================================================
 
             const codigo =
                 document.createElement(
@@ -427,10 +370,6 @@ function exibirResultadosConferencia(
             );
 
 
-            // =================================================
-            // REFERÊNCIA
-            // =================================================
-
             const referencia =
                 document.createElement(
                     "p"
@@ -445,10 +384,6 @@ function exibirResultadosConferencia(
                 )
             );
 
-
-            // =================================================
-            // LOCAL
-            // =================================================
 
             const local =
                 document.createElement(
@@ -465,10 +400,6 @@ function exibirResultadosConferencia(
             );
 
 
-            // =================================================
-            // MARCA
-            // =================================================
-
             const marca =
                 document.createElement(
                     "p"
@@ -483,10 +414,6 @@ function exibirResultadosConferencia(
                 )
             );
 
-
-            // =================================================
-            // QUANTIDADE ESPERADA
-            // =================================================
 
             const quantidade =
                 document.createElement(
@@ -503,10 +430,6 @@ function exibirResultadosConferencia(
             );
 
 
-            // =================================================
-            // BOTÃO SELECIONAR
-            // =================================================
-
             const botao =
                 document.createElement(
                     "button"
@@ -519,16 +442,6 @@ function exibirResultadosConferencia(
                 "Selecionar";
 
 
-            // =================================================
-            // GUARDAR O MATERIAL DIRETAMENTE NO BOTÃO
-            // =================================================
-            //
-            // Não utilizamos mais o array "materiais".
-            //
-            // O botão recebe o objeto retornado pelo Supabase.
-            //
-            // =================================================
-
             botao.addEventListener(
                 "click",
                 function () {
@@ -540,10 +453,6 @@ function exibirResultadosConferencia(
                 }
             );
 
-
-            // =================================================
-            // MONTAR BLOCO
-            // =================================================
 
             bloco.appendChild(
                 linha
@@ -578,10 +487,6 @@ function exibirResultadosConferencia(
             );
 
 
-            // =================================================
-            // ADICIONAR AO FRAGMENTO
-            // =================================================
-
             fragmento.appendChild(
                 bloco
             );
@@ -589,10 +494,6 @@ function exibirResultadosConferencia(
         }
     );
 
-
-    // ========================================================
-    // ADICIONAR TUDO À TELA
-    // ========================================================
 
     areaResultado.appendChild(
         fragmento
@@ -610,22 +511,13 @@ function exibirResultadosConferencia(
 //
 // Receber o material escolhido pelo usuário.
 //
-// IMPORTANTE:
-//
 // O material já veio diretamente do Supabase.
-//
-// Portanto, não precisamos procurar novamente dentro
-// do array local "materiais".
 //
 // ============================================================
 
 function selecionarMaterialConferencia(
     material
 ) {
-
-    // ========================================================
-    // VALIDAR MATERIAL
-    // ========================================================
 
     if (!material) {
 
@@ -637,17 +529,9 @@ function selecionarMaterialConferencia(
     }
 
 
-    // ========================================================
-    // GUARDAR MATERIAL SELECIONADO
-    // ========================================================
-
     materialConferenciaSelecionado =
         material;
 
-
-    // ========================================================
-    // LOCALIZAR ÁREA DE RESULTADO
-    // ========================================================
 
     const areaResultado =
         document.getElementById(
@@ -662,17 +546,9 @@ function selecionarMaterialConferencia(
     }
 
 
-    // ========================================================
-    // LIMPAR RESULTADO
-    // ========================================================
-
     areaResultado.innerHTML =
         "";
 
-
-    // ========================================================
-    // DESCRIÇÃO
-    // ========================================================
 
     const titulo =
         document.createElement(
@@ -683,10 +559,6 @@ function selecionarMaterialConferencia(
         material.descricao ||
         "Material";
 
-
-    // ========================================================
-    // CÓDIGO
-    // ========================================================
 
     const codigo =
         document.createElement(
@@ -703,10 +575,6 @@ function selecionarMaterialConferencia(
     );
 
 
-    // ========================================================
-    // REFERÊNCIA
-    // ========================================================
-
     const referencia =
         document.createElement(
             "p"
@@ -721,10 +589,6 @@ function selecionarMaterialConferencia(
         )
     );
 
-
-    // ========================================================
-    // LOCAL
-    // ========================================================
 
     const local =
         document.createElement(
@@ -741,10 +605,6 @@ function selecionarMaterialConferencia(
     );
 
 
-    // ========================================================
-    // MARCA
-    // ========================================================
-
     const marca =
         document.createElement(
             "p"
@@ -759,10 +619,6 @@ function selecionarMaterialConferencia(
         )
     );
 
-
-    // ========================================================
-    // ESTOQUE ESPERADO
-    // ========================================================
 
     const quantidade =
         document.createElement(
@@ -779,19 +635,11 @@ function selecionarMaterialConferencia(
     );
 
 
-    // ========================================================
-    // SEPARADOR
-    // ========================================================
-
     const linha =
         document.createElement(
             "hr"
         );
 
-
-    // ========================================================
-    // CAMPO DE QUANTIDADE FÍSICA
-    // ========================================================
 
     const campoQuantidade =
         document.createElement(
@@ -814,10 +662,6 @@ function selecionarMaterialConferencia(
         "1";
 
 
-    // ========================================================
-    // BOTÃO CONFIRMAR
-    // ========================================================
-
     const botaoConfirmar =
         document.createElement(
             "button"
@@ -833,10 +677,6 @@ function selecionarMaterialConferencia(
         "CONFIRMAR";
 
 
-    // ========================================================
-    // EVENTO DO BOTÃO
-    // ========================================================
-
     botaoConfirmar.addEventListener(
         "click",
         function () {
@@ -846,23 +686,6 @@ function selecionarMaterialConferencia(
         }
     );
 
-
-    // ========================================================
-    // MONTAR TELA
-    // ========================================================
-
-    areaResultado.appendChild(
-        titulo
-    );
-
-    areaResultado.appendChild(
-        codigo
-    );
-
-    areaResultado.appen
-    // ========================================================
-    // MONTAR TELA
-    // ========================================================
 
     areaResultado.appendChild(
         titulo
@@ -901,10 +724,6 @@ function selecionarMaterialConferencia(
     );
 
 
-    // ========================================================
-    // COLOCAR CURSOR NO CAMPO
-    // ========================================================
-
     campoQuantidade.focus();
 
 }
@@ -929,20 +748,11 @@ function selecionarMaterialConferencia(
 //       ↓
 // Status
 //       ↓
-// Histórico de conferências
-//
-// IMPORTANTE:
-//
-// O material utilizado aqui é o material recebido
-// diretamente do Supabase.
+// Supabase
 //
 // ============================================================
 
-function registrarContagem() {
-
-    // ========================================================
-    // VERIFICAR MATERIAL SELECIONADO
-    // ========================================================
+async function registrarContagem() {
 
     const material =
         materialConferenciaSelecionado;
@@ -958,10 +768,6 @@ function registrarContagem() {
     }
 
 
-    // ========================================================
-    // LOCALIZAR CAMPO
-    // ========================================================
-
     const campoQuantidade =
         document.getElementById(
             "campoQuantidadeFisica"
@@ -975,17 +781,9 @@ function registrarContagem() {
     }
 
 
-    // ========================================================
-    // LER QUANTIDADE FÍSICA
-    // ========================================================
-
     const valor =
         campoQuantidade.value.trim();
 
-
-    // ========================================================
-    // VALIDAR CAMPO VAZIO
-    // ========================================================
 
     if (valor === "") {
 
@@ -997,17 +795,9 @@ function registrarContagem() {
     }
 
 
-    // ========================================================
-    // CONVERTER PARA NÚMERO
-    // ========================================================
-
     const quantidadeFisica =
         Number(valor);
 
-
-    // ========================================================
-    // VALIDAR NÚMERO
-    // ========================================================
 
     if (
         !Number.isFinite(
@@ -1024,36 +814,16 @@ function registrarContagem() {
     }
 
 
-    // ========================================================
-    // QUANTIDADE ESPERADA
-    // ========================================================
-
     const quantidadeEsperada =
         Number(
             material.quantidade ?? 0
         );
 
 
-    // ========================================================
-    // CALCULAR DIFERENÇA
-    // ========================================================
-    //
-    // Física - Esperada
-    //
-    // 0  = OK
-    // <0 = FALTA
-    // >0 = SOBRA
-    //
-    // ========================================================
-
     const diferenca =
         quantidadeFisica -
         quantidadeEsperada;
 
-
-    // ========================================================
-    // DEFINIR STATUS
-    // ========================================================
 
     let status =
         "";
@@ -1084,14 +854,7 @@ function registrarContagem() {
 
 
     // ========================================================
-    // CRIAR REGISTRO DA CONFERÊNCIA
-    // ========================================================
-    //
-    // O ID do Supabase também é armazenado.
-    //
-    // Isso será importante posteriormente quando
-    // migrarmos o histórico para o próprio Supabase.
-    //
+    // CRIAR REGISTRO
     // ========================================================
 
     const registroConferencia = {
@@ -1133,15 +896,7 @@ function registrarContagem() {
 
 
     // ========================================================
-    // ADICIONAR AO HISTÓRICO ATUAL
-    // ========================================================
-    //
-    // Por enquanto, o histórico ainda utiliza
-    // o sistema local existente.
-    //
-    // Depois faremos a migração desse histórico
-    // para o Supabase.
-    //
+    // ADICIONAR À MEMÓRIA
     // ========================================================
 
     if (
@@ -1161,10 +916,40 @@ function registrarContagem() {
 
 
     // ========================================================
-    // SALVAR HISTÓRICO
+    // SALVAR NO SUPABASE
+    // ========================================================
+    //
+    // A nova conferência agora é enviada diretamente
+    // para a tabela "conferencias".
+    //
     // ========================================================
 
-    salvarConferencias();
+    try {
+
+        await salvarConferenciaSupabase(
+            registroConferencia
+        );
+
+        console.log(
+            "Conferência salva no Supabase com sucesso."
+        );
+
+
+    } catch (erro) {
+
+        console.error(
+            "Erro ao salvar conferência no Supabase:",
+            erro
+        );
+
+        alert(
+            "⚠️ A conferência foi calculada, mas não foi salva no Supabase.\n\n" +
+            "Verifique a conexão e tente novamente."
+        );
+
+        return;
+
+    }
 
 
     // ========================================================
@@ -1181,8 +966,6 @@ function registrarContagem() {
     );
 
 }
-
-
 // ============================================================
 // FUNÇÃO: mostrarResultadoConferencia()
 // ============================================================
@@ -1190,8 +973,6 @@ function registrarContagem() {
 // OBJETIVO:
 //
 // Mostrar o resultado da contagem realizada.
-//
-// Esta função não consulta o IndexedDB.
 //
 // Todos os dados utilizados vieram do material
 // selecionado no Supabase.
@@ -1383,7 +1164,7 @@ function mostrarResultadoConferencia(
         );
 
     mensagem.textContent =
-        "📌 Contagem registrada.";
+        "📌 Contagem registrada no Supabase.";
 
 
     // ========================================================
@@ -1558,24 +1339,20 @@ function iniciarNovaConsultaConferencia() {
 // FIM DO ARQUIVO
 // ============================================================
 //
-// IMPORTANTE:
-//
-// Nesta versão:
+// AGORA:
 //
 // ✅ Materiais vêm do Supabase
-// ✅ Pesquisa da conferência usa Supabase
-// ✅ Seleção usa o registro retornado pelo Supabase
+// ✅ Pesquisa usa Supabase
+// ✅ Seleção usa Supabase
 // ✅ Quantidade esperada vem do Supabase
 // ✅ ID do material é preservado
-// ✅ Histórico continua funcionando localmente
+// ✅ Conferência é gravada no Supabase
+// ✅ Histórico em memória continua funcionando
+// ✅ Importação Excel não foi alterada
 //
-// Ainda NÃO fazemos:
+// PRÓXIMA ETAPA:
 //
-// ❌ Gravação das conferências no Supabase
-// ❌ Migração do histórico
-// ❌ Remoção do IndexedDB do restante do projeto
-// ❌ Alteração da importação Excel
+// Fazer a tela "Conferências Realizadas" carregar
+// explicitamente os registros da tabela "conferencias".
 //
-// Essas serão etapas posteriores.
-//
-// ============================================================
+// =========================================================
