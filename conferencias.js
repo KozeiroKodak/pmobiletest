@@ -7,24 +7,37 @@
 //
 // Controlar os dados das conferências realizadas.
 //
-// A partir desta versão:
+// O Supabase é a fonte central das conferências.
 //
-// - O Supabase passa a ser a fonte central das conferências.
-// - As conferências são gravadas na tabela "conferencias".
-// - O histórico é carregado diretamente do Supabase.
-// - O localStorage deixa de ser utilizado como banco principal.
+// Este arquivo faz a ligação entre:
+//
+//     Supabase
+//          ↕
+//     conferencias.js
+//          ↕
+//     restante do PMOBILE
 //
 // IMPORTANTE:
 //
-// Este arquivo mantém os nomes das funções:
+// O Supabase utiliza nomes de campos em snake_case.
 //
-//     carregarConferencias()
-//     salvarConferencias()
+// Exemplo:
 //
-// para manter compatibilidade com o restante do PMOBILE.
+//     codigo_material
+//     quantidade_esperada
+//     quantidade_fisica
+//
+// O restante do PMOBILE utiliza nomes em camelCase.
+//
+// Exemplo:
+//
+//     codigo
+//     quantidadeEsperada
+//     quantidadeFisica
+//
+// Este arquivo faz essa conversão.
 //
 // ============================================================
-
 
 
 // ============================================================
@@ -38,24 +51,22 @@
 //
 // IMPORTANTE:
 //
-// Essa variável NÃO é mais a fonte principal dos dados.
+// Esta variável NÃO é o banco de dados.
 //
-// A fonte oficial é:
+// A fonte oficial dos dados é:
 //
 //     Supabase → tabela conferencias
 //
-// A variável serve apenas para a tela trabalhar com
-// os dados que foram carregados.
+// A variável existe apenas para disponibilizar os dados
+// para as telas do PMOBILE.
 //
 // ============================================================
 
 let conferencias = [];
 
 
-
 // ============================================================
 // FUNÇÃO: obterClienteSupabaseConferencias()
-// ============================================================
 //
 // OBJETIVO:
 //
@@ -63,13 +74,13 @@ let conferencias = [];
 //
 // RETORNO:
 //
-// Retorna o cliente Supabase inicializado em:
+// Retorna:
 //
 //     window.clienteSupabase
 //
 // ERRO:
 //
-// Caso o Supabase ainda não tenha sido inicializado,
+// Caso o cliente não tenha sido inicializado,
 // interrompe a operação.
 //
 // ============================================================
@@ -89,196 +100,146 @@ function obterClienteSupabaseConferencias() {
 }
 
 
-
 // ============================================================
-// FUNÇÃO: carregarConferencias()
-// ============================================================
+// FUNÇÃO: converterConferenciaSupabaseParaPMobile()
 //
 // OBJETIVO:
 //
-// Carregar o histórico de conferências diretamente
-// do Supabase.
+// Converter um registro vindo do Supabase para o formato
+// utilizado internamente pelo PMOBILE.
 //
-// TABELA:
+// Supabase:
 //
-//     public.conferencias
+//     codigo_material
+//     descricao_material
+//     referencia_material
+//     quantidade_esperada
+//     quantidade_fisica
 //
-// RESULTADO:
+// PMOBILE:
 //
-// Os registros retornados são armazenados temporariamente
-// na variável:
-//
-//     conferencias
-//
-// IMPORTANTE:
-//
-// O localStorage não é mais utilizado.
-//
-// ============================================================
-
-async function carregarConferencias() {
-
-    try {
-
-        // ====================================================
-        // OBTER CLIENTE SUPABASE
-        // ====================================================
-
-        const clienteSupabase =
-            obterClienteSupabaseConferencias();
-
-
-
-        // ====================================================
-        // CONSULTAR CONFERÊNCIAS
-        // ====================================================
-
-        const { data, error } =
-            await clienteSupabase
-
-                .from("conferencias")
-
-                .select(
-                    "id,material_id,codigo_material,descricao_material,referencia_material,quantidade_esperada,quantidade_fisica,diferenca,status,usuario_id,criado_em"
-                )
-
-                .order(
-                    "criado_em",
-                    {
-                        ascending: false
-                    }
-                );
-
-
-
-        // ====================================================
-        // VERIFICAR ERRO
-        // ====================================================
-
-        if (error) {
-
-            throw error;
-
-        }
-
-
-
-        // ====================================================
-        // ARMAZENAR RESULTADOS NA MEMÓRIA
-        // ====================================================
-
-        conferencias =
-            Array.isArray(data)
-                ? data
-                : [];
-
-
-
-        console.log(
-            "Conferências carregadas do Supabase:",
-            conferencias.length
-        );
-
-
-
-        return conferencias;
-
-
-
-    } catch (erro) {
-
-        console.error(
-            "Erro ao carregar conferências do Supabase:",
-            erro
-        );
-
-
-
-        // ====================================================
-        // EM CASO DE ERRO
-        // ====================================================
-        //
-        // Mantemos a variável como lista vazia para
-        // evitar que o restante da aplicação quebre.
-        //
-        // ====================================================
-
-        conferencias = [];
-
-
-
-        return [];
-
-    }
-
-}
-
-
-
-// ============================================================
-// FUNÇÃO: salvarConferencias()
-// ============================================================
-//
-// OBJETIVO:
-//
-// Manter compatibilidade com o restante do PMOBILE.
-//
-// IMPORTANTE:
-//
-// Esta função NÃO grava mais a lista inteira no localStorage.
-//
-// O registro individual da conferência é feito pela função:
-//
-//     salvarConferenciaSupabase()
-//
-// Portanto, esta função apenas garante que o histórico
-// disponível na memória esteja atualizado.
+//     codigo
+//     descricao
+//     referencia
+//     quantidadeEsperada
+//     quantidadeFisica
 //
 // ============================================================
 
-async function salvarConferencias() {
-
-    return await carregarConferencias();
-
-}
-
-
-
-// ============================================================
-// FUNÇÃO: salvarConferenciaSupabase()
-// ============================================================
-//
-// OBJETIVO:
-//
-// Gravar UMA nova conferência diretamente no Supabase.
-//
-// TABELA:
-//
-//     public.conferencias
-//
-// DADOS GRAVADOS:
-//
-// - material_id
-// - codigo_material
-// - descricao_material
-// - referencia_material
-// - quantidade_esperada
-// - quantidade_fisica
-// - diferenca
-// - status
-//
-// O campo "criado_em" é preenchido automaticamente
-// pelo banco quando configurado dessa forma.
-//
-// ============================================================
-
-async function salvarConferenciaSupabase(
-    contagem
+function converterConferenciaSupabaseParaPMobile(
+    registro
 ) {
 
-    // ========================================================
-    // VALIDAR DADOS
-    // ========================================================
+    if (!registro) {
+        return null;
+    }
+
+
+    return {
+
+        // ====================================================
+        // IDENTIFICAÇÃO
+        // ====================================================
+
+        id:
+            registro.id ?? null,
+
+        materialId:
+            registro.material_id ?? null,
+
+
+        // ====================================================
+        // DADOS DO MATERIAL
+        // ====================================================
+
+        codigo:
+            registro.codigo_material ?? "",
+
+        descricao:
+            registro.descricao_material ?? "",
+
+        referencia:
+            registro.referencia_material ?? "",
+
+
+        // ====================================================
+        // QUANTIDADES
+        // ====================================================
+
+        quantidadeEsperada:
+            Number(
+                registro.quantidade_esperada ?? 0
+            ),
+
+        quantidadeFisica:
+            Number(
+                registro.quantidade_fisica ?? 0
+            ),
+
+        diferenca:
+            Number(
+                registro.diferenca ?? 0
+            ),
+
+
+        // ====================================================
+        // STATUS
+        // ====================================================
+
+        status:
+            registro.status ?? "CONFERIDO",
+
+
+        // ====================================================
+        // USUÁRIO
+        // ====================================================
+
+        usuarioId:
+            registro.usuario_id ?? null,
+
+
+        // ====================================================
+        // DATA
+        // ====================================================
+
+        data:
+            registro.criado_em ?? null,
+
+        criadoEm:
+            registro.criado_em ?? null
+
+    };
+
+}
+
+
+// ============================================================
+// FUNÇÃO: converterConferenciaPMobileParaSupabase()
+//
+// OBJETIVO:
+//
+// Converter uma conferência do formato interno do PMOBILE
+// para o formato utilizado pela tabela do Supabase.
+//
+// PMOBILE:
+//
+//     codigo
+//     descricao
+//     quantidadeEsperada
+//     quantidadeFisica
+//
+// Supabase:
+//
+//     codigo_material
+//     descricao_material
+//     quantidade_esperada
+//     quantidade_fisica
+//
+// ============================================================
+
+function converterConferenciaPMobileParaSupabase(
+    contagem
+) {
 
     if (!contagem) {
 
@@ -289,26 +250,7 @@ async function salvarConferenciaSupabase(
     }
 
 
-
-    // ========================================================
-    // OBTER CLIENTE SUPABASE
-    // ========================================================
-
-    const clienteSupabase =
-        obterClienteSupabaseConferencias();
-
-
-
-    // ========================================================
-    // PREPARAR DADOS
-    // ========================================================
-    //
-    // Aqui fazemos a conversão do formato utilizado
-    // pelo PMOBILE para o formato da tabela Supabase.
-    //
-    // ========================================================
-
-    const registro = {
+    return {
 
         material_id:
             contagem.materialId ?? null,
@@ -342,6 +284,215 @@ async function salvarConferenciaSupabase(
 
     };
 
+}
+
+
+// ============================================================
+// FUNÇÃO: carregarConferencias()
+//
+// OBJETIVO:
+//
+// Carregar o histórico diretamente do Supabase.
+//
+// Depois da consulta:
+//
+//     Supabase
+//          ↓
+//     conversão
+//          ↓
+//     conferencias
+//
+// A variável conferencias sempre ficará no formato
+// utilizado pelo PMOBILE.
+//
+// ============================================================
+
+async function carregarConferencias() {
+
+    try {
+
+        // ====================================================
+        // OBTER CLIENTE SUPABASE
+        // ====================================================
+
+        const clienteSupabase =
+            obterClienteSupabaseConferencias();
+
+
+        // ====================================================
+        // CONSULTAR CONFERÊNCIAS
+        // ====================================================
+
+        const { data, error } =
+            await clienteSupabase
+
+                .from("conferencias")
+
+                .select(
+                    "id,material_id,codigo_material,descricao_material,referencia_material,quantidade_esperada,quantidade_fisica,diferenca,status,usuario_id,criado_em"
+                )
+
+                .order(
+                    "criado_em",
+                    {
+                        ascending: false
+                    }
+                );
+
+
+        // ====================================================
+        // VERIFICAR ERRO
+        // ====================================================
+
+        if (error) {
+
+            throw error;
+
+        }
+
+
+        // ====================================================
+        // CONVERTER DADOS
+        // ====================================================
+
+        conferencias =
+            Array.isArray(data)
+                ? data
+                    .map(
+                        converterConferenciaSupabaseParaPMobile
+                    )
+                    .filter(
+                        function (registro) {
+                            return registro !== null;
+                        }
+                    )
+                : [];
+
+
+        // ====================================================
+        // LOG
+        // ====================================================
+
+        console.log(
+            "Conferências carregadas do Supabase:",
+            conferencias.length
+        );
+
+
+        // ====================================================
+        // RETORNO
+        // ====================================================
+
+        return conferencias;
+
+
+    } catch (erro) {
+
+        // ====================================================
+        // TRATAMENTO DE ERRO
+        // ====================================================
+
+        console.error(
+            "Erro ao carregar conferências do Supabase:",
+            erro
+        );
+
+
+        // ====================================================
+        // MANTER APLICAÇÃO ESTÁVEL
+        // ====================================================
+
+        conferencias = [];
+
+
+        return [];
+
+    }
+
+}
+
+
+// ============================================================
+// FUNÇÃO: salvarConferencias()
+//
+// OBJETIVO:
+//
+// Manter compatibilidade com o restante do PMOBILE.
+//
+// IMPORTANTE:
+//
+// Esta função NÃO utiliza localStorage.
+//
+// O salvamento de uma conferência é realizado pela:
+//
+//     salvarConferenciaSupabase()
+//
+// Depois do salvamento, esta função pode ser utilizada
+// para atualizar a lista em memória.
+//
+// ============================================================
+
+async function salvarConferencias() {
+
+    return await carregarConferencias();
+
+}
+
+
+// ============================================================
+// FUNÇÃO: salvarConferenciaSupabase()
+//
+// OBJETIVO:
+//
+// Gravar uma nova conferência diretamente no Supabase.
+//
+// FLUXO:
+//
+//     PMOBILE
+//        ↓
+//     converter
+//        ↓
+//     Supabase
+//        ↓
+//     converter
+//        ↓
+//     memória do PMOBILE
+//
+// ============================================================
+
+async function salvarConferenciaSupabase(
+    contagem
+) {
+
+    // ========================================================
+    // VALIDAR DADOS
+    // ========================================================
+
+    if (!contagem) {
+
+        throw new Error(
+            "Dados da conferência não foram informados."
+        );
+
+    }
+
+
+    // ========================================================
+    // OBTER CLIENTE SUPABASE
+    // ========================================================
+
+    const clienteSupabase =
+        obterClienteSupabaseConferencias();
+
+
+    // ========================================================
+    // CONVERTER PARA FORMATO DO SUPABASE
+    // ========================================================
+
+    const registro =
+        converterConferenciaPMobileParaSupabase(
+            contagem
+        );
 
 
     // ========================================================
@@ -358,9 +509,7 @@ async function salvarConferenciaSupabase(
             )
 
             .select()
-            
             .single();
-
 
 
     // ========================================================
@@ -379,41 +528,50 @@ async function salvarConferenciaSupabase(
     }
 
 
+    // ========================================================
+    // CONVERTER RESPOSTA
+    // ========================================================
+
+    const conferenciaSalva =
+        converterConferenciaSupabaseParaPMobile(
+            data
+        );
+
 
     // ========================================================
-    // ATUALIZAR MEMÓRIA LOCAL
+    // ATUALIZAR MEMÓRIA
     // ========================================================
 
-    if (data) {
+    if (conferenciaSalva) {
 
         conferencias.unshift(
-            data
+            conferenciaSalva
         );
 
     }
 
+
+    // ========================================================
+    // LOG
+    // ========================================================
+
+    console.log(
+        "Conferência salva no Supabase:",
+        conferenciaSalva
+    );
 
 
     // ========================================================
     // RETORNO
     // ========================================================
 
-    console.log(
-        "Conferência salva no Supabase:",
-        data
-    );
-
-
-
-    return data;
+    return conferenciaSalva;
 
 }
 
 
-
 // ============================================================
 // FUNÇÃO: excluirConferenciaSupabase()
-// ============================================================
 //
 // OBJETIVO:
 //
@@ -427,8 +585,9 @@ async function salvarConferenciaSupabase(
 // IMPORTANTE:
 //
 // Esta função não é chamada automaticamente.
-// Ela fica disponível para uma futura função de
-// exclusão do histórico.
+//
+// Ela fica disponível para uma futura função de exclusão
+// do histórico.
 //
 // ============================================================
 
@@ -449,14 +608,12 @@ async function excluirConferenciaSupabase(
     }
 
 
-
     // ========================================================
     // OBTER CLIENTE
     // ========================================================
 
     const clienteSupabase =
         obterClienteSupabaseConferencias();
-
 
 
     // ========================================================
@@ -476,7 +633,6 @@ async function excluirConferenciaSupabase(
             );
 
 
-
     // ========================================================
     // VERIFICAR ERRO
     // ========================================================
@@ -493,7 +649,6 @@ async function excluirConferenciaSupabase(
     }
 
 
-
     // ========================================================
     // REMOVER DA MEMÓRIA
     // ========================================================
@@ -508,6 +663,9 @@ async function excluirConferenciaSupabase(
         );
 
 
+    // ========================================================
+    // LOG
+    // ========================================================
 
     console.log(
         "Conferência excluída:",
@@ -517,21 +675,18 @@ async function excluirConferenciaSupabase(
 }
 
 
-
 // ============================================================
 // INICIALIZAÇÃO
 // ============================================================
 //
-// IMPORTANTE:
+// Não carregamos automaticamente o histórico aqui.
 //
-// Não executamos carregarConferencias() imediatamente.
-//
-// O motivo é que o arquivo supabase.js pode ainda estar
-// inicializando o cliente Supabase.
-//
-// O carregamento será feito quando o histórico for aberto
-// ou quando outra parte do sistema chamar:
+// O carregamento acontece quando alguma tela precisar
+// dos dados e chamar:
 //
 //     carregarConferencias()
+//
+// Isso evita tentar acessar o Supabase antes que o cliente
+// tenha sido inicializado pelo supabase.js.
 //
 // ============================================================
