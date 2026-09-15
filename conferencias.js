@@ -571,122 +571,171 @@ async function salvarConferenciaSupabase(
 
 
 // ============================================================
-// FUNÇÃO: excluirConferenciaSupabase()
+// FUNÇÃO: limparConferenciasSupabase()
+// ============================================================
 //
 // OBJETIVO:
 //
-// Excluir uma conferência específica do Supabase.
-//
-// PARÂMETRO:
-//
-// id
-//     ID da conferência na tabela "conferencias".
+// Excluir TODAS as conferências armazenadas no Supabase.
 //
 // IMPORTANTE:
 //
-// Esta função não é chamada automaticamente.
+// Esta função:
+//     - NÃO apaga materiais
+//     - NÃO apaga importações
+//     - NÃO altera a tabela materiais
+//     - apaga somente a tabela conferencias
 //
-// Ela fica disponível para uma futura função de exclusão
-// do histórico.
+// Depois da exclusão:
+//     - a memória do PMOBILE é limpa
+//     - a tela de conferências é atualizada
 //
 // ============================================================
 
-async function excluirConferenciaSupabase(
-    id
-) {
+async function limparConferenciasSupabase() {
 
     // ========================================================
-    // VALIDAR ID
+    // CONFIRMAÇÃO
     // ========================================================
 
-    if (!id) {
+    const confirmar = confirm(
+        "⚠️ ATENÇÃO!\n\n" +
+        "Todas as conferências realizadas serão apagadas.\n\n" +
+        "Os materiais do inventário NÃO serão apagados.\n\n" +
+        "Deseja continuar?"
+    );
 
-        throw new Error(
-            "ID da conferência não informado."
-        );
+
+    if (!confirmar) {
+
+        return;
 
     }
 
 
     // ========================================================
-    // OBTER CLIENTE
+    // OBTER CLIENTE SUPABASE
     // ========================================================
 
-    const clienteSupabase =
-        obterClienteSupabaseConferencias();
+    let clienteSupabase;
+
+    try {
+
+        clienteSupabase =
+            obterClienteSupabaseConferencias();
+
+    } catch (erro) {
+
+        console.error(
+            "Erro ao obter cliente Supabase:",
+            erro
+        );
+
+        alert(
+            "❌ Não foi possível acessar o Supabase."
+        );
+
+        return;
+
+    }
 
 
     // ========================================================
-    // EXCLUIR REGISTRO
+    // EXECUTAR EXCLUSÃO
     // ========================================================
 
-    const { error } =
-        await clienteSupabase
+    try {
 
-            .from("conferencias")
+        console.log(
+            "Iniciando limpeza das conferências..."
+        );
 
-            .delete()
 
-            .eq(
-                "id",
-                id
+        const { error } =
+            await clienteSupabase
+
+                .from("conferencias")
+
+                .delete()
+
+                // A coluna id é obrigatória,
+                // portanto esta condição seleciona
+                // todos os registros.
+                .not(
+                    "id",
+                    "is",
+                    null
+                );
+
+
+        // ====================================================
+        // VERIFICAR ERRO
+        // ====================================================
+
+        if (error) {
+
+            console.error(
+                "Erro ao limpar conferências:",
+                error
+            );
+
+            throw error;
+
+        }
+
+
+        // ====================================================
+        // LIMPAR MEMÓRIA
+        // ====================================================
+
+        conferencias = [];
+
+
+        // ====================================================
+        // ATUALIZAR TELA
+        // ====================================================
+
+        const resultado =
+            document.getElementById(
+                "resultadoConferencias"
             );
 
 
-    // ========================================================
-    // VERIFICAR ERRO
-    // ========================================================
+        if (resultado) {
 
-    if (error) {
+            resultado.innerHTML =
+                "<p>✅ Todas as conferências foram apagadas.</p>";
 
-        console.error(
-            "Erro ao excluir conferência:",
-            error
+        }
+
+
+        // ====================================================
+        // CONFIRMAÇÃO
+        // ====================================================
+
+        alert(
+            "✅ Conferências apagadas com sucesso!"
         );
 
-        throw error;
+
+        console.log(
+            "Todas as conferências foram excluídas."
+        );
+
+
+    } catch (erro) {
+
+        console.error(
+            "Erro ao limpar conferências:",
+            erro
+        );
+
+
+        alert(
+            "❌ Não foi possível limpar as conferências.\n\n" +
+            "Verifique a conexão com o Supabase."
+        );
 
     }
 
-
-    // ========================================================
-    // REMOVER DA MEMÓRIA
-    // ========================================================
-
-    conferencias =
-        conferencias.filter(
-            function (contagem) {
-
-                return contagem.id !== id;
-
-            }
-        );
-
-
-    // ========================================================
-    // LOG
-    // ========================================================
-
-    console.log(
-        "Conferência excluída:",
-        id
-    );
-
 }
-
-
-// ============================================================
-// INICIALIZAÇÃO
-// ============================================================
-//
-// Não carregamos automaticamente o histórico aqui.
-//
-// O carregamento acontece quando alguma tela precisar
-// dos dados e chamar:
-//
-//     carregarConferencias()
-//
-// Isso evita tentar acessar o Supabase antes que o cliente
-// tenha sido inicializado pelo supabase.js.
-//
-// ============================================================
