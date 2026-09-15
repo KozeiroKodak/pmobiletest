@@ -1,150 +1,341 @@
-// ============================
-// DADOS DOS MATERIAIS
-// ============================
-// Este arquivo é responsável por:
-// - Manter os materiais do PMOBILE em memória
-// - Carregar o inventário salvo no IndexedDB
-// - Salvar o inventário no IndexedDB
-// - Permitir zerar o inventário
+// ============================================================
+// PMOBILE
+// ARQUIVO: dados.js
+// ============================================================
 //
-// O IndexedDB é utilizado porque o PMOBILE
-// pode trabalhar com dezenas de milhares de
-// materiais.
+// CAMADA LOCAL DE DADOS DO PMOBILE
+//
+// OBJETIVO:
+//
+// Este arquivo controla o armazenamento LOCAL do inventário.
+//
+// Arquitetura planejada:
+//
+//                  PMOBILE
+//                     |
+//              +------+------ +
+//              |             |
+//           SUPABASE      INDEXEDDB
+//           CENTRAL        LOCAL
+//              |             |
+//              +------+------ +
+//                     |
+//              sincronização
+//                 futura
 //
 // IMPORTANTE:
-// Os campos utilizados pelo PMOBILE continuam
-// exatamente os mesmos:
 //
-// codigo
-// descricao
-// referencia
-// marca
-// local
-// quantidade
-// quantidadeReservada
-// disponivel
-// ultimaEntrada
+// O Supabase é a fonte central do sistema.
 //
-// Os dados de teste continuam disponíveis
-// somente quando nenhum inventário foi
-// importado ou zerado.
+// O IndexedDB NÃO substitui o Supabase.
+//
+// Ele funciona como uma cópia local preparada para:
+//
+// - funcionamento offline
+// - carregamento rápido
+// - consulta local
+// - futura sincronização
+//
+// A sincronização automática ainda NÃO é implementada
+// neste arquivo.
+//
+// ============================================================
 
-// ============================
+
+// ============================================================
 // DADOS DE TESTE
-// ============================
+// ============================================================
+//
+// OBJETIVO:
+//
+// Disponibilizar materiais fictícios somente quando:
+//
+// - o PMOBILE estiver sendo executado pela primeira vez
+// - não existir inventário local
+// - o inventário não tiver sido marcado como zerado
+//
+// IMPORTANTE:
+//
+// Esses dados não representam o estoque real.
+//
+// ============================================================
 
 const materiaisTeste = [
+
     {
         codigo: "001",
         descricao: "Material de teste A",
-        quantidade: 100
+        referencia: "",
+        marca: "",
+        local: "",
+        quantidade: 100,
+        quantidadeReservada: 0,
+        disponivel: 100,
+        ultimaEntrada: ""
     },
+
     {
         codigo: "002",
         descricao: "Material de teste B",
-        quantidade: 50
+        referencia: "",
+        marca: "",
+        local: "",
+        quantidade: 50,
+        quantidadeReservada: 0,
+        disponivel: 50,
+        ultimaEntrada: ""
     },
+
     {
         codigo: "003",
         descricao: "Material de teste C",
-        quantidade: 25
+        referencia: "",
+        marca: "",
+        local: "",
+        quantidade: 25,
+        quantidadeReservada: 0,
+        disponivel: 25,
+        ultimaEntrada: ""
     }
+
 ];
 
-// ============================
+
+// ============================================================
 // MATERIAIS EM MEMÓRIA
-// ============================
+// ============================================================
+//
+// OBJETIVO:
+//
+// Manter os materiais disponíveis para o restante do PMOBILE.
+//
+// Esta variável representa a cópia atualmente carregada
+// na memória da aplicação.
+//
+// ============================================================
 
-let materiais = [...materiaisTeste];
+let materiais = [];
 
-// ============================
+
+// ============================================================
 // CONTROLE DO INVENTÁRIO
-// ============================
-// Este marcador diferencia:
+// ============================================================
 //
-// - primeira utilização
-// - inventário importado
-// - inventário zerado propositalmente
+// OBJETIVO:
 //
-// Assim, quando o IndexedDB estiver vazio,
-// o PMOBILE não confundirá um inventário
-// zerado com uma instalação nova.
+// Diferenciar:
+//
+// 1. primeira utilização
+// 2. inventário existente
+// 3. inventário zerado propositalmente
+//
+// ============================================================
 
 const chaveInventarioZerado =
     "pmobile_inventario_zerado";
 
-// ============================
+
+// ============================================================
 // CONFIGURAÇÃO DO INDEXEDDB
-// ============================
+// ============================================================
 
-const nomeBanco = "PMOBILE";
-const versaoBanco = 1;
-const nomeTabela = "materiais";
+const nomeBanco =
+    "PMOBILE";
 
-// ============================
-// ABRIR BANCO
-// ============================
-// Cria ou abre o banco de dados do PMOBILE.
+const versaoBanco =
+    1;
+
+const nomeTabela =
+    "materiais";
+
+
+// ============================================================
+// FUNÇÃO: normalizarMaterialLocal()
+//
+// OBJETIVO:
+//
+// Garantir que qualquer material recebido pela camada local
+// tenha sempre a mesma estrutura.
+//
+// Isso é especialmente importante porque os dados podem vir:
+//
+// - do Supabase
+// - da importação
+// - do IndexedDB
+// - de dados de teste
+//
+// ============================================================
+
+function normalizarMaterialLocal(material) {
+
+    if (!material) {
+
+        return null;
+
+    }
+
+
+    return {
+
+        codigo:
+            material.codigo ?? "",
+
+        descricao:
+            material.descricao ?? "",
+
+        referencia:
+            material.referencia ?? "",
+
+        marca:
+            material.marca ?? "",
+
+        local:
+            material.local ?? "",
+
+        quantidade:
+            Number(
+                material.quantidade ?? 0
+            ),
+
+        quantidadeReservada:
+            Number(
+                material.quantidadeReservada ?? 0
+            ),
+
+        disponivel:
+            Number(
+                material.disponivel ??
+                (
+                    Number(material.quantidade ?? 0) -
+                    Number(material.quantidadeReservada ?? 0)
+                )
+            ),
+
+        ultimaEntrada:
+            material.ultimaEntrada ?? ""
+
+    };
+
+}
+
+
+// ============================================================
+// FUNÇÃO: abrirBanco()
+//
+// OBJETIVO:
+//
+// Criar ou abrir o banco IndexedDB utilizado pelo PMOBILE.
+//
+// ============================================================
 
 function abrirBanco() {
 
-    return new Promise((resolve, reject) => {
+    return new Promise(
+        function(resolve, reject) {
 
-        const requisicao = indexedDB.open(
-            nomeBanco,
-            versaoBanco
-        );
-
-        // Executado quando o banco é criado
-        // pela primeira vez ou quando sua
-        // estrutura precisa ser atualizada.
-
-        requisicao.onupgradeneeded = function(evento) {
-
-            const banco = evento.target.result;
-
-            if (!banco.objectStoreNames.contains(nomeTabela)) {
-
-                banco.createObjectStore(
-                    nomeTabela,
-                    {
-                        keyPath: "id",
-                        autoIncrement: true
-                    }
+            const requisicao =
+                indexedDB.open(
+                    nomeBanco,
+                    versaoBanco
                 );
-            }
-        };
 
-        // Banco aberto com sucesso.
 
-        requisicao.onsuccess = function(evento) {
+            // ==================================================
+            // CRIAÇÃO / ATUALIZAÇÃO DO BANCO
+            // ==================================================
 
-            resolve(evento.target.result);
-        };
+            requisicao.onupgradeneeded =
+                function(evento) {
 
-        // Erro ao abrir o banco.
+                    const banco =
+                        evento.target.result;
 
-        requisicao.onerror = function(evento) {
 
-            reject(evento.target.error);
-        };
-    });
+                    if (
+                        !banco.objectStoreNames.contains(
+                            nomeTabela
+                        )
+                    ) {
+
+                        banco.createObjectStore(
+                            nomeTabela,
+                            {
+                                keyPath: "id",
+                                autoIncrement: true
+                            }
+                        );
+
+                    }
+
+                };
+
+
+            // ==================================================
+            // ABERTURA CONCLUÍDA
+            // ==================================================
+
+            requisicao.onsuccess =
+                function(evento) {
+
+                    resolve(
+                        evento.target.result
+                    );
+
+                };
+
+
+            // ==================================================
+            // ERRO
+            // ==================================================
+
+            requisicao.onerror =
+                function(evento) {
+
+                    reject(
+                        evento.target.error
+                    );
+
+                };
+
+        }
+    );
+
 }
 
-// ============================
-// SALVAR MATERIAIS
-// ============================
-// Salva o inventário completo no IndexedDB.
-//
-// Diferentemente do localStorage,
-// o IndexedDB consegue trabalhar com
-// volumes muito maiores de dados.
 
-async function salvarMateriais(inventario = materiais) {
+// ============================================================
+// FUNÇÃO: salvarMateriais()
+//
+// OBJETIVO:
+//
+// Salvar uma cópia completa do inventário no IndexedDB.
+//
+// USO FUTURO:
+//
+// Essa função poderá ser chamada depois de uma consulta
+// bem-sucedida ao Supabase.
+//
+// Exemplo:
+//
+// Supabase
+//    ↓
+// materiais
+//    ↓
+// salvarMateriais()
+//    ↓
+// IndexedDB
+//
+// ============================================================
+
+async function salvarMateriais(
+    inventario = materiais
+) {
 
     try {
 
-        const banco = await abrirBanco();
+        const banco =
+            await abrirBanco();
+
 
         const transacao =
             banco.transaction(
@@ -152,86 +343,214 @@ async function salvarMateriais(inventario = materiais) {
                 "readwrite"
             );
 
-        const tabela =
-            transacao.objectStore(nomeTabela);
 
-        // Remove o inventário anterior.
+        const tabela =
+            transacao.objectStore(
+                nomeTabela
+            );
+
+
+        // ====================================================
+        // LIMPAR CÓPIA ANTERIOR
+        // ====================================================
 
         tabela.clear();
 
-        // Insere todos os materiais
-        // recebidos para gravação.
 
-        inventario.forEach(material => {
+        // ====================================================
+        // NORMALIZAR E GRAVAR
+        // ====================================================
 
-            tabela.add({
-                codigo: material.codigo,
-                descricao: material.descricao,
-                referencia: material.referencia || "",
-                marca: material.marca || "",
-                local: material.local || "",
-                quantidade: material.quantidade ?? 0,
-                quantidadeReservada:
-                    material.quantidadeReservada ?? 0,
-                disponivel:
-                    material.disponivel ?? 0,
-                ultimaEntrada:
-                    material.ultimaEntrada || ""
-            });
-        });
+        inventario.forEach(
+            function(material) {
 
-        return new Promise((resolve, reject) => {
+                const materialNormalizado =
+                    normalizarMaterialLocal(
+                        material
+                    );
 
-            transacao.oncomplete = function() {
 
-                banco.close();
+                if (!materialNormalizado) {
 
-                resolve();
-            };
+                    return;
 
-            transacao.onerror = function(evento) {
+                }
 
-                banco.close();
 
-                reject(evento.target.error);
-            };
+                tabela.add(
+                    materialNormalizado
+                );
 
-            transacao.onabort = function(evento) {
+            }
+        );
 
-                banco.close();
 
-                reject(evento.target.error);
-            };
-        });
+        // ====================================================
+        // FINALIZAR TRANSAÇÃO
+        // ====================================================
+
+        return new Promise(
+            function(resolve, reject) {
+
+                transacao.oncomplete =
+                    function() {
+
+                        banco.close();
+
+                        resolve();
+
+                    };
+
+
+                transacao.onerror =
+                    function(evento) {
+
+                        banco.close();
+
+                        reject(
+                            evento.target.error
+                        );
+
+                    };
+
+
+                transacao.onabort =
+                    function(evento) {
+
+                        banco.close();
+
+                        reject(
+                            evento.target.error ||
+                            new Error(
+                                "Transação abortada."
+                            )
+                        );
+
+                    };
+
+            }
+        );
+
 
     } catch (erro) {
 
         console.error(
-            "Erro ao salvar o inventário:",
+            "Erro ao salvar materiais no IndexedDB:",
             erro
         );
 
         throw erro;
+
     }
+
 }
 
-// ============================
-// LIMPAR MATERIAIS
-// ============================
-// Remove completamente o inventário
-// armazenado no IndexedDB.
+
+// ============================================================
+// FUNÇÃO: salvarCopiaLocalDoSupabase()
 //
-// Esta função NÃO mexe nas conferências.
+// OBJETIVO:
 //
-// A exclusão das conferências será feita
-// somente quando o usuário escolher
-// "SIM" na confirmação.
+// Gravar no IndexedDB uma cópia dos materiais recebidos
+// do Supabase.
+//
+// ESTA É UMA DAS PRINCIPAIS FUNÇÕES DA NOVA CAMADA.
+//
+// Ela deixa explícito que:
+//
+// Supabase = fonte central
+//
+// IndexedDB = cópia local
+//
+// ============================================================
+
+async function salvarCopiaLocalDoSupabase(
+    materiaisSupabase
+) {
+
+    if (
+        !Array.isArray(
+            materiaisSupabase
+        )
+    ) {
+
+        throw new Error(
+            "Os materiais recebidos do Supabase precisam ser uma lista."
+        );
+
+    }
+
+
+    const inventarioLocal =
+        materiaisSupabase
+            .map(
+                normalizarMaterialLocal
+            )
+            .filter(
+                function(material) {
+
+                    return material !== null;
+
+                }
+            );
+
+
+    await salvarMateriais(
+        inventarioLocal
+    );
+
+
+    // ========================================================
+    // O INVENTÁRIO DEIXOU DE ESTAR ZERADO
+    // ========================================================
+
+    if (
+        inventarioLocal.length > 0
+    ) {
+
+        desmarcarInventarioZerado();
+
+    }
+
+
+    // ========================================================
+    // ATUALIZAR MEMÓRIA
+    // ========================================================
+
+    materiais =
+        [...inventarioLocal];
+
+
+    return materiais;
+
+}
+
+
+// ============================================================
+// FUNÇÃO: limparMateriais()
+//
+// OBJETIVO:
+//
+// Remover a cópia local do inventário.
+//
+// IMPORTANTE:
+//
+// Esta função NÃO apaga materiais do Supabase.
+//
+// Ela atua SOMENTE no IndexedDB.
+//
+// A exclusão dos materiais do banco central continua sendo
+// responsabilidade da função correspondente ao Supabase.
+//
+// ============================================================
 
 async function limparMateriais() {
 
     try {
 
-        const banco = await abrirBanco();
+        const banco =
+            await abrirBanco();
+
 
         const transacao =
             banco.transaction(
@@ -239,70 +558,110 @@ async function limparMateriais() {
                 "readwrite"
             );
 
+
         const tabela =
-            transacao.objectStore(nomeTabela);
+            transacao.objectStore(
+                nomeTabela
+            );
+
 
         tabela.clear();
 
-        return new Promise((resolve, reject) => {
 
-            transacao.oncomplete = function() {
+        return new Promise(
+            function(resolve, reject) {
 
-                banco.close();
+                transacao.oncomplete =
+                    function() {
 
-                resolve();
-            };
+                        banco.close();
 
-            transacao.onerror = function(evento) {
 
-                banco.close();
+                        materiais = [];
 
-                reject(evento.target.error);
-            };
 
-            transacao.onabort = function(evento) {
+                        marcarInventarioZerado();
 
-                banco.close();
 
-                reject(
-                    evento.target.error ||
-                    new Error("Transação abortada.")
-                );
-            };
-        });
+                        resolve();
+
+                    };
+
+
+                transacao.onerror =
+                    function(evento) {
+
+                        banco.close();
+
+                        reject(
+                            evento.target.error
+                        );
+
+                    };
+
+
+                transacao.onabort =
+                    function(evento) {
+
+                        banco.close();
+
+                        reject(
+                            evento.target.error ||
+                            new Error(
+                                "Transação abortada."
+                            )
+                        );
+
+                    };
+
+            }
+        );
+
 
     } catch (erro) {
 
         console.error(
-            "Erro ao limpar o inventário:",
+            "Erro ao limpar o inventário local:",
             erro
         );
 
         throw erro;
+
     }
+
 }
 
-// ============================
-// CARREGAR MATERIAIS
-// ============================
-// Recupera o inventário salvo no IndexedDB.
+
+// ============================================================
+// FUNÇÃO: carregarMateriais()
 //
-// Existem três situações:
+// OBJETIVO:
 //
-// 1. Primeira utilização:
-//    → carrega materiaisTeste
+// Carregar a cópia local do inventário armazenada no IndexedDB.
 //
-// 2. Inventário existente:
-//    → carrega IndexedDB
+// COMPORTAMENTO:
 //
-// 3. Inventário zerado:
-//    → mantém materiais vazio
+// Se existir inventário local:
+//
+//     IndexedDB → materiais
+//
+// Se o inventário tiver sido zerado:
+//
+//     materiais = []
+//
+// Se for a primeira utilização:
+//
+//     materiaisTeste
+//
+// ============================================================
 
 async function carregarMateriais() {
 
     try {
 
-        const banco = await abrirBanco();
+        const banco =
+            await abrirBanco();
+
 
         const transacao =
             banco.transaction(
@@ -310,135 +669,273 @@ async function carregarMateriais() {
                 "readonly"
             );
 
+
         const tabela =
-            transacao.objectStore(nomeTabela);
+            transacao.objectStore(
+                nomeTabela
+            );
+
 
         const requisicao =
             tabela.getAll();
 
-        return new Promise((resolve, reject) => {
 
-            requisicao.onsuccess =
-                function(evento) {
+        return new Promise(
+            function(resolve, reject) {
 
-                    const dados =
-                        evento.target.result;
+                requisicao.onsuccess =
+                    function(evento) {
 
-                    banco.close();
+                        const dados =
+                            evento.target.result;
 
-                    // ============================
-                    // INVENTÁRIO EXISTENTE
-                    // ============================
 
-                    if (dados.length > 0) {
+                        banco.close();
 
-                        materiais = dados.map(
-                            material => {
 
-                                return {
-                                    codigo:
-                                        material.codigo,
+                        // ====================================
+                        // EXISTE INVENTÁRIO LOCAL
+                        // ====================================
 
-                                    descricao:
-                                        material.descricao,
+                        if (
+                            dados.length > 0
+                        ) {
 
-                                    referencia:
-                                        material.referencia || "",
+                            materiais =
+                                dados
+                                    .map(
+                                        normalizarMaterialLocal
+                                    )
+                                    .filter(
+                                        function(material) {
 
-                                    marca:
-                                        material.marca || "",
+                                            return material !== null;
 
-                                    local:
-                                        material.local || "",
+                                        }
+                                    );
 
-                                    quantidade:
-                                        material.quantidade ?? 0,
 
-                                    quantidadeReservada:
-                                        material.quantidadeReservada ?? 0,
+                            resolve(
+                                materiais
+                            );
 
-                                    disponivel:
-                                        material.disponivel ?? 0,
 
-                                    ultimaEntrada:
-                                        material.ultimaEntrada || ""
-                                };
-                            }
-                        );
+                            return;
 
-                    }
+                        }
 
-                    // ============================
-                    // INVENTÁRIO ZERADO
-                    // ============================
 
-                    else if (
-                        localStorage.getItem(
-                            chaveInventarioZerado
-                        ) === "true"
-                    ) {
+                        // ====================================
+                        // INVENTÁRIO FOI ZERADO
+                        // ====================================
 
-                        materiais = [];
+                        if (
+                            inventarioEstaZerado()
+                        ) {
 
-                    }
+                            materiais = [];
 
-                    // ============================
-                    // PRIMEIRA UTILIZAÇÃO
-                    // ============================
 
-                    else {
+                            resolve(
+                                materiais
+                            );
+
+
+                            return;
+
+                        }
+
+
+                        // ====================================
+                        // PRIMEIRA UTILIZAÇÃO
+                        // ====================================
 
                         materiais =
-                            [...materiaisTeste];
-                    }
+                            materiaisTeste.map(
+                                normalizarMaterialLocal
+                            );
 
-                    resolve(materiais);
-                };
 
-            requisicao.onerror =
-                function(evento) {
+                        resolve(
+                            materiais
+                        );
 
-                    banco.close();
+                    };
 
-                    reject(evento.target.error);
-                };
-        });
+
+                requisicao.onerror =
+                    function(evento) {
+
+                        banco.close();
+
+
+                        reject(
+                            evento.target.error
+                        );
+
+                    };
+
+            }
+        );
+
 
     } catch (erro) {
 
         console.error(
-            "Erro ao carregar o inventário:",
+            "Erro ao carregar o inventário local:",
             erro
         );
 
-        // Se ocorreu erro ao acessar o banco,
-        // mantemos o comportamento de segurança
-        // original.
+
+        // ====================================================
+        // FALLBACK
+        // ====================================================
 
         if (
-            localStorage.getItem(
-                chaveInventarioZerado
-            ) === "true"
+            inventarioEstaZerado()
         ) {
 
             materiais = [];
 
         } else {
 
-            materiais = [...materiaisTeste];
+            materiais =
+                materiaisTeste.map(
+                    normalizarMaterialLocal
+                );
+
         }
 
+
         return materiais;
+
     }
+
 }
 
-// ============================
-// MARCAR INVENTÁRIO COMO ZERADO
-// ============================
-// Usado depois que o IndexedDB foi limpo.
+
+// ============================================================
+// FUNÇÃO: existeInventarioLocal()
 //
-// O marcador informa ao PMOBILE que o banco
-// vazio é intencional.
+// OBJETIVO:
+//
+// Verificar se existe pelo menos um material armazenado
+// no IndexedDB.
+//
+// RETORNO:
+//
+// true  → existe inventário local
+//
+// false → não existe inventário local
+//
+// ============================================================
+
+async function existeInventarioLocal() {
+
+    try {
+
+        const banco =
+            await abrirBanco();
+
+
+        const transacao =
+            banco.transaction(
+                nomeTabela,
+                "readonly"
+            );
+
+
+        const tabela =
+            transacao.objectStore(
+                nomeTabela
+            );
+
+
+        const requisicao =
+            tabela.count();
+
+
+        return new Promise(
+            function(resolve, reject) {
+
+                requisicao.onsuccess =
+                    function(evento) {
+
+                        banco.close();
+
+
+                        resolve(
+                            evento.target.result > 0
+                        );
+
+                    };
+
+
+                requisicao.onerror =
+                    function(evento) {
+
+                        banco.close();
+
+
+                        reject(
+                            evento.target.error
+                        );
+
+                    };
+
+            }
+        );
+
+
+    } catch (erro) {
+
+        console.error(
+            "Erro ao verificar inventário local:",
+            erro
+        );
+
+
+        return false;
+
+    }
+
+}
+
+
+// ============================================================
+// FUNÇÃO: inventarioEstaZerado()
+//
+// OBJETIVO:
+//
+// Verificar se o usuário marcou explicitamente
+// o inventário local como zerado.
+//
+// ============================================================
+
+function inventarioEstaZerado() {
+
+    return (
+        localStorage.getItem(
+            chaveInventarioZerado
+        ) === "true"
+    );
+
+}
+
+
+// ============================================================
+// FUNÇÃO: marcarInventarioZerado()
+//
+// OBJETIVO:
+//
+// Informar ao PMOBILE que o inventário local foi
+// zerado propositalmente.
+//
+// IMPORTANTE:
+//
+// Isto NÃO apaga nada do Supabase.
+//
+// ============================================================
 
 function marcarInventarioZerado() {
 
@@ -446,28 +943,113 @@ function marcarInventarioZerado() {
         chaveInventarioZerado,
         "true"
     );
+
 }
 
-// ============================
-// REMOVER MARCA DE INVENTÁRIO ZERADO
-// ============================
-// Usado quando uma nova planilha for
-// importada.
+
+// ============================================================
+// FUNÇÃO: desmarcarInventarioZerado()
 //
-// Assim, depois da importação, o PMOBILE
-// volta a considerar o inventário como
-// existente.
+// OBJETIVO:
+//
+// Remover a marca de inventário zerado.
+//
+// Normalmente utilizada quando uma nova cópia de inventário
+// é gravada localmente.
+//
+// ============================================================
 
 function desmarcarInventarioZerado() {
 
     localStorage.removeItem(
         chaveInventarioZerado
     );
+
 }
 
-// ============================
-// CARREGAR AO INICIAR
-// ============================
-// O carregamento é iniciado assim que
-// o arquivo dados.js é executado.
+
+// ============================================================
+// FUNÇÃO: obterMateriaisLocais()
+//
+// OBJETIVO:
+//
+// Retornar os materiais atualmente carregados na memória.
+//
+// IMPORTANTE:
+//
+// Esta função NÃO consulta o Supabase.
+//
+// ============================================================
+
+function obterMateriaisLocais() {
+
+    return materiais;
+
+}
+
+
+// ============================================================
+// FUNÇÃO: substituirMateriaisLocais()
+//
+// OBJETIVO:
+//
+// Substituir somente os dados que estão em memória.
+//
+// IMPORTANTE:
+//
+// Esta função NÃO grava automaticamente no IndexedDB
+// e NÃO altera o Supabase.
+//
+// Ela serve para operações internas controladas.
+//
+// ============================================================
+
+function substituirMateriaisLocais(
+    novoInventario
+) {
+
+    if (
+        !Array.isArray(
+            novoInventario
+        )
+    ) {
+
+        throw new Error(
+            "O novo inventário precisa ser uma lista."
+        );
+
+    }
+
+
+    materiais =
+        novoInventario
+            .map(
+                normalizarMaterialLocal
+            )
+            .filter(
+                function(material) {
+
+                    return material !== null;
+
+                }
+            );
+
+
+    return materiais;
+
+}
+
+
+// ============================================================
+// INICIALIZAÇÃO DA CAMADA LOCAL
+// ============================================================
+//
+// Carrega a cópia local existente.
+//
+// IMPORTANTE:
+//
+// Esta chamada NÃO consulta o Supabase.
+//
+// ============================================================
+
 carregarMateriais();
