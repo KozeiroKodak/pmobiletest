@@ -143,7 +143,7 @@ function mostrarStatusSupabase(mensagem) {
         // ====================================================
 
         status.style.padding =
-            "05px";
+            "10px";
 
         status.style.background =
             "#eeeeee";
