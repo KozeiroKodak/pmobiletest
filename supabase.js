@@ -129,13 +129,13 @@ function mostrarStatusSupabase(mensagem) {
             "fixed";
 
         status.style.bottom =
-            "05px";
+            "10px";
 
         status.style.left =
-            "05px";
+            "10px";
 
         status.style.right =
-            "05px";
+            "10px";
 
 
         // ====================================================
@@ -143,7 +143,7 @@ function mostrarStatusSupabase(mensagem) {
         // ====================================================
 
         status.style.padding =
-            "12px";
+            "05px";
 
         status.style.background =
             "#eeeeee";
