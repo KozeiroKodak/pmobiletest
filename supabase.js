@@ -1134,16 +1134,6 @@ async function testarLeituraSupabase() {
 
 }
 
-// ========================================================
-    // BOTÃO FECHAR
-    // ========================================================
-
-    html +=
-        "<br>" +
-        "<button type=\"button\" " +
-        "onclick=\"fecharErrosSupabase()\">" +
-        "Fechar" +
-        "</button>";
 
 // ============================================================
 // FUNÇÃO: permitirAtualizacaoNavegador()
