@@ -9,57 +9,11 @@
 //
 // O Supabase é a fonte central das conferências.
 //
-// Este arquivo faz a ligação entre:
-//
-//     Supabase
-//          ↕
-//     conferencias.js
-//          ↕
-//     restante do PMOBILE
-//
-// IMPORTANTE:
-//
-// O Supabase utiliza nomes de campos em snake_case.
-//
-// Exemplo:
-//
-//     codigo_material
-//     quantidade_esperada
-//     quantidade_fisica
-//
-// O restante do PMOBILE utiliza nomes em camelCase.
-//
-// Exemplo:
-//
-//     codigo
-//     quantidadeEsperada
-//     quantidadeFisica
-//
-// Este arquivo faz essa conversão.
-//
 // ============================================================
 
 
 // ============================================================
 // VARIÁVEL: conferencias
-// ============================================================
-//
-// OBJETIVO:
-//
-// Armazenar temporariamente na memória do navegador
-// as conferências carregadas do Supabase.
-//
-// IMPORTANTE:
-//
-// Esta variável NÃO é o banco de dados.
-//
-// A fonte oficial dos dados é:
-//
-//     Supabase → tabela conferencias
-//
-// A variável existe apenas para disponibilizar os dados
-// para as telas do PMOBILE.
-//
 // ============================================================
 
 let conferencias = [];
@@ -67,22 +21,6 @@ let conferencias = [];
 
 // ============================================================
 // FUNÇÃO: obterClienteSupabaseConferencias()
-//
-// OBJETIVO:
-//
-// Garantir que o cliente Supabase esteja disponível.
-//
-// RETORNO:
-//
-// Retorna:
-//
-//     window.clienteSupabase
-//
-// ERRO:
-//
-// Caso o cliente não tenha sido inicializado,
-// interrompe a operação.
-//
 // ============================================================
 
 function obterClienteSupabaseConferencias() {
@@ -102,28 +40,6 @@ function obterClienteSupabaseConferencias() {
 
 // ============================================================
 // FUNÇÃO: converterConferenciaSupabaseParaPMobile()
-//
-// OBJETIVO:
-//
-// Converter um registro vindo do Supabase para o formato
-// utilizado internamente pelo PMOBILE.
-//
-// Supabase:
-//
-//     codigo_material
-//     descricao_material
-//     referencia_material
-//     quantidade_esperada
-//     quantidade_fisica
-//
-// PMOBILE:
-//
-//     codigo
-//     descricao
-//     referencia
-//     quantidadeEsperada
-//     quantidadeFisica
-//
 // ============================================================
 
 function converterConferenciaSupabaseParaPMobile(
@@ -131,26 +47,22 @@ function converterConferenciaSupabaseParaPMobile(
 ) {
 
     if (!registro) {
+
         return null;
+
     }
 
 
     return {
 
-        // ====================================================
-        // IDENTIFICAÇÃO
-        // ====================================================
-
         id:
             registro.id ?? null,
 
+        conferenciaId:
+            registro.conferencia_id ?? null,
+
         materialId:
             registro.material_id ?? null,
-
-
-        // ====================================================
-        // DADOS DO MATERIAL
-        // ====================================================
 
         codigo:
             registro.codigo_material ?? "",
@@ -160,11 +72,6 @@ function converterConferenciaSupabaseParaPMobile(
 
         referencia:
             registro.referencia_material ?? "",
-
-
-        // ====================================================
-        // QUANTIDADES
-        // ====================================================
 
         quantidadeEsperada:
             Number(
@@ -181,26 +88,11 @@ function converterConferenciaSupabaseParaPMobile(
                 registro.diferenca ?? 0
             ),
 
-
-        // ====================================================
-        // STATUS
-        // ====================================================
-
         status:
             registro.status ?? "CONFERIDO",
 
-
-        // ====================================================
-        // USUÁRIO
-        // ====================================================
-
         usuarioId:
             registro.usuario_id ?? null,
-
-
-        // ====================================================
-        // DATA
-        // ====================================================
 
         data:
             registro.criado_em ?? null,
@@ -215,25 +107,11 @@ function converterConferenciaSupabaseParaPMobile(
 
 // ============================================================
 // FUNÇÃO: converterConferenciaPMobileParaSupabase()
+// ============================================================
 //
 // OBJETIVO:
 //
-// Converter uma conferência do formato interno do PMOBILE
-// para o formato utilizado pela tabela do Supabase.
-//
-// PMOBILE:
-//
-//     codigo
-//     descricao
-//     quantidadeEsperada
-//     quantidadeFisica
-//
-// Supabase:
-//
-//     codigo_material
-//     descricao_material
-//     quantidade_esperada
-//     quantidade_fisica
+// Converter o objeto do PMOBILE para o formato do Supabase.
 //
 // ============================================================
 
@@ -250,7 +128,21 @@ function converterConferenciaPMobileParaSupabase(
     }
 
 
+    if (
+        !contagem.conferenciaId
+    ) {
+
+        throw new Error(
+            "ID único da conferência não foi informado."
+        );
+
+    }
+
+
     return {
+
+        conferencia_id:
+            contagem.conferenciaId,
 
         material_id:
             contagem.materialId ?? null,
@@ -289,39 +181,15 @@ function converterConferenciaPMobileParaSupabase(
 
 // ============================================================
 // FUNÇÃO: carregarConferencias()
-//
-// OBJETIVO:
-//
-// Carregar o histórico diretamente do Supabase.
-//
-// Depois da consulta:
-//
-//     Supabase
-//          ↓
-//     conversão
-//          ↓
-//     conferencias
-//
-// A variável conferencias sempre ficará no formato
-// utilizado pelo PMOBILE.
-//
 // ============================================================
 
 async function carregarConferencias() {
 
     try {
 
-        // ====================================================
-        // OBTER CLIENTE SUPABASE
-        // ====================================================
-
         const clienteSupabase =
             obterClienteSupabaseConferencias();
 
-
-        // ====================================================
-        // CONSULTAR CONFERÊNCIAS
-        // ====================================================
 
         const { data, error } =
             await clienteSupabase
@@ -329,7 +197,7 @@ async function carregarConferencias() {
                 .from("conferencias")
 
                 .select(
-                    "id,material_id,codigo_material,descricao_material,referencia_material,quantidade_esperada,quantidade_fisica,diferenca,status,usuario_id,criado_em"
+                    "id,conferencia_id,material_id,codigo_material,descricao_material,referencia_material,quantidade_esperada,quantidade_fisica,diferenca,status,usuario_id,criado_em"
                 )
 
                 .order(
@@ -340,20 +208,12 @@ async function carregarConferencias() {
                 );
 
 
-        // ====================================================
-        // VERIFICAR ERRO
-        // ====================================================
-
         if (error) {
 
             throw error;
 
         }
 
-
-        // ====================================================
-        // CONVERTER DADOS
-        // ====================================================
 
         conferencias =
             Array.isArray(data)
@@ -362,16 +222,14 @@ async function carregarConferencias() {
                         converterConferenciaSupabaseParaPMobile
                     )
                     .filter(
-                        function (registro) {
+                        function(registro) {
+
                             return registro !== null;
+
                         }
                     )
                 : [];
 
-
-        // ====================================================
-        // LOG
-        // ====================================================
 
         console.log(
             "Conferências carregadas do Supabase:",
@@ -379,28 +237,16 @@ async function carregarConferencias() {
         );
 
 
-        // ====================================================
-        // RETORNO
-        // ====================================================
-
         return conferencias;
 
 
     } catch (erro) {
-
-        // ====================================================
-        // TRATAMENTO DE ERRO
-        // ====================================================
 
         console.error(
             "Erro ao carregar conferências do Supabase:",
             erro
         );
 
-
-        // ====================================================
-        // MANTER APLICAÇÃO ESTÁVEL
-        // ====================================================
 
         conferencias = [];
 
@@ -414,22 +260,6 @@ async function carregarConferencias() {
 
 // ============================================================
 // FUNÇÃO: salvarConferencias()
-//
-// OBJETIVO:
-//
-// Manter compatibilidade com o restante do PMOBILE.
-//
-// IMPORTANTE:
-//
-// Esta função NÃO utiliza localStorage.
-//
-// O salvamento de uma conferência é realizado pela:
-//
-//     salvarConferenciaSupabase()
-//
-// Depois do salvamento, esta função pode ser utilizada
-// para atualizar a lista em memória.
-//
 // ============================================================
 
 async function salvarConferencias() {
@@ -441,32 +271,24 @@ async function salvarConferencias() {
 
 // ============================================================
 // FUNÇÃO: salvarConferenciaSupabase()
+// ============================================================
 //
 // OBJETIVO:
 //
-// Gravar uma nova conferência diretamente no Supabase.
+// Salvar uma conferência no Supabase.
 //
-// FLUXO:
+// PROTEÇÃO:
 //
-//     PMOBILE
-//        ↓
-//     converter
-//        ↓
-//     Supabase
-//        ↓
-//     converter
-//        ↓
-//     memória do PMOBILE
+// O conferencia_id é UNIQUE no banco.
+//
+// Se a mesma conferência for enviada novamente,
+// o Supabase recusará a duplicata.
 //
 // ============================================================
 
 async function salvarConferenciaSupabase(
     contagem
 ) {
-
-    // ========================================================
-    // VALIDAR DADOS
-    // ========================================================
 
     if (!contagem) {
 
@@ -477,27 +299,15 @@ async function salvarConferenciaSupabase(
     }
 
 
-    // ========================================================
-    // OBTER CLIENTE SUPABASE
-    // ========================================================
-
     const clienteSupabase =
         obterClienteSupabaseConferencias();
 
-
-    // ========================================================
-    // CONVERTER PARA FORMATO DO SUPABASE
-    // ========================================================
 
     const registro =
         converterConferenciaPMobileParaSupabase(
             contagem
         );
 
-
-    // ========================================================
-    // INSERIR NO SUPABASE
-    // ========================================================
 
     const { data, error } =
         await clienteSupabase
@@ -512,25 +322,119 @@ async function salvarConferenciaSupabase(
             .single();
 
 
-    // ========================================================
-    // VERIFICAR ERRO
-    // ========================================================
-
     if (error) {
+
+        // ====================================================
+        // DUPLICAÇÃO
+        // ====================================================
+        //
+        // PostgreSQL retorna código 23505 para violação
+        // de UNIQUE.
+        //
+        // Nesse caso, a conferência já existe no banco.
+        //
+        // Para o sistema offline, isso significa que ela
+        // já foi sincronizada anteriormente.
+        //
+        // ====================================================
+
+        if (
+            error.code === "23505"
+        ) {
+
+            console.warn(
+                "Conferência já existe no Supabase:",
+                contagem.conferenciaId
+            );
+
+
+            const { data: existente } =
+                await clienteSupabase
+
+                    .from("conferencias")
+
+                    .select(
+                        "id,conferencia_id,material_id,codigo_material,descricao_material,referencia_material,quantidade_esperada,quantidade_fisica,diferenca,status,usuario_id,criado_em"
+                    )
+
+                    .eq(
+                        "conferencia_id",
+                        contagem.conferenciaId
+                    )
+
+                    .maybeSingle();
+
+
+            if (
+                existente
+            ) {
+
+                const conferenciaExistente =
+                    converterConferenciaSupabaseParaPMobile(
+                        existente
+                    );
+
+
+                if (
+                    conferenciaExistente
+                ) {
+
+                    const jaExiste =
+                        conferencias.some(
+                            function(item) {
+
+                                return (
+                                    item.conferenciaId ===
+                                    conferenciaExistente.conferenciaId
+                                );
+
+                            }
+                        );
+
+
+                    if (
+                        !jaExiste
+                    ) {
+
+                        conferencias.unshift(
+                            conferenciaExistente
+                        );
+
+                    }
+
+                }
+
+
+                return conferenciaExistente;
+
+            }
+
+
+            // =================================================
+            // Mesmo que o registro não seja retornado,
+            // consideramos que ele já existe.
+            // =================================================
+
+            return {
+
+                conferenciaId:
+                    contagem.conferenciaId
+
+            };
+
+        }
+
 
         console.error(
             "Erro ao salvar conferência no Supabase:",
             error
         );
 
+
         throw error;
 
     }
 
-
-    // ========================================================
-    // CONVERTER RESPOSTA
-    // ========================================================
 
     const conferenciaSalva =
         converterConferenciaSupabaseParaPMobile(
@@ -538,32 +442,41 @@ async function salvarConferenciaSupabase(
         );
 
 
-    // ========================================================
-    // ATUALIZAR MEMÓRIA
-    // ========================================================
+    if (
+        conferenciaSalva
+    ) {
 
-    if (conferenciaSalva) {
+        const jaExiste =
+            conferencias.some(
+                function(item) {
 
-        conferencias.unshift(
-            conferenciaSalva
-        );
+                    return (
+                        item.conferenciaId ===
+                        conferenciaSalva.conferenciaId
+                    );
+
+                }
+            );
+
+
+        if (
+            !jaExiste
+        ) {
+
+            conferencias.unshift(
+                conferenciaSalva
+            );
+
+        }
 
     }
 
-
-    // ========================================================
-    // LOG
-    // ========================================================
 
     console.log(
         "Conferência salva no Supabase:",
         conferenciaSalva
     );
 
-
-    // ========================================================
-    // RETORNO
-    // ========================================================
 
     return conferenciaSalva;
 
@@ -576,48 +489,32 @@ async function salvarConferenciaSupabase(
 //
 // OBJETIVO:
 //
-// Excluir TODAS as conferências armazenadas no Supabase.
-//
-// IMPORTANTE:
-//
-// Esta função:
-//     - NÃO apaga materiais
-//     - NÃO apaga importações
-//     - NÃO altera a tabela materiais
-//     - apaga somente a tabela conferencias
-//
-// Depois da exclusão:
-//     - a memória do PMOBILE é limpa
-//     - a tela de conferências é atualizada
+// Apagar todas as conferências do Supabase.
 //
 // ============================================================
 
 async function limparConferenciasSupabase() {
 
-    // ========================================================
-    // CONFIRMAÇÃO
-    // ========================================================
-
-    const confirmar = confirm(
-        "⚠️ ATENÇÃO!\n\n" +
-        "Todas as conferências realizadas serão apagadas.\n\n" +
-        "Os materiais do inventário NÃO serão apagados.\n\n" +
-        "Deseja continuar?"
-    );
+    const confirmar =
+        confirm(
+            "⚠️ ATENÇÃO!\n\n" +
+            "Todas as conferências realizadas serão apagadas.\n\n" +
+            "Os materiais do inventário NÃO serão apagados.\n\n" +
+            "Deseja continuar?"
+        );
 
 
-    if (!confirmar) {
+    if (
+        !confirmar
+    ) {
 
         return;
 
     }
 
 
-    // ========================================================
-    // OBTER CLIENTE SUPABASE
-    // ========================================================
-
     let clienteSupabase;
+
 
     try {
 
@@ -627,7 +524,6 @@ async function limparConferenciasSupabase() {
     } catch (erro) {
 
         console.error(
-            "Erro ao obter cliente Supabase:",
             erro
         );
 
@@ -640,16 +536,7 @@ async function limparConferenciasSupabase() {
     }
 
 
-    // ========================================================
-    // EXECUTAR EXCLUSÃO
-    // ========================================================
-
     try {
-
-        console.log(
-            "Iniciando limpeza das conferências..."
-        );
-
 
         const { error } =
             await clienteSupabase
@@ -658,9 +545,6 @@ async function limparConferenciasSupabase() {
 
                 .delete()
 
-                // A coluna id é obrigatória,
-                // portanto esta condição seleciona
-                // todos os registros.
                 .not(
                     "id",
                     "is",
@@ -668,32 +552,17 @@ async function limparConferenciasSupabase() {
                 );
 
 
-        // ====================================================
-        // VERIFICAR ERRO
-        // ====================================================
-
-        if (error) {
-
-            console.error(
-                "Erro ao limpar conferências:",
-                error
-            );
+        if (
+            error
+        ) {
 
             throw error;
 
         }
 
 
-        // ====================================================
-        // LIMPAR MEMÓRIA
-        // ====================================================
-
         conferencias = [];
 
-
-        // ====================================================
-        // ATUALIZAR TELA
-        // ====================================================
 
         const resultado =
             document.getElementById(
@@ -701,7 +570,9 @@ async function limparConferenciasSupabase() {
             );
 
 
-        if (resultado) {
+        if (
+            resultado
+        ) {
 
             resultado.innerHTML =
                 "<p>✅ Todas as conferências foram apagadas.</p>";
@@ -709,17 +580,8 @@ async function limparConferenciasSupabase() {
         }
 
 
-        // ====================================================
-        // CONFIRMAÇÃO
-        // ====================================================
-
         alert(
             "✅ Conferências apagadas com sucesso!"
-        );
-
-
-        console.log(
-            "Todas as conferências foram excluídas."
         );
 
 
@@ -732,8 +594,7 @@ async function limparConferenciasSupabase() {
 
 
         alert(
-            "❌ Não foi possível limpar as conferências.\n\n" +
-            "Verifique a conexão com o Supabase."
+            "❌ Não foi possível limpar as conferências."
         );
 
     }
