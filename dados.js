@@ -63,38 +63,68 @@
 const materiaisTeste = [
 
     {
+        idSupabase: "teste-001",
+
         codigo: "001",
+
         descricao: "Material de teste A",
+
         referencia: "",
+
         marca: "",
+
         local: "",
+
         quantidade: 100,
+
         quantidadeReservada: 0,
+
         disponivel: 100,
+
         ultimaEntrada: ""
     },
 
     {
+        idSupabase: "teste-002",
+
         codigo: "002",
+
         descricao: "Material de teste B",
+
         referencia: "",
+
         marca: "",
+
         local: "",
+
         quantidade: 50,
+
         quantidadeReservada: 0,
+
         disponivel: 50,
+
         ultimaEntrada: ""
     },
 
     {
+        idSupabase: "teste-003",
+
         codigo: "003",
+
         descricao: "Material de teste C",
+
         referencia: "",
+
         marca: "",
+
         local: "",
+
         quantidade: 25,
+
         quantidadeReservada: 0,
+
         disponivel: 25,
+
         ultimaEntrada: ""
     }
 
@@ -142,8 +172,34 @@ const chaveInventarioZerado =
 const nomeBanco =
     "PMOBILE";
 
+
+// ============================================================
+// VERSÃO DO BANCO
+// ============================================================
+//
+// VERSÃO 2:
+//
+// A versão 1 utilizava:
+//
+//     keyPath: "id"
+//     autoIncrement: true
+//
+// Isso fazia o IndexedDB criar uma identidade própria
+// para cada material.
+//
+// A partir da versão 2:
+//
+//     keyPath: "idSupabase"
+//     autoIncrement: false
+//
+// O ID original do Supabase passa a ser a identidade
+// principal do material dentro da cópia local.
+//
+// ============================================================
+
 const versaoBanco =
-    1;
+    2;
+
 
 const nomeTabela =
     "materiais";
@@ -151,6 +207,7 @@ const nomeTabela =
 
 // ============================================================
 // FUNÇÃO: normalizarMaterialLocal()
+// ============================================================
 //
 // OBJETIVO:
 //
@@ -164,6 +221,14 @@ const nomeTabela =
 // - do IndexedDB
 // - de dados de teste
 //
+// IMPORTANTE:
+//
+// O idSupabase representa a identidade ORIGINAL do material
+// no Supabase.
+//
+// Ele NÃO deve ser substituído por um ID automático
+// criado pelo IndexedDB.
+//
 // ============================================================
 
 function normalizarMaterialLocal(material) {
@@ -175,7 +240,88 @@ function normalizarMaterialLocal(material) {
     }
 
 
+    // ========================================================
+    // PRESERVAR ID DO SUPABASE
+    // ========================================================
+    //
+    // Prioridade:
+    //
+    // 1. material.idSupabase
+    // 2. material.id
+    //
+    // O segundo caso existe porque os registros vindos
+    // diretamente do Supabase normalmente possuem o campo
+    // "id".
+    //
+    // ========================================================
+
+    const idSupabase =
+        material.idSupabase ??
+        material.id ??
+        null;
+
+
+    // ========================================================
+    // MATERIAL PRECISA TER IDENTIDADE
+    // ========================================================
+    //
+    // Materiais reais vindos do Supabase possuem ID.
+    //
+    // Dados de teste também possuem um idSupabase próprio.
+    //
+    // Se não houver identidade, o registro não deve ser
+    // colocado na camada local.
+    //
+    // ========================================================
+
+    if (
+        idSupabase === null ||
+        idSupabase === undefined ||
+        idSupabase === ""
+    ) {
+
+        console.warn(
+            "Material ignorado por não possuir idSupabase:",
+            material
+        );
+
+        return null;
+
+    }
+
+
+    // ========================================================
+    // ESTRUTURA PADRONIZADA
+    // ========================================================
+
     return {
+
+        // ====================================================
+        // IDENTIDADE CENTRAL
+        // ====================================================
+        //
+        // Este valor é o mesmo ID utilizado pelo Supabase.
+        //
+        idSupabase:
+            idSupabase,
+
+
+        // ====================================================
+        // ALIAS DO ID
+        // ====================================================
+        //
+        // Mantemos também "id" apontando para o mesmo ID.
+        //
+        // Isso ajuda na compatibilidade com partes existentes
+        // do PMOBILE que ainda possam acessar material.id.
+        //
+        id:
+            idSupabase,
+
+
+        // ====================================================
+        // DADOS DO MATERIAL
+        // ====================================================
 
         codigo:
             material.codigo ?? "",
@@ -191,6 +337,11 @@ function normalizarMaterialLocal(material) {
 
         local:
             material.local ?? "",
+
+
+        // ====================================================
+        // QUANTIDADES
+        // ====================================================
 
         quantidade:
             Number(
@@ -211,6 +362,11 @@ function normalizarMaterialLocal(material) {
                 )
             ),
 
+
+        // ====================================================
+        // DATA DA ÚLTIMA ENTRADA
+        // ====================================================
+
         ultimaEntrada:
             material.ultimaEntrada ?? ""
 
@@ -221,6 +377,7 @@ function normalizarMaterialLocal(material) {
 
 // ============================================================
 // FUNÇÃO: abrirBanco()
+// ============================================================
 //
 // OBJETIVO:
 //
@@ -251,21 +408,59 @@ function abrirBanco() {
                         evento.target.result;
 
 
+                    // ==========================================
+                    // VERSÃO ANTERIOR
+                    // ==========================================
+                    //
+                    // A versão 1 utilizava um objectStore com:
+                    //
+                    // keyPath: "id"
+                    // autoIncrement: true
+                    //
+                    // Essa estrutura não é adequada para a nova
+                    // identidade baseada no Supabase.
+                    //
+                    // Portanto, o objectStore antigo é removido
+                    // e recriado utilizando idSupabase.
+                    //
+                    // IMPORTANTE:
+                    //
+                    // Os dados antigos da versão 1 não possuem
+                    // garantia de que seu "id" automático
+                    // corresponda ao ID real do Supabase.
+                    //
+                    // Por segurança, eles não são reutilizados
+                    // como identidade central.
+                    //
+                    // O inventário correto será novamente
+                    // carregado a partir do Supabase.
+                    //
+                    // ==========================================
+
                     if (
-                        !banco.objectStoreNames.contains(
+                        banco.objectStoreNames.contains(
                             nomeTabela
                         )
                     ) {
 
-                        banco.createObjectStore(
-                            nomeTabela,
-                            {
-                                keyPath: "id",
-                                autoIncrement: true
-                            }
+                        banco.deleteObjectStore(
+                            nomeTabela
                         );
 
                     }
+
+
+                    // ==========================================
+                    // NOVA ESTRUTURA
+                    // ==========================================
+
+                    banco.createObjectStore(
+                        nomeTabela,
+                        {
+                            keyPath: "idSupabase",
+                            autoIncrement: false
+                        }
+                    );
 
                 };
 
@@ -305,25 +500,24 @@ function abrirBanco() {
 
 // ============================================================
 // FUNÇÃO: salvarMateriais()
+// ============================================================
 //
 // OBJETIVO:
 //
 // Salvar uma cópia completa do inventário no IndexedDB.
 //
-// USO FUTURO:
+// USO:
 //
-// Essa função poderá ser chamada depois de uma consulta
-// bem-sucedida ao Supabase.
+// Essa função pode receber:
 //
-// Exemplo:
+// - materiais vindos do Supabase
+// - materiais de teste
+// - materiais já normalizados
 //
-// Supabase
-//    ↓
-// materiais
-//    ↓
-// salvarMateriais()
-//    ↓
-// IndexedDB
+// COMPORTAMENTO:
+//
+// A cópia local anterior é substituída pelo inventário
+// recebido.
 //
 // ============================================================
 
@@ -353,6 +547,11 @@ async function salvarMateriais(
         // ====================================================
         // LIMPAR CÓPIA ANTERIOR
         // ====================================================
+        //
+        // Isso mantém o IndexedDB como uma cópia do inventário
+        // mais recente recebido.
+        //
+        // ====================================================
 
         tabela.clear();
 
@@ -377,7 +576,16 @@ async function salvarMateriais(
                 }
 
 
-                tabela.add(
+                // ==============================================
+                // PUT EM VEZ DE ADD
+                // ==============================================
+                //
+                // PUT utiliza idSupabase como chave.
+                //
+                // Isso evita que o IndexedDB crie uma nova
+                // identidade para o material.
+                //
+                tabela.put(
                     materialNormalizado
                 );
 
@@ -448,6 +656,7 @@ async function salvarMateriais(
 
 // ============================================================
 // FUNÇÃO: salvarCopiaLocalDoSupabase()
+// ============================================================
 //
 // OBJETIVO:
 //
@@ -481,6 +690,10 @@ async function salvarCopiaLocalDoSupabase(
     }
 
 
+    // ========================================================
+    // NORMALIZAR INVENTÁRIO
+    // ========================================================
+
     const inventarioLocal =
         materiaisSupabase
             .map(
@@ -494,6 +707,10 @@ async function salvarCopiaLocalDoSupabase(
                 }
             );
 
+
+    // ========================================================
+    // GRAVAR CÓPIA LOCAL
+    // ========================================================
 
     await salvarMateriais(
         inventarioLocal
@@ -528,6 +745,7 @@ async function salvarCopiaLocalDoSupabase(
 
 // ============================================================
 // FUNÇÃO: limparMateriais()
+// ============================================================
 //
 // OBJETIVO:
 //
@@ -634,6 +852,7 @@ async function limparMateriais() {
 
 // ============================================================
 // FUNÇÃO: carregarMateriais()
+// ============================================================
 //
 // OBJETIVO:
 //
@@ -751,9 +970,17 @@ async function carregarMateriais() {
                         // ====================================
 
                         materiais =
-                            materiaisTeste.map(
-                                normalizarMaterialLocal
-                            );
+                            materiaisTeste
+                                .map(
+                                    normalizarMaterialLocal
+                                )
+                                .filter(
+                                    function(material) {
+
+                                        return material !== null;
+
+                                    }
+                                );
 
 
                         resolve(
@@ -800,9 +1027,17 @@ async function carregarMateriais() {
         } else {
 
             materiais =
-                materiaisTeste.map(
-                    normalizarMaterialLocal
-                );
+                materiaisTeste
+                    .map(
+                        normalizarMaterialLocal
+                    )
+                    .filter(
+                        function(material) {
+
+                            return material !== null;
+
+                        }
+                    );
 
         }
 
@@ -816,6 +1051,7 @@ async function carregarMateriais() {
 
 // ============================================================
 // FUNÇÃO: existeInventarioLocal()
+// ============================================================
 //
 // OBJETIVO:
 //
@@ -904,6 +1140,7 @@ async function existeInventarioLocal() {
 
 // ============================================================
 // FUNÇÃO: inventarioEstaZerado()
+// ============================================================
 //
 // OBJETIVO:
 //
@@ -925,6 +1162,7 @@ function inventarioEstaZerado() {
 
 // ============================================================
 // FUNÇÃO: marcarInventarioZerado()
+// ============================================================
 //
 // OBJETIVO:
 //
@@ -949,6 +1187,7 @@ function marcarInventarioZerado() {
 
 // ============================================================
 // FUNÇÃO: desmarcarInventarioZerado()
+// ============================================================
 //
 // OBJETIVO:
 //
@@ -970,6 +1209,7 @@ function desmarcarInventarioZerado() {
 
 // ============================================================
 // FUNÇÃO: obterMateriaisLocais()
+// ============================================================
 //
 // OBJETIVO:
 //
@@ -990,6 +1230,7 @@ function obterMateriaisLocais() {
 
 // ============================================================
 // FUNÇÃO: substituirMateriaisLocais()
+// ============================================================
 //
 // OBJETIVO:
 //
@@ -1036,6 +1277,227 @@ function substituirMateriaisLocais(
 
 
     return materiais;
+
+}
+
+
+// ============================================================
+// FUNÇÃO: obterMaterialLocalPorIdSupabase()
+// ============================================================
+//
+// OBJETIVO:
+//
+// Localizar diretamente um material utilizando seu ID original
+// do Supabase.
+//
+// USO FUTURO:
+//
+// Essa função será especialmente útil para:
+//
+// - conferência offline
+// - recuperação de material
+// - fila de sincronização
+// - relacionamento com conferencias
+//
+// ============================================================
+
+async function obterMaterialLocalPorIdSupabase(
+    idSupabase
+) {
+
+    if (
+        idSupabase === null ||
+        idSupabase === undefined ||
+        idSupabase === ""
+    ) {
+
+        return null;
+
+    }
+
+
+    try {
+
+        const banco =
+            await abrirBanco();
+
+
+        const transacao =
+            banco.transaction(
+                nomeTabela,
+                "readonly"
+            );
+
+
+        const tabela =
+            transacao.objectStore(
+                nomeTabela
+            );
+
+
+        const requisicao =
+            tabela.get(
+                idSupabase
+            );
+
+
+        return new Promise(
+            function(resolve, reject) {
+
+                requisicao.onsuccess =
+                    function(evento) {
+
+                        const resultado =
+                            evento.target.result;
+
+
+                        banco.close();
+
+
+                        if (!resultado) {
+
+                            resolve(null);
+
+                            return;
+
+                        }
+
+
+                        const material =
+                            normalizarMaterialLocal(
+                                resultado
+                            );
+
+
+                        resolve(
+                            material
+                        );
+
+                    };
+
+
+                requisicao.onerror =
+                    function(evento) {
+
+                        banco.close();
+
+
+                        reject(
+                            evento.target.error
+                        );
+
+                    };
+
+            }
+        );
+
+
+    } catch (erro) {
+
+        console.error(
+            "Erro ao buscar material local por idSupabase:",
+            erro
+        );
+
+        return null;
+
+    }
+
+}
+
+
+// ============================================================
+// FUNÇÃO: contarMateriaisLocais()
+// ============================================================
+//
+// OBJETIVO:
+//
+// Retornar a quantidade de materiais atualmente armazenados
+// no IndexedDB.
+//
+// USO FUTURO:
+//
+// Pode ser utilizada para:
+//
+// - indicador de sincronização
+// - diagnóstico offline
+// - confirmação de carregamento
+// - testes
+//
+// ============================================================
+
+async function contarMateriaisLocais() {
+
+    try {
+
+        const banco =
+            await abrirBanco();
+
+
+        const transacao =
+            banco.transaction(
+                nomeTabela,
+                "readonly"
+            );
+
+
+        const tabela =
+            transacao.objectStore(
+                nomeTabela
+            );
+
+
+        const requisicao =
+            tabela.count();
+
+
+        return new Promise(
+            function(resolve, reject) {
+
+                requisicao.onsuccess =
+                    function(evento) {
+
+                        const quantidade =
+                            evento.target.result;
+
+
+                        banco.close();
+
+
+                        resolve(
+                            quantidade
+                        );
+
+                    };
+
+
+                requisicao.onerror =
+                    function(evento) {
+
+                        banco.close();
+
+
+                        reject(
+                            evento.target.error
+                        );
+
+                    };
+
+            }
+        );
+
+
+    } catch (erro) {
+
+        console.error(
+            "Erro ao contar materiais locais:",
+            erro
+        );
+
+
+        return 0;
+
+    }
 
 }
 
