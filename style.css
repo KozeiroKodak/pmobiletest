@@ -1,0 +1,271 @@
+/* ============================================================
+   PMOBILE
+   ARQUIVO: style.css
+
+   ETAPA VISUAL 01
+   Layout principal inspirado na navegação do Supabase
+   ============================================================ */
+
+
+/* ============================================================
+   CONFIGURAÇÃO GERAL
+   ============================================================ */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+}
+
+body {
+    font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+    background: #111111;
+    color: #e5e7eb;
+}
+
+
+/* ============================================================
+   TELA INICIAL
+
+   Mantemos a tela de início separada.
+   O novo layout aparecerá depois de clicar em "Iniciar".
+   ============================================================ */
+
+#inicio {
+    min-height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 24px;
+
+    text-align: center;
+    background: #111111;
+}
+
+#inicio h1 {
+    margin-bottom: 8px;
+}
+
+#inicio p {
+    color: #9ca3af;
+}
+
+
+/* ============================================================
+   BOTÃO DA TELA INICIAL
+   ============================================================ */
+
+#inicio button {
+    margin-top: 16px;
+
+    padding: 10px 22px;
+
+    border: 1px solid #3f3f46;
+    border-radius: 6px;
+
+    background: #18181b;
+    color: #ffffff;
+
+    font-size: 15px;
+
+    cursor: pointer;
+}
+
+
+/* ============================================================
+   MENU PRINCIPAL
+
+   Quando aberto, funciona como uma sidebar fixa.
+   ============================================================ */
+
+#sistema {
+    position: fixed;
+
+    top: 0;
+    left: 0;
+    bottom: 0;
+
+    width: 230px;
+
+    padding: 16px 10px;
+
+    background: #171717;
+
+    border-right: 1px solid #2e2e2e;
+
+    overflow-y: auto;
+
+    z-index: 100;
+}
+
+
+/* ============================================================
+   TÍTULO DA SIDEBAR
+   ============================================================ */
+
+#sistema h1 {
+    margin: 4px 8px 22px;
+
+    font-size: 16px;
+    font-weight: 600;
+
+    color: #ffffff;
+}
+
+
+/* ============================================================
+   BOTÕES DA SIDEBAR
+   ============================================================ */
+
+#sistema button {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+
+    min-height: 42px;
+
+    margin: 2px 0;
+    padding: 9px 10px;
+
+    border: 0;
+    border-radius: 6px;
+
+    background: transparent;
+    color: #b4b4b4;
+
+    font-size: 14px;
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        background 0.15s ease,
+        color 0.15s ease;
+}
+
+
+/* ============================================================
+   HOVER
+   ============================================================ */
+
+#sistema button:hover {
+    background: #262626;
+    color: #ffffff;
+}
+
+
+/* ============================================================
+   CLIQUE
+   ============================================================ */
+
+#sistema button:active {
+    background: #303030;
+}
+
+
+/* ============================================================
+   ÁREA DAS TELAS INTERNAS
+
+   Pesquisa, importação, conferência etc. aparecem à direita.
+   ============================================================ */
+
+#pesquisa,
+#conferencia,
+#conferencias,
+#divergencias,
+#importacao,
+#configuracoes {
+    min-height: 100vh;
+
+    margin-left: 230px;
+
+    padding: 30px;
+
+    background: #111111;
+    color: #e5e7eb;
+}
+
+
+/* ============================================================
+   TÍTULOS DAS TELAS
+   ============================================================ */
+
+#pesquisa h1,
+#conferencia h1,
+#conferencias h1,
+#divergencias h1,
+#importacao h1,
+#configuracoes h1 {
+    margin-top: 0;
+
+    font-size: 22px;
+    font-weight: 600;
+
+    color: #ffffff;
+}
+
+
+/* ============================================================
+   CAMPOS
+   ============================================================ */
+
+input {
+    max-width: 100%;
+    min-height: 38px;
+
+    padding: 8px 10px;
+
+    border: 1px solid #3a3a3a;
+    border-radius: 6px;
+
+    outline: none;
+
+    background: #181818;
+    color: #ffffff;
+}
+
+input:focus {
+    border-color: #6b7280;
+}
+
+
+/* ============================================================
+   RESPONSIVIDADE
+
+   Em telas pequenas, reduzimos a largura da sidebar.
+   Nesta primeira etapa ainda mantemos os textos.
+   ============================================================ */
+
+@media (max-width: 700px) {
+
+    #sistema {
+        width: 190px;
+    }
+
+    #pesquisa,
+    #conferencia,
+    #conferencias,
+    #divergencias,
+    #importacao,
+    #configuracoes {
+        margin-left: 190px;
+        padding: 20px;
+    }
+
+}
