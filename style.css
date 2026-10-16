@@ -17,7 +17,7 @@
    6. Controlar formulários.
    7. Controlar botões.
    8. Controlar modais.
-   9. Controlar avisos do Supabase.
+   9. Controlar a barra fixa de status do PMOBILE.
    10. Controlar o menu interno de Pesquisa.
    11. Controlar a adaptação para celulares.
 
@@ -30,6 +30,16 @@
    A aparência deve permanecer neste arquivo.
 
    JavaScript deve cuidar das funções e não da aparência.
+
+   ALTERAÇÃO DESTA VERSÃO:
+
+   A antiga notificação flutuante #statusSupabase deixa de
+   possuir aparência de popup.
+
+   Ela passa a funcionar visualmente como uma barra fixa de
+   status no rodapé da aplicação.
+
+   A lógica JavaScript permanece inalterada.
 
    ============================================================ */
 
@@ -143,6 +153,15 @@ body {
 
 /* ============================================================
    CORPO DA PÁGINA
+   ============================================================
+
+   A barra de status do PMOBILE utiliza position: fixed.
+
+   Por isso reservamos espaço na parte inferior da página.
+
+   Isso impede que o último botão, painel ou resultado fique
+   escondido atrás da barra fixa de status.
+
    ============================================================ */
 
 body {
@@ -162,6 +181,9 @@ body {
 
     font-size:
         14px;
+
+    padding-bottom:
+        48px;
 
 }
 
@@ -1601,27 +1623,106 @@ input[type="file"] {
 
 }
 
-
 /* ============================================================
-   STATUS DO SUPABASE
+   BARRA FIXA DE STATUS DO PMOBILE
+   ============================================================
+
+   OBJETIVO:
+
+   Exibir os estados de conexão e sincronização do PMOBILE
+   permanentemente na parte inferior da tela.
+
+   EXEMPLOS DE INFORMAÇÕES EXIBIDAS:
+
+   - conexão com Supabase;
+   - inventário offline disponível;
+   - sincronização de materiais;
+   - progresso da sincronização;
+   - sincronização de conferências;
+   - perda de conexão;
+   - retorno da internet;
+   - falhas de sincronização.
+
+   ALTERAÇÃO DESTA VERSÃO:
+
+   Anteriormente #statusSupabase era apresentado visualmente
+   como um popup flutuante:
+
+   - afastado das laterais;
+   - afastado da parte inferior;
+   - fundo transparente;
+   - efeito blur;
+   - cantos arredondados;
+   - sombra ao redor.
+
+   Agora ele passa a funcionar visualmente como um componente
+   estrutural da interface:
+
+   - fixado no rodapé;
+   - encostado nas laterais;
+   - encostado na parte inferior;
+   - sem cantos arredondados;
+   - fundo sólido;
+   - borda somente na parte superior.
+
+   IMPORTANTE:
+
+   O ID continua sendo #statusSupabase.
+
+   Portanto dados.js, conferencia.js e supabase.js continuam
+   utilizando exatamente o mesmo elemento.
+
+   Nenhuma alteração de lógica é necessária nesta etapa.
+
    ============================================================ */
 
 #statusSupabase {
+
+    /* ========================================================
+       POSICIONAMENTO
+       ========================================================
+
+       Mantém a barra presa ao rodapé da janela.
+
+       ======================================================== */
 
     position:
         fixed;
 
     left:
-        12px;
+        0;
 
     right:
-        12px;
+        0;
 
     bottom:
-        12px;
+        0;
+
+
+    /* ========================================================
+       DIMENSÕES
+       ========================================================
+
+       A barra ocupa toda a largura disponível.
+
+       ======================================================== */
+
+    width:
+        100%;
 
     min-height:
-        48px;
+        44px;
+
+
+    /* ========================================================
+       ORGANIZAÇÃO INTERNA
+       ========================================================
+
+       A mensagem ocupa o espaço disponível à esquerda.
+
+       O botão X permanece na extremidade direita.
+
+       ======================================================== */
 
     display:
         flex;
@@ -1635,25 +1736,63 @@ input[type="file"] {
     gap:
         12px;
 
+
+    /* ========================================================
+       ESPAÇAMENTO INTERNO
+       ======================================================== */
+
     padding:
-        8px 10px
-        8px 14px;
+        6px 10px
+        6px 14px;
+
+
+    /* ========================================================
+       FUNDO
+       ========================================================
+
+       Utiliza o mesmo fundo estrutural da sidebar.
+
+       O efeito transparente/blur do antigo popup foi removido.
+
+       ======================================================== */
 
     background:
-        var(--aviso-fundo);
+        var(--fundo-sidebar);
 
-    backdrop-filter:
-        blur(12px);
 
-    -webkit-backdrop-filter:
-        blur(12px);
+    /* ========================================================
+       BORDA
+       ========================================================
+
+       Como a barra encosta nas extremidades da janela, apenas
+       a borda superior é necessária para separar visualmente
+       o status do restante da aplicação.
+
+       ======================================================== */
 
     border:
+        0;
+
+    border-top:
         1px solid
-        var(--aviso-borda);
+        var(--borda-clara);
+
+
+    /* ========================================================
+       FORMATO
+       ========================================================
+
+       O rodapé não utiliza cantos arredondados.
+
+       ======================================================== */
 
     border-radius:
-        8px;
+        0;
+
+
+    /* ========================================================
+       TEXTO
+       ======================================================== */
 
     color:
         var(--texto);
@@ -1670,20 +1809,54 @@ input[type="file"] {
     text-align:
         left;
 
+
+    /* ========================================================
+       SOMBRA
+       ========================================================
+
+       A sombra é projetada discretamente para cima.
+
+       Isso ajuda a separar o rodapé do conteúdo principal sem
+       devolver a aparência de popup ao componente.
+
+       ======================================================== */
+
     box-shadow:
-        0 8px 30px
+        0 -4px 14px
         rgba(
             0,
             0,
             0,
-            0.30
+            0.22
         );
+
+
+    /* ========================================================
+       CAMADA
+       ========================================================
+
+       Mantém a barra acima do conteúdo normal da aplicação.
+
+       ======================================================== */
 
     z-index:
         9999;
 
 }
 
+
+/* ============================================================
+   TEXTO DA BARRA DE STATUS
+   ============================================================
+
+   OBJETIVO:
+
+   Permitir que a mensagem utilize todo o espaço disponível.
+
+   min-width: 0 também evita que textos grandes empurrem o
+   botão X para fora da largura da tela.
+
+   ============================================================ */
 
 #statusSupabase > span {
 
@@ -1697,7 +1870,21 @@ input[type="file"] {
 
 
 /* ============================================================
-   BOTÃO X DO STATUS DO SUPABASE
+   BOTÃO X DA BARRA DE STATUS
+   ============================================================
+
+   OBJETIVO:
+
+   Manter o botão já utilizado pelo supabase.js para fechar
+   manualmente a mensagem atual.
+
+   IMPORTANTE:
+
+   Nesta etapa o comportamento JavaScript não foi alterado.
+
+   Apenas adaptamos a aparência do botão para combinar com a
+   nova barra fixa.
+
    ============================================================ */
 
 #statusSupabase > button {
@@ -1728,13 +1915,13 @@ input[type="file"] {
 
     border:
         1px solid
-        var(--aviso-borda);
+        var(--borda);
 
     border-radius:
         5px;
 
     background:
-        var(--aviso-botao);
+        transparent;
 
     color:
         #bdbdbd;
@@ -1754,10 +1941,14 @@ input[type="file"] {
 }
 
 
+/* ============================================================
+   BOTÃO X DA BARRA DE STATUS - HOVER
+   ============================================================ */
+
 #statusSupabase > button:hover {
 
     background:
-        var(--aviso-botao-hover);
+        var(--fundo-hover);
 
     color:
         #ffffff;
@@ -2239,19 +2430,40 @@ input[type="file"] {
 
 
     /* ========================================================
-       STATUS DO SUPABASE NO CELULAR
+       BARRA DE STATUS NO CELULAR
+       ========================================================
+
+       OBJETIVO:
+
+       Manter o mesmo comportamento de rodapé fixo também em
+       smartphones.
+
+       Na versão anterior existiam margens de 8px nas laterais
+       e na parte inferior.
+
+       Essas margens pertenciam ao antigo visual de popup.
+
+       Agora a barra permanece encostada:
+
+       - à esquerda;
+       - à direita;
+       - na parte inferior.
+
        ======================================================== */
 
     #statusSupabase {
 
         left:
-            8px;
+            0;
 
         right:
-            8px;
+            0;
 
         bottom:
-            8px;
+            0;
+
+        width:
+            100%;
 
     }
 
