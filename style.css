@@ -18,7 +18,8 @@
    7. Controlar botões.
    8. Controlar modais.
    9. Controlar avisos do Supabase.
-   10. Controlar a adaptação para celulares.
+   10. Controlar o menu interno de Pesquisa.
+   11. Controlar a adaptação para celulares.
 
    REFERÊNCIA VISUAL:
 
@@ -35,13 +36,6 @@
 
 /* ============================================================
    VARIÁVEIS GERAIS
-   ============================================================
-
-   Cores e medidas reutilizadas pelo sistema.
-
-   Alterar uma variável aqui permite modificar vários
-   componentes simultaneamente.
-
    ============================================================ */
 
 :root {
@@ -119,11 +113,6 @@
 
 /* ============================================================
    RESET
-   ============================================================
-
-   Remove diferenças básicas de espaçamento entre navegadores
-   e padroniza o cálculo das dimensões.
-
    ============================================================ */
 
 * {
@@ -179,10 +168,6 @@ body {
 
 /* ============================================================
    TELA INICIAL
-   ============================================================
-
-   Primeira tela exibida antes de entrar no sistema.
-
    ============================================================ */
 
 #inicio {
@@ -214,10 +199,6 @@ body {
 }
 
 
-/* ============================================================
-   TÍTULO DA TELA INICIAL
-   ============================================================ */
-
 #inicio h1 {
 
     margin:
@@ -231,10 +212,6 @@ body {
 
 }
 
-
-/* ============================================================
-   DESCRIÇÃO DA TELA INICIAL
-   ============================================================ */
 
 #inicio p {
 
@@ -284,10 +261,6 @@ body {
 }
 
 
-/* ============================================================
-   BOTÃO INICIAR - HOVER
-   ============================================================ */
-
 #inicio button:hover {
 
     background:
@@ -298,13 +271,6 @@ body {
 
 /* ============================================================
    APLICAÇÃO PRINCIPAL
-   ============================================================
-
-   Contém:
-
-   - sidebar;
-   - conteúdo principal.
-
    ============================================================ */
 
 #aplicacao {
@@ -320,14 +286,6 @@ body {
 
 /* ============================================================
    SIDEBAR
-   ============================================================
-
-   Menu lateral principal.
-
-   No desktop fica expandido.
-
-   No celular fica compacto mostrando somente os ícones.
-
    ============================================================ */
 
 #sistema {
@@ -558,10 +516,6 @@ body {
 }
 
 
-/* ============================================================
-   ITEM DA SIDEBAR - HOVER
-   ============================================================ */
-
 .sidebar-item:hover {
 
     background:
@@ -572,10 +526,6 @@ body {
 
 }
 
-
-/* ============================================================
-   ITEM ATIVO
-   ============================================================ */
 
 .sidebar-item.ativo {
 
@@ -635,10 +585,6 @@ body {
 
 /* ============================================================
    RODAPÉ DA SIDEBAR
-   ============================================================
-
-   Atualmente utilizado para Configurações.
-
    ============================================================ */
 
 .sidebar-rodape {
@@ -655,10 +601,6 @@ body {
 
 /* ============================================================
    CONTEÚDO PRINCIPAL
-   ============================================================
-
-   Área exibida ao lado direito da sidebar.
-
    ============================================================ */
 
 #conteudoPrincipal {
@@ -677,18 +619,6 @@ body {
 
 /* ============================================================
    TELAS INTERNAS
-   ============================================================
-
-   Classe utilizada por:
-
-   - home;
-   - pesquisa;
-   - conferência;
-   - conferências;
-   - divergências;
-   - importação;
-   - configurações.
-
    ============================================================ */
 
 .tela-sistema {
@@ -717,10 +647,6 @@ body {
 }
 
 
-/* ============================================================
-   CAMINHO / BREADCRUMB
-   ============================================================ */
-
 .cabecalho-caminho {
 
     margin:
@@ -734,10 +660,6 @@ body {
 
 }
 
-
-/* ============================================================
-   TÍTULO DO CABEÇALHO
-   ============================================================ */
 
 .cabecalho-pagina h1 {
 
@@ -756,10 +678,6 @@ body {
 }
 
 
-/* ============================================================
-   DESCRIÇÃO DO CABEÇALHO
-   ============================================================ */
-
 .cabecalho-pagina > p:not(.cabecalho-caminho) {
 
     margin:
@@ -773,10 +691,6 @@ body {
 
 /* ============================================================
    PAINÉIS
-   ============================================================
-
-   Blocos utilizados para agrupar conteúdo dentro das telas.
-
    ============================================================ */
 
 .painel {
@@ -802,10 +716,6 @@ body {
 
 }
 
-
-/* ============================================================
-   TÍTULOS DOS PAINÉIS
-   ============================================================ */
 
 .painel h2,
 .painel h3 {
@@ -899,10 +809,6 @@ input {
 }
 
 
-/* ============================================================
-   PLACEHOLDER
-   ============================================================ */
-
 input::placeholder {
 
     color:
@@ -911,10 +817,6 @@ input::placeholder {
 }
 
 
-/* ============================================================
-   CAMPO EM FOCO
-   ============================================================ */
-
 input:focus {
 
     border-color:
@@ -922,10 +824,6 @@ input:focus {
 
 }
 
-
-/* ============================================================
-   INPUT DE ARQUIVO
-   ============================================================ */
 
 input[type="file"] {
 
@@ -970,10 +868,6 @@ input[type="file"] {
 }
 
 
-/* ============================================================
-   BOTÃO PRINCIPAL
-   ============================================================ */
-
 .botao-principal {
 
     border:
@@ -1000,10 +894,6 @@ input[type="file"] {
 }
 
 
-/* ============================================================
-   BOTÃO SECUNDÁRIO
-   ============================================================ */
-
 .botao-secundario {
 
     border:
@@ -1026,10 +916,6 @@ input[type="file"] {
 
 }
 
-
-/* ============================================================
-   BOTÃO DE AÇÃO PERIGOSA
-   ============================================================ */
 
 .botao-perigo {
 
@@ -1094,11 +980,504 @@ input[type="file"] {
 
 
 /* ============================================================
-   MODAL
+   MENU INTERNO DA PESQUISA
    ============================================================
 
-   Fundo que cobre a página quando um modal é exibido.
+   Tela inicial do módulo Pesquisar material.
 
+   Apresenta três opções:
+
+   - Código
+   - Descrição
+   - Referência
+
+   Os botões seguem a mesma linguagem visual da sidebar.
+
+   ============================================================ */
+
+.menu-pesquisa {
+
+    width:
+        100%;
+
+    max-width:
+        760px;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        6px;
+
+}
+
+
+/* ============================================================
+   BOTÃO DE OPÇÃO DA PESQUISA
+   ============================================================ */
+
+.opcao-pesquisa {
+
+    width:
+        100%;
+
+    min-height:
+        62px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        12px;
+
+    padding:
+        10px 12px;
+
+    border:
+        0;
+
+    border-radius:
+        6px;
+
+    background:
+        transparent;
+
+    color:
+        var(--texto-secundario);
+
+    font-family:
+        inherit;
+
+    text-align:
+        left;
+
+    cursor:
+        pointer;
+
+    transition:
+        background 0.12s ease,
+        color 0.12s ease;
+
+}
+
+
+.opcao-pesquisa:hover {
+
+    background:
+        var(--fundo-hover);
+
+    color:
+        #ffffff;
+
+}
+
+
+.opcao-pesquisa:active {
+
+    background:
+        var(--fundo-ativo);
+
+}
+
+
+/* ============================================================
+   ÍCONE DA OPÇÃO DE PESQUISA
+   ============================================================ */
+
+.opcao-pesquisa-icone {
+
+    width:
+        34px;
+
+    height:
+        34px;
+
+    flex-shrink:
+        0;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    font-size:
+        17px;
+
+}
+
+
+/* ============================================================
+   CONTEÚDO DA OPÇÃO
+   ============================================================ */
+
+.opcao-pesquisa-conteudo {
+
+    flex:
+        1;
+
+    min-width:
+        0;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        3px;
+
+}
+
+
+.opcao-pesquisa-conteudo strong {
+
+    color:
+        var(--texto);
+
+    font-size:
+        13px;
+
+    font-weight:
+        500;
+
+}
+
+
+.opcao-pesquisa-conteudo small {
+
+    color:
+        var(--texto-fraco);
+
+    font-size:
+        12px;
+
+    font-weight:
+        400;
+
+    line-height:
+        1.4;
+
+}
+
+
+.opcao-pesquisa:hover
+.opcao-pesquisa-conteudo strong {
+
+    color:
+        #ffffff;
+
+}
+
+
+.opcao-pesquisa:hover
+.opcao-pesquisa-conteudo small {
+
+    color:
+        var(--texto-secundario);
+
+}
+
+
+/* ============================================================
+   SETA DAS OPÇÕES
+   ============================================================ */
+
+.opcao-pesquisa-seta {
+
+    width:
+        24px;
+
+    flex-shrink:
+        0;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    color:
+        var(--texto-fraco);
+
+    font-size:
+        22px;
+
+    line-height:
+        1;
+
+    transition:
+        transform 0.12s ease,
+        color 0.12s ease;
+
+}
+
+
+.opcao-pesquisa:hover
+.opcao-pesquisa-seta {
+
+    color:
+        #ffffff;
+
+    transform:
+        translateX(2px);
+
+}
+
+
+/* ============================================================
+   SUBTELAS DA PESQUISA
+   ============================================================
+
+   Código, Descrição e Referência continuam dentro
+   da tela principal #pesquisa.
+
+   ============================================================ */
+
+.subtela-pesquisa {
+
+    width:
+        100%;
+
+}
+
+
+.subtela-pesquisa .painel {
+
+    max-width:
+        960px;
+
+}
+
+
+/* ============================================================
+   CABEÇALHO DAS SUBTELAS
+   ============================================================
+
+   Posiciona o botão Voltar ao lado do título.
+
+   ============================================================ */
+
+.cabecalho-subtela {
+
+    display:
+        flex;
+
+    align-items:
+        flex-start;
+
+    gap:
+        12px;
+
+}
+
+
+.cabecalho-subtela > div {
+
+    flex:
+        1;
+
+    min-width:
+        0;
+
+}
+
+
+.cabecalho-subtela h1 {
+
+    margin:
+        0;
+
+}
+
+
+.cabecalho-subtela p {
+
+    margin:
+        7px 0 0;
+
+    color:
+        var(--texto-secundario);
+
+    font-size:
+        13px;
+
+}
+
+
+/* ============================================================
+   BOTÃO VOLTAR DA PESQUISA
+   ============================================================
+
+   Retorna de Código, Descrição ou Referência para
+   o menu interno da Pesquisa.
+
+   ============================================================ */
+
+.botao-voltar-pesquisa {
+
+    width:
+        36px;
+
+    height:
+        36px;
+
+    flex-shrink:
+        0;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    margin:
+        0;
+
+    padding:
+        0;
+
+    border:
+        0;
+
+    border-radius:
+        6px;
+
+    background:
+        transparent;
+
+    color:
+        var(--texto-secundario);
+
+    font-family:
+        inherit;
+
+    font-size:
+        21px;
+
+    line-height:
+        1;
+
+    cursor:
+        pointer;
+
+    transition:
+        background 0.12s ease,
+        color 0.12s ease;
+
+}
+
+
+.botao-voltar-pesquisa:hover {
+
+    background:
+        var(--fundo-hover);
+
+    color:
+        #ffffff;
+
+}
+
+
+.botao-voltar-pesquisa:active {
+
+    background:
+        var(--fundo-ativo);
+
+}
+
+
+/* ============================================================
+   RESULTADOS DAS PESQUISAS
+   ============================================================ */
+
+#resultadoPesquisaCodigo hr,
+#resultadoPesquisaDescricao hr,
+#resultadoPesquisaReferencia hr {
+
+    margin:
+        16px 0 10px;
+
+    border:
+        0;
+
+    border-top:
+        1px solid
+        var(--borda-clara);
+
+}
+
+
+#resultadoPesquisaCodigo > div:first-child hr,
+#resultadoPesquisaDescricao > div:first-child hr,
+#resultadoPesquisaReferencia > div:first-child hr {
+
+    margin-top:
+        0;
+
+}
+
+
+#resultadoPesquisaCodigo h3,
+#resultadoPesquisaDescricao h3,
+#resultadoPesquisaReferencia h3 {
+
+    margin:
+        0 0 12px;
+
+    color:
+        #ffffff;
+
+    font-size:
+        14px;
+
+    font-weight:
+        600;
+
+}
+
+
+#resultadoPesquisaCodigo p,
+#resultadoPesquisaDescricao p,
+#resultadoPesquisaReferencia p {
+
+    margin:
+        7px 0;
+
+    line-height:
+        1.45;
+
+}
+
+
+#resultadoPesquisaCodigo strong,
+#resultadoPesquisaDescricao strong,
+#resultadoPesquisaReferencia strong {
+
+    color:
+        #ffffff;
+
+}
+
+
+/* ============================================================
+   MODAL
    ============================================================ */
 
 .modal {
@@ -1172,10 +1551,6 @@ input[type="file"] {
 }
 
 
-/* ============================================================
-   TÍTULO DO MODAL
-   ============================================================ */
-
 .modal-conteudo h2 {
 
     margin-top:
@@ -1207,32 +1582,6 @@ input[type="file"] {
 
 /* ============================================================
    STATUS DO SUPABASE
-   ============================================================
-
-   Elemento criado pelo supabase.js:
-
-       #statusSupabase
-
-   Exemplos:
-
-       🟢 Supabase inicializado com sucesso
-
-       🟡 Verificando materiais: 30.000
-
-       ⚠️ 93.912 materiais verificados.
-          2 problemas encontrados.
-
-   IMPORTANTE:
-
-   Toda a aparência do aviso está definida aqui.
-
-   O supabase.js controla somente:
-
-   - criação;
-   - mensagem;
-   - atualização;
-   - botão fechar.
-
    ============================================================ */
 
 #statusSupabase {
@@ -1314,10 +1663,6 @@ input[type="file"] {
 }
 
 
-/* ============================================================
-   TEXTO DO STATUS DO SUPABASE
-   ============================================================ */
-
 #statusSupabase > span {
 
     flex:
@@ -1387,10 +1732,6 @@ input[type="file"] {
 }
 
 
-/* ============================================================
-   BOTÃO X - HOVER
-   ============================================================ */
-
 #statusSupabase > button:hover {
 
     background:
@@ -1404,21 +1745,6 @@ input[type="file"] {
 
 /* ============================================================
    PAINEL DE PROBLEMAS DO SUPABASE
-   ============================================================
-
-   Elemento criado pelo supabase.js:
-
-       #resultadoVerificacaoSupabase
-
-   O painel mostra:
-
-   - quantidade de materiais verificados;
-   - quantidade de problemas;
-   - detalhes;
-   - botão Fechar.
-
-   Toda a aparência é controlada aqui.
-
    ============================================================ */
 
 #resultadoVerificacaoSupabase {
@@ -1486,10 +1812,6 @@ input[type="file"] {
 }
 
 
-/* ============================================================
-   TÍTULO DO PAINEL DE PROBLEMAS
-   ============================================================ */
-
 #resultadoVerificacaoSupabase h3 {
 
     margin:
@@ -1507,10 +1829,6 @@ input[type="file"] {
 }
 
 
-/* ============================================================
-   PARÁGRAFOS DO PAINEL
-   ============================================================ */
-
 #resultadoVerificacaoSupabase p {
 
     color:
@@ -1519,10 +1837,6 @@ input[type="file"] {
 }
 
 
-/* ============================================================
-   TEXTO EM DESTAQUE
-   ============================================================ */
-
 #resultadoVerificacaoSupabase strong {
 
     color:
@@ -1530,10 +1844,6 @@ input[type="file"] {
 
 }
 
-
-/* ============================================================
-   LISTA DE PROBLEMAS
-   ============================================================ */
 
 #resultadoVerificacaoSupabase ul {
 
@@ -1557,10 +1867,6 @@ input[type="file"] {
 }
 
 
-/* ============================================================
-   DIVISOR DO PAINEL
-   ============================================================ */
-
 #resultadoVerificacaoSupabase hr {
 
     margin:
@@ -1577,7 +1883,7 @@ input[type="file"] {
 
 
 /* ============================================================
-   BOTÃO FECHAR DO PAINEL
+   BOTÃO FECHAR DO PAINEL DO SUPABASE
    ============================================================ */
 
 #resultadoVerificacaoSupabase button {
@@ -1613,10 +1919,6 @@ input[type="file"] {
 }
 
 
-/* ============================================================
-   BOTÃO FECHAR - HOVER
-   ============================================================ */
-
 #resultadoVerificacaoSupabase button:hover {
 
     background:
@@ -1632,8 +1934,7 @@ input[type="file"] {
    RESPONSIVIDADE
    ============================================================
 
-   Ajustes específicos para telas com largura máxima
-   de 700px.
+   Ajustes para telas com largura máxima de 700px.
 
    Principal alvo:
 
@@ -1656,10 +1957,6 @@ input[type="file"] {
     }
 
 
-    /* ========================================================
-       TOPO DA SIDEBAR
-       ======================================================== */
-
     .sidebar-topo {
 
         justify-content:
@@ -1674,10 +1971,6 @@ input[type="file"] {
     }
 
 
-    /* ========================================================
-       LOGOTIPO
-       ======================================================== */
-
     .sidebar-logo {
 
         width:
@@ -1689,10 +1982,6 @@ input[type="file"] {
     }
 
 
-    /* ========================================================
-       ESCONDER TÍTULO DA SIDEBAR
-       ======================================================== */
-
     .sidebar-titulo {
 
         display:
@@ -1700,10 +1989,6 @@ input[type="file"] {
 
     }
 
-
-    /* ========================================================
-       MENU
-       ======================================================== */
 
     .sidebar-menu {
 
@@ -1716,10 +2001,6 @@ input[type="file"] {
     }
 
 
-    /* ========================================================
-       RODAPÉ
-       ======================================================== */
-
     .sidebar-rodape {
 
         padding-left:
@@ -1730,10 +2011,6 @@ input[type="file"] {
 
     }
 
-
-    /* ========================================================
-       ITENS CENTRALIZADOS
-       ======================================================== */
 
     .sidebar-item {
 
@@ -1749,10 +2026,6 @@ input[type="file"] {
     }
 
 
-    /* ========================================================
-       ÍCONES
-       ======================================================== */
-
     .sidebar-icone {
 
         width:
@@ -1760,10 +2033,6 @@ input[type="file"] {
 
     }
 
-
-    /* ========================================================
-       ESCONDER TEXTO DOS ITENS
-       ======================================================== */
 
     .sidebar-texto {
 
@@ -1784,10 +2053,6 @@ input[type="file"] {
 
     }
 
-
-    /* ========================================================
-       TELAS
-       ======================================================== */
 
     .tela-sistema {
 
@@ -1812,10 +2077,6 @@ input[type="file"] {
     }
 
 
-    /* ========================================================
-       INPUTS
-       ======================================================== */
-
     input {
 
         max-width:
@@ -1823,10 +2084,6 @@ input[type="file"] {
 
     }
 
-
-    /* ========================================================
-       BOTÃO PRINCIPAL DOS FORMULÁRIOS
-       ======================================================== */
 
     .linha-formulario .botao-principal {
 
@@ -1836,14 +2093,114 @@ input[type="file"] {
     }
 
 
-    /* ========================================================
-       PAINÉIS
-       ======================================================== */
-
     .painel {
 
         padding:
             15px;
+
+    }
+
+
+    /* ========================================================
+       MENU INTERNO DA PESQUISA - CELULAR
+       ======================================================== */
+
+    .menu-pesquisa {
+
+        max-width:
+            none;
+
+        gap:
+            4px;
+
+    }
+
+
+    .opcao-pesquisa {
+
+        min-height:
+            58px;
+
+        padding:
+            9px 8px;
+
+        gap:
+            8px;
+
+    }
+
+
+    .opcao-pesquisa-icone {
+
+        width:
+            30px;
+
+        height:
+            30px;
+
+        font-size:
+            16px;
+
+    }
+
+
+    .opcao-pesquisa-conteudo strong {
+
+        font-size:
+            13px;
+
+    }
+
+
+    .opcao-pesquisa-conteudo small {
+
+        font-size:
+            11px;
+
+    }
+
+
+    .opcao-pesquisa-seta {
+
+        width:
+            18px;
+
+        font-size:
+            20px;
+
+    }
+
+
+    /* ========================================================
+       CABEÇALHO DAS SUBTELAS - CELULAR
+       ======================================================== */
+
+    .cabecalho-subtela {
+
+        gap:
+            8px;
+
+    }
+
+
+    .botao-voltar-pesquisa {
+
+        width:
+            34px;
+
+        height:
+            34px;
+
+        font-size:
+            20px;
+
+    }
+
+
+    .subtela-pesquisa .painel {
+
+        max-width:
+            none;
 
     }
 
