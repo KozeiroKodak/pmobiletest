@@ -147,6 +147,54 @@ let sincronizacaoEmAndamento =
 
 
 // ============================================================
+// FUNÇÃO: mostrarStatusSincronizacaoOffline()
+// ============================================================
+//
+// OBJETIVO:
+//
+// Utilizar a barra de status já existente no PMOBILE para
+// informar o estado da sincronização do inventário local.
+//
+// A função tenta utilizar:
+//
+//     mostrarStatusSupabase()
+//
+// que pertence ao supabase.js.
+//
+// O segundo parâmetro "true" informa que essa mensagem é
+// prioritária e deve ser exibida durante a sincronização.
+//
+// Se a função ainda não estiver disponível, a mensagem é
+// enviada para o console como alternativa.
+//
+// ============================================================
+
+function mostrarStatusSincronizacaoOffline(
+    mensagem
+) {
+
+    if (
+        typeof mostrarStatusSupabase === "function"
+    ) {
+
+        mostrarStatusSupabase(
+            mensagem,
+            true
+        );
+
+        return;
+
+    }
+
+
+    console.log(
+        mensagem
+    );
+
+}
+
+
+// ============================================================
 // FUNÇÃO: normalizarMaterialLocal()
 // ============================================================
 //
@@ -997,7 +1045,6 @@ function obterClienteSupabaseParaDados() {
 // FLUXO:
 //
 //     Supabase
-//        |
 //        | páginas de 1.000
 //        v
 //     JavaScript
@@ -1061,6 +1108,11 @@ async function sincronizarMateriaisLocaisComSupabase(
         );
 
 
+        mostrarStatusSincronizacaoOffline(
+            "🔴 Offline indisponível — este dispositivo ainda não possui inventário local."
+        );
+
+
         return {
             sucesso:
                 false,
@@ -1095,6 +1147,13 @@ async function sincronizarMateriaisLocaisComSupabase(
             );
 
 
+            mostrarStatusSincronizacaoOffline(
+                "🟢 Offline OK — " +
+                quantidadeLocal.toLocaleString("pt-BR") +
+                " materiais disponíveis."
+            );
+
+
             return {
                 sucesso:
                     true,
@@ -1116,6 +1175,11 @@ async function sincronizarMateriaisLocaisComSupabase(
 
     sincronizacaoEmAndamento =
         true;
+
+
+    mostrarStatusSincronizacaoOffline(
+        "🟡 Sincronizando inventário offline..."
+    );
 
 
     console.log(
@@ -1232,6 +1296,13 @@ async function sincronizarMateriaisLocaisComSupabase(
             );
 
 
+            mostrarStatusSincronizacaoOffline(
+                "🟡 Sincronizando inventário offline... " +
+                inventarioCompleto.length.toLocaleString("pt-BR") +
+                " materiais"
+            );
+
+
             // ================================================
             // FINAL DA TABELA
             // ================================================
@@ -1283,6 +1354,13 @@ async function sincronizarMateriaisLocaisComSupabase(
         );
 
 
+        mostrarStatusSincronizacaoOffline(
+            "🟡 Gravando inventário offline... " +
+            inventarioCompleto.length.toLocaleString("pt-BR") +
+            " materiais"
+        );
+
+
         await salvarCopiaLocalDoSupabase(
             inventarioCompleto
         );
@@ -1317,6 +1395,13 @@ async function sincronizarMateriaisLocaisComSupabase(
         );
 
 
+        mostrarStatusSincronizacaoOffline(
+            "🟢 Offline OK — " +
+            inventarioCompleto.length.toLocaleString("pt-BR") +
+            " materiais sincronizados."
+        );
+
+
         return {
 
             sucesso:
@@ -1339,6 +1424,11 @@ async function sincronizarMateriaisLocaisComSupabase(
         console.error(
             "❌ Erro ao sincronizar materiais:",
             erro
+        );
+
+
+        mostrarStatusSincronizacaoOffline(
+            "🔴 Falha ao sincronizar o inventário offline."
         );
 
 
@@ -1410,6 +1500,13 @@ async function garantirInventarioLocal() {
             );
 
 
+            mostrarStatusSincronizacaoOffline(
+                "🟢 Offline OK — " +
+                quantidadeLocal.toLocaleString("pt-BR") +
+                " materiais disponíveis."
+            );
+
+
             return {
 
                 disponivel:
@@ -1433,6 +1530,11 @@ async function garantirInventarioLocal() {
 
             console.warn(
                 "📴 Sem inventário local e sem internet."
+            );
+
+
+            mostrarStatusSincronizacaoOffline(
+                "🔴 Offline indisponível — este dispositivo ainda não possui inventário local."
             );
 
 
@@ -1494,8 +1596,6 @@ async function garantirInventarioLocal() {
     }
 
 }
-
-
 // ============================================================
 // FUNÇÃO: limparMateriais()
 // ============================================================
@@ -1710,6 +1810,25 @@ async function carregarMateriais() {
             );
 
 
+            // =================================================
+            // ATUALIZA STATUS VISUAL
+            // =================================================
+            //
+            // Neste ponto o dispositivo já possui uma cópia
+            // local do inventário.
+            //
+            // Portanto Pesquisa e Conferência podem utilizar
+            // o IndexedDB mesmo sem internet.
+            //
+            // =================================================
+
+            mostrarStatusSincronizacaoOffline(
+                "🟢 Offline OK — " +
+                materiais.length.toLocaleString("pt-BR") +
+                " materiais disponíveis."
+            );
+
+
             return materiais;
 
         }
@@ -1750,6 +1869,26 @@ async function carregarMateriais() {
                 return materiais;
 
             }
+
+        }
+        else {
+
+            // =================================================
+            // DISPOSITIVO ESTÁ OFFLINE E NÃO POSSUI CÓPIA
+            // =================================================
+            //
+            // Não há como realizar a primeira sincronização
+            // sem acesso ao Supabase.
+            //
+            // Depois que o dispositivo ficar online pela
+            // primeira vez, o inventário será baixado para o
+            // IndexedDB.
+            //
+            // =================================================
+
+            mostrarStatusSincronizacaoOffline(
+                "🔴 Offline indisponível — este dispositivo ainda não possui inventário local."
+            );
 
         }
 
