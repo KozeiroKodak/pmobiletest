@@ -137,14 +137,31 @@ const SUPABASE_PUBLISHABLE_KEY =
 //     ⚠️ 93.947 materiais verificados.
 //        2 problemas encontrados.
 //
+// TAMBÉM:
+//
+// Esta função agora protege o status da sincronização offline.
+//
+// Durante a sincronização realizada pelo dados.js:
+//
+//     🟡 Sincronizando inventário offline...
+//
+//     🟡 Sincronizando inventário offline... 1.000 materiais
+//
+//     🟢 Offline OK — 93.947 materiais sincronizados.
+//
+// mensagens normais do Supabase não devem sobrescrever
+// temporariamente esse aviso.
+//
 // FUNCIONAMENTO:
 //
-// 1. Procura #statusSupabase.
-// 2. Caso não exista, cria o elemento.
-// 3. Limpa o conteúdo anterior.
-// 4. Insere a nova mensagem.
-// 5. Cria o botão "✕".
-// 6. Permite fechar somente o aviso.
+// 1. Verifica se uma sincronização offline está em andamento.
+// 2. Se estiver, preserva o status da sincronização.
+// 3. Procura #statusSupabase.
+// 4. Caso não exista, cria o elemento.
+// 5. Limpa o conteúdo anterior.
+// 6. Insere a nova mensagem.
+// 7. Cria o botão "✕".
+// 8. Permite fechar somente o aviso.
 //
 // IMPORTANTE:
 //
@@ -155,6 +172,86 @@ const SUPABASE_PUBLISHABLE_KEY =
 function mostrarStatusSupabase(
     mensagem
 ) {
+
+    // ========================================================
+    // PROTEÇÃO DO STATUS DA SINCRONIZAÇÃO OFFLINE
+    // ========================================================
+    //
+    // Durante o download do inventário para o IndexedDB,
+    // o dados.js controla o status exibido ao usuário.
+    //
+    // Não queremos que uma verificação comum do Supabase
+    // apague uma mensagem como:
+    //
+    //     🟡 Sincronizando inventário offline...
+    //
+    // ou:
+    //
+    //     🟡 Sincronizando inventário offline... 10.000 materiais
+    //
+    // ========================================================
+
+    if (
+        typeof sincronizacaoEmAndamento !== "undefined" &&
+        sincronizacaoEmAndamento === true
+    ) {
+
+        // ====================================================
+        // PERMITIR SOMENTE MENSAGENS DA SINCRONIZAÇÃO OFFLINE
+        // ====================================================
+        //
+        // O dados.js utiliza mensagens iniciadas por:
+        //
+        //     🟡 Sincronizando inventário offline
+        //
+        //     🟢 Offline OK
+        //
+        //     🔴 Offline indisponível
+        //
+        // Essas mensagens precisam continuar funcionando.
+        //
+        // ====================================================
+
+        const mensagemEhDaSincronizacao =
+            typeof mensagem === "string" &&
+            (
+                mensagem.startsWith(
+                    "🟡 Sincronizando inventário offline"
+                ) ||
+                mensagem.startsWith(
+                    "🟢 Offline OK"
+                ) ||
+                mensagem.startsWith(
+                    "🔴 Offline indisponível"
+                )
+            );
+
+
+        // ====================================================
+        // SE NÃO FOR MENSAGEM DA SINCRONIZAÇÃO
+        // ====================================================
+        //
+        // Ignora temporariamente a mensagem comum do Supabase.
+        //
+        // ====================================================
+
+        if (
+            !mensagemEhDaSincronizacao
+        ) {
+
+            console.log(
+                "ℹ️ Status do Supabase ignorado temporariamente " +
+                "porque a sincronização offline está em andamento:",
+                mensagem
+            );
+
+
+            return;
+
+        }
+
+    }
+
 
     // ========================================================
     // PROCURAR AVISO EXISTENTE
