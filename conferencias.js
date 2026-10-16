@@ -1780,4 +1780,3 @@ async function limparConferenciasSupabase() {
 // ✅ Nenhuma alteração no banco Supabase necessária
 //
 // ============================================================
-```
