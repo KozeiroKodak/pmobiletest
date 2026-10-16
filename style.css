@@ -983,15 +983,19 @@ input[type="file"] {
    MENU INTERNO DA PESQUISA
    ============================================================
 
-   Tela inicial do módulo Pesquisar material.
+   Tela inicial do módulo "Pesquisar material".
 
    Apresenta três opções:
 
-   - Código
-   - Descrição
-   - Referência
+   - Pesquisar por código
+   - Pesquisar por descrição
+   - Pesquisar por referência
 
-   Os botões seguem a mesma linguagem visual da sidebar.
+   NOVO PADRÃO:
+
+   Os botões deste menu utilizam as mesmas medidas,
+   espaçamentos, tipografia, cores e comportamento visual
+   dos itens existentes na sidebar.
 
    ============================================================ */
 
@@ -1010,13 +1014,22 @@ input[type="file"] {
         column;
 
     gap:
-        6px;
+        2px;
 
 }
 
 
 /* ============================================================
    BOTÃO DE OPÇÃO DA PESQUISA
+   ============================================================
+
+   Este componente reproduz o padrão visual de:
+
+       .sidebar-item
+
+   Mantemos uma classe separada porque estes botões pertencem
+   ao conteúdo da página, e não à navegação principal.
+
    ============================================================ */
 
 .opcao-pesquisa {
@@ -1025,7 +1038,7 @@ input[type="file"] {
         100%;
 
     min-height:
-        62px;
+        40px;
 
     display:
         flex;
@@ -1034,10 +1047,13 @@ input[type="file"] {
         center;
 
     gap:
-        12px;
+        10px;
+
+    margin:
+        2px 0;
 
     padding:
-        10px 12px;
+        8px 10px;
 
     border:
         0;
@@ -1054,6 +1070,9 @@ input[type="file"] {
     font-family:
         inherit;
 
+    font-size:
+        13px;
+
     text-align:
         left;
 
@@ -1067,6 +1086,14 @@ input[type="file"] {
 }
 
 
+/* ============================================================
+   OPÇÃO DE PESQUISA - HOVER
+   ============================================================
+
+   Mesmo efeito utilizado nos itens da sidebar.
+
+   ============================================================ */
+
 .opcao-pesquisa:hover {
 
     background:
@@ -1078,6 +1105,15 @@ input[type="file"] {
 }
 
 
+/* ============================================================
+   OPÇÃO DE PESQUISA - CLIQUE
+   ============================================================
+
+   Durante o clique utilizamos o mesmo fundo do item ativo
+   da sidebar.
+
+   ============================================================ */
+
 .opcao-pesquisa:active {
 
     background:
@@ -1088,15 +1124,21 @@ input[type="file"] {
 
 /* ============================================================
    ÍCONE DA OPÇÃO DE PESQUISA
+   ============================================================
+
+   Utiliza:
+
+   - largura de 22px;
+   - fonte de 16px;
+
+   As mesmas medidas do .sidebar-icone.
+
    ============================================================ */
 
 .opcao-pesquisa-icone {
 
     width:
-        34px;
-
-    height:
-        34px;
+        22px;
 
     flex-shrink:
         0;
@@ -1111,13 +1153,17 @@ input[type="file"] {
         center;
 
     font-size:
-        17px;
+        16px;
 
 }
 
 
 /* ============================================================
-   CONTEÚDO DA OPÇÃO
+   CONTEÚDO DA OPÇÃO DE PESQUISA
+   ============================================================
+
+   Ocupa todo o espaço disponível depois do ícone.
+
    ============================================================ */
 
 .opcao-pesquisa-conteudo {
@@ -1131,109 +1177,85 @@ input[type="file"] {
     display:
         flex;
 
-    flex-direction:
-        column;
-
-    gap:
-        3px;
-
-}
-
-
-.opcao-pesquisa-conteudo strong {
-
-    color:
-        var(--texto);
-
-    font-size:
-        13px;
-
-    font-weight:
-        500;
-
-}
-
-
-.opcao-pesquisa-conteudo small {
-
-    color:
-        var(--texto-fraco);
-
-    font-size:
-        12px;
-
-    font-weight:
-        400;
-
-    line-height:
-        1.4;
-
-}
-
-
-.opcao-pesquisa:hover
-.opcao-pesquisa-conteudo strong {
-
-    color:
-        #ffffff;
-
-}
-
-
-.opcao-pesquisa:hover
-.opcao-pesquisa-conteudo small {
-
-    color:
-        var(--texto-secundario);
+    align-items:
+        center;
 
 }
 
 
 /* ============================================================
-   SETA DAS OPÇÕES
+   TEXTO PRINCIPAL DA OPÇÃO
+   ============================================================
+
+   Segue o padrão da sidebar:
+
+   - 13px;
+   - peso normal;
+   - cor herdada do botão;
+   - reticências se faltar espaço.
+
    ============================================================ */
 
-.opcao-pesquisa-seta {
-
-    width:
-        24px;
-
-    flex-shrink:
-        0;
-
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    justify-content:
-        center;
+.opcao-pesquisa-conteudo strong {
 
     color:
-        var(--texto-fraco);
+        inherit;
 
     font-size:
-        22px;
+        13px;
 
-    line-height:
-        1;
+    font-weight:
+        400;
 
-    transition:
-        transform 0.12s ease,
-        color 0.12s ease;
+    white-space:
+        nowrap;
+
+    overflow:
+        hidden;
+
+    text-overflow:
+        ellipsis;
 
 }
 
 
-.opcao-pesquisa:hover
+/* ============================================================
+   DESCRIÇÃO SECUNDÁRIA DA OPÇÃO
+   ============================================================
+
+   As descrições continuam presentes no index.html para
+   preservar a estrutura atual.
+
+   Porém ficam escondidas visualmente para que os botões
+   tenham exatamente a aparência compacta da sidebar.
+
+   ============================================================ */
+
+.opcao-pesquisa-conteudo small {
+
+    display:
+        none;
+
+}
+
+
+/* ============================================================
+   SETA DA OPÇÃO DE PESQUISA
+   ============================================================
+
+   A seta também continua disponível no HTML.
+
+   Ela é escondida no CSS porque os itens da sidebar não
+   possuem seta lateral.
+
+   Isso mantém os dois menus visualmente consistentes.
+
+   ============================================================ */
+
 .opcao-pesquisa-seta {
 
-    color:
-        #ffffff;
-
-    transform:
-        translateX(2px);
+    display:
+        none;
 
 }
 
@@ -2103,6 +2125,16 @@ input[type="file"] {
 
     /* ========================================================
        MENU INTERNO DA PESQUISA - CELULAR
+       ========================================================
+
+       Mantemos o mesmo padrão compacto utilizado no desktop.
+
+       Diferente da versão anterior, os botões NÃO aumentam
+       para 58px no celular.
+
+       Isso mantém Código, Descrição e Referência visualmente
+       coerentes com os itens da sidebar.
+
        ======================================================== */
 
     .menu-pesquisa {
@@ -2111,7 +2143,7 @@ input[type="file"] {
             none;
 
         gap:
-            4px;
+            2px;
 
     }
 
@@ -2119,13 +2151,19 @@ input[type="file"] {
     .opcao-pesquisa {
 
         min-height:
-            58px;
-
-        padding:
-            9px 8px;
+            40px;
 
         gap:
-            8px;
+            10px;
+
+        margin:
+            2px 0;
+
+        padding:
+            8px 10px;
+
+        font-size:
+            13px;
 
     }
 
@@ -2133,10 +2171,7 @@ input[type="file"] {
     .opcao-pesquisa-icone {
 
         width:
-            30px;
-
-        height:
-            30px;
+            22px;
 
         font-size:
             16px;
@@ -2152,21 +2187,19 @@ input[type="file"] {
     }
 
 
-    .opcao-pesquisa-conteudo small {
+    /* ========================================================
+       DESCRIÇÕES E SETAS NO CELULAR
+       ========================================================
 
-        font-size:
-            11px;
+       Permanecem ocultas assim como no desktop.
 
-    }
+       ======================================================== */
 
-
+    .opcao-pesquisa-conteudo small,
     .opcao-pesquisa-seta {
 
-        width:
-            18px;
-
-        font-size:
-            20px;
+        display:
+            none;
 
     }
 
