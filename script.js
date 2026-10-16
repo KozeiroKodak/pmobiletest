@@ -5,18 +5,201 @@
 //
 // OBJETIVO:
 //
-// Este arquivo controla principalmente a navegação entre
-// as diferentes telas do PMOBILE.
+// Controlar a navegação visual do PMOBILE.
 //
-// Também contém as funções responsáveis pelo modal de
-// zeramento do inventário.
+// NOVO PADRÃO:
 //
-// IMPORTANTE:
+// A sidebar permanece visível depois que o usuário entra
+// no sistema.
 //
-// As funções relacionadas aos dados dos materiais continuam
-// nos arquivos específicos, como dados.js e supabase.js.
+// Somente o conteúdo localizado à direita da sidebar muda.
+//
+// A lógica específica de:
+//
+// - Pesquisa
+// - Importação
+// - Conferência
+// - Conferências
+// - Divergências
+// - Supabase
+//
+// continua nos arquivos responsáveis.
 //
 // ============================================================
+
+
+// ============================================================
+// LISTA DAS TELAS INTERNAS
+// ============================================================
+
+const telasSistema = [
+
+    "homeSistema",
+
+    "pesquisa",
+
+    "conferencia",
+
+    "conferencias",
+
+    "divergencias",
+
+    "importacao",
+
+    "configuracoes"
+
+];
+
+
+// ============================================================
+// LISTA DOS ITENS DA SIDEBAR
+// ============================================================
+
+const itensMenuSistema = [
+
+    "menuPesquisa",
+
+    "menuImportacao",
+
+    "menuConferencia",
+
+    "menuConferencias",
+
+    "menuDivergencias",
+
+    "menuConfiguracoes"
+
+];
+
+
+// ============================================================
+// FUNÇÃO: esconderTelasSistema()
+// ============================================================
+//
+// Esconde todas as telas internas.
+//
+// A sidebar NÃO é alterada.
+//
+// ============================================================
+
+function esconderTelasSistema() {
+
+    telasSistema.forEach(
+
+        function(idTela) {
+
+            const tela =
+                document.getElementById(
+                    idTela
+                );
+
+
+            if (tela) {
+
+                tela.style.display =
+                    "none";
+
+            }
+
+        }
+
+    );
+
+}
+
+
+// ============================================================
+// FUNÇÃO: limparMenuAtivo()
+// ============================================================
+//
+// Remove o destaque visual de todos os itens da sidebar.
+//
+// ============================================================
+
+function limparMenuAtivo() {
+
+    itensMenuSistema.forEach(
+
+        function(idItem) {
+
+            const item =
+                document.getElementById(
+                    idItem
+                );
+
+
+            if (item) {
+
+                item.classList.remove(
+                    "ativo"
+                );
+
+            }
+
+        }
+
+    );
+
+}
+
+
+// ============================================================
+// FUNÇÃO: mostrarTelaSistema()
+// ============================================================
+//
+// PARÂMETROS:
+//
+// idTela
+//     Tela que será exibida.
+//
+// idMenu
+//     Item da sidebar que ficará destacado.
+//
+// ============================================================
+
+function mostrarTelaSistema(
+    idTela,
+    idMenu
+) {
+
+    esconderTelasSistema();
+
+    limparMenuAtivo();
+
+
+    const tela =
+        document.getElementById(
+            idTela
+        );
+
+
+    if (tela) {
+
+        tela.style.display =
+            "block";
+
+    }
+
+
+    if (idMenu) {
+
+        const itemMenu =
+            document.getElementById(
+                idMenu
+            );
+
+
+        if (itemMenu) {
+
+            itemMenu.classList.add(
+                "ativo"
+            );
+
+        }
+
+    }
+
+}
 
 
 // ============================================================
@@ -26,55 +209,59 @@
 // FUNÇÃO:
 //     abrirSistema()
 //
-// OBJETIVO:
-//
-// Sair da tela inicial do PMOBILE e abrir o menu principal.
-//
-// FUNCIONAMENTO:
-//
-// 1. Esconde a tela "inicio".
-// 2. Mostra a tela "sistema".
-//
-// USADO PELO:
-//
-//     Botão "Entrar" / acesso ao sistema.
+// Sai da tela inicial e abre a aplicação.
 //
 // ============================================================
 
 function abrirSistema() {
 
-    document.getElementById("inicio").style.display = "none";
+    const inicio =
+        document.getElementById(
+            "inicio"
+        );
 
-    document.getElementById("sistema").style.display = "block";
+
+    const aplicacao =
+        document.getElementById(
+            "aplicacao"
+        );
+
+
+    if (inicio) {
+
+        inicio.style.display =
+            "none";
+
+    }
+
+
+    if (aplicacao) {
+
+        aplicacao.style.display =
+            "block";
+
+    }
+
+
+    mostrarTelaSistema(
+        "homeSistema",
+        null
+    );
+
 }
 
 
 // ============================================================
 // PESQUISA
 // ============================================================
-//
-// FUNÇÃO:
-//     abrirPesquisa()
-//
-// OBJETIVO:
-//
-// Abrir a tela de pesquisa de materiais.
-//
-// FUNCIONAMENTO:
-//
-// 1. Esconde o menu principal.
-// 2. Mostra a tela de pesquisa.
-//
-// A pesquisa é controlada pelo arquivo:
-//     pesquisa.js
-//
-// ============================================================
 
 function abrirPesquisa() {
 
-    document.getElementById("sistema").style.display = "none";
+    mostrarTelaSistema(
+        "pesquisa",
+        "menuPesquisa"
+    );
 
-    document.getElementById("pesquisa").style.display = "block";
 }
 
 
@@ -82,476 +269,290 @@ function abrirPesquisa() {
 // VOLTAR DA PESQUISA
 // ============================================================
 //
-// FUNÇÃO:
-//     voltarMenu()
-//
-// OBJETIVO:
-//
-// Fechar a tela de pesquisa e retornar ao menu principal.
-//
-// FUNCIONAMENTO:
-//
-// 1. Esconde a tela de pesquisa.
-// 2. Mostra novamente o menu principal.
+// Mantida por compatibilidade.
 //
 // ============================================================
 
 function voltarMenu() {
 
-    document.getElementById("pesquisa").style.display = "none";
+    mostrarTelaSistema(
+        "homeSistema",
+        null
+    );
 
-    document.getElementById("sistema").style.display = "block";
 }
 
 
 // ============================================================
 // CONFERÊNCIA
 // ============================================================
-//
-// FUNÇÃO:
-//     abrirConferencia()
-//
-// OBJETIVO:
-//
-// Abrir a tela utilizada para realizar a conferência física
-// dos materiais.
-//
-// FUNCIONAMENTO:
-//
-// 1. Esconde o menu principal.
-// 2. Mostra a tela de conferência.
-//
-// A lógica da conferência fica no arquivo:
-//     conferencia.js
-//
-// ============================================================
 
 function abrirConferencia() {
 
-    document.getElementById("sistema").style.display = "none";
+    mostrarTelaSistema(
+        "conferencia",
+        "menuConferencia"
+    );
 
-    document.getElementById("conferencia").style.display = "block";
 }
 
 
 // ============================================================
 // VOLTAR DA CONFERÊNCIA
 // ============================================================
-//
-// FUNÇÃO:
-//     voltarMenuConferencia()
-//
-// OBJETIVO:
-//
-// Fechar a tela de conferência e retornar ao menu principal.
-//
-// ============================================================
 
 function voltarMenuConferencia() {
 
-    document.getElementById("conferencia").style.display = "none";
+    mostrarTelaSistema(
+        "homeSistema",
+        null
+    );
 
-    document.getElementById("sistema").style.display = "block";
 }
 
 
 // ============================================================
 // CONFERÊNCIAS REALIZADAS
 // ============================================================
-//
-// FUNÇÃO:
-//     abrirConferencias()
-//
-// OBJETIVO:
-//
-// Abrir o histórico das conferências realizadas.
-//
-// FUNCIONAMENTO:
-//
-// 1. Esconde o menu principal.
-// 2. Mostra a tela de conferências.
-// 3. Executa exibirConferencias() para atualizar os dados.
-//
-// A função exibirConferencias() pertence ao sistema de
-// histórico de conferências.
-//
-// ============================================================
 
 function abrirConferencias() {
 
-    document.getElementById("sistema").style.display = "none";
+    mostrarTelaSistema(
+        "conferencias",
+        "menuConferencias"
+    );
 
-    document.getElementById("conferencias").style.display = "block";
 
-    exibirConferencias();
+    if (
+        typeof exibirConferencias ===
+        "function"
+    ) {
+
+        exibirConferencias();
+
+    }
+
 }
 
 
 // ============================================================
 // VOLTAR DAS CONFERÊNCIAS
 // ============================================================
-//
-// FUNÇÃO:
-//     voltarMenuConferencias()
-//
-// OBJETIVO:
-//
-// Fechar o histórico de conferências e retornar ao menu.
-//
-// ============================================================
 
 function voltarMenuConferencias() {
 
-    document.getElementById("conferencias").style.display = "none";
+    mostrarTelaSistema(
+        "homeSistema",
+        null
+    );
 
-    document.getElementById("sistema").style.display = "block";
 }
 
 
 // ============================================================
 // DIVERGÊNCIAS
 // ============================================================
-//
-// FUNÇÃO:
-//     abrirDivergencias()
-//
-// OBJETIVO:
-//
-// Abrir a tela que apresenta as divergências encontradas
-// durante as conferências.
-//
-// FUNCIONAMENTO:
-//
-// 1. Esconde o menu principal.
-// 2. Mostra a tela de divergências.
-// 3. Executa exibirDivergencias() para atualizar os dados.
-//
-// A lógica das divergências fica no arquivo:
-//     divergencias.js
-//
-// ============================================================
 
 function abrirDivergencias() {
 
-    document.getElementById("sistema").style.display = "none";
+    mostrarTelaSistema(
+        "divergencias",
+        "menuDivergencias"
+    );
 
-    document.getElementById("divergencias").style.display = "block";
 
-    exibirDivergencias();
+    if (
+        typeof exibirDivergencias ===
+        "function"
+    ) {
+
+        exibirDivergencias();
+
+    }
+
 }
 
 
 // ============================================================
 // VOLTAR DAS DIVERGÊNCIAS
 // ============================================================
-//
-// FUNÇÃO:
-//     voltarMenuDivergencias()
-//
-// OBJETIVO:
-//
-// Fechar a tela de divergências e retornar ao menu principal.
-//
-// ============================================================
 
 function voltarMenuDivergencias() {
 
-    document.getElementById("divergencias").style.display = "none";
+    mostrarTelaSistema(
+        "homeSistema",
+        null
+    );
 
-    document.getElementById("sistema").style.display = "block";
 }
 
 
 // ============================================================
 // IMPORTAÇÃO
 // ============================================================
-//
-// FUNÇÃO:
-//     abrirImportacao()
-//
-// OBJETIVO:
-//
-// Abrir a tela utilizada para importar a planilha de materiais.
-//
-// FUNCIONAMENTO:
-//
-// 1. Esconde o menu principal.
-// 2. Mostra a tela de importação.
-// 3. Verifica se a biblioteca XLSX já está carregada.
-// 4. Caso não esteja, carrega "xlsx.full.min.js".
-//
-// A biblioteca SheetJS é utilizada para leitura dos arquivos
-// Excel.
-//
-// ============================================================
 
 function abrirImportacao() {
 
-    document.getElementById("sistema").style.display = "none";
-
-    document.getElementById("importacao").style.display = "block";
+    mostrarTelaSistema(
+        "importacao",
+        "menuImportacao"
+    );
 
 
     // ========================================================
     // VERIFICAR SE XLSX JÁ ESTÁ CARREGADO
     // ========================================================
-    //
-    // Se window.XLSX existir, significa que a biblioteca
-    // já está disponível.
-    //
-    // Nesse caso não precisamos carregá-la novamente.
-    //
-    // ========================================================
 
     if (window.XLSX) {
+
         return;
+
     }
 
 
     // ========================================================
-    // CRIAR ELEMENTO SCRIPT
-    // ========================================================
-    //
-    // Cria dinamicamente uma tag <script> para carregar
-    // a biblioteca Excel.
-    //
+    // CARREGAR BIBLIOTECA LOCAL
     // ========================================================
 
-    const script = document.createElement("script");
-
-    script.src = "xlsx.full.min.js";
-
-
-    // ========================================================
-    // BIBLIOTECA CARREGADA
-    // ========================================================
-    //
-    // Executado quando o arquivo XLSX é carregado com sucesso.
-    //
-    // ========================================================
-
-    script.onload = function() {
-
-        console.log(
-            "SheetJS carregado com sucesso."
+    const script =
+        document.createElement(
+            "script"
         );
-    };
 
 
-    // ========================================================
-    // ERRO AO CARREGAR BIBLIOTECA
-    // ========================================================
-    //
-    // Caso o arquivo XLSX não possa ser carregado, informa
-    // o problema na tela de importação.
-    //
-    // ========================================================
-
-    script.onerror = function() {
-
-        document.getElementById(
-            "resultadoImportacao"
-        ).innerHTML =
-            "<p>❌ Não foi possível carregar a biblioteca Excel.</p>";
-    };
+    script.src =
+        "xlsx.full.min.js";
 
 
-    // ========================================================
-    // ADICIONAR SCRIPT À PÁGINA
-    // ========================================================
+    script.onload =
+        function() {
 
-    document.body.appendChild(script);
+            console.log(
+                "SheetJS carregado com sucesso."
+            );
+
+        };
+
+
+    script.onerror =
+        function() {
+
+            const resultado =
+                document.getElementById(
+                    "resultadoImportacao"
+                );
+
+
+            if (resultado) {
+
+                resultado.innerHTML =
+                    "<p>❌ Não foi possível carregar a biblioteca Excel.</p>";
+
+            }
+
+        };
+
+
+    document.body.appendChild(
+        script
+    );
+
 }
 
 
 // ============================================================
 // VOLTAR DA IMPORTAÇÃO
 // ============================================================
-//
-// FUNÇÃO:
-//     voltarMenuImportacao()
-//
-// OBJETIVO:
-//
-// Fechar a tela de importação e retornar ao menu principal.
-//
-// ============================================================
 
 function voltarMenuImportacao() {
 
-    document.getElementById("importacao").style.display = "none";
+    mostrarTelaSistema(
+        "homeSistema",
+        null
+    );
 
-    document.getElementById("sistema").style.display = "block";
 }
 
 
 // ============================================================
 // CONFIGURAÇÕES
 // ============================================================
-//
-// FUNÇÃO:
-//     abrirConfiguracoes()
-//
-// OBJETIVO:
-//
-// Abrir a área de configurações do PMOBILE.
-//
-// ESTRUTURA ATUAL:
-//
-// Configurações
-// └── Limpar banco de dados
-//       └── Materiais importados
-//
-// IMPORTANTE:
-//
-// Esta função NÃO altera nenhum dado.
-//
-// Ela somente controla a navegação entre:
-//     Menu principal
-//          ↓
-//     Configurações
-//
-// ============================================================
 
 function abrirConfiguracoes() {
 
-    document.getElementById("sistema").style.display = "none";
+    mostrarTelaSistema(
+        "configuracoes",
+        "menuConfiguracoes"
+    );
 
-    document.getElementById("configuracoes").style.display = "block";
 }
 
 
 // ============================================================
 // VOLTAR DAS CONFIGURAÇÕES
 // ============================================================
-//
-// FUNÇÃO:
-//     voltarMenuConfiguracoes()
-//
-// OBJETIVO:
-//
-// Fechar a tela de configurações e retornar ao menu principal.
-//
-// FUNCIONAMENTO:
-//
-// 1. Esconde a tela de configurações.
-// 2. Mostra novamente o menu principal.
-//
-// IMPORTANTE:
-//
-// Esta função também NÃO altera nenhum dado.
-//
-// ============================================================
 
 function voltarMenuConfiguracoes() {
 
-    document.getElementById("configuracoes").style.display = "none";
+    mostrarTelaSistema(
+        "homeSistema",
+        null
+    );
 
-    document.getElementById("sistema").style.display = "block";
 }
 
 
 // ============================================================
 // MODAL DE ZERAMENTO DO INVENTÁRIO
 // ============================================================
-//
-// O bloco abaixo controla o modal antigo de zeramento
-// existente na tela de importação.
-//
-// Ele é independente da nova área:
-//
-//     Configurações
-//          ↓
-//     Materiais importados
-//
-// Portanto, NÃO estamos removendo nem alterando essa lógica.
-//
-// ============================================================
 
 
 // ============================================================
 // ABRIR MODAL
 // ============================================================
-//
-// FUNÇÃO:
-//     abrirModalZerarInventario()
-//
-// OBJETIVO:
-//
-// Exibir a janela de confirmação para zerar o inventário.
-//
-// IMPORTANTE:
-//
-// Neste momento nenhum dado é apagado.
-//
-// Apenas o modal é exibido.
-//
-// ============================================================
 
 function abrirModalZerarInventario() {
 
-    document.getElementById(
-        "modalZerarInventario"
-    ).style.display = "block";
+    const modal =
+        document.getElementById(
+            "modalZerarInventario"
+        );
+
+
+    if (modal) {
+
+        modal.style.display =
+            "flex";
+
+    }
+
 }
 
 
 // ============================================================
 // FECHAR MODAL
 // ============================================================
-//
-// FUNÇÃO:
-//     fecharModalZerarInventario()
-//
-// OBJETIVO:
-//
-// Fechar o modal sem executar nenhuma alteração.
-//
-// Equivale ao botão:
-//
-//     CANCELAR
-//
-// ============================================================
 
 function fecharModalZerarInventario() {
 
-    document.getElementById(
-        "modalZerarInventario"
-    ).style.display = "none";
+    const modal =
+        document.getElementById(
+            "modalZerarInventario"
+        );
+
+
+    if (modal) {
+
+        modal.style.display =
+            "none";
+
+    }
+
 }
 
 
 // ============================================================
 // CONFIRMAR ZERAMENTO
-// ============================================================
-//
-// FUNÇÃO:
-//     confirmarZeramento(apagarConferencias)
-//
-// OBJETIVO:
-//
-// Executar o zeramento do inventário após a confirmação
-// do usuário.
-//
-// PARÂMETRO:
-//
-// apagarConferencias
-//
-//     true
-//         Apaga o inventário e as conferências.
-//
-//     false
-//         Apaga somente o inventário.
-//
-// FUNCIONAMENTO:
-//
-// 1. Fecha o modal.
-// 2. Limpa os materiais.
-// 3. Limpa a variável "materiais" em memória.
-// 4. Marca o inventário como zerado.
-// 5. Opcionalmente remove as conferências.
-// 6. Mostra o resultado na tela.
-//
 // ============================================================
 
 async function confirmarZeramento(
@@ -570,25 +571,12 @@ async function confirmarZeramento(
         // ====================================================
         // LIMPAR INVENTÁRIO
         // ====================================================
-        //
-        // Executa a função limparMateriais().
-        //
-        // Essa função é responsável pela limpeza dos dados
-        // do inventário no armazenamento utilizado pelo
-        // sistema.
-        //
-        // ====================================================
 
         await limparMateriais();
 
 
         // ====================================================
         // LIMPAR MATERIAIS DA MEMÓRIA
-        // ====================================================
-        //
-        // Também limpa a variável que contém os materiais
-        // carregados atualmente.
-        //
         // ====================================================
 
         materiais = [];
@@ -597,40 +585,31 @@ async function confirmarZeramento(
         // ====================================================
         // MARCAR INVENTÁRIO COMO ZERADO
         // ====================================================
-        //
-        // Registra que o inventário foi zerado
-        // propositalmente.
-        //
-        // Isso evita que o sistema interprete a ausência
-        // de materiais como um erro inesperado.
-        //
-        // ====================================================
 
         marcarInventarioZerado();
 
 
         // ====================================================
-        // LIMPAR CONFERÊNCIAS — OPCIONAL
-        // ====================================================
-        //
-        // Somente executa quando:
-        //
-        //     apagarConferencias === true
-        //
+        // LIMPAR CONFERÊNCIAS OPCIONALMENTE
         // ====================================================
 
-        if (apagarConferencias === true) {
+        if (
+            apagarConferencias ===
+            true
+        ) {
 
             conferencias = [];
+
 
             localStorage.removeItem(
                 "pmobile_conferencias"
             );
+
         }
 
 
         // ====================================================
-        // RESULTADO DA OPERAÇÃO
+        // RESULTADO
         // ====================================================
 
         const resultado =
@@ -639,38 +618,30 @@ async function confirmarZeramento(
             );
 
 
-        // ====================================================
-        // MENSAGEM — INVENTÁRIO + CONFERÊNCIAS
-        // ====================================================
+        if (!resultado) {
 
-        if (apagarConferencias === true) {
+            return;
+
+        }
+
+
+        if (
+            apagarConferencias ===
+            true
+        ) {
 
             resultado.innerHTML =
                 "<p>✅ Inventário e conferências foram apagados com sucesso.</p>";
-
-
-        // ====================================================
-        // MENSAGEM — SOMENTE INVENTÁRIO
-        // ====================================================
 
         } else {
 
             resultado.innerHTML =
                 "<p>✅ Inventário apagado com sucesso. As conferências foram mantidas.</p>";
+
         }
 
 
     } catch (erro) {
-
-        // ====================================================
-        // TRATAMENTO DE ERRO
-        // ====================================================
-        //
-        // Caso alguma etapa do zeramento apresente erro,
-        // o erro é registrado no console e uma mensagem
-        // é mostrada na tela.
-        //
-        // ====================================================
 
         console.error(
             "Erro ao zerar o inventário:",
@@ -678,9 +649,19 @@ async function confirmarZeramento(
         );
 
 
-        document.getElementById(
-            "resultadoImportacao"
-        ).innerHTML =
-            "<p>❌ Não foi possível zerar o inventário.</p>";
+        const resultado =
+            document.getElementById(
+                "resultadoImportacao"
+            );
+
+
+        if (resultado) {
+
+            resultado.innerHTML =
+                "<p>❌ Não foi possível zerar o inventário.</p>";
+
+        }
+
     }
+
 }
