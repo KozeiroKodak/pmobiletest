@@ -37,27 +37,6 @@
 // VERIFICAÇÃO DOS MATERIAIS
 // ============================================================
 //
-// VERSÃO ANTIGA:
-//
-// O navegador baixava os materiais em lotes de 1.000 registros
-// e realizava toda a análise em JavaScript.
-//
-// Com aproximadamente 94 mil materiais isso significava:
-//
-//     PMOBILE
-//        ↓
-//     lote 1.000
-//        ↓
-//     lote 1.000
-//        ↓
-//     lote 1.000
-//        ↓
-//     ...
-//        ↓
-//     ~94 mil registros
-//        ↓
-//     JavaScript verifica tudo
-//
 // VERSÃO ATUAL:
 //
 // A verificação pesada foi transferida para o PostgreSQL.
