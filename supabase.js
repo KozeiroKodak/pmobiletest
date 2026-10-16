@@ -83,8 +83,6 @@
 // ============================================================
 
 
-
-
 // ============================================================
 // CONFIGURAÇÃO DO SUPABASE
 // ============================================================
@@ -121,6 +119,40 @@ const SUPABASE_PUBLISHABLE_KEY =
 
 
 // ============================================================
+// CONTROLE DE STATUS PRIORITÁRIO
+// ============================================================
+//
+// OBJETIVO:
+//
+// Informar se a barra de status está sendo utilizada por uma
+// operação que não pode ser sobrescrita por mensagens comuns.
+//
+// PRINCIPAL USO:
+//
+// Sincronização do inventário offline.
+//
+// Durante a sincronização:
+//
+//     🟡 Sincronizando inventário offline...
+//
+//     🟡 Sincronizando inventário offline... 1.000 materiais
+//
+//     🟢 Offline OK — 93.948 materiais sincronizados.
+//
+// mensagens normais do Supabase não poderão substituir esse
+// status.
+//
+// O bloqueio permanece ativo até o usuário fechar o aviso.
+//
+// ============================================================
+
+let statusSupabasePrioritario =
+    false;
+
+
+
+
+// ============================================================
 // FUNÇÃO: mostrarStatusSupabase()
 // ============================================================
 //
@@ -128,40 +160,46 @@ const SUPABASE_PUBLISHABLE_KEY =
 //
 // Criar ou atualizar o aviso de status do Supabase.
 //
+// PARÂMETROS:
+//
+// mensagem
+//
+//     Texto que será exibido.
+//
+// prioridade
+//
+//     false:
+//         mensagem normal.
+//
+//     true:
+//         mensagem prioritária.
+//
+//         Uma mensagem prioritária bloqueia temporariamente
+//         outras mensagens normais.
+//
 // EXEMPLOS:
 //
-//     🟢 Supabase inicializado com sucesso
+//     mostrarStatusSupabase(
+//         "🟢 Supabase inicializado com sucesso"
+//     );
 //
-//     🟡 Verificando materiais no PostgreSQL...
+// Mensagem prioritária:
 //
-//     ⚠️ 93.947 materiais verificados.
-//        2 problemas encontrados.
-//
-// TAMBÉM:
-//
-// Esta função agora protege o status da sincronização offline.
-//
-// Durante a sincronização realizada pelo dados.js:
-//
-//     🟡 Sincronizando inventário offline...
-//
-//     🟡 Sincronizando inventário offline... 1.000 materiais
-//
-//     🟢 Offline OK — 93.947 materiais sincronizados.
-//
-// mensagens normais do Supabase não devem sobrescrever
-// temporariamente esse aviso.
+//     mostrarStatusSupabase(
+//         "🟡 Sincronizando inventário offline...",
+//         true
+//     );
 //
 // FUNCIONAMENTO:
 //
-// 1. Verifica se uma sincronização offline está em andamento.
-// 2. Se estiver, preserva o status da sincronização.
+// 1. Ativa o modo prioritário quando prioridade = true.
+// 2. Bloqueia mensagens normais enquanto o modo estiver ativo.
 // 3. Procura #statusSupabase.
 // 4. Caso não exista, cria o elemento.
 // 5. Limpa o conteúdo anterior.
 // 6. Insere a nova mensagem.
 // 7. Cria o botão "✕".
-// 8. Permite fechar somente o aviso.
+// 8. O fechamento libera novamente o status normal.
 //
 // IMPORTANTE:
 //
@@ -170,85 +208,51 @@ const SUPABASE_PUBLISHABLE_KEY =
 // ============================================================
 
 function mostrarStatusSupabase(
-    mensagem
+    mensagem,
+    prioridade = false
 ) {
 
     // ========================================================
-    // PROTEÇÃO DO STATUS DA SINCRONIZAÇÃO OFFLINE
+    // ATIVAR STATUS PRIORITÁRIO
     // ========================================================
     //
-    // Durante o download do inventário para o IndexedDB,
-    // o dados.js controla o status exibido ao usuário.
-    //
-    // Não queremos que uma verificação comum do Supabase
-    // apague uma mensagem como:
-    //
-    //     🟡 Sincronizando inventário offline...
-    //
-    // ou:
-    //
-    //     🟡 Sincronizando inventário offline... 10.000 materiais
+    // O dados.js chama esta função com prioridade = true
+    // quando está sincronizando o inventário offline.
     //
     // ========================================================
 
     if (
-        typeof sincronizacaoEmAndamento !== "undefined" &&
-        sincronizacaoEmAndamento === true
+        prioridade === true
     ) {
 
-        // ====================================================
-        // PERMITIR SOMENTE MENSAGENS DA SINCRONIZAÇÃO OFFLINE
-        // ====================================================
-        //
-        // O dados.js utiliza mensagens iniciadas por:
-        //
-        //     🟡 Sincronizando inventário offline
-        //
-        //     🟢 Offline OK
-        //
-        //     🔴 Offline indisponível
-        //
-        // Essas mensagens precisam continuar funcionando.
-        //
-        // ====================================================
+        statusSupabasePrioritario =
+            true;
 
-        const mensagemEhDaSincronizacao =
-            typeof mensagem === "string" &&
-            (
-                mensagem.startsWith(
-                    "🟡 Sincronizando inventário offline"
-                ) ||
-                mensagem.startsWith(
-                    "🟢 Offline OK"
-                ) ||
-                mensagem.startsWith(
-                    "🔴 Offline indisponível"
-                )
-            );
+    }
 
 
-        // ====================================================
-        // SE NÃO FOR MENSAGEM DA SINCRONIZAÇÃO
-        // ====================================================
-        //
-        // Ignora temporariamente a mensagem comum do Supabase.
-        //
-        // ====================================================
+    // ========================================================
+    // BLOQUEAR MENSAGENS NORMAIS
+    // ========================================================
+    //
+    // Se existe uma operação prioritária ativa e a nova
+    // mensagem não é prioritária, ela não poderá substituir
+    // o status atual.
+    //
+    // ========================================================
 
-        if (
-            !mensagemEhDaSincronizacao
-        ) {
+    if (
+        statusSupabasePrioritario === true &&
+        prioridade !== true
+    ) {
 
-            console.log(
-                "ℹ️ Status do Supabase ignorado temporariamente " +
-                "porque a sincronização offline está em andamento:",
-                mensagem
-            );
+        console.log(
+            "ℹ️ Status comum do Supabase ignorado porque " +
+            "existe um status prioritário ativo:",
+            mensagem
+        );
 
-
-            return;
-
-        }
+        return;
 
     }
 
@@ -267,7 +271,9 @@ function mostrarStatusSupabase(
     // CRIAR AVISO CASO NÃO EXISTA
     // ========================================================
 
-    if (!status) {
+    if (
+        !status
+    ) {
 
         status =
             document.createElement(
@@ -361,6 +367,14 @@ function mostrarStatusSupabase(
 //
 // IMPORTANTE:
 //
+// Esta função também libera o modo de prioridade.
+//
+// Depois que o usuário fechar o aviso:
+//
+//     statusSupabasePrioritario = false
+//
+// mensagens normais do Supabase poderão aparecer novamente.
+//
 // Esta função NÃO:
 //
 // - cancela consultas;
@@ -374,16 +388,46 @@ function mostrarStatusSupabase(
 
 function fecharStatusSupabase() {
 
+    // ========================================================
+    // LIBERAR STATUS PRIORITÁRIO
+    // ========================================================
+    //
+    // Se o aviso que estava na tela era prioritário, o
+    // fechamento libera novamente a barra para mensagens
+    // normais.
+    //
+    // ========================================================
+
+    statusSupabasePrioritario =
+        false;
+
+
+    // ========================================================
+    // PROCURAR AVISO
+    // ========================================================
+
     const status =
         document.getElementById(
             "statusSupabase"
         );
 
-    if (!status) {
+
+    // ========================================================
+    // SE NÃO EXISTIR, ENCERRAR
+    // ========================================================
+
+    if (
+        !status
+    ) {
 
         return;
 
     }
+
+
+    // ========================================================
+    // REMOVER AVISO
+    // ========================================================
 
     status.remove();
 
@@ -447,7 +491,9 @@ function mostrarErrosSupabase(
     // CRIAR PAINEL
     // ========================================================
 
-    if (!area) {
+    if (
+        !area
+    ) {
 
         area =
             document.createElement(
