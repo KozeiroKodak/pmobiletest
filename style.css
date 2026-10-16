@@ -803,3 +803,354 @@ input[type="file"] {
     }
 
 }
+
+/* ============================================================
+   PMOBILE
+   AVISOS DO SUPABASE
+   ============================================================ */
+
+
+/* ============================================================
+   BARRA DE STATUS DO SUPABASE
+
+   Exemplo:
+   ⚠️ 93.912 materiais verificados. 2 problemas encontrados.
+
+   O !important é necessário porque o supabase.js atualmente
+   aplica alguns estilos diretamente no elemento.
+   ============================================================ */
+
+#statusSupabase {
+
+    display: flex !important;
+
+    align-items: center !important;
+    justify-content: space-between !important;
+
+    gap: 10px !important;
+
+    padding: 10px 14px !important;
+
+    background: rgba(
+        18,
+        18,
+        18,
+        0.72
+    ) !important;
+
+    backdrop-filter:
+        blur(10px);
+
+    -webkit-backdrop-filter:
+        blur(10px);
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.14
+        ) !important;
+
+    border-radius:
+        8px !important;
+
+    color:
+        #ededed !important;
+
+    text-align:
+        left !important;
+
+    font-weight:
+        500 !important;
+
+    box-shadow:
+        0 8px 30px
+        rgba(
+            0,
+            0,
+            0,
+            0.30
+        );
+
+}
+
+
+/* ============================================================
+   BOTÃO X DO STATUS
+   ============================================================ */
+
+#statusSupabase button {
+
+    width: 32px;
+    height: 32px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    margin-left:
+        10px !important;
+
+    padding: 0;
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.18
+        );
+
+    border-radius: 5px;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.05
+        );
+
+    color:
+        #bdbdbd;
+
+    font-size:
+        18px;
+
+    cursor:
+        pointer;
+
+}
+
+
+/* ============================================================
+   BOTÃO X — HOVER
+   ============================================================ */
+
+#statusSupabase button:hover {
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.10
+        );
+
+    color:
+        #ffffff;
+
+}
+
+
+/* ============================================================
+   PAINEL DE PROBLEMAS DO SUPABASE
+
+   Exemplo:
+   ⚠️ Problemas encontrados
+   93.912 materiais verificados
+   2 problemas encontrados
+   ============================================================ */
+
+#resultadoVerificacaoSupabase {
+
+    background:
+        rgba(
+            18,
+            18,
+            18,
+            0.78
+        ) !important;
+
+    backdrop-filter:
+        blur(12px);
+
+    -webkit-backdrop-filter:
+        blur(12px);
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.14
+        ) !important;
+
+    border-radius:
+        8px !important;
+
+    color:
+        #ededed !important;
+
+    box-shadow:
+        0 12px 40px
+        rgba(
+            0,
+            0,
+            0,
+            0.35
+        );
+
+}
+
+
+/* ============================================================
+   TÍTULO DO PAINEL
+   ============================================================ */
+
+#resultadoVerificacaoSupabase h3 {
+
+    color:
+        #ffffff;
+
+    font-weight:
+        600;
+
+}
+
+
+/* ============================================================
+   TEXTOS
+   ============================================================ */
+
+#resultadoVerificacaoSupabase p,
+#resultadoVerificacaoSupabase li,
+#resultadoVerificacaoSupabase strong {
+
+    color:
+        #ededed;
+
+}
+
+
+/* ============================================================
+   LINHA DIVISÓRIA
+   ============================================================ */
+
+#resultadoVerificacaoSupabase hr {
+
+    border: 0;
+
+    border-top:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.14
+        );
+
+}
+
+
+/* ============================================================
+   BOTÃO FECHAR DO PAINEL
+   ============================================================ */
+
+#resultadoVerificacaoSupabase button {
+
+    min-height:
+        34px;
+
+    padding:
+        6px 14px;
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.18
+        );
+
+    border-radius:
+        5px;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.05
+        );
+
+    color:
+        #ededed;
+
+    font-family:
+        inherit;
+
+    cursor:
+        pointer;
+
+}
+
+
+/* ============================================================
+   BOTÃO FECHAR — HOVER
+   ============================================================ */
+
+#resultadoVerificacaoSupabase button:hover {
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.10
+        );
+
+    color:
+        #ffffff;
+
+}
+
+
+/* ============================================================
+   AJUSTE PARA CELULAR
+   ============================================================ */
+
+@media (max-width: 700px) {
+
+    #resultadoVerificacaoSupabase {
+
+        top:
+            20px !important;
+
+        left:
+            10px !important;
+
+        right:
+            10px !important;
+
+        max-height:
+            70vh !important;
+
+        padding:
+            16px !important;
+
+    }
+
+
+    #statusSupabase {
+
+        left:
+            10px !important;
+
+        right:
+            10px !important;
+
+        bottom:
+            10px !important;
+
+    }
+
+}
