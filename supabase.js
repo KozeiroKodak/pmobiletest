@@ -13,9 +13,9 @@
 // 2. Configurar a Publishable Key.
 // 3. Inicializar o cliente Supabase.
 // 4. Disponibilizar o cliente para os demais arquivos.
-// 5. Testar a leitura da tabela "materiais".
-// 6. Verificar os materiais existentes.
-// 7. Identificar possíveis problemas nos registros.
+// 5. Verificar a tabela "materiais".
+// 6. Solicitar ao PostgreSQL o diagnóstico dos materiais.
+// 7. Buscar somente materiais problemáticos quando necessário.
 // 8. Mostrar o status da conexão/verificação.
 // 9. Mostrar detalhes dos problemas encontrados.
 // 10. Permitir limpar os materiais do Supabase.
@@ -24,14 +24,67 @@
 //
 // O Supabase é o banco central do PMOBILE.
 //
-// A importação dos materiais continua sendo realizada pelo
-// arquivo:
+// A importação dos materiais continua sendo realizada pelo:
 //
 //     importacao.js
 //
 // Este arquivo NÃO realiza a importação da planilha.
 //
 // Este arquivo também NÃO altera o IndexedDB.
+//
+// ============================================================
+//
+// VERIFICAÇÃO DOS MATERIAIS
+// ============================================================
+//
+// VERSÃO ANTIGA:
+//
+// O navegador baixava os materiais em lotes de 1.000 registros
+// e realizava toda a análise em JavaScript.
+//
+// Com aproximadamente 94 mil materiais isso significava:
+//
+//     PMOBILE
+//        ↓
+//     lote 1.000
+//        ↓
+//     lote 1.000
+//        ↓
+//     lote 1.000
+//        ↓
+//     ...
+//        ↓
+//     ~94 mil registros
+//        ↓
+//     JavaScript verifica tudo
+//
+// VERSÃO ATUAL:
+//
+// A verificação pesada foi transferida para o PostgreSQL.
+//
+//     PMOBILE
+//        ↓
+//     pmobile_diagnosticar_materiais()
+//        ↓
+//     PostgreSQL verifica a tabela
+//        ↓
+//     PMOBILE recebe somente o resumo
+//
+// Caso existam problemas:
+//
+//     PMOBILE
+//        ↓
+//     pmobile_listar_problemas_materiais()
+//        ↓
+//     PostgreSQL retorna somente os registros problemáticos
+//
+// Isso reduz drasticamente:
+//
+// - quantidade de requisições;
+// - transferência de dados;
+// - processamento no celular;
+// - consumo de memória;
+// - tempo de verificação.
 //
 // ============================================================
 //
@@ -43,16 +96,13 @@
 //
 //     style.css
 //
-// Os elementos criados aqui possuem IDs próprios:
+// Elementos utilizados:
 //
 //     #statusSupabase
 //     #resultadoVerificacaoSupabase
 //
-// Dessa forma, posição, cores, transparência, bordas,
-// tamanhos, espaçamentos e responsividade podem ser
-// controlados somente pelo CSS.
-//
 // ============================================================
+
 
 
 
@@ -69,6 +119,7 @@ const SUPABASE_URL =
 
 
 
+
 // ============================================================
 // CHAVE PÚBLICA DO SUPABASE
 // ============================================================
@@ -79,13 +130,14 @@ const SUPABASE_URL =
 //
 // IMPORTANTE:
 //
-// Chaves secretas ou service_role NUNCA devem ser
-// colocadas neste arquivo.
+// Chaves secretas ou service_role NUNCA devem ser colocadas
+// neste arquivo.
 //
 // ============================================================
 
 const SUPABASE_PUBLISHABLE_KEY =
     "sb_publishable_Ckh6ls7eIh_11wviwxMlCQ_25Oes0QF";
+
 
 
 
@@ -97,41 +149,27 @@ const SUPABASE_PUBLISHABLE_KEY =
 //
 // Criar ou atualizar o aviso de status do Supabase.
 //
-// O aviso pode apresentar mensagens como:
+// EXEMPLOS:
 //
 //     🟢 Supabase inicializado com sucesso
 //
-//     🟡 Verificando todos os materiais...
+//     🟡 Verificando materiais no PostgreSQL...
 //
-//     ⚠️ 93.912 materiais verificados.
+//     ⚠️ 93.947 materiais verificados.
 //        2 problemas encontrados.
 //
 // FUNCIONAMENTO:
 //
-// 1. Procura o elemento #statusSupabase.
-// 2. Se não existir, cria o elemento.
+// 1. Procura #statusSupabase.
+// 2. Caso não exista, cria o elemento.
 // 3. Limpa o conteúdo anterior.
 // 4. Insere a nova mensagem.
-// 5. Adiciona o botão "✕".
-// 6. O botão permite fechar somente o aviso.
+// 5. Cria o botão "✕".
+// 6. Permite fechar somente o aviso.
 //
 // IMPORTANTE:
 //
-// Nenhuma aparência visual é definida aqui.
-//
-// Toda a aparência deste aviso deve ser controlada no:
-//
-//     style.css
-//
-// utilizando:
-//
-//     #statusSupabase
-//     #statusSupabase button
-//
-// PARÂMETRO:
-//
-// mensagem
-//     Texto que será apresentado ao usuário.
+// Esta função altera somente a interface.
 //
 // ============================================================
 
@@ -160,14 +198,8 @@ function mostrarStatusSupabase(
                 "div"
             );
 
-
         status.id =
             "statusSupabase";
-
-
-        // ====================================================
-        // ADICIONAR À PÁGINA
-        // ====================================================
 
         document.body.appendChild(
             status
@@ -185,7 +217,7 @@ function mostrarStatusSupabase(
 
 
     // ========================================================
-    // CRIAR TEXTO DO STATUS
+    // CRIAR TEXTO
     // ========================================================
 
     const textoStatus =
@@ -193,13 +225,12 @@ function mostrarStatusSupabase(
             "span"
         );
 
-
     textoStatus.textContent =
         mensagem;
 
 
     // ========================================================
-    // ADICIONAR TEXTO AO AVISO
+    // ADICIONAR TEXTO
     // ========================================================
 
     status.appendChild(
@@ -216,29 +247,21 @@ function mostrarStatusSupabase(
             "button"
         );
 
-
     botaoFechar.type =
         "button";
-
 
     botaoFechar.textContent =
         "✕";
 
-
     botaoFechar.title =
         "Fechar aviso";
-
-
-    // ========================================================
-    // FUNÇÃO DO BOTÃO
-    // ========================================================
 
     botaoFechar.onclick =
         fecharStatusSupabase;
 
 
     // ========================================================
-    // ADICIONAR BOTÃO AO AVISO
+    // ADICIONAR BOTÃO
     // ========================================================
 
     status.appendChild(
@@ -249,48 +272,36 @@ function mostrarStatusSupabase(
 
 
 
+
 // ============================================================
 // FUNÇÃO: fecharStatusSupabase()
 // ============================================================
 //
 // OBJETIVO:
 //
-// Fechar/remover da tela o aviso:
+// Remover da tela o aviso:
 //
 //     #statusSupabase
 //
 // IMPORTANTE:
 //
-// Esta função altera somente a interface.
-//
-// Ela NÃO:
+// Esta função NÃO:
 //
 // - cancela consultas;
-// - interrompe a verificação;
 // - desconecta o Supabase;
-// - remove dados;
-// - altera materiais.
+// - remove materiais;
+// - altera o banco.
 //
-// Se uma verificação estiver acontecendo, ela continuará
-// normalmente mesmo depois que o usuário fechar o aviso.
+// Atua somente na interface.
 //
 // ============================================================
 
 function fecharStatusSupabase() {
 
-    // ========================================================
-    // PROCURAR AVISO
-    // ========================================================
-
     const status =
         document.getElementById(
             "statusSupabase"
         );
-
-
-    // ========================================================
-    // AVISO NÃO EXISTE
-    // ========================================================
 
     if (!status) {
 
@@ -298,14 +309,10 @@ function fecharStatusSupabase() {
 
     }
 
-
-    // ========================================================
-    // REMOVER AVISO
-    // ========================================================
-
     status.remove();
 
 }
+
 
 
 
@@ -315,49 +322,32 @@ function fecharStatusSupabase() {
 //
 // OBJETIVO:
 //
-// Mostrar na tela os problemas encontrados durante
-// a verificação dos materiais.
+// Mostrar os problemas encontrados pelo PostgreSQL.
 //
 // PARÂMETROS:
 //
 // erros
-//     Array contendo as mensagens dos problemas.
+//     Array contendo mensagens dos problemas.
 //
 // totalEncontrado
-//     Quantidade total de materiais analisados.
+//     Total de materiais existentes.
 //
 // quantidadeErros
-//     Quantidade total de problemas encontrados.
+//     Total de problemas detectados.
 //
 // FUNCIONAMENTO:
 //
 // 1. Procura #resultadoVerificacaoSupabase.
-// 2. Se não existir, cria o painel.
-// 3. Mostra o total de materiais verificados.
-// 4. Mostra a quantidade de problemas.
-// 5. Exibe os detalhes dos problemas.
-// 6. Limita a apresentação aos primeiros 20 problemas.
-// 7. Adiciona um botão "Fechar".
+// 2. Cria o painel caso necessário.
+// 3. Mostra quantidade de materiais.
+// 4. Mostra quantidade de problemas.
+// 5. Mostra até 20 detalhes.
+// 6. Cria botão para fechar.
 //
 // IMPORTANTE:
 //
-// Todos os problemas continuam disponíveis no console.
-//
-// Nenhuma aparência visual é definida aqui.
-//
-// O visual deve ser controlado exclusivamente pelo:
-//
-//     style.css
-//
-// utilizando:
-//
-//     #resultadoVerificacaoSupabase
-//     #resultadoVerificacaoSupabase h3
-//     #resultadoVerificacaoSupabase p
-//     #resultadoVerificacaoSupabase ul
-//     #resultadoVerificacaoSupabase li
-//     #resultadoVerificacaoSupabase hr
-//     #resultadoVerificacaoSupabase button
+// Os textos vindos do banco passam por escaparHTML() antes
+// de serem inseridos no HTML.
 //
 // ============================================================
 
@@ -368,7 +358,7 @@ function mostrarErrosSupabase(
 ) {
 
     // ========================================================
-    // PROCURAR PAINEL EXISTENTE
+    // PROCURAR PAINEL
     // ========================================================
 
     let area =
@@ -378,7 +368,7 @@ function mostrarErrosSupabase(
 
 
     // ========================================================
-    // CRIAR PAINEL CASO NÃO EXISTA
+    // CRIAR PAINEL
     // ========================================================
 
     if (!area) {
@@ -388,14 +378,8 @@ function mostrarErrosSupabase(
                 "div"
             );
 
-
         area.id =
             "resultadoVerificacaoSupabase";
-
-
-        // ====================================================
-        // ADICIONAR À PÁGINA
-        // ====================================================
 
         document.body.appendChild(
             area
@@ -405,7 +389,7 @@ function mostrarErrosSupabase(
 
 
     // ========================================================
-    // INICIAR CONTEÚDO DO PAINEL
+    // INICIAR HTML
     // ========================================================
 
     let html =
@@ -444,16 +428,12 @@ function mostrarErrosSupabase(
         "</strong> problemas encontrados.</p>";
 
 
-    // ========================================================
-    // DIVISOR
-    // ========================================================
-
     html +=
         "<hr>";
 
 
     // ========================================================
-    // NENHUM DETALHE DISPONÍVEL
+    // SEM DETALHES
     // ========================================================
 
     if (
@@ -465,17 +445,8 @@ function mostrarErrosSupabase(
 
     } else {
 
-        // ====================================================
-        // TÍTULO DOS DETALHES
-        // ====================================================
-
         html +=
             "<p><strong>Detalhes:</strong></p>";
-
-
-        // ====================================================
-        // ABRIR LISTA
-        // ====================================================
 
         html +=
             "<ul>";
@@ -504,16 +475,12 @@ function mostrarErrosSupabase(
             );
 
 
-        // ====================================================
-        // FECHAR LISTA
-        // ====================================================
-
         html +=
             "</ul>";
 
 
         // ====================================================
-        // EXISTEM MAIS DE 20 PROBLEMAS
+        // MAIS DE 20 PROBLEMAS
         // ====================================================
 
         if (
@@ -555,39 +522,27 @@ function mostrarErrosSupabase(
 
 
 
+
 // ============================================================
 // FUNÇÃO: fecharErrosSupabase()
 // ============================================================
 //
 // OBJETIVO:
 //
-// Fechar/remover o painel:
+// Remover da tela:
 //
 //     #resultadoVerificacaoSupabase
 //
-// Esta função afeta somente a interface.
-//
-// Os erros encontrados continuam existindo durante
-// a execução da verificação e também permanecem registrados
-// no console do navegador.
+// Atua somente na interface.
 //
 // ============================================================
 
 function fecharErrosSupabase() {
 
-    // ========================================================
-    // PROCURAR PAINEL
-    // ========================================================
-
     const area =
         document.getElementById(
             "resultadoVerificacaoSupabase"
         );
-
-
-    // ========================================================
-    // PAINEL NÃO EXISTE
-    // ========================================================
 
     if (!area) {
 
@@ -595,14 +550,10 @@ function fecharErrosSupabase() {
 
     }
 
-
-    // ========================================================
-    // REMOVER PAINEL
-    // ========================================================
-
     area.remove();
 
 }
+
 
 
 
@@ -612,25 +563,10 @@ function fecharErrosSupabase() {
 //
 // OBJETIVO:
 //
-// Converter caracteres especiais em entidades HTML.
+// Converter caracteres especiais para entidades HTML.
 //
-// Isso evita que informações vindas do banco sejam
-// interpretadas pelo navegador como código HTML.
-//
-// EXEMPLO:
-//
-//     <
-// passa a ser:
-//     &lt;
-//
-// PARÂMETRO:
-//
-// texto
-//     Valor que será exibido.
-//
-// RETORNO:
-//
-// Texto seguro para inserção dentro do HTML.
+// Isso impede que informações vindas do banco sejam
+// interpretadas como HTML pelo navegador.
 //
 // ============================================================
 
@@ -666,43 +602,38 @@ function escaparHTML(
 
 
 
+
 // ============================================================
 // INICIALIZAÇÃO DO CLIENTE SUPABASE
 // ============================================================
 //
 // OBJETIVO:
 //
-// Criar o cliente utilizado pelo PMOBILE para conversar
-// com o banco Supabase.
+// Criar o cliente utilizado pelo PMOBILE.
 //
 // Depois da inicialização:
 //
 //     window.clienteSupabase
 //
-// ficará disponível globalmente para os demais arquivos.
+// ficará disponível globalmente.
 //
 // ============================================================
 
 if (!window.supabase) {
 
     // ========================================================
-    // BIBLIOTECA NÃO ENCONTRADA
+    // BIBLIOTECA NÃO CARREGADA
     // ========================================================
 
     console.error(
         "❌ Biblioteca do Supabase não foi carregada."
     );
 
-
     mostrarStatusSupabase(
         "❌ Biblioteca do Supabase não foi carregada"
     );
 
 } else {
-
-    // ========================================================
-    // BIBLIOTECA ENCONTRADA
-    // ========================================================
 
     console.log(
         "✅ Biblioteca do Supabase carregada."
@@ -712,7 +643,7 @@ if (!window.supabase) {
     try {
 
         // ====================================================
-        // CRIAR CLIENTE SUPABASE
+        // CRIAR CLIENTE
         // ====================================================
 
         const clienteSupabase =
@@ -723,25 +654,17 @@ if (!window.supabase) {
 
 
         // ====================================================
-        // DISPONIBILIZAR CLIENTE GLOBALMENTE
+        // DISPONIBILIZAR GLOBALMENTE
         // ====================================================
 
         window.clienteSupabase =
             clienteSupabase;
 
 
-        // ====================================================
-        // REGISTRAR SUCESSO NO CONSOLE
-        // ====================================================
-
         console.log(
             "✅ Cliente Supabase inicializado com sucesso."
         );
 
-
-        // ====================================================
-        // MOSTRAR STATUS
-        // ====================================================
 
         mostrarStatusSupabase(
             "🟢 Supabase inicializado com sucesso"
@@ -749,11 +672,11 @@ if (!window.supabase) {
 
 
         // ====================================================
-        // INICIAR VERIFICAÇÃO DOS MATERIAIS
+        // INICIAR DIAGNÓSTICO
         // ====================================================
         //
-        // O pequeno atraso continua preservado para garantir
-        // que a página tenha tempo de concluir a inicialização.
+        // Pequeno atraso mantido para permitir que a página
+        // termine sua inicialização.
         //
         // ====================================================
 
@@ -765,15 +688,10 @@ if (!window.supabase) {
 
     } catch (erro) {
 
-        // ====================================================
-        // ERRO NA INICIALIZAÇÃO
-        // ====================================================
-
         console.error(
             "❌ Erro ao inicializar o Supabase:",
             erro
         );
-
 
         mostrarStatusSupabase(
             "🔴 Erro ao inicializar o Supabase"
@@ -785,437 +703,221 @@ if (!window.supabase) {
 
 
 
+
 // ============================================================
 // FUNÇÃO: testarLeituraSupabase()
 // ============================================================
 //
 // OBJETIVO:
 //
-// Fazer a verificação completa da tabela:
+// Verificar a integridade da tabela:
 //
 //     public.materiais
 //
-// A função percorre todos os registros disponíveis.
+// utilizando funções PostgreSQL executadas diretamente
+// dentro do Supabase.
 //
-// VERIFICAÇÕES ATUAIS:
+// ============================================================
 //
-// 1. Se o Supabase responde.
-// 2. Quantos materiais existem.
-// 3. Se o material possui código.
-// 4. Se existem códigos duplicados.
-// 5. Se o material possui descrição.
-// 6. Se quantidade está preenchida.
-// 7. Se quantidade_reservada está preenchida.
-// 8. Se disponivel está preenchido.
+// DIFERENÇA DA VERSÃO ANTERIOR
+// ============================================================
 //
-// FUNCIONAMENTO:
+// ANTES:
 //
-// A consulta é realizada em lotes de 1.000 registros.
+// O navegador executava consultas de 1.000 registros.
 //
-// Isso evita solicitar todos os materiais em uma única
-// resposta do Supabase.
+// Depois analisava:
+//
+// - código;
+// - duplicidade;
+// - descrição;
+// - quantidade;
+// - quantidade reservada;
+// - disponível.
+//
+// Isso era repetido até percorrer toda a tabela.
+//
+// ============================================================
+//
+// AGORA:
+//
+// O PostgreSQL realiza a análise.
+//
+// PRIMEIRA RPC:
+//
+//     pmobile_diagnosticar_materiais()
+//
+// Retorna:
+//
+// - total_materiais
+// - sem_codigo
+// - sem_descricao
+// - quantidade_nula
+// - quantidade_reservada_nula
+// - disponivel_nulo
+// - codigos_duplicados
+// - total_problemas
+//
+// SEGUNDA RPC:
+//
+//     pmobile_listar_problemas_materiais()
+//
+// É executada SOMENTE se:
+//
+//     total_problemas > 0
+//
+// Ela retorna somente os materiais problemáticos.
+//
+// ============================================================
 //
 // IMPORTANTE:
 //
-// Esta rotina foi mantida exatamente nesta etapa.
+// Esta função é SOMENTE DE LEITURA.
 //
-// A futura transferência da verificação para o banco
-// Supabase/PostgreSQL continua pausada enquanto trabalhamos
-// na organização visual do PMOBILE.
+// Ela NÃO:
+//
+// - insere materiais;
+// - altera materiais;
+// - exclui materiais;
+// - altera IndexedDB.
 //
 // ============================================================
 
 async function testarLeituraSupabase() {
 
     console.log(
-        "🟡 Iniciando verificação completa da tabela materiais..."
+        "🟡 Iniciando diagnóstico PostgreSQL da tabela materiais..."
     );
 
 
     mostrarStatusSupabase(
-        "🟡 Verificando todos os materiais..."
+        "🟡 Verificando materiais no PostgreSQL..."
     );
 
 
     try {
 
         // ====================================================
-        // TAMANHO DE CADA LOTE
-        // ====================================================
-
-        const tamanhoLote =
-            1000;
-
-
-        // ====================================================
-        // POSIÇÃO INICIAL
-        // ====================================================
-
-        let inicio =
-            0;
-
-
-        // ====================================================
-        // TOTAL DE MATERIAIS ENCONTRADOS
-        // ====================================================
-
-        let totalEncontrado =
-            0;
-
-
-        // ====================================================
-        // TOTAL DE PROBLEMAS
-        // ====================================================
-
-        let quantidadeErros =
-            0;
-
-
-        // ====================================================
-        // LISTA DE PROBLEMAS
-        // ====================================================
-
-        const erros =
-            [];
-
-
-        // ====================================================
-        // CONTROLE DE CÓDIGOS
+        // ETAPA 1
+        // SOLICITAR DIAGNÓSTICO GERAL
         // ====================================================
         //
-        // O Set é utilizado para detectar códigos duplicados
-        // durante a leitura dos lotes.
+        // Uma única chamada substitui a antiga leitura de
+        // aproximadamente 94 lotes de 1.000 materiais.
         //
         // ====================================================
 
-        const codigosEncontrados =
-            new Set();
-
-
-        // ====================================================
-        // CONSULTAR LOTES
-        // ====================================================
-
-        while (true) {
-
-            // =================================================
-            // CALCULAR FINAL DO LOTE
-            // =================================================
-
-            const fim =
-                inicio +
-                tamanhoLote -
-                1;
-
-
-            console.log(
-                "🔎 Consultando registros:",
-                inicio,
-                "até",
-                fim
-            );
-
-
-            // =================================================
-            // CONSULTAR TABELA MATERIAIS
-            // =================================================
-
-            const resultado =
-                await window.clienteSupabase
-                    .from(
-                        "materiais"
-                    )
-                    .select(
-                        "id,codigo,descricao,referencia,marca,local,quantidade,quantidade_reservada,disponivel,ultima_entrada"
-                    )
-                    .order(
-                        "id",
-                        {
-                            ascending: true
-                        }
-                    )
-                    .range(
-                        inicio,
-                        fim
-                    );
-
-
-            // =================================================
-            // ERRO RETORNADO PELO SUPABASE
-            // =================================================
-
-            if (
-                resultado.error
-            ) {
-
-                console.error(
-                    "❌ Erro retornado pelo Supabase:",
-                    resultado.error
+        const {
+            data: dadosDiagnostico,
+            error: erroDiagnostico
+        } =
+            await window.clienteSupabase
+                .rpc(
+                    "pmobile_diagnosticar_materiais"
                 );
 
 
-                throw resultado.error;
+        // ====================================================
+        // ERRO NO DIAGNÓSTICO
+        // ====================================================
 
-            }
+        if (
+            erroDiagnostico
+        ) {
 
-
-            // =================================================
-            // OBTER REGISTROS
-            // =================================================
-
-            const dados =
-                resultado.data || [];
-
-
-            // =================================================
-            // NENHUM REGISTRO NO LOTE
-            // =================================================
-
-            if (
-                dados.length === 0
-            ) {
-
-                break;
-
-            }
-
-
-            // =================================================
-            // ANALISAR MATERIAIS DO LOTE
-            // =================================================
-
-            dados.forEach(
-                material => {
-
-                    // =========================================
-                    // CONTAR MATERIAL
-                    // =========================================
-
-                    totalEncontrado++;
-
-
-                    // =========================================
-                    // VERIFICAR CÓDIGO
-                    // =========================================
-
-                    if (
-                        !material.codigo ||
-                        String(
-                            material.codigo
-                        ).trim() === ""
-                    ) {
-
-                        quantidadeErros++;
-
-
-                        erros.push(
-                            "ID " +
-                            material.id +
-                            ": código vazio."
-                        );
-
-                    } else {
-
-                        const codigo =
-                            String(
-                                material.codigo
-                            ).trim();
-
-
-                        // =====================================
-                        // VERIFICAR CÓDIGO DUPLICADO
-                        // =====================================
-
-                        if (
-                            codigosEncontrados.has(
-                                codigo
-                            )
-                        ) {
-
-                            quantidadeErros++;
-
-
-                            erros.push(
-                                "Código duplicado: " +
-                                codigo +
-                                " (ID " +
-                                material.id +
-                                ")."
-                            );
-
-                        } else {
-
-                            codigosEncontrados.add(
-                                codigo
-                            );
-
-                        }
-
-                    }
-
-
-                    // =========================================
-                    // VERIFICAR DESCRIÇÃO
-                    // =========================================
-
-                    if (
-                        !material.descricao ||
-                        String(
-                            material.descricao
-                        ).trim() === ""
-                    ) {
-
-                        quantidadeErros++;
-
-
-                        erros.push(
-                            "ID " +
-                            material.id +
-                            ": descrição vazia."
-                        );
-
-                    }
-
-
-                    // =========================================
-                    // VERIFICAR QUANTIDADE
-                    // =========================================
-
-                    if (
-                        material.quantidade === null ||
-                        material.quantidade === undefined
-                    ) {
-
-                        quantidadeErros++;
-
-
-                        erros.push(
-                            "ID " +
-                            material.id +
-                            ": quantidade ausente."
-                        );
-
-                    }
-
-
-                    // =========================================
-                    // VERIFICAR QUANTIDADE RESERVADA
-                    // =========================================
-
-                    if (
-                        material.quantidade_reservada === null ||
-                        material.quantidade_reservada === undefined
-                    ) {
-
-                        quantidadeErros++;
-
-
-                        erros.push(
-                            "ID " +
-                            material.id +
-                            ": quantidade reservada ausente."
-                        );
-
-                    }
-
-
-                    // =========================================
-                    // VERIFICAR DISPONÍVEL
-                    // =========================================
-
-                    if (
-                        material.disponivel === null ||
-                        material.disponivel === undefined
-                    ) {
-
-                        quantidadeErros++;
-
-
-                        erros.push(
-                            "ID " +
-                            material.id +
-                            ": quantidade disponível ausente."
-                        );
-
-                    }
-
-                }
+            console.error(
+                "❌ Erro no diagnóstico PostgreSQL:",
+                erroDiagnostico
             );
 
-
-            // =================================================
-            // ATUALIZAR AVISO DE PROGRESSO
-            // =================================================
-
-            mostrarStatusSupabase(
-                "🟡 Verificando materiais: " +
-                totalEncontrado.toLocaleString(
-                    "pt-BR"
-                )
-            );
-
-
-            // =================================================
-            // ÚLTIMO LOTE
-            // =================================================
-
-            if (
-                dados.length <
-                tamanhoLote
-            ) {
-
-                break;
-
-            }
-
-
-            // =================================================
-            // PREPARAR PRÓXIMO LOTE
-            // =================================================
-
-            inicio +=
-                tamanhoLote;
-
-
-            // =================================================
-            // LIBERAR INTERFACE DO NAVEGADOR
-            // =================================================
-
-            await permitirAtualizacaoNavegador();
+            throw erroDiagnostico;
 
         }
 
 
         // ====================================================
-        // VERIFICAÇÃO CONCLUÍDA
+        // OBTER RESULTADO
+        // ====================================================
+        //
+        // A função PostgreSQL retorna somente uma linha.
+        //
+        // Dependendo da resposta da biblioteca, tratamos tanto
+        // array quanto objeto.
+        //
         // ====================================================
 
-        console.log(
-            "🟢 Verificação completa concluída."
-        );
-
-
-        console.log(
-            "Total de materiais:",
-            totalEncontrado
-        );
-
-
-        console.log(
-            "Quantidade de problemas:",
-            quantidadeErros
-        );
-
-
-        console.log(
-            "Problemas:",
-            erros
-        );
+        const diagnostico =
+            Array.isArray(
+                dadosDiagnostico
+            )
+                ? dadosDiagnostico[0]
+                : dadosDiagnostico;
 
 
         // ====================================================
-        // CASO 1:
-        // TABELA MATERIAIS VAZIA
+        // VALIDAR RESPOSTA
+        // ====================================================
+
+        if (
+            !diagnostico
+        ) {
+
+            throw new Error(
+                "O PostgreSQL não retornou o diagnóstico dos materiais."
+            );
+
+        }
+
+
+        // ====================================================
+        // CONVERTER BIGINT PARA NUMBER
+        // ====================================================
+        //
+        // Os valores BIGINT do PostgreSQL podem chegar ao
+        // JavaScript como texto.
+        //
+        // Number() permite utilizar comparações e
+        // toLocaleString() normalmente.
+        //
+        // ====================================================
+
+        const totalEncontrado =
+            Number(
+                diagnostico.total_materiais ??
+                0
+            );
+
+
+        const quantidadeErros =
+            Number(
+                diagnostico.total_problemas ??
+                0
+            );
+
+
+        // ====================================================
+        // MOSTRAR DIAGNÓSTICO NO CONSOLE
+        // ====================================================
+        //
+        // Mantemos o objeto completo para facilitar testes
+        // e análise durante o desenvolvimento.
+        //
+        // ====================================================
+
+        console.log(
+            "🟢 Diagnóstico PostgreSQL concluído."
+        );
+
+
+        console.log(
+            "Resumo do diagnóstico:",
+            diagnostico
+        );
+
+
+        // ====================================================
+        // CASO 1
+        // TABELA VAZIA
         // ====================================================
 
         if (
@@ -1226,15 +928,21 @@ async function testarLeituraSupabase() {
                 "🟡 Supabase respondeu, mas a tabela materiais está vazia."
             );
 
-
             return;
 
         }
 
 
         // ====================================================
-        // CASO 2:
+        // CASO 2
         // NENHUM PROBLEMA
+        // ====================================================
+        //
+        // Se não existem problemas, encerramos aqui.
+        //
+        // pmobile_listar_problemas_materiais()
+        // NÃO será executada.
+        //
         // ====================================================
 
         if (
@@ -1261,7 +969,7 @@ async function testarLeituraSupabase() {
 
 
         // ====================================================
-        // CASO 3:
+        // CASO 3
         // PROBLEMAS ENCONTRADOS
         // ====================================================
 
@@ -1279,7 +987,207 @@ async function testarLeituraSupabase() {
 
 
         // ====================================================
-        // MOSTRAR DETALHES DOS PROBLEMAS
+        // ETAPA 2
+        // BUSCAR SOMENTE MATERIAIS PROBLEMÁTICOS
+        // ====================================================
+        //
+        // Esta consulta somente acontece quando:
+        //
+        //     total_problemas > 0
+        //
+        // Portanto não baixamos novamente os materiais
+        // corretos.
+        //
+        // ====================================================
+
+        const {
+            data: materiaisProblematicos,
+            error: erroDetalhes
+        } =
+            await window.clienteSupabase
+                .rpc(
+                    "pmobile_listar_problemas_materiais"
+                );
+
+
+        // ====================================================
+        // ERRO AO BUSCAR DETALHES
+        // ====================================================
+
+        if (
+            erroDetalhes
+        ) {
+
+            console.error(
+                "❌ Erro ao buscar detalhes dos problemas:",
+                erroDetalhes
+            );
+
+            throw erroDetalhes;
+
+        }
+
+
+        // ====================================================
+        // ARRAY DE MENSAGENS
+        // ====================================================
+        //
+        // A função mostrarErrosSupabase() já trabalha com
+        // mensagens em texto.
+        //
+        // Portanto transformamos os códigos retornados pelo
+        // PostgreSQL em mensagens legíveis.
+        //
+        // ====================================================
+
+        const erros =
+            [];
+
+
+        // ====================================================
+        // TRADUÇÃO DOS TIPOS DE PROBLEMA
+        // ====================================================
+
+        const descricoesProblemas = {
+
+            SEM_CODIGO:
+                "código vazio.",
+
+            SEM_DESCRICAO:
+                "descrição vazia.",
+
+            QUANTIDADE_NULA:
+                "quantidade ausente.",
+
+            QUANTIDADE_RESERVADA_NULA:
+                "quantidade reservada ausente.",
+
+            DISPONIVEL_NULO:
+                "quantidade disponível ausente."
+
+        };
+
+
+        // ====================================================
+        // PERCORRER SOMENTE MATERIAIS PROBLEMÁTICOS
+        // ====================================================
+
+        (
+            materiaisProblematicos ||
+            []
+        ).forEach(
+
+            material => {
+
+                // =============================================
+                // OBTER ARRAY DE PROBLEMAS
+                // =============================================
+
+                const problemas =
+                    Array.isArray(
+                        material.problemas
+                    )
+                        ? material.problemas
+                        : [];
+
+
+                // =============================================
+                // PERCORRER PROBLEMAS DO MATERIAL
+                // =============================================
+
+                problemas.forEach(
+
+                    problema => {
+
+
+                        // =====================================
+                        // CÓDIGO DUPLICADO
+                        // =====================================
+                        //
+                        // Mantemos formato semelhante ao aviso
+                        // utilizado anteriormente.
+                        //
+                        // =====================================
+
+                        if (
+                            problema ===
+                            "CODIGO_DUPLICADO"
+                        ) {
+
+                            erros.push(
+                                "Código duplicado: " +
+                                String(
+                                    material.codigo ??
+                                    ""
+                                ) +
+                                " (ID " +
+                                material.id +
+                                ")."
+                            );
+
+
+                            return;
+
+                        }
+
+
+                        // =====================================
+                        // DEMAIS PROBLEMAS
+                        // =====================================
+
+                        const descricao =
+                            descricoesProblemas[
+                                problema
+                            ] ||
+                            (
+                                "problema identificado: " +
+                                problema +
+                                "."
+                            );
+
+
+                        erros.push(
+                            "ID " +
+                            material.id +
+                            ": " +
+                            descricao
+                        );
+
+                    }
+
+                );
+
+            }
+
+        );
+
+
+        // ====================================================
+        // MOSTRAR DETALHES NO CONSOLE
+        // ====================================================
+
+        console.log(
+            "Materiais problemáticos:",
+            materiaisProblematicos ||
+            []
+        );
+
+
+        console.log(
+            "Problemas formatados:",
+            erros
+        );
+
+
+        // ====================================================
+        // MOSTRAR DETALHES NA INTERFACE
+        // ====================================================
+        //
+        // Mantemos a mesma função visual já utilizada pelo
+        // PMOBILE.
+        //
+        // Nenhuma alteração no style.css é necessária.
+        //
         // ====================================================
 
         mostrarErrosSupabase(
@@ -1311,40 +1219,6 @@ async function testarLeituraSupabase() {
 
 
 
-// ============================================================
-// FUNÇÃO: permitirAtualizacaoNavegador()
-// ============================================================
-//
-// OBJETIVO:
-//
-// Dar ao navegador uma oportunidade de atualizar a interface
-// entre a leitura de um lote e outro.
-//
-// Isso é especialmente útil durante testes em celulares,
-// evitando bloquear continuamente a atualização visual.
-//
-// RETORNO:
-//
-// Promise resolvida no próximo ciclo disponível.
-//
-// ============================================================
-
-function permitirAtualizacaoNavegador() {
-
-    return new Promise(
-        resolve => {
-
-            setTimeout(
-                resolve,
-                0
-            );
-
-        }
-    );
-
-}
-
-
 
 // ============================================================
 // FUNÇÃO: limparMateriaisSupabase()
@@ -1358,10 +1232,10 @@ function permitirAtualizacaoNavegador() {
 //
 // FLUXO:
 //
-// 1. Solicita confirmação do usuário.
-// 2. Caso seja cancelado, encerra a função.
+// 1. Solicita confirmação.
+// 2. Caso seja cancelado, encerra.
 // 3. Mostra aviso de processamento.
-// 4. Executa a exclusão no Supabase.
+// 4. Executa exclusão no Supabase.
 // 5. Informa sucesso ou erro.
 //
 // IMPORTANTE:
@@ -1371,9 +1245,9 @@ function permitirAtualizacaoNavegador() {
 // - usuários;
 // - conferências;
 // - histórico de importações;
-// - dados do IndexedDB.
+// - IndexedDB.
 //
-// Ela atua somente na tabela:
+// Atua somente em:
 //
 //     public.materiais
 //
@@ -1394,11 +1268,9 @@ async function limparMateriaisSupabase() {
         );
 
 
-    // ========================================================
-    // CANCELADO PELO USUÁRIO
-    // ========================================================
-
-    if (!confirmar) {
+    if (
+        !confirmar
+    ) {
 
         return;
 
@@ -1435,10 +1307,12 @@ async function limparMateriaisSupabase() {
 
 
         // ====================================================
-        // ERRO RETORNADO PELO SUPABASE
+        // ERRO
         // ====================================================
 
-        if (error) {
+        if (
+            error
+        ) {
 
             console.error(
                 "❌ Erro ao limpar materiais:",
