@@ -93,7 +93,6 @@ function gerarIdConferencia() {
 //
 // OBJETIVO:
 // Retornar o cliente Supabase inicializado em supabase.js.
-//
 // ============================================================
 
 function obterClienteSupabaseConferencia() {
@@ -140,7 +139,6 @@ function escaparBuscaILikeConferencia(valor) {
 // dados.js fornece:
 //   carregarMateriais()
 //   obterMateriaisLocais()
-//
 // ============================================================
 
 async function obterMateriaisLocaisConferencia() {
@@ -463,7 +461,6 @@ async function buscarMaterialConferencia() {
 //
 // O botão "Selecionar" passa o objeto inteiro para a tela de
 // conferência.
-//
 // ============================================================
 
 function exibirResultadosConferencia(
@@ -637,7 +634,6 @@ function exibirResultadosConferencia(
 // física.
 //
 // O objeto selecionado pode vir do Supabase ou do IndexedDB.
-//
 // ============================================================
 
 function selecionarMaterialConferencia(
@@ -813,7 +809,6 @@ function selecionarMaterialConferencia(
 // de navigator.onLine para decidir se podemos usar a fila.
 // Se o aparelho disser "online", mas o Supabase estiver
 // inacessível, a conferência também fica protegida localmente.
-//
 // ============================================================
 
 async function registrarContagem() {
@@ -936,58 +931,46 @@ async function registrarContagem() {
         const registroConferencia = {
 
             conferenciaId:
-
                 conferenciaId,
 
             materialId:
-
                 material.id ??
                 material.idSupabase ??
                 null,
 
             codigo:
-
                 material.codigo ??
                 "",
 
             descricao:
-
                 material.descricao ??
                 "",
 
             referencia:
-
                 material.referencia ||
                 "",
 
             marca:
-
                 material.marca ||
                 "",
 
             local:
-
                 material.local ||
                 "",
 
             quantidadeEsperada:
-
                 quantidadeEsperada,
 
             quantidadeFisica:
-
                 quantidadeFisica,
 
             diferenca:
-
                 diferenca,
 
             status:
-
                 status,
 
             data:
-
                 new Date().toISOString()
 
         };
@@ -1811,6 +1794,43 @@ async function removerConferenciaPendente(
         }
     );
 
+}// ============================================================
+// FUNÇÃO: mostrarStatusSincronizacaoConferencias()
+// ============================================================
+//
+// OBJETIVO:
+// Mostrar na barra de status do Supabase as mensagens
+// relacionadas à sincronização da fila de conferências.
+//
+// A função utiliza a mesma barra criada pelo supabase.js.
+//
+// O parâmetro true mantém esta mensagem como prioritária,
+// evitando que mensagens normais do Supabase sobrescrevam
+// o status enquanto a sincronização estiver sendo exibida.
+// ============================================================
+
+function mostrarStatusSincronizacaoConferencias(
+    mensagem
+) {
+
+    if (
+        typeof mostrarStatusSupabase === "function"
+    ) {
+
+        mostrarStatusSupabase(
+            mensagem,
+            true
+        );
+
+    } else {
+
+        console.warn(
+            "Função mostrarStatusSupabase() não encontrada:",
+            mensagem
+        );
+
+    }
+
 }
 
 
@@ -1828,7 +1848,9 @@ async function removerConferenciaPendente(
 // - sucesso -> remove da fila;
 // - conferencia_id já existente -> tratado pela função
 //   salvarConferenciaSupabase();
-// - erro -> mantém na fila.
+// - erro -> mantém na fila;
+// - status da sincronização aparece na barra do Supabase.
+//
 // ============================================================
 
 async function sincronizarConferenciasPendentes() {
@@ -1851,6 +1873,10 @@ async function sincronizarConferenciasPendentes() {
 
         console.log(
             "📴 Dispositivo offline. Sincronização adiada."
+        );
+
+        mostrarStatusSincronizacaoConferencias(
+            "📴 Offline — sincronização de conferências aguardando conexão."
         );
 
         return;
@@ -1876,6 +1902,10 @@ async function sincronizarConferenciasPendentes() {
                 erro
             );
 
+            mostrarStatusSincronizacaoConferencias(
+                "🔴 Erro ao carregar a fila de conferências."
+            );
+
             return;
 
         }
@@ -1896,6 +1926,14 @@ async function sincronizarConferenciasPendentes() {
             "📦 Conferências pendentes:",
             pendentes.length
         );
+
+        mostrarStatusSincronizacaoConferencias(
+            "🟡 Sincronizando conferências... 0 de " +
+            pendentes.length
+        );
+
+        let sincronizadas =
+            0;
 
         for (
             const item of pendentes
@@ -1938,6 +1976,15 @@ async function sincronizarConferenciasPendentes() {
                         "📴 Internet caiu durante a sincronização."
                     );
 
+                    mostrarStatusSincronizacaoConferencias(
+                        "📴 Internet caiu — " +
+                        (
+                            pendentes.length -
+                            sincronizadas
+                        ) +
+                        " conferência(s) permanecem na fila."
+                    );
+
                     break;
 
                 }
@@ -1950,10 +1997,19 @@ async function sincronizarConferenciasPendentes() {
                     item.id
                 );
 
+                sincronizadas++;
+
                 console.log(
                     "✅ Conferência sincronizada:",
                     conferencia.codigo,
                     conferencia.conferenciaId
+                );
+
+                mostrarStatusSincronizacaoConferencias(
+                    "🟡 Sincronizando conferências... " +
+                    sincronizadas +
+                    " de " +
+                    pendentes.length
                 );
 
             } catch (erro) {
@@ -1965,6 +2021,15 @@ async function sincronizarConferenciasPendentes() {
 
                 // Não remove.
                 // O registro será tentado novamente.
+
+                mostrarStatusSincronizacaoConferencias(
+                    "🔴 Falha na sincronização — " +
+                    (
+                        pendentes.length -
+                        sincronizadas
+                    ) +
+                    " conferência(s) permanecem na fila."
+                );
 
                 break;
 
@@ -1990,6 +2055,39 @@ async function sincronizarConferenciasPendentes() {
                     "✅ Fila de conferências sincronizada."
                 );
 
+                mostrarStatusSincronizacaoConferencias(
+                    "🟢 Conferências sincronizadas com sucesso — " +
+                    sincronizadas +
+                    " conferência(s)."
+                );
+
+            } else if (
+                navigator.onLine === false
+            ) {
+
+                console.log(
+                    "📴 Sincronização interrompida porque a internet caiu."
+                );
+
+                mostrarStatusSincronizacaoConferencias(
+                    "📴 Sincronização interrompida — " +
+                    restantes.length +
+                    " conferência(s) permanecem na fila."
+                );
+
+            } else {
+
+                console.warn(
+                    "⚠️ Ainda existem conferências pendentes:",
+                    restantes.length
+                );
+
+                mostrarStatusSincronizacaoConferencias(
+                    "🔴 Sincronização incompleta — " +
+                    restantes.length +
+                    " conferência(s) permanecem na fila."
+                );
+
             }
 
         } catch (erro) {
@@ -1997,6 +2095,10 @@ async function sincronizarConferenciasPendentes() {
             console.error(
                 "Erro ao verificar fila:",
                 erro
+            );
+
+            mostrarStatusSincronizacaoConferencias(
+                "🔴 Não foi possível verificar a fila de conferências."
             );
 
         }
@@ -2042,6 +2144,8 @@ function sincronizarQuandoPossivel() {
 // OBJETIVO:
 // Quando o navegador detectar retorno da conexão, iniciar a
 // sincronização automaticamente.
+//
+// A mensagem também aparece na barra de status.
 // ============================================================
 
 window.addEventListener(
@@ -2049,6 +2153,10 @@ window.addEventListener(
     function() {
 
         console.log(
+            "🌐 Internet voltou. Sincronizando conferências..."
+        );
+
+        mostrarStatusSincronizacaoConferencias(
             "🌐 Internet voltou. Sincronizando conferências..."
         );
 
@@ -2102,6 +2210,10 @@ document.addEventListener(
 // ✅ Registro removido da fila somente após sucesso
 // ✅ conferencia_id duplicado é tratado pelo Supabase
 // ✅ Falha de sincronização mantém a conferência local
+// ✅ Status da sincronização aparece na barra do Supabase
+// ✅ Progresso da sincronização aparece na barra
+// ✅ Falha de sincronização aparece na barra
+// ✅ Retorno da internet aparece na barra
 //
 // TESTE RECOMENDADO:
 //
@@ -2119,12 +2231,19 @@ document.addEventListener(
 //      realizar conferência;
 //      confirmar;
 //      verificar mensagem de fila local.
-// 5. Voltar ONLINE.
-// 6. Verificar console:
+// 5. Criar duas ou mais conferências offline.
+// 6. Voltar ONLINE.
+// 7. Verificar a barra de status:
+//      "🌐 Internet voltou..."
+//      "🟡 Sincronizando..."
+//      "1 de X"
+//      "2 de X"
+//      "🟢 Conferências sincronizadas..."
+// 8. Verificar console:
 //      "Conferência sincronizada".
-// 7. Conferir a tabela public.conferencias.
-// 8. Confirmar que existe somente uma linha para o
-//    conferencia_id.
-// 9. Repetir o teste offline para uma divergência.
+// 9. Conferir a tabela public.conferencias.
+// 10. Confirmar que existe somente uma linha para o
+//     conferencia_id.
+// 11. Repetir o teste offline para uma divergência.
 //
 // ============================================================
