@@ -1,4 +1,3 @@
-```javascript
 // ============================================================
 // PMOBILE
 // ARQUIVO: conferencias.js
