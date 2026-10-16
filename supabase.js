@@ -240,6 +240,38 @@ status.appendChild(
 
 }
 
+// ============================================================
+// FUNÇÃO: fecharStatusSupabase()
+// ============================================================
+//
+// OBJETIVO:
+//
+// Fechar o aviso de status exibido na parte superior
+// da tela.
+//
+// Esta função altera somente a interface.
+// Nenhuma operação do Supabase é interrompida.
+//
+// ============================================================
+
+function fecharStatusSupabase() {
+
+    const status =
+        document.getElementById(
+            "statusSupabase"
+        );
+
+
+    if (!status) {
+
+        return;
+
+    }
+
+
+    status.remove();
+
+}
 
 
 // ============================================================
