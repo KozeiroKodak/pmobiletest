@@ -469,6 +469,24 @@ function fecharStatusSupabase() {
 // Os textos vindos do banco passam por escaparHTML() antes
 // de serem inseridos no HTML.
 //
+// O resumo dos problemas é exibido SOMENTE neste painel.
+//
+// Quando o PostgreSQL encontrar problemas, a mensagem:
+//
+//     ⚠️ 93.948 materiais verificados.
+//     2 problemas encontrados.
+//
+// NÃO será enviada também para #statusSupabase.
+//
+// Isso evita duplicidade de informação e mantém a barra de
+// status disponível para mensagens operacionais, como:
+//
+// - conexão com Supabase;
+// - sincronização do inventário;
+// - progresso da sincronização;
+// - conclusão da sincronização;
+// - erros de conexão.
+//
 // ============================================================
 
 function mostrarErrosSupabase(
@@ -892,6 +910,34 @@ if (!window.supabase) {
 //
 // ============================================================
 //
+// ALTERAÇÃO ATUAL:
+//
+// Caso o PostgreSQL encontre problemas:
+//
+//     total_problemas > 0
+//
+// o resultado NÃO será mais enviado para a barra:
+//
+//     #statusSupabase
+//
+// Os problemas continuam sendo exibidos normalmente através
+// de:
+//
+//     mostrarErrosSupabase()
+//
+// Portanto:
+//
+// DIAGNÓSTICO POSTGRESQL
+//        │
+//        ├── console                     → MANTIDO
+//        ├── popup/painel de problemas   → MANTIDO
+//        └── barra #statusSupabase       → REMOVIDO
+//
+// A alteração evita que o resultado do diagnóstico concorra
+// visualmente com o status operacional da sincronização.
+//
+// ============================================================
+//
 // IMPORTANTE:
 //
 // Esta função é SOMENTE DE LEITURA.
@@ -1094,21 +1140,31 @@ async function testarLeituraSupabase() {
         // CASO 3
         // PROBLEMAS ENCONTRADOS
         // ====================================================
-
-        mostrarStatusSupabase(
-            "⚠️ " +
-            totalEncontrado.toLocaleString(
-                "pt-BR"
-            ) +
-            " materiais verificados. " +
-            quantidadeErros.toLocaleString(
-                "pt-BR"
-            ) +
-            " problemas encontrados."
-        );
-
-
-        // ====================================================
+        //
+        // ALTERAÇÃO:
+        //
+        // A mensagem de resumo NÃO é mais enviada para:
+        //
+        //     mostrarStatusSupabase()
+        //
+        // Antes este bloco também mostrava:
+        //
+        //     ⚠️ 93.948 materiais verificados.
+        //     2 problemas encontrados.
+        //
+        // na barra de status.
+        //
+        // Isso foi removido porque o próprio painel criado por
+        // mostrarErrosSupabase() já apresenta:
+        //
+        // - total de materiais verificados;
+        // - total de problemas;
+        // - detalhes dos problemas.
+        //
+        // O diagnóstico continua normalmente abaixo.
+        //
+        // =================================================
+                // ====================================================
         // ETAPA 2
         // BUSCAR SOMENTE MATERIAIS PROBLEMÁTICOS
         // ====================================================
@@ -1119,6 +1175,15 @@ async function testarLeituraSupabase() {
         //
         // Portanto não baixamos novamente os materiais
         // corretos.
+        //
+        // IMPORTANTE:
+        //
+        // O resultado desta etapa será utilizado pelo painel
+        // de diagnóstico.
+        //
+        // Ele NÃO será enviado para a barra:
+        //
+        //     #statusSupabase
         //
         // ====================================================
 
@@ -1305,8 +1370,26 @@ async function testarLeituraSupabase() {
         // MOSTRAR DETALHES NA INTERFACE
         // ====================================================
         //
-        // Mantemos a mesma função visual já utilizada pelo
-        // PMOBILE.
+        // O painel continua sendo exibido normalmente.
+        //
+        // Esta é agora a ÚNICA representação visual do
+        // resultado quando o diagnóstico PostgreSQL encontra
+        // problemas nos materiais.
+        //
+        // Exemplo:
+        //
+        //     ⚠️ Problemas encontrados
+        //
+        //     93.948 materiais verificados.
+        //
+        //     2 problemas encontrados.
+        //
+        //     Detalhes:
+        //
+        //     - ID XXXXX: código vazio.
+        //     - ID XXXXX: descrição vazia.
+        //
+        // A barra #statusSupabase NÃO recebe esse resumo.
         //
         // Nenhuma alteração no style.css é necessária.
         //
@@ -1323,6 +1406,23 @@ async function testarLeituraSupabase() {
 
         // ====================================================
         // ERRO DURANTE A VERIFICAÇÃO
+        // ====================================================
+        //
+        // IMPORTANTE:
+        //
+        // Aqui estamos tratando um ERRO DE EXECUÇÃO/CONEXÃO,
+        // e não um problema encontrado nos materiais.
+        //
+        // Por isso esta mensagem CONTINUA podendo utilizar a
+        // barra de status.
+        //
+        // Exemplos:
+        //
+        // - RPC indisponível;
+        // - falha de conexão;
+        // - erro inesperado do PostgreSQL;
+        // - erro de comunicação com o Supabase.
+        //
         // ====================================================
 
         console.error(
@@ -1380,6 +1480,12 @@ async function limparMateriaisSupabase() {
     // ========================================================
     // CONFIRMAÇÃO
     // ========================================================
+    //
+    // Como esta operação remove todos os materiais do banco
+    // central, é obrigatório solicitar confirmação antes de
+    // executar a exclusão.
+    //
+    // ========================================================
 
     const confirmar =
         confirm(
@@ -1389,6 +1495,10 @@ async function limparMateriaisSupabase() {
             "Deseja continuar?"
         );
 
+
+    // ========================================================
+    // CANCELAMENTO
+    // ========================================================
 
     if (
         !confirmar
@@ -1402,6 +1512,13 @@ async function limparMateriaisSupabase() {
     // ========================================================
     // MOSTRAR PROCESSAMENTO
     // ========================================================
+    //
+    // Esta é uma operação real sobre o banco.
+    //
+    // Portanto o status continua sendo exibido normalmente
+    // na barra.
+    //
+    // ========================================================
 
     mostrarStatusSupabase(
         "🟡 Limpando materiais do Supabase..."
@@ -1412,6 +1529,18 @@ async function limparMateriaisSupabase() {
 
         // ====================================================
         // EXCLUIR MATERIAIS
+        // ====================================================
+        //
+        // A exclusão atua exclusivamente na tabela:
+        //
+        //     public.materiais
+        //
+        // O filtro:
+        //
+        //     .neq("id", 0)
+        //
+        // permite aplicar DELETE aos registros da tabela.
+        //
         // ====================================================
 
         const {
@@ -1481,6 +1610,11 @@ async function limparMateriaisSupabase() {
 
         // ====================================================
         // ERRO INESPERADO
+        // ====================================================
+        //
+        // Captura erros JavaScript ou outras falhas que não
+        // tenham sido retornadas diretamente pelo Supabase.
+        //
         // ====================================================
 
         console.error(
