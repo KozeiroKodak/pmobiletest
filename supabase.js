@@ -176,11 +176,67 @@ function mostrarStatusSupabase(mensagem) {
 
 
     // ========================================================
-    // ATUALIZAR TEXTO
-    // ========================================================
+// ATUALIZAR CONTEÚDO
+// ========================================================
+//
+// Mostra a mensagem do Supabase e adiciona um botão
+// para permitir fechar manualmente o aviso.
+//
+// ========================================================
 
-    status.textContent =
-        mensagem;
+status.innerHTML = "";
+
+
+// ========================================================
+// TEXTO DO STATUS
+// ========================================================
+
+const textoStatus =
+    document.createElement(
+        "span"
+    );
+
+textoStatus.textContent =
+    mensagem;
+
+textoStatus.style.flex =
+    "1";
+
+status.appendChild(
+    textoStatus
+);
+
+
+// ========================================================
+// BOTÃO FECHAR
+// ========================================================
+
+const botaoFechar =
+    document.createElement(
+        "button"
+    );
+
+botaoFechar.type =
+    "button";
+
+botaoFechar.textContent =
+    "✕";
+
+botaoFechar.title =
+    "Fechar aviso";
+
+botaoFechar.style.marginLeft =
+    "10px";
+
+botaoFechar.style.cursor =
+    "pointer";
+
+botaoFechar.onclick =
+    fecharStatusSupabase;
+
+status.appendChild(
+    botaoFechar
+);
 
 }
 
