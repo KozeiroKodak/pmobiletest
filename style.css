@@ -1,20 +1,58 @@
 /* ============================================================
    PMOBILE
    ARQUIVO: style.css
+   ============================================================
 
-   LAYOUT PRINCIPAL
-   Referência visual: Supabase Studio
+   OBJETIVO:
+
+   Centralizar toda a aparência visual do PMOBILE.
+
+   RESPONSABILIDADES DESTE ARQUIVO:
+
+   1. Definir as cores principais do sistema.
+   2. Controlar a tela inicial.
+   3. Controlar a sidebar.
+   4. Controlar a área principal.
+   5. Controlar painéis.
+   6. Controlar formulários.
+   7. Controlar botões.
+   8. Controlar modais.
+   9. Controlar avisos do Supabase.
+   10. Controlar a adaptação para celulares.
+
+   REFERÊNCIA VISUAL:
+
+   Supabase Studio.
+
+   IMPORTANTE:
+
+   A aparência deve permanecer neste arquivo.
+
+   JavaScript deve cuidar das funções e não da aparência.
+
    ============================================================ */
 
 
 /* ============================================================
-   VARIÁVEIS
+   VARIÁVEIS GERAIS
+   ============================================================
+
+   Cores e medidas reutilizadas pelo sistema.
+
+   Alterar uma variável aqui permite modificar vários
+   componentes simultaneamente.
+
    ============================================================ */
 
 :root {
 
+    /* SIDEBAR */
+
     --sidebar-largura: 240px;
     --sidebar-mobile: 58px;
+
+
+    /* FUNDOS */
 
     --fundo: #121212;
     --fundo-sidebar: #171717;
@@ -22,37 +60,101 @@
     --fundo-hover: #242424;
     --fundo-ativo: #2a2a2a;
 
+
+    /* BORDAS */
+
     --borda: #2e2e2e;
     --borda-clara: #3a3a3a;
+
+
+    /* TEXTOS */
 
     --texto: #ededed;
     --texto-secundario: #a3a3a3;
     --texto-fraco: #737373;
 
+
+    /* COR PRINCIPAL */
+
     --verde: #3ecf8e;
     --verde-hover: #34b27b;
+
+
+    /* AVISOS TRANSPARENTES */
+
+    --aviso-fundo:
+        rgba(
+            18,
+            18,
+            18,
+            0.78
+        );
+
+    --aviso-borda:
+        rgba(
+            255,
+            255,
+            255,
+            0.14
+        );
+
+    --aviso-botao:
+        rgba(
+            255,
+            255,
+            255,
+            0.05
+        );
+
+    --aviso-botao-hover:
+        rgba(
+            255,
+            255,
+            255,
+            0.10
+        );
 
 }
 
 
 /* ============================================================
    RESET
+   ============================================================
+
+   Remove diferenças básicas de espaçamento entre navegadores
+   e padroniza o cálculo das dimensões.
+
    ============================================================ */
 
 * {
-    box-sizing: border-box;
+
+    box-sizing:
+        border-box;
+
 }
 
 
 html,
 body {
-    margin: 0;
-    padding: 0;
 
-    width: 100%;
-    min-height: 100%;
+    margin:
+        0;
+
+    padding:
+        0;
+
+    width:
+        100%;
+
+    min-height:
+        100%;
+
 }
 
+
+/* ============================================================
+   CORPO DA PÁGINA
+   ============================================================ */
 
 body {
 
@@ -63,192 +165,338 @@ body {
         "Segoe UI",
         sans-serif;
 
-    background: var(--fundo);
-    color: var(--texto);
+    background:
+        var(--fundo);
 
-    font-size: 14px;
+    color:
+        var(--texto);
+
+    font-size:
+        14px;
+
 }
 
 
 /* ============================================================
    TELA INICIAL
+   ============================================================
+
+   Primeira tela exibida antes de entrar no sistema.
+
    ============================================================ */
 
 #inicio {
 
-    min-height: 100vh;
+    min-height:
+        100vh;
 
-    display: flex;
-    flex-direction: column;
+    display:
+        flex;
 
-    align-items: center;
-    justify-content: center;
+    flex-direction:
+        column;
 
-    padding: 24px;
+    align-items:
+        center;
 
-    text-align: center;
+    justify-content:
+        center;
 
-    background: var(--fundo);
-}
+    padding:
+        24px;
 
+    text-align:
+        center;
 
-#inicio h1 {
+    background:
+        var(--fundo);
 
-    margin: 0 0 8px;
-
-    font-size: 26px;
-    font-weight: 600;
-}
-
-
-#inicio p {
-
-    margin: 0;
-
-    color: var(--texto-secundario);
-}
-
-
-#inicio button {
-
-    margin-top: 22px;
-
-    padding: 10px 22px;
-
-    border: 1px solid var(--borda-clara);
-    border-radius: 6px;
-
-    background: var(--fundo-painel);
-    color: var(--texto);
-
-    font-size: 14px;
-
-    cursor: pointer;
-}
-
-
-#inicio button:hover {
-
-    background: var(--fundo-hover);
 }
 
 
 /* ============================================================
-   APLICAÇÃO
+   TÍTULO DA TELA INICIAL
+   ============================================================ */
+
+#inicio h1 {
+
+    margin:
+        0 0 8px;
+
+    font-size:
+        26px;
+
+    font-weight:
+        600;
+
+}
+
+
+/* ============================================================
+   DESCRIÇÃO DA TELA INICIAL
+   ============================================================ */
+
+#inicio p {
+
+    margin:
+        0;
+
+    color:
+        var(--texto-secundario);
+
+}
+
+
+/* ============================================================
+   BOTÃO INICIAR
+   ============================================================ */
+
+#inicio button {
+
+    margin-top:
+        22px;
+
+    padding:
+        10px 22px;
+
+    border:
+        1px solid
+        var(--borda-clara);
+
+    border-radius:
+        6px;
+
+    background:
+        var(--fundo-painel);
+
+    color:
+        var(--texto);
+
+    font-family:
+        inherit;
+
+    font-size:
+        14px;
+
+    cursor:
+        pointer;
+
+}
+
+
+/* ============================================================
+   BOTÃO INICIAR - HOVER
+   ============================================================ */
+
+#inicio button:hover {
+
+    background:
+        var(--fundo-hover);
+
+}
+
+
+/* ============================================================
+   APLICAÇÃO PRINCIPAL
+   ============================================================
+
+   Contém:
+
+   - sidebar;
+   - conteúdo principal.
+
    ============================================================ */
 
 #aplicacao {
 
-    min-height: 100vh;
+    min-height:
+        100vh;
 
-    background: var(--fundo);
+    background:
+        var(--fundo);
+
 }
 
 
 /* ============================================================
    SIDEBAR
+   ============================================================
+
+   Menu lateral principal.
+
+   No desktop fica expandido.
+
+   No celular fica compacto mostrando somente os ícones.
+
    ============================================================ */
 
 #sistema {
 
-    position: fixed;
+    position:
+        fixed;
 
-    top: 0;
-    left: 0;
-    bottom: 0;
+    top:
+        0;
 
-    width: var(--sidebar-largura);
+    left:
+        0;
 
-    display: flex;
-    flex-direction: column;
+    bottom:
+        0;
 
-    background: var(--fundo-sidebar);
+    width:
+        var(--sidebar-largura);
 
-    border-right: 1px solid var(--borda);
+    display:
+        flex;
 
-    z-index: 1000;
+    flex-direction:
+        column;
+
+    background:
+        var(--fundo-sidebar);
+
+    border-right:
+        1px solid
+        var(--borda);
+
+    z-index:
+        1000;
+
 }
 
 
 /* ============================================================
-   TOPO SIDEBAR
+   TOPO DA SIDEBAR
    ============================================================ */
 
 .sidebar-topo {
 
-    min-height: 64px;
+    min-height:
+        64px;
 
-    display: flex;
-    align-items: center;
+    display:
+        flex;
 
-    gap: 10px;
+    align-items:
+        center;
 
-    padding: 10px 12px;
+    gap:
+        10px;
 
-    border-bottom: 1px solid var(--borda);
+    padding:
+        10px 12px;
+
+    border-bottom:
+        1px solid
+        var(--borda);
+
 }
 
+
+/* ============================================================
+   LOGOTIPO DA SIDEBAR
+   ============================================================ */
 
 .sidebar-logo {
 
-    width: 34px;
-    height: 34px;
+    width:
+        34px;
 
-    flex-shrink: 0;
+    height:
+        34px;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-shrink:
+        0;
 
-    border-radius: 7px;
+    display:
+        flex;
 
-    background: var(--verde);
-    color: #0a0a0a;
+    align-items:
+        center;
 
-    font-weight: 700;
-    font-size: 16px;
+    justify-content:
+        center;
+
+    border-radius:
+        7px;
+
+    background:
+        var(--verde);
+
+    color:
+        #0a0a0a;
+
+    font-weight:
+        700;
+
+    font-size:
+        16px;
+
 }
 
 
+/* ============================================================
+   TÍTULO DA SIDEBAR
+   ============================================================ */
+
 .sidebar-titulo {
 
-    min-width: 0;
+    min-width:
+        0;
 
-    display: flex;
-    flex-direction: column;
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
 }
 
 
 .sidebar-titulo strong {
 
-    color: #ffffff;
+    color:
+        #ffffff;
 
-    font-size: 14px;
-    font-weight: 600;
+    font-size:
+        14px;
+
+    font-weight:
+        600;
+
 }
 
 
 .sidebar-titulo span {
 
-    margin-top: 2px;
+    margin-top:
+        2px;
 
-    color: var(--texto-fraco);
+    color:
+        var(--texto-fraco);
 
-    font-size: 12px;
+    font-size:
+        12px;
+
 }
 
 
 /* ============================================================
-   MENU
+   ÁREA DE NAVEGAÇÃO DA SIDEBAR
    ============================================================ */
 
 .sidebar-menu {
 
-    flex: 1;
+    flex:
+        1;
 
-    padding: 10px 8px;
+    padding:
+        10px 8px;
 
-    overflow-y: auto;
+    overflow-y:
+        auto;
+
 }
 
 
@@ -258,240 +506,420 @@ body {
 
 .sidebar-item {
 
-    width: 100%;
-    min-height: 40px;
+    width:
+        100%;
 
-    display: flex;
-    align-items: center;
+    min-height:
+        40px;
 
-    gap: 10px;
+    display:
+        flex;
 
-    margin: 2px 0;
+    align-items:
+        center;
 
-    padding: 8px 10px;
+    gap:
+        10px;
 
-    border: 0;
-    border-radius: 6px;
+    margin:
+        2px 0;
 
-    background: transparent;
+    padding:
+        8px 10px;
 
-    color: var(--texto-secundario);
+    border:
+        0;
 
-    font-family: inherit;
-    font-size: 13px;
+    border-radius:
+        6px;
 
-    text-align: left;
+    background:
+        transparent;
 
-    cursor: pointer;
+    color:
+        var(--texto-secundario);
+
+    font-family:
+        inherit;
+
+    font-size:
+        13px;
+
+    text-align:
+        left;
+
+    cursor:
+        pointer;
 
     transition:
         background 0.12s ease,
         color 0.12s ease;
-}
 
-
-.sidebar-item:hover {
-
-    background: var(--fundo-hover);
-    color: #ffffff;
-}
-
-
-.sidebar-item.ativo {
-
-    background: var(--fundo-ativo);
-    color: #ffffff;
-}
-
-
-.sidebar-icone {
-
-    width: 22px;
-
-    flex-shrink: 0;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    font-size: 16px;
-}
-
-
-.sidebar-texto {
-
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 
 /* ============================================================
-   RODAPÉ SIDEBAR
+   ITEM DA SIDEBAR - HOVER
+   ============================================================ */
+
+.sidebar-item:hover {
+
+    background:
+        var(--fundo-hover);
+
+    color:
+        #ffffff;
+
+}
+
+
+/* ============================================================
+   ITEM ATIVO
+   ============================================================ */
+
+.sidebar-item.ativo {
+
+    background:
+        var(--fundo-ativo);
+
+    color:
+        #ffffff;
+
+}
+
+
+/* ============================================================
+   ÍCONE DA SIDEBAR
+   ============================================================ */
+
+.sidebar-icone {
+
+    width:
+        22px;
+
+    flex-shrink:
+        0;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    font-size:
+        16px;
+
+}
+
+
+/* ============================================================
+   TEXTO DA SIDEBAR
+   ============================================================ */
+
+.sidebar-texto {
+
+    white-space:
+        nowrap;
+
+    overflow:
+        hidden;
+
+    text-overflow:
+        ellipsis;
+
+}
+
+
+/* ============================================================
+   RODAPÉ DA SIDEBAR
+   ============================================================
+
+   Atualmente utilizado para Configurações.
+
    ============================================================ */
 
 .sidebar-rodape {
 
-    padding: 8px;
+    padding:
+        8px;
 
-    border-top: 1px solid var(--borda);
+    border-top:
+        1px solid
+        var(--borda);
+
 }
 
 
 /* ============================================================
    CONTEÚDO PRINCIPAL
+   ============================================================
+
+   Área exibida ao lado direito da sidebar.
+
    ============================================================ */
 
 #conteudoPrincipal {
 
-    min-height: 100vh;
+    min-height:
+        100vh;
 
-    margin-left: var(--sidebar-largura);
+    margin-left:
+        var(--sidebar-largura);
 
-    background: var(--fundo);
+    background:
+        var(--fundo);
+
 }
 
 
 /* ============================================================
-   TELAS
+   TELAS INTERNAS
+   ============================================================
+
+   Classe utilizada por:
+
+   - home;
+   - pesquisa;
+   - conferência;
+   - conferências;
+   - divergências;
+   - importação;
+   - configurações.
+
    ============================================================ */
 
 .tela-sistema {
 
-    width: 100%;
+    width:
+        100%;
 
-    min-height: 100vh;
+    min-height:
+        100vh;
 
-    padding: 28px 32px;
+    padding:
+        28px 32px;
+
 }
 
 
 /* ============================================================
-   CABEÇALHO
+   CABEÇALHO DAS PÁGINAS
    ============================================================ */
 
 .cabecalho-pagina {
 
-    margin-bottom: 24px;
+    margin-bottom:
+        24px;
+
 }
 
+
+/* ============================================================
+   CAMINHO / BREADCRUMB
+   ============================================================ */
 
 .cabecalho-caminho {
 
-    margin: 0 0 8px;
+    margin:
+        0 0 8px;
 
-    color: var(--texto-fraco);
+    color:
+        var(--texto-fraco);
 
-    font-size: 12px;
+    font-size:
+        12px;
+
 }
 
+
+/* ============================================================
+   TÍTULO DO CABEÇALHO
+   ============================================================ */
 
 .cabecalho-pagina h1 {
 
-    margin: 0;
+    margin:
+        0;
 
-    color: #ffffff;
+    color:
+        #ffffff;
 
-    font-size: 23px;
-    font-weight: 500;
+    font-size:
+        23px;
+
+    font-weight:
+        500;
+
 }
 
 
+/* ============================================================
+   DESCRIÇÃO DO CABEÇALHO
+   ============================================================ */
+
 .cabecalho-pagina > p:not(.cabecalho-caminho) {
 
-    margin: 8px 0 0;
+    margin:
+        8px 0 0;
 
-    color: var(--texto-secundario);
+    color:
+        var(--texto-secundario);
+
 }
 
 
 /* ============================================================
    PAINÉIS
+   ============================================================
+
+   Blocos utilizados para agrupar conteúdo dentro das telas.
+
    ============================================================ */
 
 .painel {
 
-    width: 100%;
+    width:
+        100%;
 
-    margin-bottom: 18px;
+    margin-bottom:
+        18px;
 
-    padding: 20px;
+    padding:
+        20px;
 
-    border: 1px solid var(--borda);
-    border-radius: 8px;
+    border:
+        1px solid
+        var(--borda);
 
-    background: var(--fundo-painel);
+    border-radius:
+        8px;
+
+    background:
+        var(--fundo-painel);
+
 }
 
+
+/* ============================================================
+   TÍTULOS DOS PAINÉIS
+   ============================================================ */
 
 .painel h2,
 .painel h3 {
 
-    margin-top: 0;
+    margin-top:
+        0;
 
-    color: #ffffff;
+    color:
+        #ffffff;
 
-    font-weight: 500;
+    font-weight:
+        500;
+
 }
 
 
 .painel h2 {
 
-    font-size: 17px;
+    font-size:
+        17px;
+
 }
 
 
 .painel h3 {
 
-    font-size: 14px;
+    font-size:
+        14px;
+
 }
 
 
 /* ============================================================
-   FORMULÁRIOS
+   LINHA DE FORMULÁRIO
    ============================================================ */
 
 .linha-formulario {
 
-    display: flex;
+    display:
+        flex;
 
-    align-items: center;
+    align-items:
+        center;
 
-    gap: 8px;
+    gap:
+        8px;
+
 }
 
+
+/* ============================================================
+   CAMPOS DE ENTRADA
+   ============================================================ */
 
 input {
 
-    width: 100%;
-    max-width: 500px;
+    width:
+        100%;
 
-    min-height: 38px;
+    max-width:
+        500px;
 
-    padding: 8px 11px;
+    min-height:
+        38px;
 
-    border: 1px solid var(--borda-clara);
-    border-radius: 6px;
+    padding:
+        8px 11px;
 
-    outline: none;
+    border:
+        1px solid
+        var(--borda-clara);
 
-    background: #101010;
-    color: #ffffff;
+    border-radius:
+        6px;
 
-    font-family: inherit;
-    font-size: 14px;
+    outline:
+        none;
+
+    background:
+        #101010;
+
+    color:
+        #ffffff;
+
+    font-family:
+        inherit;
+
+    font-size:
+        14px;
+
 }
 
+
+/* ============================================================
+   PLACEHOLDER
+   ============================================================ */
 
 input::placeholder {
 
-    color: #666666;
+    color:
+        #666666;
+
 }
 
 
+/* ============================================================
+   CAMPO EM FOCO
+   ============================================================ */
+
 input:focus {
 
-    border-color: #666666;
+    border-color:
+        #666666;
+
 }
 
 
@@ -501,32 +929,44 @@ input:focus {
 
 input[type="file"] {
 
-    max-width: 100%;
+    max-width:
+        100%;
 
-    padding: 8px;
+    padding:
+        8px;
 
-    background: #101010;
+    background:
+        #101010;
+
 }
 
 
 /* ============================================================
-   BOTÕES
+   BOTÕES PADRÃO
    ============================================================ */
 
 .botao-principal,
 .botao-secundario,
 .botao-perigo {
 
-    min-height: 38px;
+    min-height:
+        38px;
 
-    padding: 8px 14px;
+    padding:
+        8px 14px;
 
-    border-radius: 6px;
+    border-radius:
+        6px;
 
-    font-family: inherit;
-    font-size: 13px;
+    font-family:
+        inherit;
 
-    cursor: pointer;
+    font-size:
+        13px;
+
+    cursor:
+        pointer;
+
 }
 
 
@@ -536,18 +976,27 @@ input[type="file"] {
 
 .botao-principal {
 
-    border: 1px solid var(--verde);
+    border:
+        1px solid
+        var(--verde);
 
-    background: var(--verde);
-    color: #07140e;
+    background:
+        var(--verde);
 
-    font-weight: 600;
+    color:
+        #07140e;
+
+    font-weight:
+        600;
+
 }
 
 
 .botao-principal:hover {
 
-    background: var(--verde-hover);
+    background:
+        var(--verde-hover);
+
 }
 
 
@@ -557,16 +1006,24 @@ input[type="file"] {
 
 .botao-secundario {
 
-    border: 1px solid var(--borda-clara);
+    border:
+        1px solid
+        var(--borda-clara);
 
-    background: #202020;
-    color: var(--texto);
+    background:
+        #202020;
+
+    color:
+        var(--texto);
+
 }
 
 
 .botao-secundario:hover {
 
-    background: #292929;
+    background:
+        #292929;
+
 }
 
 
@@ -576,37 +1033,50 @@ input[type="file"] {
 
 .botao-perigo {
 
-    border: 1px solid #5c3030;
+    border:
+        1px solid
+        #5c3030;
 
-    background: #2a1818;
-    color: #f0aaaa;
+    background:
+        #2a1818;
+
+    color:
+        #f0aaaa;
+
 }
 
 
 .botao-perigo:hover {
 
-    background: #351d1d;
+    background:
+        #351d1d;
+
 }
 
 
 /* ============================================================
-   IMPORTAÇÃO
+   AÇÕES DA IMPORTAÇÃO
    ============================================================ */
 
 .acoes-importacao {
 
-    display: flex;
+    display:
+        flex;
 
-    gap: 8px;
+    gap:
+        8px;
 
-    flex-wrap: wrap;
+    flex-wrap:
+        wrap;
 
-    margin-top: 16px;
+    margin-top:
+        16px;
+
 }
 
 
 /* ============================================================
-   RESULTADOS
+   ÁREAS DE RESULTADOS
    ============================================================ */
 
 #resultadoPesquisaCodigo,
@@ -617,253 +1087,217 @@ input[type="file"] {
 #resultadoDivergencias,
 #resultadoImportacao {
 
-    margin-top: 16px;
+    margin-top:
+        16px;
+
 }
 
 
 /* ============================================================
    MODAL
+   ============================================================
+
+   Fundo que cobre a página quando um modal é exibido.
+
    ============================================================ */
 
 .modal {
 
-    position: fixed;
+    position:
+        fixed;
 
-    inset: 0;
+    inset:
+        0;
 
-    display: flex;
+    display:
+        flex;
 
-    align-items: center;
-    justify-content: center;
+    align-items:
+        center;
 
-    padding: 20px;
+    justify-content:
+        center;
 
-    background: rgba(0, 0, 0, 0.7);
+    padding:
+        20px;
 
-    z-index: 2000;
+    background:
+        rgba(
+            0,
+            0,
+            0,
+            0.70
+        );
+
+    z-index:
+        2000;
+
 }
 
+
+/* ============================================================
+   CONTEÚDO DO MODAL
+   ============================================================ */
 
 .modal-conteudo {
 
-    width: 100%;
-    max-width: 430px;
+    width:
+        100%;
 
-    padding: 22px;
+    max-width:
+        430px;
 
-    border: 1px solid var(--borda-clara);
-    border-radius: 8px;
+    padding:
+        22px;
 
-    background: #181818;
+    border:
+        1px solid
+        var(--borda-clara);
+
+    border-radius:
+        8px;
+
+    background:
+        #181818;
 
     box-shadow:
-        0 20px 60px rgba(0, 0, 0, 0.45);
+        0 20px 60px
+        rgba(
+            0,
+            0,
+            0,
+            0.45
+        );
+
 }
 
+
+/* ============================================================
+   TÍTULO DO MODAL
+   ============================================================ */
 
 .modal-conteudo h2 {
 
-    margin-top: 0;
+    margin-top:
+        0;
+
 }
 
+
+/* ============================================================
+   AÇÕES DO MODAL
+   ============================================================ */
 
 .modal-acoes {
 
-    display: flex;
+    display:
+        flex;
 
-    gap: 8px;
+    gap:
+        8px;
 
-    flex-wrap: wrap;
+    flex-wrap:
+        wrap;
 
-    margin-top: 20px;
-}
-
-
-/* ============================================================
-   RESPONSIVIDADE
-   CELULAR
-   ============================================================ */
-
-@media (max-width: 700px) {
-
-
-    /* ========================================================
-       SIDEBAR COMPACTA
-       ======================================================== */
-
-    #sistema {
-
-        width: var(--sidebar-mobile);
-    }
-
-
-    .sidebar-topo {
-
-        justify-content: center;
-
-        padding-left: 8px;
-        padding-right: 8px;
-    }
-
-
-    .sidebar-logo {
-
-        width: 34px;
-        height: 34px;
-    }
-
-
-    .sidebar-titulo {
-
-        display: none;
-    }
-
-
-    .sidebar-menu {
-
-        padding-left: 6px;
-        padding-right: 6px;
-    }
-
-
-    .sidebar-rodape {
-
-        padding-left: 6px;
-        padding-right: 6px;
-    }
-
-
-    .sidebar-item {
-
-        justify-content: center;
-
-        padding-left: 6px;
-        padding-right: 6px;
-    }
-
-
-    .sidebar-icone {
-
-        width: 24px;
-    }
-
-
-    .sidebar-texto {
-
-        display: none;
-    }
-
-
-    /* ========================================================
-       CONTEÚDO
-       ======================================================== */
-
-    #conteudoPrincipal {
-
-        margin-left: var(--sidebar-mobile);
-    }
-
-
-    .tela-sistema {
-
-        padding: 20px 14px;
-    }
-
-
-    /* ========================================================
-       FORMULÁRIOS
-       ======================================================== */
-
-    .linha-formulario {
-
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-
-    input {
-
-        max-width: none;
-    }
-
-
-    .linha-formulario .botao-principal {
-
-        width: 100%;
-    }
-
-
-    /* ========================================================
-       PAINÉIS
-       ======================================================== */
-
-    .painel {
-
-        padding: 15px;
-    }
+    margin-top:
+        20px;
 
 }
 
-/* ============================================================
-   PMOBILE
-   AVISOS DO SUPABASE
-   ============================================================ */
-
 
 /* ============================================================
-   BARRA DE STATUS DO SUPABASE
+   STATUS DO SUPABASE
+   ============================================================
 
-   Exemplo:
-   ⚠️ 93.912 materiais verificados. 2 problemas encontrados.
+   Elemento criado pelo supabase.js:
 
-   O !important é necessário porque o supabase.js atualmente
-   aplica alguns estilos diretamente no elemento.
+       #statusSupabase
+
+   Exemplos:
+
+       🟢 Supabase inicializado com sucesso
+
+       🟡 Verificando materiais: 30.000
+
+       ⚠️ 93.912 materiais verificados.
+          2 problemas encontrados.
+
+   IMPORTANTE:
+
+   Toda a aparência do aviso está definida aqui.
+
+   O supabase.js controla somente:
+
+   - criação;
+   - mensagem;
+   - atualização;
+   - botão fechar.
+
    ============================================================ */
 
 #statusSupabase {
 
-    display: flex !important;
+    position:
+        fixed;
 
-    align-items: center !important;
-    justify-content: space-between !important;
+    left:
+        12px;
 
-    gap: 10px !important;
+    right:
+        12px;
 
-    padding: 10px 14px !important;
+    bottom:
+        12px;
 
-    background: rgba(
-        18,
-        18,
-        18,
-        0.72
-    ) !important;
+    min-height:
+        48px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        12px;
+
+    padding:
+        8px 10px
+        8px 14px;
+
+    background:
+        var(--aviso-fundo);
 
     backdrop-filter:
-        blur(10px);
+        blur(12px);
 
     -webkit-backdrop-filter:
-        blur(10px);
+        blur(12px);
 
     border:
         1px solid
-        rgba(
-            255,
-            255,
-            255,
-            0.14
-        ) !important;
+        var(--aviso-borda);
 
     border-radius:
-        8px !important;
+        8px;
 
     color:
-        #ededed !important;
+        var(--texto);
 
-    text-align:
-        left !important;
+    font-size:
+        13px;
 
     font-weight:
-        500 !important;
+        500;
+
+    line-height:
+        1.4;
+
+    text-align:
+        left;
 
     box-shadow:
         0 8px 30px
@@ -874,54 +1308,78 @@ input[type="file"] {
             0.30
         );
 
+    z-index:
+        9999;
+
 }
 
 
 /* ============================================================
-   BOTÃO X DO STATUS
+   TEXTO DO STATUS DO SUPABASE
    ============================================================ */
 
-#statusSupabase button {
+#statusSupabase > span {
 
-    width: 32px;
-    height: 32px;
+    flex:
+        1;
 
-    flex-shrink: 0;
+    min-width:
+        0;
 
-    display: flex;
+}
 
-    align-items: center;
-    justify-content: center;
 
-    margin-left:
-        10px !important;
+/* ============================================================
+   BOTÃO X DO STATUS DO SUPABASE
+   ============================================================ */
 
-    padding: 0;
+#statusSupabase > button {
+
+    width:
+        32px;
+
+    height:
+        32px;
+
+    flex-shrink:
+        0;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    margin:
+        0;
+
+    padding:
+        0;
 
     border:
         1px solid
-        rgba(
-            255,
-            255,
-            255,
-            0.18
-        );
+        var(--aviso-borda);
 
-    border-radius: 5px;
+    border-radius:
+        5px;
 
     background:
-        rgba(
-            255,
-            255,
-            255,
-            0.05
-        );
+        var(--aviso-botao);
 
     color:
         #bdbdbd;
 
+    font-family:
+        inherit;
+
     font-size:
-        18px;
+        17px;
+
+    line-height:
+        1;
 
     cursor:
         pointer;
@@ -930,18 +1388,13 @@ input[type="file"] {
 
 
 /* ============================================================
-   BOTÃO X — HOVER
+   BOTÃO X - HOVER
    ============================================================ */
 
-#statusSupabase button:hover {
+#statusSupabase > button:hover {
 
     background:
-        rgba(
-            255,
-            255,
-            255,
-            0.10
-        );
+        var(--aviso-botao-hover);
 
     color:
         #ffffff;
@@ -951,43 +1404,72 @@ input[type="file"] {
 
 /* ============================================================
    PAINEL DE PROBLEMAS DO SUPABASE
+   ============================================================
 
-   Exemplo:
-   ⚠️ Problemas encontrados
-   93.912 materiais verificados
-   2 problemas encontrados
+   Elemento criado pelo supabase.js:
+
+       #resultadoVerificacaoSupabase
+
+   O painel mostra:
+
+   - quantidade de materiais verificados;
+   - quantidade de problemas;
+   - detalhes;
+   - botão Fechar.
+
+   Toda a aparência é controlada aqui.
+
    ============================================================ */
 
 #resultadoVerificacaoSupabase {
 
+    position:
+        fixed;
+
+    top:
+        70px;
+
+    left:
+        12px;
+
+    right:
+        12px;
+
+    max-height:
+        calc(
+            100vh - 150px
+        );
+
+    overflow-y:
+        auto;
+
+    padding:
+        18px;
+
     background:
-        rgba(
-            18,
-            18,
-            18,
-            0.78
-        ) !important;
+        var(--aviso-fundo);
 
     backdrop-filter:
-        blur(12px);
+        blur(14px);
 
     -webkit-backdrop-filter:
-        blur(12px);
+        blur(14px);
 
     border:
         1px solid
-        rgba(
-            255,
-            255,
-            255,
-            0.14
-        ) !important;
+        var(--aviso-borda);
 
     border-radius:
-        8px !important;
+        8px;
 
     color:
-        #ededed !important;
+        var(--texto);
+
+    font-size:
+        14px;
+
+    line-height:
+        1.5;
 
     box-shadow:
         0 12px 40px
@@ -998,17 +1480,26 @@ input[type="file"] {
             0.35
         );
 
+    z-index:
+        9998;
+
 }
 
 
 /* ============================================================
-   TÍTULO DO PAINEL
+   TÍTULO DO PAINEL DE PROBLEMAS
    ============================================================ */
 
 #resultadoVerificacaoSupabase h3 {
 
+    margin:
+        0 0 18px;
+
     color:
         #ffffff;
+
+    font-size:
+        18px;
 
     font-weight:
         600;
@@ -1017,35 +1508,70 @@ input[type="file"] {
 
 
 /* ============================================================
-   TEXTOS
+   PARÁGRAFOS DO PAINEL
    ============================================================ */
 
-#resultadoVerificacaoSupabase p,
-#resultadoVerificacaoSupabase li,
-#resultadoVerificacaoSupabase strong {
+#resultadoVerificacaoSupabase p {
 
     color:
-        #ededed;
+        var(--texto);
 
 }
 
 
 /* ============================================================
-   LINHA DIVISÓRIA
+   TEXTO EM DESTAQUE
+   ============================================================ */
+
+#resultadoVerificacaoSupabase strong {
+
+    color:
+        #ffffff;
+
+}
+
+
+/* ============================================================
+   LISTA DE PROBLEMAS
+   ============================================================ */
+
+#resultadoVerificacaoSupabase ul {
+
+    padding-left:
+        24px;
+
+    color:
+        var(--texto-secundario);
+
+}
+
+
+#resultadoVerificacaoSupabase li {
+
+    margin-bottom:
+        5px;
+
+    color:
+        var(--texto-secundario);
+
+}
+
+
+/* ============================================================
+   DIVISOR DO PAINEL
    ============================================================ */
 
 #resultadoVerificacaoSupabase hr {
 
-    border: 0;
+    margin:
+        18px 0;
+
+    border:
+        0;
 
     border-top:
         1px solid
-        rgba(
-            255,
-            255,
-            255,
-            0.14
-        );
+        var(--aviso-borda);
 
 }
 
@@ -1064,29 +1590,22 @@ input[type="file"] {
 
     border:
         1px solid
-        rgba(
-            255,
-            255,
-            255,
-            0.18
-        );
+        var(--aviso-borda);
 
     border-radius:
         5px;
 
     background:
-        rgba(
-            255,
-            255,
-            255,
-            0.05
-        );
+        var(--aviso-botao);
 
     color:
-        #ededed;
+        var(--texto);
 
     font-family:
         inherit;
+
+    font-size:
+        13px;
 
     cursor:
         pointer;
@@ -1095,18 +1614,13 @@ input[type="file"] {
 
 
 /* ============================================================
-   BOTÃO FECHAR — HOVER
+   BOTÃO FECHAR - HOVER
    ============================================================ */
 
 #resultadoVerificacaoSupabase button:hover {
 
     background:
-        rgba(
-            255,
-            255,
-            255,
-            0.10
-        );
+        var(--aviso-botao-hover);
 
     color:
         #ffffff;
@@ -1115,41 +1629,265 @@ input[type="file"] {
 
 
 /* ============================================================
-   AJUSTE PARA CELULAR
+   RESPONSIVIDADE
+   ============================================================
+
+   Ajustes específicos para telas com largura máxima
+   de 700px.
+
+   Principal alvo:
+
+   smartphones.
+
    ============================================================ */
 
 @media (max-width: 700px) {
 
-    #resultadoVerificacaoSupabase {
 
-        top:
-            20px !important;
+    /* ========================================================
+       SIDEBAR COMPACTA
+       ======================================================== */
 
-        left:
-            10px !important;
+    #sistema {
 
-        right:
-            10px !important;
-
-        max-height:
-            70vh !important;
-
-        padding:
-            16px !important;
+        width:
+            var(--sidebar-mobile);
 
     }
 
 
+    /* ========================================================
+       TOPO DA SIDEBAR
+       ======================================================== */
+
+    .sidebar-topo {
+
+        justify-content:
+            center;
+
+        padding-left:
+            8px;
+
+        padding-right:
+            8px;
+
+    }
+
+
+    /* ========================================================
+       LOGOTIPO
+       ======================================================== */
+
+    .sidebar-logo {
+
+        width:
+            34px;
+
+        height:
+            34px;
+
+    }
+
+
+    /* ========================================================
+       ESCONDER TÍTULO DA SIDEBAR
+       ======================================================== */
+
+    .sidebar-titulo {
+
+        display:
+            none;
+
+    }
+
+
+    /* ========================================================
+       MENU
+       ======================================================== */
+
+    .sidebar-menu {
+
+        padding-left:
+            6px;
+
+        padding-right:
+            6px;
+
+    }
+
+
+    /* ========================================================
+       RODAPÉ
+       ======================================================== */
+
+    .sidebar-rodape {
+
+        padding-left:
+            6px;
+
+        padding-right:
+            6px;
+
+    }
+
+
+    /* ========================================================
+       ITENS CENTRALIZADOS
+       ======================================================== */
+
+    .sidebar-item {
+
+        justify-content:
+            center;
+
+        padding-left:
+            6px;
+
+        padding-right:
+            6px;
+
+    }
+
+
+    /* ========================================================
+       ÍCONES
+       ======================================================== */
+
+    .sidebar-icone {
+
+        width:
+            24px;
+
+    }
+
+
+    /* ========================================================
+       ESCONDER TEXTO DOS ITENS
+       ======================================================== */
+
+    .sidebar-texto {
+
+        display:
+            none;
+
+    }
+
+
+    /* ========================================================
+       CONTEÚDO PRINCIPAL
+       ======================================================== */
+
+    #conteudoPrincipal {
+
+        margin-left:
+            var(--sidebar-mobile);
+
+    }
+
+
+    /* ========================================================
+       TELAS
+       ======================================================== */
+
+    .tela-sistema {
+
+        padding:
+            20px 14px;
+
+    }
+
+
+    /* ========================================================
+       FORMULÁRIOS
+       ======================================================== */
+
+    .linha-formulario {
+
+        flex-direction:
+            column;
+
+        align-items:
+            stretch;
+
+    }
+
+
+    /* ========================================================
+       INPUTS
+       ======================================================== */
+
+    input {
+
+        max-width:
+            none;
+
+    }
+
+
+    /* ========================================================
+       BOTÃO PRINCIPAL DOS FORMULÁRIOS
+       ======================================================== */
+
+    .linha-formulario .botao-principal {
+
+        width:
+            100%;
+
+    }
+
+
+    /* ========================================================
+       PAINÉIS
+       ======================================================== */
+
+    .painel {
+
+        padding:
+            15px;
+
+    }
+
+
+    /* ========================================================
+       STATUS DO SUPABASE NO CELULAR
+       ======================================================== */
+
     #statusSupabase {
 
         left:
-            10px !important;
+            8px;
 
         right:
-            10px !important;
+            8px;
 
         bottom:
-            10px !important;
+            8px;
+
+    }
+
+
+    /* ========================================================
+       PAINEL DE PROBLEMAS NO CELULAR
+       ======================================================== */
+
+    #resultadoVerificacaoSupabase {
+
+        top:
+            16px;
+
+        left:
+            8px;
+
+        right:
+            8px;
+
+        max-height:
+            calc(
+                100vh - 90px
+            );
+
+        padding:
+            16px;
 
     }
 
