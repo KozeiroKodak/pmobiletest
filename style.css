@@ -2,27 +2,60 @@
    PMOBILE
    ARQUIVO: style.css
 
-   ETAPA VISUAL 01
-   Layout principal inspirado na navegação do Supabase
+   LAYOUT PRINCIPAL
+   Referência visual: Supabase Studio
    ============================================================ */
 
 
 /* ============================================================
-   CONFIGURAÇÃO GERAL
+   VARIÁVEIS
+   ============================================================ */
+
+:root {
+
+    --sidebar-largura: 240px;
+    --sidebar-mobile: 58px;
+
+    --fundo: #121212;
+    --fundo-sidebar: #171717;
+    --fundo-painel: #181818;
+    --fundo-hover: #242424;
+    --fundo-ativo: #2a2a2a;
+
+    --borda: #2e2e2e;
+    --borda-clara: #3a3a3a;
+
+    --texto: #ededed;
+    --texto-secundario: #a3a3a3;
+    --texto-fraco: #737373;
+
+    --verde: #3ecf8e;
+    --verde-hover: #34b27b;
+
+}
+
+
+/* ============================================================
+   RESET
    ============================================================ */
 
 * {
     box-sizing: border-box;
 }
 
+
 html,
 body {
     margin: 0;
     padding: 0;
+
+    width: 100%;
     min-height: 100%;
 }
 
+
 body {
+
     font-family:
         Inter,
         -apple-system,
@@ -30,19 +63,19 @@ body {
         "Segoe UI",
         sans-serif;
 
-    background: #111111;
-    color: #e5e7eb;
+    background: var(--fundo);
+    color: var(--texto);
+
+    font-size: 14px;
 }
 
 
 /* ============================================================
    TELA INICIAL
-
-   Mantemos a tela de início separada.
-   O novo layout aparecerá depois de clicar em "Iniciar".
    ============================================================ */
 
 #inicio {
+
     min-height: 100vh;
 
     display: flex;
@@ -54,218 +87,719 @@ body {
     padding: 24px;
 
     text-align: center;
-    background: #111111;
+
+    background: var(--fundo);
 }
+
 
 #inicio h1 {
-    margin-bottom: 8px;
+
+    margin: 0 0 8px;
+
+    font-size: 26px;
+    font-weight: 600;
 }
+
 
 #inicio p {
-    color: #9ca3af;
+
+    margin: 0;
+
+    color: var(--texto-secundario);
 }
 
 
-/* ============================================================
-   BOTÃO DA TELA INICIAL
-   ============================================================ */
-
 #inicio button {
-    margin-top: 16px;
+
+    margin-top: 22px;
 
     padding: 10px 22px;
 
-    border: 1px solid #3f3f46;
+    border: 1px solid var(--borda-clara);
     border-radius: 6px;
 
-    background: #18181b;
-    color: #ffffff;
+    background: var(--fundo-painel);
+    color: var(--texto);
 
-    font-size: 15px;
+    font-size: 14px;
 
     cursor: pointer;
 }
 
 
-/* ============================================================
-   MENU PRINCIPAL
+#inicio button:hover {
 
-   Quando aberto, funciona como uma sidebar fixa.
+    background: var(--fundo-hover);
+}
+
+
+/* ============================================================
+   APLICAÇÃO
+   ============================================================ */
+
+#aplicacao {
+
+    min-height: 100vh;
+
+    background: var(--fundo);
+}
+
+
+/* ============================================================
+   SIDEBAR
    ============================================================ */
 
 #sistema {
+
     position: fixed;
 
     top: 0;
     left: 0;
     bottom: 0;
 
-    width: 230px;
+    width: var(--sidebar-largura);
 
-    padding: 16px 10px;
+    display: flex;
+    flex-direction: column;
 
-    background: #171717;
+    background: var(--fundo-sidebar);
 
-    border-right: 1px solid #2e2e2e;
+    border-right: 1px solid var(--borda);
 
-    overflow-y: auto;
-
-    z-index: 100;
+    z-index: 1000;
 }
 
 
 /* ============================================================
-   TÍTULO DA SIDEBAR
+   TOPO SIDEBAR
    ============================================================ */
 
-#sistema h1 {
-    margin: 4px 8px 22px;
+.sidebar-topo {
 
-    font-size: 16px;
-    font-weight: 600;
-
-    color: #ffffff;
-}
-
-
-/* ============================================================
-   BOTÕES DA SIDEBAR
-   ============================================================ */
-
-#sistema button {
-    width: 100%;
+    min-height: 64px;
 
     display: flex;
     align-items: center;
 
-    min-height: 42px;
+    gap: 10px;
+
+    padding: 10px 12px;
+
+    border-bottom: 1px solid var(--borda);
+}
+
+
+.sidebar-logo {
+
+    width: 34px;
+    height: 34px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 7px;
+
+    background: var(--verde);
+    color: #0a0a0a;
+
+    font-weight: 700;
+    font-size: 16px;
+}
+
+
+.sidebar-titulo {
+
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+.sidebar-titulo strong {
+
+    color: #ffffff;
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+
+.sidebar-titulo span {
+
+    margin-top: 2px;
+
+    color: var(--texto-fraco);
+
+    font-size: 12px;
+}
+
+
+/* ============================================================
+   MENU
+   ============================================================ */
+
+.sidebar-menu {
+
+    flex: 1;
+
+    padding: 10px 8px;
+
+    overflow-y: auto;
+}
+
+
+/* ============================================================
+   ITEM DA SIDEBAR
+   ============================================================ */
+
+.sidebar-item {
+
+    width: 100%;
+    min-height: 40px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
 
     margin: 2px 0;
-    padding: 9px 10px;
+
+    padding: 8px 10px;
 
     border: 0;
     border-radius: 6px;
 
     background: transparent;
-    color: #b4b4b4;
 
-    font-size: 14px;
+    color: var(--texto-secundario);
+
+    font-family: inherit;
+    font-size: 13px;
+
     text-align: left;
 
     cursor: pointer;
 
     transition:
-        background 0.15s ease,
-        color 0.15s ease;
+        background 0.12s ease,
+        color 0.12s ease;
 }
 
 
-/* ============================================================
-   HOVER
-   ============================================================ */
+.sidebar-item:hover {
 
-#sistema button:hover {
-    background: #262626;
+    background: var(--fundo-hover);
     color: #ffffff;
 }
 
 
-/* ============================================================
-   CLIQUE
-   ============================================================ */
+.sidebar-item.ativo {
 
-#sistema button:active {
-    background: #303030;
+    background: var(--fundo-ativo);
+    color: #ffffff;
+}
+
+
+.sidebar-icone {
+
+    width: 22px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 16px;
+}
+
+
+.sidebar-texto {
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 
 /* ============================================================
-   ÁREA DAS TELAS INTERNAS
-
-   Pesquisa, importação, conferência etc. aparecem à direita.
+   RODAPÉ SIDEBAR
    ============================================================ */
 
-#pesquisa,
-#conferencia,
-#conferencias,
-#divergencias,
-#importacao,
-#configuracoes {
+.sidebar-rodape {
+
+    padding: 8px;
+
+    border-top: 1px solid var(--borda);
+}
+
+
+/* ============================================================
+   CONTEÚDO PRINCIPAL
+   ============================================================ */
+
+#conteudoPrincipal {
+
     min-height: 100vh;
 
-    margin-left: 230px;
+    margin-left: var(--sidebar-largura);
 
-    padding: 30px;
-
-    background: #111111;
-    color: #e5e7eb;
+    background: var(--fundo);
 }
 
 
 /* ============================================================
-   TÍTULOS DAS TELAS
+   TELAS
    ============================================================ */
 
-#pesquisa h1,
-#conferencia h1,
-#conferencias h1,
-#divergencias h1,
-#importacao h1,
-#configuracoes h1 {
-    margin-top: 0;
+.tela-sistema {
 
-    font-size: 22px;
-    font-weight: 600;
+    width: 100%;
+
+    min-height: 100vh;
+
+    padding: 28px 32px;
+}
+
+
+/* ============================================================
+   CABEÇALHO
+   ============================================================ */
+
+.cabecalho-pagina {
+
+    margin-bottom: 24px;
+}
+
+
+.cabecalho-caminho {
+
+    margin: 0 0 8px;
+
+    color: var(--texto-fraco);
+
+    font-size: 12px;
+}
+
+
+.cabecalho-pagina h1 {
+
+    margin: 0;
 
     color: #ffffff;
+
+    font-size: 23px;
+    font-weight: 500;
+}
+
+
+.cabecalho-pagina > p:not(.cabecalho-caminho) {
+
+    margin: 8px 0 0;
+
+    color: var(--texto-secundario);
 }
 
 
 /* ============================================================
-   CAMPOS
+   PAINÉIS
    ============================================================ */
 
+.painel {
+
+    width: 100%;
+
+    margin-bottom: 18px;
+
+    padding: 20px;
+
+    border: 1px solid var(--borda);
+    border-radius: 8px;
+
+    background: var(--fundo-painel);
+}
+
+
+.painel h2,
+.painel h3 {
+
+    margin-top: 0;
+
+    color: #ffffff;
+
+    font-weight: 500;
+}
+
+
+.painel h2 {
+
+    font-size: 17px;
+}
+
+
+.painel h3 {
+
+    font-size: 14px;
+}
+
+
+/* ============================================================
+   FORMULÁRIOS
+   ============================================================ */
+
+.linha-formulario {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+}
+
+
 input {
-    max-width: 100%;
+
+    width: 100%;
+    max-width: 500px;
+
     min-height: 38px;
 
-    padding: 8px 10px;
+    padding: 8px 11px;
 
-    border: 1px solid #3a3a3a;
+    border: 1px solid var(--borda-clara);
     border-radius: 6px;
 
     outline: none;
 
-    background: #181818;
+    background: #101010;
     color: #ffffff;
+
+    font-family: inherit;
+    font-size: 14px;
 }
 
+
+input::placeholder {
+
+    color: #666666;
+}
+
+
 input:focus {
-    border-color: #6b7280;
+
+    border-color: #666666;
+}
+
+
+/* ============================================================
+   INPUT DE ARQUIVO
+   ============================================================ */
+
+input[type="file"] {
+
+    max-width: 100%;
+
+    padding: 8px;
+
+    background: #101010;
+}
+
+
+/* ============================================================
+   BOTÕES
+   ============================================================ */
+
+.botao-principal,
+.botao-secundario,
+.botao-perigo {
+
+    min-height: 38px;
+
+    padding: 8px 14px;
+
+    border-radius: 6px;
+
+    font-family: inherit;
+    font-size: 13px;
+
+    cursor: pointer;
+}
+
+
+/* ============================================================
+   BOTÃO PRINCIPAL
+   ============================================================ */
+
+.botao-principal {
+
+    border: 1px solid var(--verde);
+
+    background: var(--verde);
+    color: #07140e;
+
+    font-weight: 600;
+}
+
+
+.botao-principal:hover {
+
+    background: var(--verde-hover);
+}
+
+
+/* ============================================================
+   BOTÃO SECUNDÁRIO
+   ============================================================ */
+
+.botao-secundario {
+
+    border: 1px solid var(--borda-clara);
+
+    background: #202020;
+    color: var(--texto);
+}
+
+
+.botao-secundario:hover {
+
+    background: #292929;
+}
+
+
+/* ============================================================
+   BOTÃO DE AÇÃO PERIGOSA
+   ============================================================ */
+
+.botao-perigo {
+
+    border: 1px solid #5c3030;
+
+    background: #2a1818;
+    color: #f0aaaa;
+}
+
+
+.botao-perigo:hover {
+
+    background: #351d1d;
+}
+
+
+/* ============================================================
+   IMPORTAÇÃO
+   ============================================================ */
+
+.acoes-importacao {
+
+    display: flex;
+
+    gap: 8px;
+
+    flex-wrap: wrap;
+
+    margin-top: 16px;
+}
+
+
+/* ============================================================
+   RESULTADOS
+   ============================================================ */
+
+#resultadoPesquisaCodigo,
+#resultadoPesquisaDescricao,
+#resultadoPesquisaReferencia,
+#resultadoConferencia,
+#resultadoConferencias,
+#resultadoDivergencias,
+#resultadoImportacao {
+
+    margin-top: 16px;
+}
+
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+
+.modal {
+
+    position: fixed;
+
+    inset: 0;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    background: rgba(0, 0, 0, 0.7);
+
+    z-index: 2000;
+}
+
+
+.modal-conteudo {
+
+    width: 100%;
+    max-width: 430px;
+
+    padding: 22px;
+
+    border: 1px solid var(--borda-clara);
+    border-radius: 8px;
+
+    background: #181818;
+
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.45);
+}
+
+
+.modal-conteudo h2 {
+
+    margin-top: 0;
+}
+
+
+.modal-acoes {
+
+    display: flex;
+
+    gap: 8px;
+
+    flex-wrap: wrap;
+
+    margin-top: 20px;
 }
 
 
 /* ============================================================
    RESPONSIVIDADE
-
-   Em telas pequenas, reduzimos a largura da sidebar.
-   Nesta primeira etapa ainda mantemos os textos.
+   CELULAR
    ============================================================ */
 
 @media (max-width: 700px) {
 
+
+    /* ========================================================
+       SIDEBAR COMPACTA
+       ======================================================== */
+
     #sistema {
-        width: 190px;
+
+        width: var(--sidebar-mobile);
     }
 
-    #pesquisa,
-    #conferencia,
-    #conferencias,
-    #divergencias,
-    #importacao,
-    #configuracoes {
-        margin-left: 190px;
-        padding: 20px;
+
+    .sidebar-topo {
+
+        justify-content: center;
+
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+
+    .sidebar-logo {
+
+        width: 34px;
+        height: 34px;
+    }
+
+
+    .sidebar-titulo {
+
+        display: none;
+    }
+
+
+    .sidebar-menu {
+
+        padding-left: 6px;
+        padding-right: 6px;
+    }
+
+
+    .sidebar-rodape {
+
+        padding-left: 6px;
+        padding-right: 6px;
+    }
+
+
+    .sidebar-item {
+
+        justify-content: center;
+
+        padding-left: 6px;
+        padding-right: 6px;
+    }
+
+
+    .sidebar-icone {
+
+        width: 24px;
+    }
+
+
+    .sidebar-texto {
+
+        display: none;
+    }
+
+
+    /* ========================================================
+       CONTEÚDO
+       ======================================================== */
+
+    #conteudoPrincipal {
+
+        margin-left: var(--sidebar-mobile);
+    }
+
+
+    .tela-sistema {
+
+        padding: 20px 14px;
+    }
+
+
+    /* ========================================================
+       FORMULÁRIOS
+       ======================================================== */
+
+    .linha-formulario {
+
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+
+    input {
+
+        max-width: none;
+    }
+
+
+    .linha-formulario .botao-principal {
+
+        width: 100%;
+    }
+
+
+    /* ========================================================
+       PAINÉIS
+       ======================================================== */
+
+    .painel {
+
+        padding: 15px;
     }
 
 }
