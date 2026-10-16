@@ -5,8 +5,7 @@
 //
 // OBJETIVO:
 //
-// Inicializar e verificar a conexão do PMOBILE
-// com o Supabase.
+// Centralizar a comunicação básica do PMOBILE com o Supabase.
 //
 // RESPONSABILIDADES DESTE ARQUIVO:
 //
@@ -15,20 +14,43 @@
 // 3. Inicializar o cliente Supabase.
 // 4. Disponibilizar o cliente para os demais arquivos.
 // 5. Testar a leitura da tabela "materiais".
-// 6. Verificar TODOS os materiais existentes.
-// 7. Verificar possíveis problemas nos registros.
-// 8. Mostrar os problemas encontrados na tela.
+// 6. Verificar os materiais existentes.
+// 7. Identificar possíveis problemas nos registros.
+// 8. Mostrar o status da conexão/verificação.
+// 9. Mostrar detalhes dos problemas encontrados.
+// 10. Permitir limpar os materiais do Supabase.
 //
 // IMPORTANTE:
 //
 // O Supabase é o banco central do PMOBILE.
 //
-// A importação dos materiais é realizada pelo
-// arquivo "importacao.js".
+// A importação dos materiais continua sendo realizada pelo
+// arquivo:
 //
-// Este arquivo NÃO realiza a importação.
+//     importacao.js
+//
+// Este arquivo NÃO realiza a importação da planilha.
 //
 // Este arquivo também NÃO altera o IndexedDB.
+//
+// ============================================================
+//
+// ORGANIZAÇÃO VISUAL:
+//
+// Este arquivo NÃO define aparência dos avisos.
+//
+// Toda a aparência deve ficar exclusivamente no:
+//
+//     style.css
+//
+// Os elementos criados aqui possuem IDs próprios:
+//
+//     #statusSupabase
+//     #resultadoVerificacaoSupabase
+//
+// Dessa forma, posição, cores, transparência, bordas,
+// tamanhos, espaçamentos e responsividade podem ser
+// controlados somente pelo CSS.
 //
 // ============================================================
 
@@ -46,17 +68,18 @@ const SUPABASE_URL =
     "https://rxyvllbebtgbfbqoimwe.supabase.co";
 
 
+
 // ============================================================
 // CHAVE PÚBLICA DO SUPABASE
 // ============================================================
 //
-// Essa é a Publishable Key.
+// Publishable Key utilizada pelo frontend.
 //
-// Ela pode ser utilizada no frontend.
+// Essa chave pode ser utilizada no navegador.
 //
 // IMPORTANTE:
 //
-// Chaves secretas/service_role NUNCA devem ser
+// Chaves secretas ou service_role NUNCA devem ser
 // colocadas neste arquivo.
 //
 // ============================================================
@@ -72,31 +95,52 @@ const SUPABASE_PUBLISHABLE_KEY =
 //
 // OBJETIVO:
 //
-// Criar ou atualizar uma mensagem visual fixa na tela.
+// Criar ou atualizar o aviso de status do Supabase.
 //
-// Isso é especialmente útil durante os testes pelo
-// celular, onde nem sempre temos acesso ao console
-// do navegador.
+// O aviso pode apresentar mensagens como:
+//
+//     🟢 Supabase inicializado com sucesso
+//
+//     🟡 Verificando todos os materiais...
+//
+//     ⚠️ 93.912 materiais verificados.
+//        2 problemas encontrados.
+//
+// FUNCIONAMENTO:
+//
+// 1. Procura o elemento #statusSupabase.
+// 2. Se não existir, cria o elemento.
+// 3. Limpa o conteúdo anterior.
+// 4. Insere a nova mensagem.
+// 5. Adiciona o botão "✕".
+// 6. O botão permite fechar somente o aviso.
+//
+// IMPORTANTE:
+//
+// Nenhuma aparência visual é definida aqui.
+//
+// Toda a aparência deste aviso deve ser controlada no:
+//
+//     style.css
+//
+// utilizando:
+//
+//     #statusSupabase
+//     #statusSupabase button
 //
 // PARÂMETRO:
 //
 // mensagem
-//     Texto que será mostrado ao usuário.
-//
-// EXEMPLOS:
-//
-// 🟢 Supabase inicializado com sucesso
-//
-// 🟡 Verificando todos os materiais...
-//
-// 🟢 Supabase OK! 92.735 materiais verificados sem erros.
+//     Texto que será apresentado ao usuário.
 //
 // ============================================================
 
-function mostrarStatusSupabase(mensagem) {
+function mostrarStatusSupabase(
+    mensagem
+) {
 
     // ========================================================
-    // PROCURAR ÁREA DE STATUS EXISTENTE
+    // PROCURAR AVISO EXISTENTE
     // ========================================================
 
     let status =
@@ -106,7 +150,7 @@ function mostrarStatusSupabase(mensagem) {
 
 
     // ========================================================
-    // SE NÃO EXISTIR, CRIAR
+    // CRIAR AVISO CASO NÃO EXISTA
     // ========================================================
 
     if (!status) {
@@ -122,49 +166,6 @@ function mostrarStatusSupabase(mensagem) {
 
 
         // ====================================================
-        // POSIÇÃO
-        // ====================================================
-
-        status.style.position =
-            "fixed";
-
-        status.style.bottom =
-            "10px";
-
-        status.style.left =
-            "10px";
-
-        status.style.right =
-            "10px";
-
-
-        // ====================================================
-        // APARÊNCIA
-        // ====================================================
-
-        status.style.padding =
-            "10px";
-
-        status.style.background =
-            "#eeeeee";
-
-        status.style.border =
-            "1px solid #999";
-
-        status.style.borderRadius =
-            "8px";
-
-        status.style.textAlign =
-            "center";
-
-        status.style.fontWeight =
-            "bold";
-
-        status.style.zIndex =
-            "9999";
-
-
-        // ====================================================
         // ADICIONAR À PÁGINA
         // ====================================================
 
@@ -176,69 +177,77 @@ function mostrarStatusSupabase(mensagem) {
 
 
     // ========================================================
-// ATUALIZAR CONTEÚDO
-// ========================================================
-//
-// Mostra a mensagem do Supabase e adiciona um botão
-// para permitir fechar manualmente o aviso.
-//
-// ========================================================
+    // LIMPAR CONTEÚDO ANTERIOR
+    // ========================================================
 
-status.innerHTML = "";
+    status.innerHTML =
+        "";
 
 
-// ========================================================
-// TEXTO DO STATUS
-// ========================================================
+    // ========================================================
+    // CRIAR TEXTO DO STATUS
+    // ========================================================
 
-const textoStatus =
-    document.createElement(
-        "span"
+    const textoStatus =
+        document.createElement(
+            "span"
+        );
+
+
+    textoStatus.textContent =
+        mensagem;
+
+
+    // ========================================================
+    // ADICIONAR TEXTO AO AVISO
+    // ========================================================
+
+    status.appendChild(
+        textoStatus
     );
 
-textoStatus.textContent =
-    mensagem;
 
-textoStatus.style.flex =
-    "1";
+    // ========================================================
+    // CRIAR BOTÃO FECHAR
+    // ========================================================
 
-status.appendChild(
-    textoStatus
-);
+    const botaoFechar =
+        document.createElement(
+            "button"
+        );
 
 
-// ========================================================
-// BOTÃO FECHAR
-// ========================================================
+    botaoFechar.type =
+        "button";
 
-const botaoFechar =
-    document.createElement(
-        "button"
+
+    botaoFechar.textContent =
+        "✕";
+
+
+    botaoFechar.title =
+        "Fechar aviso";
+
+
+    // ========================================================
+    // FUNÇÃO DO BOTÃO
+    // ========================================================
+
+    botaoFechar.onclick =
+        fecharStatusSupabase;
+
+
+    // ========================================================
+    // ADICIONAR BOTÃO AO AVISO
+    // ========================================================
+
+    status.appendChild(
+        botaoFechar
     );
-
-botaoFechar.type =
-    "button";
-
-botaoFechar.textContent =
-    "✕";
-
-botaoFechar.title =
-    "Fechar aviso";
-
-botaoFechar.style.marginLeft =
-    "10px";
-
-botaoFechar.style.cursor =
-    "pointer";
-
-botaoFechar.onclick =
-    fecharStatusSupabase;
-
-status.appendChild(
-    botaoFechar
-);
 
 }
+
+
 
 // ============================================================
 // FUNÇÃO: fecharStatusSupabase()
@@ -246,21 +255,42 @@ status.appendChild(
 //
 // OBJETIVO:
 //
-// Fechar o aviso de status exibido na parte superior
-// da tela.
+// Fechar/remover da tela o aviso:
+//
+//     #statusSupabase
+//
+// IMPORTANTE:
 //
 // Esta função altera somente a interface.
-// Nenhuma operação do Supabase é interrompida.
+//
+// Ela NÃO:
+//
+// - cancela consultas;
+// - interrompe a verificação;
+// - desconecta o Supabase;
+// - remove dados;
+// - altera materiais.
+//
+// Se uma verificação estiver acontecendo, ela continuará
+// normalmente mesmo depois que o usuário fechar o aviso.
 //
 // ============================================================
 
 function fecharStatusSupabase() {
+
+    // ========================================================
+    // PROCURAR AVISO
+    // ========================================================
 
     const status =
         document.getElementById(
             "statusSupabase"
         );
 
+
+    // ========================================================
+    // AVISO NÃO EXISTE
+    // ========================================================
 
     if (!status) {
 
@@ -269,9 +299,14 @@ function fecharStatusSupabase() {
     }
 
 
+    // ========================================================
+    // REMOVER AVISO
+    // ========================================================
+
     status.remove();
 
 }
+
 
 
 // ============================================================
@@ -294,13 +329,35 @@ function fecharStatusSupabase() {
 // quantidadeErros
 //     Quantidade total de problemas encontrados.
 //
+// FUNCIONAMENTO:
+//
+// 1. Procura #resultadoVerificacaoSupabase.
+// 2. Se não existir, cria o painel.
+// 3. Mostra o total de materiais verificados.
+// 4. Mostra a quantidade de problemas.
+// 5. Exibe os detalhes dos problemas.
+// 6. Limita a apresentação aos primeiros 20 problemas.
+// 7. Adiciona um botão "Fechar".
+//
 // IMPORTANTE:
 //
-// Para evitar uma tela gigantesca, mostramos no máximo
-// os primeiros 20 problemas.
+// Todos os problemas continuam disponíveis no console.
 //
-// Todos os problemas continuam sendo enviados para
-// o console do navegador.
+// Nenhuma aparência visual é definida aqui.
+//
+// O visual deve ser controlado exclusivamente pelo:
+//
+//     style.css
+//
+// utilizando:
+//
+//     #resultadoVerificacaoSupabase
+//     #resultadoVerificacaoSupabase h3
+//     #resultadoVerificacaoSupabase p
+//     #resultadoVerificacaoSupabase ul
+//     #resultadoVerificacaoSupabase li
+//     #resultadoVerificacaoSupabase hr
+//     #resultadoVerificacaoSupabase button
 //
 // ============================================================
 
@@ -311,7 +368,7 @@ function mostrarErrosSupabase(
 ) {
 
     // ========================================================
-    // PROCURAR ÁREA DE RESULTADO
+    // PROCURAR PAINEL EXISTENTE
     // ========================================================
 
     let area =
@@ -321,7 +378,7 @@ function mostrarErrosSupabase(
 
 
     // ========================================================
-    // SE NÃO EXISTIR, CRIAR
+    // CRIAR PAINEL CASO NÃO EXISTA
     // ========================================================
 
     if (!area) {
@@ -337,44 +394,6 @@ function mostrarErrosSupabase(
 
 
         // ====================================================
-        // APARÊNCIA
-        // ====================================================
-
-        area.style.position =
-            "fixed";
-
-        area.style.top =
-            "80px";
-
-        area.style.left =
-            "10px";
-
-        area.style.right =
-            "10px";
-
-        area.style.maxHeight =
-            "70vh";
-
-        area.style.overflowY =
-            "auto";
-
-        area.style.padding =
-            "15px";
-
-        area.style.background =
-            "#ffffff";
-
-        area.style.border =
-            "1px solid #999";
-
-        area.style.borderRadius =
-            "8px";
-
-        area.style.zIndex =
-            "9998";
-
-
-        // ====================================================
         // ADICIONAR À PÁGINA
         // ====================================================
 
@@ -386,15 +405,24 @@ function mostrarErrosSupabase(
 
 
     // ========================================================
-    // INICIAR HTML
+    // INICIAR CONTEÚDO DO PAINEL
     // ========================================================
 
-    let html = "";
+    let html =
+        "";
 
+
+    // ========================================================
+    // TÍTULO
+    // ========================================================
 
     html +=
         "<h3>⚠️ Problemas encontrados</h3>";
 
+
+    // ========================================================
+    // TOTAL DE MATERIAIS
+    // ========================================================
 
     html +=
         "<p><strong>" +
@@ -404,6 +432,10 @@ function mostrarErrosSupabase(
         "</strong> materiais verificados.</p>";
 
 
+    // ========================================================
+    // TOTAL DE PROBLEMAS
+    // ========================================================
+
     html +=
         "<p><strong>" +
         quantidadeErros.toLocaleString(
@@ -412,12 +444,16 @@ function mostrarErrosSupabase(
         "</strong> problemas encontrados.</p>";
 
 
+    // ========================================================
+    // DIVISOR
+    // ========================================================
+
     html +=
         "<hr>";
 
 
     // ========================================================
-    // VERIFICAR SE EXISTEM ERROS
+    // NENHUM DETALHE DISPONÍVEL
     // ========================================================
 
     if (
@@ -429,16 +465,24 @@ function mostrarErrosSupabase(
 
     } else {
 
+        // ====================================================
+        // TÍTULO DOS DETALHES
+        // ====================================================
+
         html +=
             "<p><strong>Detalhes:</strong></p>";
 
+
+        // ====================================================
+        // ABRIR LISTA
+        // ====================================================
 
         html +=
             "<ul>";
 
 
         // ====================================================
-        // MOSTRAR NO MÁXIMO 20
+        // MOSTRAR NO MÁXIMO 20 PROBLEMAS
         // ====================================================
 
         erros
@@ -460,12 +504,16 @@ function mostrarErrosSupabase(
             );
 
 
+        // ====================================================
+        // FECHAR LISTA
+        // ====================================================
+
         html +=
             "</ul>";
 
 
         // ====================================================
-        // AVISAR SE HOUVER MAIS DE 20
+        // EXISTEM MAIS DE 20 PROBLEMAS
         // ====================================================
 
         if (
@@ -473,8 +521,10 @@ function mostrarErrosSupabase(
         ) {
 
             html +=
-                "<p>⚠️ Apenas os primeiros 20 problemas " +
-                "estão sendo exibidos.</p>";
+                "<p>" +
+                "⚠️ Apenas os primeiros 20 problemas " +
+                "estão sendo exibidos." +
+                "</p>";
 
         }
 
@@ -487,14 +537,15 @@ function mostrarErrosSupabase(
 
     html +=
         "<br>" +
-        "<button type=\"button\" " +
+        "<button " +
+        "type=\"button\" " +
         "onclick=\"fecharErrosSupabase()\">" +
         "Fechar" +
         "</button>";
 
 
     // ========================================================
-    // INSERIR RESULTADO NA TELA
+    // MOSTRAR CONTEÚDO
     // ========================================================
 
     area.innerHTML =
@@ -510,21 +561,44 @@ function mostrarErrosSupabase(
 //
 // OBJETIVO:
 //
-// Fechar/remover da tela o painel de problemas
-// apresentado pela função mostrarErrosSupabase().
+// Fechar/remover o painel:
+//
+//     #resultadoVerificacaoSupabase
+//
+// Esta função afeta somente a interface.
+//
+// Os erros encontrados continuam existindo durante
+// a execução da verificação e também permanecem registrados
+// no console do navegador.
 //
 // ============================================================
 
 function fecharErrosSupabase() {
+
+    // ========================================================
+    // PROCURAR PAINEL
+    // ========================================================
 
     const area =
         document.getElementById(
             "resultadoVerificacaoSupabase"
         );
 
+
+    // ========================================================
+    // PAINEL NÃO EXISTE
+    // ========================================================
+
     if (!area) {
+
         return;
+
     }
+
+
+    // ========================================================
+    // REMOVER PAINEL
+    // ========================================================
 
     area.remove();
 
@@ -538,24 +612,31 @@ function fecharErrosSupabase() {
 //
 // OBJETIVO:
 //
-// Evitar que informações vindas do banco sejam
-// interpretadas como HTML.
+// Converter caracteres especiais em entidades HTML.
 //
-// Isso é importante porque os dados dos materiais
-// vêm diretamente do Supabase.
+// Isso evita que informações vindas do banco sejam
+// interpretadas pelo navegador como código HTML.
+//
+// EXEMPLO:
+//
+//     <
+// passa a ser:
+//     &lt;
 //
 // PARÂMETRO:
 //
 // texto
-//     Texto que será exibido.
+//     Valor que será exibido.
 //
 // RETORNO:
 //
-// Texto seguro para ser utilizado dentro de HTML.
+// Texto seguro para inserção dentro do HTML.
 //
 // ============================================================
 
-function escaparHTML(texto) {
+function escaparHTML(
+    texto
+) {
 
     return String(
         texto ?? ""
@@ -591,14 +672,14 @@ function escaparHTML(texto) {
 //
 // OBJETIVO:
 //
-// Criar o cliente Supabase que será utilizado pelos
-// demais arquivos do PMOBILE.
+// Criar o cliente utilizado pelo PMOBILE para conversar
+// com o banco Supabase.
 //
 // Depois da inicialização:
 //
-// window.clienteSupabase
+//     window.clienteSupabase
 //
-// ficará disponível globalmente.
+// ficará disponível globalmente para os demais arquivos.
 //
 // ============================================================
 
@@ -631,7 +712,7 @@ if (!window.supabase) {
     try {
 
         // ====================================================
-        // CRIAR CLIENTE
+        // CRIAR CLIENTE SUPABASE
         // ====================================================
 
         const clienteSupabase =
@@ -642,7 +723,7 @@ if (!window.supabase) {
 
 
         // ====================================================
-        // DISPONIBILIZAR GLOBALMENTE
+        // DISPONIBILIZAR CLIENTE GLOBALMENTE
         // ====================================================
 
         window.clienteSupabase =
@@ -650,7 +731,7 @@ if (!window.supabase) {
 
 
         // ====================================================
-        // LOG
+        // REGISTRAR SUCESSO NO CONSOLE
         // ====================================================
 
         console.log(
@@ -659,7 +740,7 @@ if (!window.supabase) {
 
 
         // ====================================================
-        // STATUS VISUAL
+        // MOSTRAR STATUS
         // ====================================================
 
         mostrarStatusSupabase(
@@ -668,11 +749,11 @@ if (!window.supabase) {
 
 
         // ====================================================
-        // INICIAR VERIFICAÇÃO
+        // INICIAR VERIFICAÇÃO DOS MATERIAIS
         // ====================================================
         //
-        // Pequeno atraso para garantir que a página
-        // terminou de carregar.
+        // O pequeno atraso continua preservado para garantir
+        // que a página tenha tempo de concluir a inicialização.
         //
         // ====================================================
 
@@ -710,31 +791,37 @@ if (!window.supabase) {
 //
 // OBJETIVO:
 //
-// Fazer uma verificação completa da tabela:
+// Fazer a verificação completa da tabela:
 //
 //     public.materiais
 //
-// A função verifica TODOS os registros disponíveis.
+// A função percorre todos os registros disponíveis.
 //
-// ============================================================
-//
-// VERIFICAÇÕES:
+// VERIFICAÇÕES ATUAIS:
 //
 // 1. Se o Supabase responde.
 // 2. Quantos materiais existem.
-// 3. Se todos possuem código.
+// 3. Se o material possui código.
 // 4. Se existem códigos duplicados.
-// 5. Se todos possuem descrição.
+// 5. Se o material possui descrição.
 // 6. Se quantidade está preenchida.
 // 7. Se quantidade_reservada está preenchida.
 // 8. Se disponivel está preenchido.
 //
-// ============================================================
+// FUNCIONAMENTO:
 //
 // A consulta é realizada em lotes de 1.000 registros.
 //
-// Isso evita carregar os 92.735 materiais de uma
-// única vez no celular.
+// Isso evita solicitar todos os materiais em uma única
+// resposta do Supabase.
+//
+// IMPORTANTE:
+//
+// Esta rotina foi mantida exatamente nesta etapa.
+//
+// A futura transferência da verificação para o banco
+// Supabase/PostgreSQL continua pausada enquanto trabalhamos
+// na organização visual do PMOBILE.
 //
 // ============================================================
 
@@ -753,7 +840,7 @@ async function testarLeituraSupabase() {
     try {
 
         // ====================================================
-        // TAMANHO DO LOTE
+        // TAMANHO DE CADA LOTE
         // ====================================================
 
         const tamanhoLote =
@@ -761,7 +848,7 @@ async function testarLeituraSupabase() {
 
 
         // ====================================================
-        // PRIMEIRO REGISTRO
+        // POSIÇÃO INICIAL
         // ====================================================
 
         let inicio =
@@ -769,7 +856,7 @@ async function testarLeituraSupabase() {
 
 
         // ====================================================
-        // CONTADOR TOTAL
+        // TOTAL DE MATERIAIS ENCONTRADOS
         // ====================================================
 
         let totalEncontrado =
@@ -777,7 +864,7 @@ async function testarLeituraSupabase() {
 
 
         // ====================================================
-        // CONTADOR DE PROBLEMAS
+        // TOTAL DE PROBLEMAS
         // ====================================================
 
         let quantidadeErros =
@@ -788,14 +875,16 @@ async function testarLeituraSupabase() {
         // LISTA DE PROBLEMAS
         // ====================================================
 
-        const erros = [];
+        const erros =
+            [];
 
 
         // ====================================================
         // CONTROLE DE CÓDIGOS
         // ====================================================
         //
-        // Utilizado para encontrar códigos duplicados.
+        // O Set é utilizado para detectar códigos duplicados
+        // durante a leitura dos lotes.
         //
         // ====================================================
 
@@ -803,15 +892,14 @@ async function testarLeituraSupabase() {
             new Set();
 
 
-
         // ====================================================
-        // CONSULTAR TODOS OS LOTES
+        // CONSULTAR LOTES
         // ====================================================
 
         while (true) {
 
             // =================================================
-            // DEFINIR FINAL DO LOTE
+            // CALCULAR FINAL DO LOTE
             // =================================================
 
             const fim =
@@ -829,12 +917,14 @@ async function testarLeituraSupabase() {
 
 
             // =================================================
-            // CONSULTAR SUPABASE
+            // CONSULTAR TABELA MATERIAIS
             // =================================================
 
             const resultado =
                 await window.clienteSupabase
-                    .from("materiais")
+                    .from(
+                        "materiais"
+                    )
                     .select(
                         "id,codigo,descricao,referencia,marca,local,quantidade,quantidade_reservada,disponivel,ultima_entrada"
                     )
@@ -851,7 +941,7 @@ async function testarLeituraSupabase() {
 
 
             // =================================================
-            // VERIFICAR ERRO DA CONSULTA
+            // ERRO RETORNADO PELO SUPABASE
             // =================================================
 
             if (
@@ -870,7 +960,7 @@ async function testarLeituraSupabase() {
 
 
             // =================================================
-            // OBTER DADOS
+            // OBTER REGISTROS
             // =================================================
 
             const dados =
@@ -878,7 +968,7 @@ async function testarLeituraSupabase() {
 
 
             // =================================================
-            // NENHUM REGISTRO
+            // NENHUM REGISTRO NO LOTE
             // =================================================
 
             if (
@@ -891,7 +981,7 @@ async function testarLeituraSupabase() {
 
 
             // =================================================
-            // ANALISAR CADA MATERIAL
+            // ANALISAR MATERIAIS DO LOTE
             // =================================================
 
             dados.forEach(
@@ -933,8 +1023,9 @@ async function testarLeituraSupabase() {
 
 
                         // =====================================
-                        // VERIFICAR DUPLICIDADE
+                        // VERIFICAR CÓDIGO DUPLICADO
                         // =====================================
+
                         if (
                             codigosEncontrados.has(
                                 codigo
@@ -1053,7 +1144,7 @@ async function testarLeituraSupabase() {
 
 
             // =================================================
-            // ATUALIZAR STATUS
+            // ATUALIZAR AVISO DE PROGRESSO
             // =================================================
 
             mostrarStatusSupabase(
@@ -1065,7 +1156,7 @@ async function testarLeituraSupabase() {
 
 
             // =================================================
-            // VERIFICAR SE FOI O ÚLTIMO LOTE
+            // ÚLTIMO LOTE
             // =================================================
 
             if (
@@ -1079,7 +1170,7 @@ async function testarLeituraSupabase() {
 
 
             // =================================================
-            // PRÓXIMO LOTE
+            // PREPARAR PRÓXIMO LOTE
             // =================================================
 
             inicio +=
@@ -1087,13 +1178,12 @@ async function testarLeituraSupabase() {
 
 
             // =================================================
-            // PERMITIR ATUALIZAÇÃO DA INTERFACE
+            // LIBERAR INTERFACE DO NAVEGADOR
             // =================================================
 
             await permitirAtualizacaoNavegador();
 
         }
-
 
 
         // ====================================================
@@ -1123,10 +1213,9 @@ async function testarLeituraSupabase() {
         );
 
 
-
         // ====================================================
         // CASO 1:
-        // BANCO VAZIO
+        // TABELA MATERIAIS VAZIA
         // ====================================================
 
         if (
@@ -1141,7 +1230,6 @@ async function testarLeituraSupabase() {
             return;
 
         }
-
 
 
         // ====================================================
@@ -1172,7 +1260,6 @@ async function testarLeituraSupabase() {
         }
 
 
-
         // ====================================================
         // CASO 3:
         // PROBLEMAS ENCONTRADOS
@@ -1192,7 +1279,7 @@ async function testarLeituraSupabase() {
 
 
         // ====================================================
-        // MOSTRAR PROBLEMAS NA TELA
+        // MOSTRAR DETALHES DOS PROBLEMAS
         // ====================================================
 
         mostrarErrosSupabase(
@@ -1223,16 +1310,22 @@ async function testarLeituraSupabase() {
 }
 
 
+
 // ============================================================
 // FUNÇÃO: permitirAtualizacaoNavegador()
 // ============================================================
 //
 // OBJETIVO:
 //
-// Dar uma pequena oportunidade para o navegador atualizar
-// a interface entre os lotes.
+// Dar ao navegador uma oportunidade de atualizar a interface
+// entre a leitura de um lote e outro.
 //
-// Isso é importante principalmente no celular.
+// Isso é especialmente útil durante testes em celulares,
+// evitando bloquear continuamente a atualização visual.
+//
+// RETORNO:
+//
+// Promise resolvida no próximo ciclo disponível.
 //
 // ============================================================
 
@@ -1250,52 +1343,100 @@ function permitirAtualizacaoNavegador() {
     );
 
 }
+
+
+
 // ============================================================
 // FUNÇÃO: limparMateriaisSupabase()
 // ============================================================
 //
 // OBJETIVO:
 //
-// Remover todos os materiais importados da tabela:
+// Remover todos os materiais existentes na tabela:
 //
 //     public.materiais
+//
+// FLUXO:
+//
+// 1. Solicita confirmação do usuário.
+// 2. Caso seja cancelado, encerra a função.
+// 3. Mostra aviso de processamento.
+// 4. Executa a exclusão no Supabase.
+// 5. Informa sucesso ou erro.
 //
 // IMPORTANTE:
 //
 // Esta função NÃO remove:
-// - usuários
-// - conferências
-// - histórico de importações
-// - dados do IndexedDB
 //
-// Ela atua somente na tabela "materiais" do Supabase.
+// - usuários;
+// - conferências;
+// - histórico de importações;
+// - dados do IndexedDB.
+//
+// Ela atua somente na tabela:
+//
+//     public.materiais
 //
 // ============================================================
 
 async function limparMateriaisSupabase() {
 
-    const confirmar = confirm(
-        "⚠️ ATENÇÃO!\n\n" +
-        "Isso irá apagar TODOS os materiais importados " +
-        "do Supabase.\n\n" +
-        "Deseja continuar?"
-    );
+    // ========================================================
+    // CONFIRMAÇÃO
+    // ========================================================
+
+    const confirmar =
+        confirm(
+            "⚠️ ATENÇÃO!\n\n" +
+            "Isso irá apagar TODOS os materiais importados " +
+            "do Supabase.\n\n" +
+            "Deseja continuar?"
+        );
+
+
+    // ========================================================
+    // CANCELADO PELO USUÁRIO
+    // ========================================================
 
     if (!confirmar) {
+
         return;
+
     }
+
+
+    // ========================================================
+    // MOSTRAR PROCESSAMENTO
+    // ========================================================
 
     mostrarStatusSupabase(
         "🟡 Limpando materiais do Supabase..."
     );
 
+
     try {
 
-        const { error } =
+        // ====================================================
+        // EXCLUIR MATERIAIS
+        // ====================================================
+
+        const {
+            error
+        } =
             await window.clienteSupabase
-                .from("materiais")
+                .from(
+                    "materiais"
+                )
                 .delete()
-                .neq("id", 0);
+                .neq(
+                    "id",
+                    0
+                );
+
+
+        // ====================================================
+        // ERRO RETORNADO PELO SUPABASE
+        // ====================================================
 
         if (error) {
 
@@ -1304,43 +1445,63 @@ async function limparMateriaisSupabase() {
                 error
             );
 
+
             mostrarStatusSupabase(
                 "🔴 Erro ao limpar materiais."
             );
+
 
             alert(
                 "❌ Não foi possível limpar os materiais.\n\n" +
                 error.message
             );
 
+
             return;
+
         }
+
+
+        // ====================================================
+        // SUCESSO
+        // ====================================================
 
         console.log(
             "✅ Todos os materiais foram removidos do Supabase."
         );
 
+
         mostrarStatusSupabase(
             "🟢 Materiais do Supabase limpos."
         );
+
 
         alert(
             "✅ Materiais importados removidos com sucesso!"
         );
 
+
     } catch (erro) {
+
+        // ====================================================
+        // ERRO INESPERADO
+        // ====================================================
 
         console.error(
             "❌ Erro inesperado ao limpar materiais:",
             erro
         );
 
+
         mostrarStatusSupabase(
             "🔴 Erro inesperado na limpeza."
         );
 
+
         alert(
             "❌ Ocorreu um erro ao limpar os materiais."
         );
+
     }
+
 }
