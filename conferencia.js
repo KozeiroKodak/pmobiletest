@@ -4,78 +4,52 @@
 // ============================================================
 //
 // OBJETIVO:
-//
-// Controlar a tela "Conferência".
+// Controlar a tela "Conferência" com funcionamento ONLINE e
+// OFFLINE.
 //
 // ARQUITETURA:
 //
-//     SUPABASE
-//        ↓
-//     fonte central
+// ONLINE:
+//   pesquisa -> Supabase
+//   conferência -> Supabase
 //
-//     INDEXEDDB
+// OFFLINE:
+//   pesquisa -> IndexedDB (cópia local dos materiais)
+//   conferência -> IndexedDB (fila pendente)
+//
+// QUANDO A INTERNET VOLTAR:
+//
+//   fila offline
 //        ↓
-//     fila local de conferências offline
+//   Supabase
+//        ↓
+//   sucesso / já existente
+//        ↓
+//   remove somente o registro sincronizado
 //
 // IMPORTANTE:
 //
-// A pesquisa de materiais continua sendo feita diretamente
-// no Supabase.
-//
-// Nesta versão NÃO estamos implementando pesquisa offline.
-//
-// O objetivo desta etapa é testar:
-//
-//     CONFERÊNCIA OFFLINE
-//          ↓
-//     INDEXEDDB
-//          ↓
-//     INTERNET VOLTA
-//          ↓
-//     SUPABASE
-//
-// PROTEÇÕES ADICIONADAS:
-//
-//     1. ID único para cada conferência
-//     2. Proteção contra duplo clique
-//     3. Proteção contra duas sincronizações simultâneas
-//     4. Mesmo ID preservado na fila offline
-//     5. Evita inserir a mesma conferência duas vezes na fila
-//
+// - O IndexedDB de materiais continua sendo administrado por
+//   dados.js.
+// - A fila de conferências usa um IndexedDB separado.
+// - O conferencia_id é gerado uma única vez e acompanha a
+//   conferência durante todo o ciclo.
+// - Código/descrição/referência/marca são campos de pesquisa.
+// - Local e quantidade NÃO são campos de pesquisa.
+// - Se navigator.onLine disser ONLINE, mas o Supabase falhar,
+//   o sistema também usa o banco local/fila quando apropriado.
 // ============================================================
 
 
 // ============================================================
-// VARIÁVEL: sincronizacaoConferenciasEmAndamento
-// ============================================================
-//
-// OBJETIVO:
-//
-// Impedir que duas rotinas de sincronização sejam executadas
-// simultaneamente.
-//
-// Isso é importante porque a sincronização pode ser chamada:
-// - quando a página abre;
-// - quando a internet volta;
-// - manualmente no futuro.
-//
+// CONTROLES GERAIS
 // ============================================================
 
 let sincronizacaoConferenciasEmAndamento = false;
 
-
-// ============================================================
-// VARIÁVEL: registroConferenciaEmAndamento
-// ============================================================
-//
-// OBJETIVO:
-//
-// Impedir que o usuário clique duas vezes rapidamente no botão
-// CONFIRMAR e gere duas conferências diferentes.
-//
-// ============================================================
-
 let registroConferenciaEmAndamento = false;
+
+let materialConferenciaSelecionado = null;
 
 
 // ============================================================
@@ -83,14 +57,12 @@ let registroConferenciaEmAndamento = false;
 // ============================================================
 //
 // OBJETIVO:
+// Criar um ID único para cada conferência.
 //
-// Criar um identificador único para cada conferência.
+// O mesmo ID é usado:
+//   criação -> fila offline -> Supabase
 //
-// Esse ID acompanha a conferência desde sua criação até o
-// Supabase.
-//
-// O Supabase possui uma restrição UNIQUE nesse campo.
-//
+// O banco possui UNIQUE em conferencia_id.
 // ============================================================
 
 function gerarIdConferencia() {
@@ -104,22 +76,12 @@ function gerarIdConferencia() {
 
     }
 
-
-    // ========================================================
-    // FALLBACK
-    // ========================================================
-    //
-    // Caso o navegador não possua crypto.randomUUID(),
-    // gerar um identificador suficientemente único.
-    //
-    // ========================================================
-
     return (
         Date.now().toString(36) +
         "-" +
         Math.random()
             .toString(36)
-            .substring(2, 12)
+            .substring(2, 14)
     );
 
 }
@@ -130,12 +92,7 @@ function gerarIdConferencia() {
 // ============================================================
 //
 // OBJETIVO:
-//
-// Garantir que o cliente Supabase esteja disponível.
-//
-// RETORNO:
-//
-// Retorna o cliente Supabase.
+// Retornar o cliente Supabase inicializado em supabase.js.
 //
 // ============================================================
 
@@ -159,44 +116,145 @@ function obterClienteSupabaseConferencia() {
 // ============================================================
 //
 // OBJETIVO:
-//
-// Escapar caracteres especiais utilizados pelo ILIKE.
-//
+// Escapar %, _ e \ para impedir que sejam interpretados como
+// curingas pelo ILIKE do PostgreSQL.
 // ============================================================
 
 function escaparBuscaILikeConferencia(valor) {
 
     return String(valor)
-
-        .replace(
-            /\\/g,
-            "\\\\"
-        )
-
-        .replace(
-            /%/g,
-            "\\%"
-        )
-
-        .replace(
-            /_/g,
-            "\\_"
-        );
+        .replace(/\\/g, "\\\\")
+        .replace(/%/g, "\\%")
+        .replace(/_/g, "\\_");
 
 }
 
 
 // ============================================================
-// VARIÁVEL: materialConferenciaSelecionado
+// FUNÇÃO: obterMateriaisLocaisConferencia()
 // ============================================================
 //
 // OBJETIVO:
+// Garantir que a cópia local dos materiais esteja carregada.
 //
-// Armazenar temporariamente o material selecionado.
+// dados.js fornece:
+//   carregarMateriais()
+//   obterMateriaisLocais()
 //
 // ============================================================
 
-let materialConferenciaSelecionado = null;
+async function obterMateriaisLocaisConferencia() {
+
+    if (
+        typeof carregarMateriais === "function"
+    ) {
+
+        await carregarMateriais();
+
+    }
+
+    if (
+        typeof obterMateriaisLocais !== "function"
+    ) {
+
+        throw new Error(
+            "Função obterMateriaisLocais() não encontrada."
+        );
+
+    }
+
+    const locais =
+        await obterMateriaisLocais();
+
+    if (
+        !Array.isArray(locais)
+    ) {
+
+        return [];
+
+    }
+
+    return locais;
+
+}
+
+
+// ============================================================
+// FUNÇÃO: pesquisarMateriaisLocalmenteConferencia()
+// ============================================================
+//
+// OBJETIVO:
+// Pesquisar a cópia local do inventário.
+//
+// CAMPOS:
+//   - código
+//   - descrição
+//   - referência
+//   - marca
+//
+// NÃO PESQUISA:
+//   - local
+//   - quantidade
+//
+// A comparação é case-insensitive e utiliza includes().
+// ============================================================
+
+async function pesquisarMateriaisLocalmenteConferencia(
+    buscaOriginal
+) {
+
+    const materiaisLocais =
+        await obterMateriaisLocaisConferencia();
+
+    const busca =
+        String(buscaOriginal)
+            .trim()
+            .toLowerCase();
+
+    if (
+        !busca
+    ) {
+
+        return [];
+
+    }
+
+    return materiaisLocais.filter(
+        function(material) {
+
+            if (!material) {
+
+                return false;
+
+            }
+
+            const codigo =
+                String(material.codigo ?? "")
+                    .toLowerCase();
+
+            const descricao =
+                String(material.descricao ?? "")
+                    .toLowerCase();
+
+            const referencia =
+                String(material.referencia ?? "")
+                    .toLowerCase();
+
+            const marca =
+                String(material.marca ?? "")
+                    .toLowerCase();
+
+            return (
+                codigo.includes(busca) ||
+                descricao.includes(busca) ||
+                referencia.includes(busca) ||
+                marca.includes(busca)
+            );
+
+        }
+    );
+
+}
 
 
 // ============================================================
@@ -204,21 +262,19 @@ let materialConferenciaSelecionado = null;
 // ============================================================
 //
 // OBJETIVO:
+// Pesquisar materiais para iniciar uma conferência.
 //
-// Pesquisar materiais diretamente no Supabase.
+// FLUXO ONLINE:
+//   tenta Supabase
+//   se falhar -> fallback IndexedDB
 //
-// CAMPOS:
+// FLUXO OFFLINE:
+//   IndexedDB diretamente
 //
-// - código
-// - descrição
-// - referência
-//
-// NÃO PESQUISA:
-//
-// - Local
-// - Marca
-// - Quantidade
-//
+// IMPORTANTE:
+// navigator.onLine não é tratado como garantia absoluta de
+// acesso ao Supabase. Se o Supabase falhar, o banco local é
+// utilizado.
 // ============================================================
 
 async function buscarMaterialConferencia() {
@@ -228,14 +284,15 @@ async function buscarMaterialConferencia() {
             "campoConferencia"
         );
 
-
     const areaResultado =
         document.getElementById(
             "resultadoConferencia"
         );
 
-
-    if (!campo || !areaResultado) {
+    if (
+        !campo ||
+        !areaResultado
+    ) {
 
         console.error(
             "Elementos da tela de conferência não encontrados."
@@ -245,36 +302,76 @@ async function buscarMaterialConferencia() {
 
     }
 
-
     const buscaOriginal =
         campo.value.trim();
 
-
-    if (buscaOriginal === "") {
+    if (
+        buscaOriginal === ""
+    ) {
 
         areaResultado.innerHTML =
-            "<p>Digite um código, descrição ou referência.</p>";
+            "<p>Digite um código, descrição, referência ou marca.</p>";
 
         return;
 
     }
 
-
-    const busca =
-        escaparBuscaILikeConferencia(
-            buscaOriginal
-        );
-
+    materialConferenciaSelecionado =
+        null;
 
     areaResultado.innerHTML =
-        "<p>Pesquisando no Supabase...</p>";
+        "<p>Pesquisando...</p>";
 
+    // ========================================================
+    // MODO OFFLINE
+    // ========================================================
+
+    if (
+        navigator.onLine === false
+    ) {
+
+        try {
+
+            const resultados =
+                await pesquisarMateriaisLocalmenteConferencia(
+                    buscaOriginal
+                );
+
+            exibirResultadosConferencia(
+                resultados,
+                areaResultado,
+                true
+            );
+
+        } catch (erro) {
+
+            console.error(
+                "Erro na pesquisa offline para conferência:",
+                erro
+            );
+
+            areaResultado.innerHTML =
+                "<p>❌ Não foi possível consultar o banco local.</p>";
+
+        }
+
+        return;
+
+    }
+
+    // ========================================================
+    // MODO ONLINE
+    // ========================================================
 
     try {
 
         const clienteSupabase =
             obterClienteSupabaseConferencia();
 
+        const busca =
+            escaparBuscaILikeConferencia(
+                buscaOriginal
+            );
 
         const { data, error } =
             await clienteSupabase
@@ -292,6 +389,8 @@ async function buscarMaterialConferencia() {
                     busca +
                     "%,referencia.ilike.%" +
                     busca +
+                    "%,marca.ilike.%" +
+                    busca +
                     "%"
                 )
 
@@ -304,30 +403,51 @@ async function buscarMaterialConferencia() {
 
                 .limit(100);
 
-
-        if (error) {
+        if (
+            error
+        ) {
 
             throw error;
 
         }
 
-
         exibirResultadosConferencia(
             data || [],
-            areaResultado
+            areaResultado,
+            false
         );
-
 
     } catch (erro) {
 
-        console.error(
-            "Erro ao pesquisar material para conferência:",
+        console.warn(
+            "Supabase indisponível na pesquisa de conferência. Tentando IndexedDB:",
             erro
         );
 
+        try {
 
-        areaResultado.innerHTML =
-            "<p>❌ Erro ao consultar o Supabase.</p>";
+            const resultadosLocais =
+                await pesquisarMateriaisLocalmenteConferencia(
+                    buscaOriginal
+                );
+
+            exibirResultadosConferencia(
+                resultadosLocais,
+                areaResultado,
+                true
+            );
+
+        } catch (erroLocal) {
+
+            console.error(
+                "Falha também no banco local:",
+                erroLocal
+            );
+
+            areaResultado.innerHTML =
+                "<p>❌ Não foi possível consultar o Supabase nem o banco local.</p>";
+
+        }
 
     }
 
@@ -339,18 +459,28 @@ async function buscarMaterialConferencia() {
 // ============================================================
 //
 // OBJETIVO:
+// Mostrar resultados encontrados online ou offline.
 //
-// Mostrar os materiais encontrados.
+// O botão "Selecionar" passa o objeto inteiro para a tela de
+// conferência.
 //
 // ============================================================
 
 function exibirResultadosConferencia(
     resultados,
-    areaResultado
+    areaResultado,
+    modoOffline
 ) {
 
-    areaResultado.innerHTML = "";
+    if (
+        !areaResultado
+    ) {
 
+        return;
+
+    }
+
+    areaResultado.innerHTML = "";
 
     if (
         !Array.isArray(resultados) ||
@@ -364,40 +494,39 @@ function exibirResultadosConferencia(
 
     }
 
+    const aviso =
+        document.createElement("p");
+
+    aviso.textContent =
+        modoOffline
+            ? "📴 Pesquisa realizada no banco local."
+            : "🌐 Pesquisa realizada no Supabase.";
+
+    areaResultado.appendChild(
+        aviso
+    );
 
     const fragmento =
         document.createDocumentFragment();
-
 
     resultados.forEach(
         function(material) {
 
             const bloco =
-                document.createElement(
-                    "div"
-                );
-
+                document.createElement("div");
 
             const linha =
-                document.createElement(
-                    "hr"
-                );
-
+                document.createElement("hr");
 
             const titulo =
-                document.createElement(
-                    "h3"
-                );
+                document.createElement("h3");
 
             titulo.textContent =
                 material.descricao ||
                 "Material";
 
-
             const codigo =
-                document.createElement(
-                    "p"
-                );
+                document.createElement("p");
 
             codigo.innerHTML =
                 "<strong>Código:</strong> ";
@@ -408,11 +537,8 @@ function exibirResultadosConferencia(
                 )
             );
 
-
             const referencia =
-                document.createElement(
-                    "p"
-                );
+                document.createElement("p");
 
             referencia.innerHTML =
                 "<strong>Referência:</strong> ";
@@ -423,26 +549,8 @@ function exibirResultadosConferencia(
                 )
             );
 
-
-            const local =
-                document.createElement(
-                    "p"
-                );
-
-            local.innerHTML =
-                "<strong>Local:</strong> ";
-
-            local.appendChild(
-                document.createTextNode(
-                    material.local ?? "-"
-                )
-            );
-
-
             const marca =
-                document.createElement(
-                    "p"
-                );
+                document.createElement("p");
 
             marca.innerHTML =
                 "<strong>Marca:</strong> ";
@@ -453,11 +561,20 @@ function exibirResultadosConferencia(
                 )
             );
 
+            const local =
+                document.createElement("p");
+
+            local.innerHTML =
+                "<strong>Local:</strong> ";
+
+            local.appendChild(
+                document.createTextNode(
+                    material.local ?? "-"
+                )
+            );
 
             const quantidade =
-                document.createElement(
-                    "p"
-                );
+                document.createElement("p");
 
             quantidade.innerHTML =
                 "<strong>Estoque esperado:</strong> ";
@@ -468,18 +585,14 @@ function exibirResultadosConferencia(
                 )
             );
 
-
             const botao =
-                document.createElement(
-                    "button"
-                );
+                document.createElement("button");
 
             botao.type =
                 "button";
 
             botao.textContent =
                 "Selecionar";
-
 
             botao.addEventListener(
                 "click",
@@ -492,39 +605,14 @@ function exibirResultadosConferencia(
                 }
             );
 
-
-            bloco.appendChild(
-                linha
-            );
-
-            bloco.appendChild(
-                titulo
-            );
-
-            bloco.appendChild(
-                codigo
-            );
-
-            bloco.appendChild(
-                referencia
-            );
-
-            bloco.appendChild(
-                local
-            );
-
-            bloco.appendChild(
-                marca
-            );
-
-            bloco.appendChild(
-                quantidade
-            );
-
-            bloco.appendChild(
-                botao
-            );
-
+            bloco.appendChild(linha);
+            bloco.appendChild(titulo);
+            bloco.appendChild(codigo);
+            bloco.appendChild(referencia);
+            bloco.appendChild(marca);
+            bloco.appendChild(local);
+            bloco.appendChild(quantidade);
+            bloco.appendChild(botao);
 
             fragmento.appendChild(
                 bloco
@@ -532,7 +620,6 @@ function exibirResultadosConferencia(
 
         }
     );
-
 
     areaResultado.appendChild(
         fragmento
@@ -546,8 +633,10 @@ function exibirResultadosConferencia(
 // ============================================================
 //
 // OBJETIVO:
+// Selecionar o material e preparar a entrada da quantidade
+// física.
 //
-// Receber o material escolhido pelo usuário.
+// O objeto selecionado pode vir do Supabase ou do IndexedDB.
 //
 // ============================================================
 
@@ -565,16 +654,13 @@ function selecionarMaterialConferencia(
 
     }
 
-
     materialConferenciaSelecionado =
         material;
-
 
     const areaResultado =
         document.getElementById(
             "resultadoConferencia"
         );
-
 
     if (!areaResultado) {
 
@@ -582,25 +668,17 @@ function selecionarMaterialConferencia(
 
     }
 
-
-    areaResultado.innerHTML =
-        "";
-
+    areaResultado.innerHTML = "";
 
     const titulo =
-        document.createElement(
-            "h3"
-        );
+        document.createElement("h3");
 
     titulo.textContent =
         material.descricao ||
         "Material";
 
-
     const codigo =
-        document.createElement(
-            "p"
-        );
+        document.createElement("p");
 
     codigo.innerHTML =
         "<strong>Código:</strong> ";
@@ -611,11 +689,8 @@ function selecionarMaterialConferencia(
         )
     );
 
-
     const referencia =
-        document.createElement(
-            "p"
-        );
+        document.createElement("p");
 
     referencia.innerHTML =
         "<strong>Referência:</strong> ";
@@ -626,26 +701,8 @@ function selecionarMaterialConferencia(
         )
     );
 
-
-    const local =
-        document.createElement(
-            "p"
-        );
-
-    local.innerHTML =
-        "<strong>Local:</strong> ";
-
-    local.appendChild(
-        document.createTextNode(
-            material.local ?? "-"
-        )
-    );
-
-
     const marca =
-        document.createElement(
-            "p"
-        );
+        document.createElement("p");
 
     marca.innerHTML =
         "<strong>Marca:</strong> ";
@@ -656,11 +713,20 @@ function selecionarMaterialConferencia(
         )
     );
 
+    const local =
+        document.createElement("p");
+
+    local.innerHTML =
+        "<strong>Local:</strong> ";
+
+    local.appendChild(
+        document.createTextNode(
+            material.local ?? "-"
+        )
+    );
 
     const quantidade =
-        document.createElement(
-            "p"
-        );
+        document.createElement("p");
 
     quantidade.innerHTML =
         "<strong>Estoque esperado:</strong> ";
@@ -671,17 +737,11 @@ function selecionarMaterialConferencia(
         )
     );
 
-
     const linha =
-        document.createElement(
-            "hr"
-        );
-
+        document.createElement("hr");
 
     const campoQuantidade =
-        document.createElement(
-            "input"
-        );
+        document.createElement("input");
 
     campoQuantidade.type =
         "number";
@@ -698,11 +758,8 @@ function selecionarMaterialConferencia(
     campoQuantidade.step =
         "1";
 
-
     const botaoConfirmar =
-        document.createElement(
-            "button"
-        );
+        document.createElement("button");
 
     botaoConfirmar.type =
         "button";
@@ -713,7 +770,6 @@ function selecionarMaterialConferencia(
     botaoConfirmar.textContent =
         "CONFIRMAR";
 
-
     botaoConfirmar.addEventListener(
         "click",
         function() {
@@ -723,43 +779,15 @@ function selecionarMaterialConferencia(
         }
     );
 
-
-    areaResultado.appendChild(
-        titulo
-    );
-
-    areaResultado.appendChild(
-        codigo
-    );
-
-    areaResultado.appendChild(
-        referencia
-    );
-
-    areaResultado.appendChild(
-        local
-    );
-
-    areaResultado.appendChild(
-        marca
-    );
-
-    areaResultado.appendChild(
-        quantidade
-    );
-
-    areaResultado.appendChild(
-        linha
-    );
-
-    areaResultado.appendChild(
-        campoQuantidade
-    );
-
-    areaResultado.appendChild(
-        botaoConfirmar
-    );
-
+    areaResultado.appendChild(titulo);
+    areaResultado.appendChild(codigo);
+    areaResultado.appendChild(referencia);
+    areaResultado.appendChild(marca);
+    areaResultado.appendChild(local);
+    areaResultado.appendChild(quantidade);
+    areaResultado.appendChild(linha);
+    areaResultado.appendChild(campoQuantidade);
+    areaResultado.appendChild(botaoConfirmar);
 
     campoQuantidade.focus();
 
@@ -771,26 +799,20 @@ function selecionarMaterialConferencia(
 // ============================================================
 //
 // OBJETIVO:
+// Registrar a contagem física.
 //
-// Registrar uma contagem física.
+// PRIMEIRA TENTATIVA:
+//   Supabase.
 //
-// COM INTERNET:
+// SE O SUPABASE FALHAR:
+//   a conferência é colocada na fila local.
 //
-//     Contagem
-//        ↓
-//     Supabase
+// IMPORTANTE:
 //
-// SEM INTERNET:
-//
-//     Contagem
-//        ↓
-//     IndexedDB
-//        ↓
-//     fila pendente
-//
-// PROTEÇÃO:
-//
-// Impede que dois cliques rápidos criem duas conferências.
+// Diferentemente da versão anterior, não dependemos somente
+// de navigator.onLine para decidir se podemos usar a fila.
+// Se o aparelho disser "online", mas o Supabase estiver
+// inacessível, a conferência também fica protegida localmente.
 //
 // ============================================================
 
@@ -808,16 +830,13 @@ async function registrarContagem() {
 
     }
 
-
     registroConferenciaEmAndamento =
         true;
-
 
     const botaoConfirmar =
         document.getElementById(
             "botaoConfirmarContagem"
         );
-
 
     if (botaoConfirmar) {
 
@@ -829,12 +848,10 @@ async function registrarContagem() {
 
     }
 
-
     try {
 
         const material =
             materialConferenciaSelecionado;
-
 
         if (!material) {
 
@@ -846,25 +863,27 @@ async function registrarContagem() {
 
         }
 
-
         const campoQuantidade =
             document.getElementById(
                 "campoQuantidadeFisica"
             );
 
-
         if (!campoQuantidade) {
+
+            alert(
+                "Campo de quantidade física não encontrado."
+            );
 
             return;
 
         }
 
-
         const valor =
             campoQuantidade.value.trim();
 
-
-        if (valor === "") {
+        if (
+            valor === ""
+        ) {
 
             alert(
                 "Informe a quantidade física."
@@ -874,10 +893,8 @@ async function registrarContagem() {
 
         }
 
-
         const quantidadeFisica =
             Number(valor);
-
 
         if (
             !Number.isFinite(
@@ -894,125 +911,111 @@ async function registrarContagem() {
 
         }
 
-
         const quantidadeEsperada =
             Number(
                 material.quantidade ?? 0
             );
 
-
         const diferenca =
             quantidadeFisica -
             quantidadeEsperada;
 
-
-        let status =
-            "";
-
-        let emoji =
-            "";
-
-
-        if (
+        const status =
             diferenca === 0
-        ) {
+                ? "OK / CONFERIDO"
+                : "DIVERGÊNCIA";
 
-            status =
-                "OK / CONFERIDO";
-
-            emoji =
-                "✅";
-
-        } else {
-
-            status =
-                "DIVERGÊNCIA";
-
-            emoji =
-                "❌";
-
-        }
-
-
-        // ====================================================
-        // GERAR ID ÚNICO
-        // ====================================================
-        //
-        // Esse mesmo ID será utilizado:
-        //
-        // conferência
-        //      ↓
-        // IndexedDB
-        //      ↓
-        // Supabase
-        //
-        // ====================================================
+        const emoji =
+            diferenca === 0
+                ? "✅"
+                : "❌";
 
         const conferenciaId =
             gerarIdConferencia();
 
-
-        // ====================================================
-        // CRIAR SNAPSHOT DA CONFERÊNCIA
-        // ====================================================
-
         const registroConferencia = {
 
             conferenciaId:
+
                 conferenciaId,
 
             materialId:
-                material.id ?? null,
+
+                material.id ??
+                material.idSupabase ??
+                null,
 
             codigo:
-                material.codigo ?? "",
+
+                material.codigo ??
+                "",
 
             descricao:
-                material.descricao ?? "",
+
+                material.descricao ??
+                "",
 
             referencia:
-                material.referencia || "",
+
+                material.referencia ||
+                "",
 
             marca:
-                material.marca || "",
+
+                material.marca ||
+                "",
 
             local:
-                material.local || "",
+
+                material.local ||
+                "",
 
             quantidadeEsperada:
+
                 quantidadeEsperada,
 
             quantidadeFisica:
+
                 quantidadeFisica,
 
             diferenca:
+
                 diferenca,
 
             status:
+
                 status,
 
             data:
+
                 new Date().toISOString()
 
         };
 
-
         // ====================================================
-        // TENTAR ENVIAR PARA O SUPABASE
+        // TENTAR SALVAR NO SUPABASE
         // ====================================================
 
         try {
+
+            if (
+                navigator.onLine === false
+            ) {
+
+                throw new Error(
+                    "Dispositivo está offline."
+                );
+
+            }
 
             await salvarConferenciaSupabase(
                 registroConferencia
             );
 
-
             console.log(
-                "Conferência salva no Supabase com sucesso:",
+                "✅ Conferência salva no Supabase:",
                 conferenciaId
             );
-
 
             mostrarResultadoConferencia(
                 material,
@@ -1023,41 +1026,19 @@ async function registrarContagem() {
                 emoji
             );
 
-
             return;
 
+        } catch (erroSupabase) {
 
-        } catch (erro) {
-
-            console.error(
-                "Erro ao salvar conferência no Supabase:",
-                erro
+            console.warn(
+                "⚠️ Supabase não disponível para esta conferência. Salvando na fila local.",
+                erroSupabase
             );
-
-
-            // =================================================
-            // SÓ COLOCAR NA FILA QUANDO ESTIVER OFFLINE
-            // =================================================
-
-            if (
-                navigator.onLine
-            ) {
-
-                alert(
-                    "⚠️ Não foi possível salvar a conferência no Supabase.\n\n" +
-                    "A conexão com a internet está ativa, portanto a conferência NÃO foi colocada na fila offline.\n\n" +
-                    "Verifique o erro antes de tentar novamente."
-                );
-
-                return;
-
-            }
 
         }
 
-
         // ====================================================
-        // DISPOSITIVO ESTÁ OFFLINE
+        // FALLBACK LOCAL
         // ====================================================
 
         try {
@@ -1066,12 +1047,10 @@ async function registrarContagem() {
                 registroConferencia
             );
 
-
             console.log(
-                "📦 Conferência armazenada na fila offline:",
+                "📦 Conferência salva na fila offline:",
                 conferenciaId
             );
-
 
             mostrarResultadoConferenciaOffline(
                 material,
@@ -1082,21 +1061,19 @@ async function registrarContagem() {
                 emoji
             );
 
-
         } catch (erroFila) {
 
             console.error(
-                "Erro ao salvar conferência na fila offline:",
+                "❌ Erro ao salvar conferência na fila:",
                 erroFila
             );
 
-
             alert(
-                "❌ Não foi possível salvar a conferência localmente."
+                "❌ Não foi possível salvar a conferência nem no Supabase nem no dispositivo.\n\n" +
+                "A contagem NÃO foi concluída."
             );
 
         }
-
 
     } finally {
 
@@ -1113,26 +1090,17 @@ async function registrarContagem() {
 // ============================================================
 //
 // OBJETIVO:
-//
-// Mostrar resultado de uma conferência salva diretamente
-// no Supabase.
-//
+// Mostrar resultado de conferência enviada diretamente ao
+// Supabase.
 // ============================================================
 
 function mostrarResultadoConferencia(
-
     material,
-
     quantidadeEsperada,
-
     quantidadeFisica,
-
     diferenca,
-
     status,
-
     emoji
-
 ) {
 
     const areaResultado =
@@ -1140,32 +1108,23 @@ function mostrarResultadoConferencia(
             "resultadoConferencia"
         );
 
-
     if (!areaResultado) {
 
         return;
 
     }
 
-
-    areaResultado.innerHTML =
-        "";
-
+    areaResultado.innerHTML = "";
 
     const titulo =
-        document.createElement(
-            "h3"
-        );
+        document.createElement("h3");
 
     titulo.textContent =
         material.descricao ||
         "Material";
 
-
     const codigo =
-        document.createElement(
-            "p"
-        );
+        document.createElement("p");
 
     codigo.innerHTML =
         "<strong>Código:</strong> ";
@@ -1176,11 +1135,8 @@ function mostrarResultadoConferencia(
         )
     );
 
-
     const referencia =
-        document.createElement(
-            "p"
-        );
+        document.createElement("p");
 
     referencia.innerHTML =
         "<strong>Referência:</strong> ";
@@ -1191,11 +1147,8 @@ function mostrarResultadoConferencia(
         )
     );
 
-
     const esperado =
-        document.createElement(
-            "p"
-        );
+        document.createElement("p");
 
     esperado.innerHTML =
         "<strong>Estoque esperado:</strong> ";
@@ -1206,11 +1159,8 @@ function mostrarResultadoConferencia(
         )
     );
 
-
     const fisico =
-        document.createElement(
-            "p"
-        );
+        document.createElement("p");
 
     fisico.innerHTML =
         "<strong>Quantidade física:</strong> ";
@@ -1221,11 +1171,8 @@ function mostrarResultadoConferencia(
         )
     );
 
-
     const diferencaElemento =
-        document.createElement(
-            "p"
-        );
+        document.createElement("p");
 
     diferencaElemento.innerHTML =
         "<strong>Diferença:</strong> ";
@@ -1236,126 +1183,45 @@ function mostrarResultadoConferencia(
         )
     );
 
-
     const linha =
-        document.createElement(
-            "hr"
-        );
-
+        document.createElement("hr");
 
     const resultado =
-        document.createElement(
-            "p"
-        );
-
+        document.createElement("p");
 
     const statusTexto =
-        document.createElement(
-            "strong"
-        );
+        document.createElement("strong");
 
     statusTexto.textContent =
         emoji +
         " " +
         status;
 
-
     resultado.appendChild(
         statusTexto
     );
 
-
     const mensagem =
-        document.createElement(
-            "p"
-        );
+        document.createElement("p");
 
     mensagem.textContent =
         "📌 Contagem registrada no Supabase.";
 
-
     const botaoNovaConsulta =
-        document.createElement(
-            "button"
-        );
+        criarBotaoNovaConsultaConferencia();
 
-    botaoNovaConsulta.type =
-        "button";
+    areaResultado.appendChild(titulo);
+    areaResultado.appendChild(codigo);
+    areaResultado.appendChild(referencia);
+    areaResultado.appendChild(esperado);
+    areaResultado.appendChild(fisico);
+    areaResultado.appendChild(diferencaElemento);
+    areaResultado.appendChild(linha);
+    areaResultado.appendChild(resultado);
+    areaResultado.appendChild(mensagem);
+    areaResultado.appendChild(botaoNovaConsulta);
 
-    botaoNovaConsulta.id =
-        "botaoNovaConsulta";
-
-    botaoNovaConsulta.textContent =
-        "Nova consulta";
-
-
-    botaoNovaConsulta.addEventListener(
-        "click",
-        function() {
-
-            iniciarNovaConsultaConferencia();
-
-        }
-    );
-
-
-    areaResultado.appendChild(
-        titulo
-    );
-
-    areaResultado.appendChild(
-        codigo
-    );
-
-    areaResultado.appendChild(
-        referencia
-    );
-
-    areaResultado.appendChild(
-        esperado
-    );
-
-    areaResultado.appendChild(
-        fisico
-    );
-
-    areaResultado.appendChild(
-        diferencaElemento
-    );
-
-    areaResultado.appendChild(
-        linha
-    );
-
-    areaResultado.appendChild(
-        resultado
-    );
-
-    areaResultado.appendChild(
-        mensagem
-    );
-
-    areaResultado.appendChild(
-        botaoNovaConsulta
-    );
-
-
-    materialConferenciaSelecionado =
-        null;
-
-
-    const campoPesquisa =
-        document.getElementById(
-            "campoConferencia"
-        );
-
-
-    if (campoPesquisa) {
-
-        campoPesquisa.value =
-            "";
-
-    }
+    limparSelecaoConferencia();
 
 }
 
@@ -1365,26 +1231,17 @@ function mostrarResultadoConferencia(
 // ============================================================
 //
 // OBJETIVO:
-//
-// Mostrar ao usuário que a conferência foi salva localmente
-// porque o dispositivo estava sem internet.
-//
+// Informar que a conferência foi salva localmente e está
+// aguardando sincronização.
 // ============================================================
 
 function mostrarResultadoConferenciaOffline(
-
     material,
-
     quantidadeEsperada,
-
     quantidadeFisica,
-
     diferenca,
-
     status,
-
     emoji
-
 ) {
 
     const areaResultado =
@@ -1392,32 +1249,23 @@ function mostrarResultadoConferenciaOffline(
             "resultadoConferencia"
         );
 
-
     if (!areaResultado) {
 
         return;
 
     }
 
-
-    areaResultado.innerHTML =
-        "";
-
+    areaResultado.innerHTML = "";
 
     const titulo =
-        document.createElement(
-            "h3"
-        );
+        document.createElement("h3");
 
     titulo.textContent =
         material.descricao ||
         "Material";
 
-
     const codigo =
-        document.createElement(
-            "p"
-        );
+        document.createElement("p");
 
     codigo.innerHTML =
         "<strong>Código:</strong> ";
@@ -1428,11 +1276,8 @@ function mostrarResultadoConferenciaOffline(
         )
     );
 
-
     const esperado =
-        document.createElement(
-            "p"
-        );
+        document.createElement("p");
 
     esperado.innerHTML =
         "<strong>Estoque esperado:</strong> ";
@@ -1443,11 +1288,8 @@ function mostrarResultadoConferenciaOffline(
         )
     );
 
-
     const fisico =
-        document.createElement(
-            "p"
-        );
+        document.createElement("p");
 
     fisico.innerHTML =
         "<strong>Quantidade física:</strong> ";
@@ -1458,11 +1300,8 @@ function mostrarResultadoConferenciaOffline(
         )
     );
 
-
     const diferencaElemento =
-        document.createElement(
-            "p"
-        );
+        document.createElement("p");
 
     diferencaElemento.innerHTML =
         "<strong>Diferença:</strong> ";
@@ -1473,58 +1312,72 @@ function mostrarResultadoConferenciaOffline(
         )
     );
 
-
     const linha =
-        document.createElement(
-            "hr"
-        );
-
+        document.createElement("hr");
 
     const resultado =
-        document.createElement(
-            "p"
-        );
-
+        document.createElement("p");
 
     const statusTexto =
-        document.createElement(
-            "strong"
-        );
+        document.createElement("strong");
 
     statusTexto.textContent =
         emoji +
         " " +
         status;
 
-
     resultado.appendChild(
         statusTexto
     );
 
-
     const aviso =
-        document.createElement(
-            "p"
-        );
+        document.createElement("p");
 
     aviso.textContent =
         "📦 Conferência salva no dispositivo. " +
         "Aguardando conexão para sincronização.";
 
-
     const botaoNovaConsulta =
-        document.createElement(
-            "button"
-        );
+        criarBotaoNovaConsultaConferencia();
 
-    botaoNovaConsulta.type =
+    areaResultado.appendChild(titulo);
+    areaResultado.appendChild(codigo);
+    areaResultado.appendChild(esperado);
+    areaResultado.appendChild(fisico);
+    areaResultado.appendChild(diferencaElemento);
+    areaResultado.appendChild(linha);
+    areaResultado.appendChild(resultado);
+    areaResultado.appendChild(aviso);
+    areaResultado.appendChild(botaoNovaConsulta);
+
+    limparSelecaoConferencia();
+
+}
+
+
+// ============================================================
+// FUNÇÃO: criarBotaoNovaConsultaConferencia()
+// ============================================================
+//
+// OBJETIVO:
+// Criar o botão usado após finalizar uma conferência.
+// ============================================================
+
+function criarBotaoNovaConsultaConferencia() {
+
+    const botao =
+        document.createElement("button");
+
+    botao.type =
         "button";
 
-    botaoNovaConsulta.textContent =
+    botao.id =
+        "botaoNovaConsulta";
+
+    botao.textContent =
         "Nova consulta";
 
-
-    botaoNovaConsulta.addEventListener(
+    botao.addEventListener(
         "click",
         function() {
 
@@ -1533,53 +1386,28 @@ function mostrarResultadoConferenciaOffline(
         }
     );
 
+    return botao;
 
-    areaResultado.appendChild(
-        titulo
-    );
+}
 
-    areaResultado.appendChild(
-        codigo
-    );
 
-    areaResultado.appendChild(
-        esperado
-    );
+// ============================================================
+// FUNÇÃO: limparSelecaoConferencia()
+// ============================================================
+//
+// OBJETIVO:
+// Limpar o material selecionado e o campo de pesquisa.
+// ============================================================
 
-    areaResultado.appendChild(
-        fisico
-    );
-
-    areaResultado.appendChild(
-        diferencaElemento
-    );
-
-    areaResultado.appendChild(
-        linha
-    );
-
-    areaResultado.appendChild(
-        resultado
-    );
-
-    areaResultado.appendChild(
-        aviso
-    );
-
-    areaResultado.appendChild(
-        botaoNovaConsulta
-    );
-
+function limparSelecaoConferencia() {
 
     materialConferenciaSelecionado =
         null;
-
 
     const campoPesquisa =
         document.getElementById(
             "campoConferencia"
         );
-
 
     if (campoPesquisa) {
 
@@ -1596,9 +1424,7 @@ function mostrarResultadoConferenciaOffline(
 // ============================================================
 //
 // OBJETIVO:
-//
 // Preparar a tela para uma nova pesquisa.
-//
 // ============================================================
 
 function iniciarNovaConsultaConferencia() {
@@ -1606,26 +1432,22 @@ function iniciarNovaConsultaConferencia() {
     materialConferenciaSelecionado =
         null;
 
-
     const areaResultado =
         document.getElementById(
             "resultadoConferencia"
         );
 
-
     if (areaResultado) {
 
         areaResultado.innerHTML =
-            "<p>Digite um código, descrição ou referência.</p>";
+            "<p>Digite um código, descrição, referência ou marca.</p>";
 
     }
-
 
     const campo =
         document.getElementById(
             "campoConferencia"
         );
-
 
     if (campo) {
 
@@ -1640,39 +1462,25 @@ function iniciarNovaConsultaConferencia() {
 
 
 // ============================================================
-// ============================================================
 // FILA OFFLINE DE CONFERÊNCIAS
 // ============================================================
-// ============================================================
 //
-// BANCO SEPARADO DO BANCO DE MATERIAIS.
+// BANCO SEPARADO:
 //
-// Não altera:
+//   PMOBILE_FILA_CONFERENCIAS
 //
-//     PMOBILE
-//     tabela materiais
-//     IndexedDB de materiais
+// STORE:
 //
-// Estrutura:
+//   conferencias_pendentes
 //
-//     PMOBILE_FILA_CONFERENCIAS
-//
-//         └── conferencias_pendentes
-//
-// ============================================================
-
-
-// ============================================================
-// CONFIGURAÇÃO DO BANCO DA FILA
+// O banco de materiais não é alterado por esta fila.
 // ============================================================
 
 const nomeBancoFilaConferencias =
     "PMOBILE_FILA_CONFERENCIAS";
 
-
 const versaoBancoFilaConferencias =
     1;
-
 
 const nomeTabelaFilaConferencias =
     "conferencias_pendentes";
@@ -1683,9 +1491,7 @@ const nomeTabelaFilaConferencias =
 // ============================================================
 //
 // OBJETIVO:
-//
-// Abrir o IndexedDB usado exclusivamente pela fila offline.
-//
+// Abrir/criar o IndexedDB exclusivo da fila.
 // ============================================================
 
 function abrirBancoFilaConferencias() {
@@ -1699,13 +1505,11 @@ function abrirBancoFilaConferencias() {
                     versaoBancoFilaConferencias
                 );
 
-
             requisicao.onupgradeneeded =
                 function(evento) {
 
                     const banco =
                         evento.target.result;
-
 
                     if (
                         !banco.objectStoreNames.contains(
@@ -1725,7 +1529,6 @@ function abrirBancoFilaConferencias() {
 
                 };
 
-
             requisicao.onsuccess =
                 function(evento) {
 
@@ -1734,7 +1537,6 @@ function abrirBancoFilaConferencias() {
                     );
 
                 };
-
 
             requisicao.onerror =
                 function(evento) {
@@ -1756,16 +1558,10 @@ function abrirBancoFilaConferencias() {
 // ============================================================
 //
 // OBJETIVO:
-//
-// Salvar uma conferência realizada offline.
+// Adicionar uma conferência à fila.
 //
 // PROTEÇÃO:
-//
-// Antes de adicionar, verifica se já existe uma conferência
-// com o mesmo conferenciaId.
-//
-// Isso evita duplicação na própria fila.
-//
+// O mesmo conferenciaId não é adicionado duas vezes.
 // ============================================================
 
 async function adicionarConferenciaPendente(
@@ -1780,7 +1576,6 @@ async function adicionarConferenciaPendente(
 
     }
 
-
     if (
         !conferencia.conferenciaId
     ) {
@@ -1791,10 +1586,8 @@ async function adicionarConferenciaPendente(
 
     }
 
-
     const existentes =
         await obterConferenciasPendentes();
-
 
     const duplicada =
         existentes.some(
@@ -1810,7 +1603,6 @@ async function adicionarConferenciaPendente(
             }
         );
 
-
     if (
         duplicada
     ) {
@@ -1824,10 +1616,8 @@ async function adicionarConferenciaPendente(
 
     }
 
-
     const banco =
         await abrirBancoFilaConferencias();
-
 
     const transacao =
         banco.transaction(
@@ -1835,12 +1625,10 @@ async function adicionarConferenciaPendente(
             "readwrite"
         );
 
-
     const tabela =
         transacao.objectStore(
             nomeTabelaFilaConferencias
         );
-
 
     tabela.add({
 
@@ -1851,7 +1639,6 @@ async function adicionarConferenciaPendente(
             new Date().toISOString()
 
     });
-
 
     return new Promise(
         function(resolve, reject) {
@@ -1865,7 +1652,6 @@ async function adicionarConferenciaPendente(
 
                 };
 
-
             transacao.onerror =
                 function(evento) {
 
@@ -1876,7 +1662,6 @@ async function adicionarConferenciaPendente(
                     );
 
                 };
-
 
             transacao.onabort =
                 function(evento) {
@@ -1903,9 +1688,7 @@ async function adicionarConferenciaPendente(
 // ============================================================
 //
 // OBJETIVO:
-//
-// Recuperar todas as conferências que aguardam sincronização.
-//
+// Recuperar todas as conferências aguardando sincronização.
 // ============================================================
 
 async function obterConferenciasPendentes() {
@@ -1913,23 +1696,19 @@ async function obterConferenciasPendentes() {
     const banco =
         await abrirBancoFilaConferencias();
 
-
     const transacao =
         banco.transaction(
             nomeTabelaFilaConferencias,
             "readonly"
         );
 
-
     const tabela =
         transacao.objectStore(
             nomeTabelaFilaConferencias
         );
 
-
     const requisicao =
         tabela.getAll();
-
 
     return new Promise(
         function(resolve, reject) {
@@ -1944,7 +1723,6 @@ async function obterConferenciasPendentes() {
                     );
 
                 };
-
 
             requisicao.onerror =
                 function(evento) {
@@ -1968,10 +1746,7 @@ async function obterConferenciasPendentes() {
 // ============================================================
 //
 // OBJETIVO:
-//
-// Remover da fila uma conferência que foi enviada com sucesso
-// ou que já existia no Supabase.
-//
+// Remover da fila somente após confirmação de sucesso.
 // ============================================================
 
 async function removerConferenciaPendente(
@@ -1981,24 +1756,20 @@ async function removerConferenciaPendente(
     const banco =
         await abrirBancoFilaConferencias();
 
-
     const transacao =
         banco.transaction(
             nomeTabelaFilaConferencias,
             "readwrite"
         );
 
-
     const tabela =
         transacao.objectStore(
             nomeTabelaFilaConferencias
         );
 
-
     tabela.delete(
         id
     );
-
 
     return new Promise(
         function(resolve, reject) {
@@ -2012,7 +1783,6 @@ async function removerConferenciaPendente(
 
                 };
 
-
             transacao.onerror =
                 function(evento) {
 
@@ -2023,7 +1793,6 @@ async function removerConferenciaPendente(
                     );
 
                 };
-
 
             transacao.onabort =
                 function(evento) {
@@ -2043,37 +1812,26 @@ async function removerConferenciaPendente(
     );
 
 }
+
+
 // ============================================================
 // FUNÇÃO: sincronizarConferenciasPendentes()
 // ============================================================
 //
 // OBJETIVO:
+// Enviar a fila offline para o Supabase.
 //
-// Enviar para o Supabase as conferências realizadas offline.
+// REGRAS:
 //
-// FLUXO:
-//
-//     IndexedDB
-//          ↓
-//     conferência pendente
-//          ↓
-//     Supabase
-//          ↓
-//     sucesso / já existente
-//          ↓
-//     remove da fila
-//
-// PROTEÇÃO:
-//
-// Apenas uma sincronização pode ocorrer por vez.
-//
+// - somente uma sincronização por vez;
+// - se ficar offline durante o processo, para;
+// - sucesso -> remove da fila;
+// - conferencia_id já existente -> tratado pela função
+//   salvarConferenciaSupabase();
+// - erro -> mantém na fila.
 // ============================================================
 
 async function sincronizarConferenciasPendentes() {
-
-    // ========================================================
-    // PROTEÇÃO CONTRA DUPLA SINCRONIZAÇÃO
-    // ========================================================
 
     if (
         sincronizacaoConferenciasEmAndamento
@@ -2087,13 +1845,8 @@ async function sincronizarConferenciasPendentes() {
 
     }
 
-
-    // ========================================================
-    // VERIFICAR INTERNET
-    // ========================================================
-
     if (
-        !navigator.onLine
+        navigator.onLine === false
     ) {
 
         console.log(
@@ -2104,19 +1857,12 @@ async function sincronizarConferenciasPendentes() {
 
     }
 
-
     sincronizacaoConferenciasEmAndamento =
         true;
-
 
     try {
 
         let pendentes;
-
-
-        // ====================================================
-        // CARREGAR FILA
-        // ====================================================
 
         try {
 
@@ -2134,7 +1880,6 @@ async function sincronizarConferenciasPendentes() {
 
         }
 
-
         if (
             pendentes.length === 0
         ) {
@@ -2147,16 +1892,10 @@ async function sincronizarConferenciasPendentes() {
 
         }
 
-
         console.log(
             "📦 Conferências pendentes:",
             pendentes.length
         );
-
-
-        // ====================================================
-        // PROCESSAR UMA POR UMA
-        // ====================================================
 
         for (
             const item of pendentes
@@ -2166,7 +1905,6 @@ async function sincronizarConferenciasPendentes() {
 
                 const conferencia =
                     item.conferencia;
-
 
                 if (!conferencia) {
 
@@ -2179,7 +1917,6 @@ async function sincronizarConferenciasPendentes() {
 
                 }
 
-
                 if (
                     !conferencia.conferenciaId
                 ) {
@@ -2189,20 +1926,12 @@ async function sincronizarConferenciasPendentes() {
                         item
                     );
 
-                    // Não remover automaticamente.
-                    // O registro antigo permanece para análise.
-
                     continue;
 
                 }
 
-
-                // ============================================
-                // VERIFICAR NOVAMENTE A CONEXÃO
-                // ============================================
-
                 if (
-                    !navigator.onLine
+                    navigator.onLine === false
                 ) {
 
                     console.warn(
@@ -2213,35 +1942,19 @@ async function sincronizarConferenciasPendentes() {
 
                 }
 
-
-                // ============================================
-                // ENVIAR UTILIZANDO A MESMA FUNÇÃO NORMAL
-                // ============================================
-
                 await salvarConferenciaSupabase(
                     conferencia
                 );
 
-
-                // ============================================
-                // SÓ REMOVE DA FILA APÓS SUCESSO
-                //
-                // A função salvarConferenciaSupabase()
-                // também considera sucesso quando o Supabase
-                // informa que o conferencia_id já existe.
-                // ============================================
-
                 await removerConferenciaPendente(
                     item.id
                 );
-
 
                 console.log(
                     "✅ Conferência sincronizada:",
                     conferencia.codigo,
                     conferencia.conferenciaId
                 );
-
 
             } catch (erro) {
 
@@ -2250,17 +1963,8 @@ async function sincronizarConferenciasPendentes() {
                     erro
                 );
 
-
-                // =================================================
-                // NÃO APAGAR DA FILA
-                // =================================================
-                //
-                // Se falhar, o registro continua no IndexedDB.
-                //
-                // Será tentado novamente quando a conexão
-                // voltar.
-                //
-                // =================================================
+                // Não remove.
+                // O registro será tentado novamente.
 
                 break;
 
@@ -2268,22 +1972,15 @@ async function sincronizarConferenciasPendentes() {
 
         }
 
-
-        // ====================================================
-        // VERIFICAR FILA NOVAMENTE
-        // ====================================================
-
         try {
 
             const restantes =
                 await obterConferenciasPendentes();
 
-
             console.log(
                 "Conferências restantes na fila:",
                 restantes.length
             );
-
 
             if (
                 restantes.length === 0
@@ -2304,15 +2001,34 @@ async function sincronizarConferenciasPendentes() {
 
         }
 
-
     } finally {
-
-        // ====================================================
-        // LIBERAR A TRAVA
-        // ====================================================
 
         sincronizacaoConferenciasEmAndamento =
             false;
+
+    }
+
+}
+
+
+// ============================================================
+// FUNÇÃO: sincronizarQuandoPossivel()
+// ============================================================
+//
+// OBJETIVO:
+// Tentar sincronizar a fila quando o aplicativo for aberto.
+//
+// navigator.onLine é apenas uma primeira indicação. A própria
+// rotina de sincronização trata erros de acesso ao Supabase.
+// ============================================================
+
+function sincronizarQuandoPossivel() {
+
+    if (
+        navigator.onLine === true
+    ) {
+
+        sincronizarConferenciasPendentes();
 
     }
 
@@ -2324,9 +2040,8 @@ async function sincronizarConferenciasPendentes() {
 // ============================================================
 //
 // OBJETIVO:
-//
-// Quando a internet voltar, tentar sincronizar a fila.
-//
+// Quando o navegador detectar retorno da conexão, iniciar a
+// sincronização automaticamente.
 // ============================================================
 
 window.addEventListener(
@@ -2334,14 +2049,8 @@ window.addEventListener(
     function() {
 
         console.log(
-            "🌐 Internet voltou."
+            "🌐 Internet voltou. Sincronizando conferências..."
         );
-
-
-        console.log(
-            "Verificando conferências pendentes..."
-        );
-
 
         sincronizarConferenciasPendentes();
 
@@ -2350,27 +2059,17 @@ window.addEventListener(
 
 
 // ============================================================
-// INICIALIZAÇÃO DA FILA
+// INICIALIZAÇÃO
 // ============================================================
 //
-// OBJETIVO:
-//
-// Se o aplicativo iniciar conectado, verificar se existem
-// conferências que ficaram pendentes de uma sessão anterior.
-//
+// Se o aplicativo abrir online, verifica a fila anterior.
 // ============================================================
 
 document.addEventListener(
     "DOMContentLoaded",
     function() {
 
-        if (
-            navigator.onLine
-        ) {
-
-            sincronizarConferenciasPendentes();
-
-        }
+        sincronizarQuandoPossivel();
 
     }
 );
@@ -2380,36 +2079,52 @@ document.addEventListener(
 // FIM DO ARQUIVO
 // ============================================================
 //
-// AGORA:
+// FUNCIONALIDADES DESTA VERSÃO:
 //
-// ✅ Pesquisa continua usando Supabase
-// ✅ Seleção continua usando Supabase
-// ✅ Quantidade esperada vem do Supabase
-// ✅ Conferência online continua usando Supabase
-// ✅ Cada conferência recebe um conferenciaId único
-// ✅ Conferência offline é armazenada no IndexedDB
-// ✅ Fila offline é separada dos materiais
-// ✅ Mesmo conferenciaId acompanha a fila
-// ✅ Internet voltando dispara sincronização
-// ✅ Duas sincronizações simultâneas são bloqueadas
-// ✅ Duplo clique no botão CONFIRMAR é bloqueado
-// ✅ Registro só sai da fila depois de sucesso
-// ✅ Conferência já existente no Supabase pode ser tratada
-//    como sincronizada pelo conferencia.js/conferencias.js
-// ✅ Falha de sincronização mantém o registro local
-// ✅ IndexedDB de materiais não foi alterado
+// ✅ Pesquisa online no Supabase
+// ✅ Pesquisa offline no IndexedDB
+// ✅ Fallback automático para IndexedDB se o Supabase falhar
+// ✅ Pesquisa por código
+// ✅ Pesquisa por descrição
+// ✅ Pesquisa por referência
+// ✅ Pesquisa por marca
+// ✅ Local não é usado como campo de pesquisa
+// ✅ Quantidade não é usada como campo de pesquisa
+// ✅ Seleção funciona com material online ou offline
+// ✅ Conferência online salva no Supabase
+// ✅ Conferência offline salva na fila local
+// ✅ Falha do Supabase também pode cair na fila local
+// ✅ conferencia_id único
+// ✅ Proteção contra duplo clique
+// ✅ Proteção contra duas sincronizações simultâneas
+// ✅ Fila em IndexedDB separado
+// ✅ Sincronização automática ao voltar online
+// ✅ Registro removido da fila somente após sucesso
+// ✅ conferencia_id duplicado é tratado pelo Supabase
+// ✅ Falha de sincronização mantém a conferência local
 //
-// PRÓXIMO TESTE:
+// TESTE RECOMENDADO:
 //
-//     1. Substituir conferencia.js
-//     2. Recarregar o PMOBILE
-//     3. Fazer UMA conferência online
-//     4. Confirmar que funciona
-//     5. Fazer UMA conferência offline
-//     6. Verificar que entrou na fila
-//     7. Voltar para online
-//     8. Verificar sincronização
-//     9. Verificar Supabase
-//    10. Confirmar que existe apenas UMA linha
+// 1. Substituir este arquivo.
+// 2. Recarregar o PMOBILE.
+// 3. ONLINE:
+//      pesquisar um material;
+//      selecionar;
+//      realizar uma conferência;
+//      confirmar no Supabase.
+// 4. OFFLINE:
+//      desligar internet;
+//      pesquisar o mesmo material;
+//      selecionar;
+//      realizar conferência;
+//      confirmar;
+//      verificar mensagem de fila local.
+// 5. Voltar ONLINE.
+// 6. Verificar console:
+//      "Conferência sincronizada".
+// 7. Conferir a tabela public.conferencias.
+// 8. Confirmar que existe somente uma linha para o
+//    conferencia_id.
+// 9. Repetir o teste offline para uma divergência.
 //
 // ============================================================
