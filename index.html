@@ -259,6 +259,29 @@
 
         <!-- =================================================
              PESQUISA
+             =================================================
+
+             A tela Pesquisa agora possui quatro áreas internas:
+
+             1. menuPesquisaInterno
+                Escolha do tipo de pesquisa.
+
+             2. pesquisaCodigo
+                Pesquisa por código.
+
+             3. pesquisaDescricao
+                Pesquisa por descrição.
+
+             4. pesquisaReferencia
+                Pesquisa por referência.
+
+             Todas continuam dentro da tela principal
+             #pesquisa.
+
+             Dessa forma, o item "Pesquisar material"
+             permanece ativo na sidebar enquanto o usuário
+             navega entre os tipos de pesquisa.
+
              ================================================= -->
 
         <section
@@ -267,101 +290,383 @@
             style="display: none;"
         >
 
-            <div class="cabecalho-pagina">
 
-                <p class="cabecalho-caminho">
-                    PMOBILE / Pesquisa
-                </p>
+            <!-- =============================================
+                 MENU INTERNO DA PESQUISA
+                 ============================================= -->
 
-                <h1>
-                    Pesquisar material
-                </h1>
-
-            </div>
+            <div id="menuPesquisaInterno">
 
 
-            <div class="painel">
+                <!-- CABEÇALHO -->
 
-                <h3>
-                    🔢 Código
-                </h3>
+                <div class="cabecalho-pagina">
 
-                <div class="linha-formulario">
+                    <p class="cabecalho-caminho">
+                        PMOBILE / Pesquisa
+                    </p>
 
-                    <input
-                        type="text"
-                        id="campoPesquisaCodigo"
-                        placeholder="Digite o código"
-                    >
+                    <h1>
+                        Pesquisar material
+                    </h1>
 
-                    <button
-                        class="botao-principal"
-                        onclick="pesquisarPorCodigo()"
-                    >
-                        Pesquisar
-                    </button>
+                    <p>
+                        Escolha como deseja localizar o material.
+                    </p>
 
                 </div>
 
-                <div id="resultadoPesquisaCodigo"></div>
 
-            </div>
+                <!-- =========================================
+                     OPÇÕES DE PESQUISA
+                     ========================================= -->
+
+                <div class="menu-pesquisa">
 
 
-            <div class="painel">
-
-                <h3>
-                    📝 Descrição
-                </h3>
-
-                <div class="linha-formulario">
-
-                    <input
-                        type="text"
-                        id="campoPesquisaDescricao"
-                        placeholder="Digite a descrição"
-                    >
+                    <!-- PESQUISA POR CÓDIGO -->
 
                     <button
-                        class="botao-principal"
-                        onclick="pesquisarPorDescricao()"
+                        type="button"
+                        class="opcao-pesquisa"
+                        onclick="abrirPesquisaCodigo()"
                     >
-                        Pesquisar
+
+                        <span class="opcao-pesquisa-icone">
+                            🔢
+                        </span>
+
+                        <span class="opcao-pesquisa-conteudo">
+
+                            <strong>
+                                Pesquisar por código
+                            </strong>
+
+                            <small>
+                                Localizar um material pelo código do produto.
+                            </small>
+
+                        </span>
+
+                        <span class="opcao-pesquisa-seta">
+                            ›
+                        </span>
+
                     </button>
+
+
+                    <!-- PESQUISA POR DESCRIÇÃO -->
+
+                    <button
+                        type="button"
+                        class="opcao-pesquisa"
+                        onclick="abrirPesquisaDescricao()"
+                    >
+
+                        <span class="opcao-pesquisa-icone">
+                            📝
+                        </span>
+
+                        <span class="opcao-pesquisa-conteudo">
+
+                            <strong>
+                                Pesquisar por descrição
+                            </strong>
+
+                            <small>
+                                Localizar materiais pelo nome ou descrição.
+                            </small>
+
+                        </span>
+
+                        <span class="opcao-pesquisa-seta">
+                            ›
+                        </span>
+
+                    </button>
+
+
+                    <!-- PESQUISA POR REFERÊNCIA -->
+
+                    <button
+                        type="button"
+                        class="opcao-pesquisa"
+                        onclick="abrirPesquisaReferencia()"
+                    >
+
+                        <span class="opcao-pesquisa-icone">
+                            📚
+                        </span>
+
+                        <span class="opcao-pesquisa-conteudo">
+
+                            <strong>
+                                Pesquisar por referência
+                            </strong>
+
+                            <small>
+                                Localizar materiais pela referência do fabricante.
+                            </small>
+
+                        </span>
+
+                        <span class="opcao-pesquisa-seta">
+                            ›
+                        </span>
+
+                    </button>
+
 
                 </div>
 
-                <div id="resultadoPesquisaDescricao"></div>
-
             </div>
 
 
-            <div class="painel">
+            <!-- =============================================
+                 PESQUISA POR CÓDIGO
+                 ============================================= -->
 
-                <h3>
-                    📚 Referência
-                </h3>
+            <div
+                id="pesquisaCodigo"
+                class="subtela-pesquisa"
+                style="display: none;"
+            >
 
-                <div class="linha-formulario">
 
-                    <input
-                        type="text"
-                        id="campoPesquisaReferencia"
-                        placeholder="Digite a referência"
-                    >
+                <!-- CABEÇALHO -->
 
-                    <button
-                        class="botao-principal"
-                        onclick="pesquisarPorReferencia()"
-                    >
-                        Pesquisar
-                    </button>
+                <div class="cabecalho-pagina">
+
+                    <p class="cabecalho-caminho">
+                        PMOBILE / Pesquisa / Código
+                    </p>
+
+                    <div class="cabecalho-subtela">
+
+                        <button
+                            type="button"
+                            class="botao-voltar-pesquisa"
+                            onclick="voltarPesquisa()"
+                            title="Voltar"
+                        >
+                            ←
+                        </button>
+
+                        <div>
+
+                            <h1>
+                                Pesquisar por código
+                            </h1>
+
+                            <p>
+                                Digite o código do material.
+                            </p>
+
+                        </div>
+
+                    </div>
 
                 </div>
 
-                <div id="resultadoPesquisaReferencia"></div>
+
+                <!-- PAINEL -->
+
+                <div class="painel">
+
+                    <h3>
+                        🔢 Código
+                    </h3>
+
+                    <div class="linha-formulario">
+
+                        <input
+                            type="text"
+                            id="campoPesquisaCodigo"
+                            placeholder="Digite o código"
+                        >
+
+                        <button
+                            class="botao-principal"
+                            onclick="pesquisarPorCodigo()"
+                        >
+                            Pesquisar
+                        </button>
+
+                    </div>
+
+
+                    <!-- RESULTADO -->
+
+                    <div id="resultadoPesquisaCodigo"></div>
+
+                </div>
 
             </div>
+
+
+            <!-- =============================================
+                 PESQUISA POR DESCRIÇÃO
+                 ============================================= -->
+
+            <div
+                id="pesquisaDescricao"
+                class="subtela-pesquisa"
+                style="display: none;"
+            >
+
+
+                <!-- CABEÇALHO -->
+
+                <div class="cabecalho-pagina">
+
+                    <p class="cabecalho-caminho">
+                        PMOBILE / Pesquisa / Descrição
+                    </p>
+
+                    <div class="cabecalho-subtela">
+
+                        <button
+                            type="button"
+                            class="botao-voltar-pesquisa"
+                            onclick="voltarPesquisa()"
+                            title="Voltar"
+                        >
+                            ←
+                        </button>
+
+                        <div>
+
+                            <h1>
+                                Pesquisar por descrição
+                            </h1>
+
+                            <p>
+                                Digite o nome ou parte da descrição do material.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- PAINEL -->
+
+                <div class="painel">
+
+                    <h3>
+                        📝 Descrição
+                    </h3>
+
+                    <div class="linha-formulario">
+
+                        <input
+                            type="text"
+                            id="campoPesquisaDescricao"
+                            placeholder="Digite a descrição"
+                        >
+
+                        <button
+                            class="botao-principal"
+                            onclick="pesquisarPorDescricao()"
+                        >
+                            Pesquisar
+                        </button>
+
+                    </div>
+
+
+                    <!-- RESULTADO -->
+
+                    <div id="resultadoPesquisaDescricao"></div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 PESQUISA POR REFERÊNCIA
+                 ============================================= -->
+
+            <div
+                id="pesquisaReferencia"
+                class="subtela-pesquisa"
+                style="display: none;"
+            >
+
+
+                <!-- CABEÇALHO -->
+
+                <div class="cabecalho-pagina">
+
+                    <p class="cabecalho-caminho">
+                        PMOBILE / Pesquisa / Referência
+                    </p>
+
+                    <div class="cabecalho-subtela">
+
+                        <button
+                            type="button"
+                            class="botao-voltar-pesquisa"
+                            onclick="voltarPesquisa()"
+                            title="Voltar"
+                        >
+                            ←
+                        </button>
+
+                        <div>
+
+                            <h1>
+                                Pesquisar por referência
+                            </h1>
+
+                            <p>
+                                Digite a referência do fabricante.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- PAINEL -->
+
+                <div class="painel">
+
+                    <h3>
+                        📚 Referência
+                    </h3>
+
+                    <div class="linha-formulario">
+
+                        <input
+                            type="text"
+                            id="campoPesquisaReferencia"
+                            placeholder="Digite a referência"
+                        >
+
+                        <button
+                            class="botao-principal"
+                            onclick="pesquisarPorReferencia()"
+                        >
+                            Pesquisar
+                        </button>
+
+                    </div>
+
+
+                    <!-- RESULTADO -->
+
+                    <div id="resultadoPesquisaReferencia"></div>
+
+                </div>
+
+            </div>
+
 
         </section>
 
