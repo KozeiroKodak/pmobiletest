@@ -1,0 +1,39 @@
+# Node / npm
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Android / Gradle
+android/.gradle/
+android/build/
+android/app/build/
+android/capacitor-cordova-android-plugins/build/
+.gradle/
+build/
+
+# Android local configuration
+local.properties
+android/local.properties
+
+# APK / Android bundles
+*.apk
+*.aab
+
+# Signing keys - NEVER commit
+*.jks
+*.keystore
+*.p12
+*.pem
+
+# IDE / editor
+.idea/
+.vscode/
+*.iml
+
+# OS / temporary files
+.DS_Store
+Thumbs.db
+*.tmp
+*.log
+*.bkp

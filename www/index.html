@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Relação de estoque CBA RS</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+</head>
+
+<body>
+
+
+<!-- =========================================================
+     TELA INICIAL
+     ========================================================= -->
+
+<div id="inicio">
+
+    <h1>PMOBILE - ESTOQUE</h1>
+
+    <p>
+        Relação de estoque e contagem CBA DIESEL RS.
+    </p>
+
+    <button onclick="abrirSistema()">
+        Iniciar
+    </button>
+
+</div>
+
+
+<!-- =========================================================
+     APLICAÇÃO
+     ========================================================= -->
+
+<div
+    id="aplicacao"
+    style="display: none;"
+>
+
+
+    <!-- =====================================================
+         SIDEBAR
+         ===================================================== -->
+
+    <aside id="sistema">
+
+
+        <!-- =================================================
+             IDENTIFICAÇÃO
+             ================================================= -->
+
+        <div class="sidebar-topo">
+
+            <div class="sidebar-logo">
+                P
+            </div>
+
+            <div class="sidebar-titulo">
+
+                <strong>
+                    PMOBILE
+                </strong>
+
+                <span>
+                    Estoque
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             NAVEGAÇÃO PRINCIPAL
+             ================================================= -->
+
+        <nav class="sidebar-menu">
+
+
+            <!-- PESQUISA -->
+
+            <button
+                id="menuPesquisa"
+                class="sidebar-item"
+                onclick="abrirPesquisa()"
+                title="Pesquisar material"
+            >
+
+                <span class="sidebar-icone">
+                    🔎
+                </span>
+
+                <span class="sidebar-texto">
+                    Pesquisar material
+                </span>
+
+            </button>
+
+
+            <!-- IMPORTAÇÃO -->
+
+            <button
+                id="menuImportacao"
+                class="sidebar-item"
+                onclick="abrirImportacao()"
+                title="Importar inventário"
+            >
+
+                <span class="sidebar-icone">
+                    📦
+                </span>
+
+                <span class="sidebar-texto">
+                    Importar inventário
+                </span>
+
+            </button>
+
+
+            <!-- CONFERÊNCIA -->
+
+            <button
+                id="menuConferencia"
+                class="sidebar-item"
+                onclick="abrirConferencia()"
+                title="Conferência"
+            >
+
+                <span class="sidebar-icone">
+                    📋
+                </span>
+
+                <span class="sidebar-texto">
+                    Conferência
+                </span>
+
+            </button>
+
+
+            <!-- CONFERÊNCIAS -->
+
+            <button
+                id="menuConferencias"
+                class="sidebar-item"
+                onclick="abrirConferencias()"
+                title="Conferências realizadas"
+            >
+
+                <span class="sidebar-icone">
+                    🗂️
+                </span>
+
+                <span class="sidebar-texto">
+                    Conferências
+                </span>
+
+            </button>
+
+
+            <!-- DIVERGÊNCIAS -->
+
+            <button
+                id="menuDivergencias"
+                class="sidebar-item"
+                onclick="abrirDivergencias()"
+                title="Divergências"
+            >
+
+                <span class="sidebar-icone">
+                    ⚠️
+                </span>
+
+                <span class="sidebar-texto">
+                    Divergências
+                </span>
+
+            </button>
+
+
+        </nav>
+
+
+        <!-- =================================================
+             PARTE INFERIOR DA SIDEBAR
+             ================================================= -->
+
+        <div class="sidebar-rodape">
+
+            <button
+                id="menuConfiguracoes"
+                class="sidebar-item"
+                onclick="abrirConfiguracoes()"
+                title="Configurações"
+            >
+
+                <span class="sidebar-icone">
+                    ⚙️
+                </span>
+
+                <span class="sidebar-texto">
+                    Configurações
+                </span>
+
+            </button>
+
+        </div>
+
+
+    </aside>
+
+
+    <!-- =====================================================
+         CONTEÚDO PRINCIPAL
+         ===================================================== -->
+
+    <main id="conteudoPrincipal">
+
+
+        <!-- =================================================
+             TELA PRINCIPAL
+             ================================================= -->
+
+        <section
+            id="homeSistema"
+            class="tela-sistema"
+        >
+
+            <div class="cabecalho-pagina">
+
+                <p class="cabecalho-caminho">
+                    PMOBILE
+                </p>
+
+                <h1>
+                    Estoque
+                </h1>
+
+                <p>
+                    Selecione uma opção no menu lateral.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             PESQUISA
+             =================================================
+
+             A tela Pesquisa agora possui quatro áreas internas:
+
+             1. menuPesquisaInterno
+                Escolha do tipo de pesquisa.
+
+             2. pesquisaCodigo
+                Pesquisa por código.
+
+             3. pesquisaDescricao
+                Pesquisa por descrição.
+
+             4. pesquisaReferencia
+                Pesquisa por referência.
+
+             Todas continuam dentro da tela principal
+             #pesquisa.
+
+             Dessa forma, o item "Pesquisar material"
+             permanece ativo na sidebar enquanto o usuário
+             navega entre os tipos de pesquisa.
+
+             ================================================= -->
+
+        <section
+            id="pesquisa"
+            class="tela-sistema"
+            style="display: none;"
+        >
+
+
+            <!-- =============================================
+                 MENU INTERNO DA PESQUISA
+                 ============================================= -->
+
+            <div id="menuPesquisaInterno">
+
+
+                <!-- CABEÇALHO -->
+
+                <div class="cabecalho-pagina">
+
+                    <p class="cabecalho-caminho">
+                        PMOBILE / Pesquisa
+                    </p>
+
+                    <h1>
+                        Pesquisar material
+                    </h1>
+
+                    <p>
+                        Escolha como deseja localizar o material.
+                    </p>
+
+                </div>
+
+
+                <!-- =========================================
+                     OPÇÕES DE PESQUISA
+                     ========================================= -->
+
+                <div class="menu-pesquisa">
+
+
+                    <!-- PESQUISA POR CÓDIGO -->
+
+                    <button
+                        type="button"
+                        class="opcao-pesquisa"
+                        onclick="abrirPesquisaCodigo()"
+                    >
+
+                        <span class="opcao-pesquisa-icone">
+                            🔢
+                        </span>
+
+                        <span class="opcao-pesquisa-conteudo">
+
+                            <strong>
+                                Pesquisar por código
+                            </strong>
+
+                            <small>
+                                Localizar um material pelo código do produto.
+                            </small>
+
+                        </span>
+
+                        <span class="opcao-pesquisa-seta">
+                            ›
+                        </span>
+
+                    </button>
+
+
+                    <!-- PESQUISA POR DESCRIÇÃO -->
+
+                    <button
+                        type="button"
+                        class="opcao-pesquisa"
+                        onclick="abrirPesquisaDescricao()"
+                    >
+
+                        <span class="opcao-pesquisa-icone">
+                            📝
+                        </span>
+
+                        <span class="opcao-pesquisa-conteudo">
+
+                            <strong>
+                                Pesquisar por descrição
+                            </strong>
+
+                            <small>
+                                Localizar materiais pelo nome ou descrição.
+                            </small>
+
+                        </span>
+
+                        <span class="opcao-pesquisa-seta">
+                            ›
+                        </span>
+
+                    </button>
+
+
+                    <!-- PESQUISA POR REFERÊNCIA -->
+
+                    <button
+                        type="button"
+                        class="opcao-pesquisa"
+                        onclick="abrirPesquisaReferencia()"
+                    >
+
+                        <span class="opcao-pesquisa-icone">
+                            📚
+                        </span>
+
+                        <span class="opcao-pesquisa-conteudo">
+
+                            <strong>
+                                Pesquisar por referência
+                            </strong>
+
+                            <small>
+                                Localizar materiais pela referência do fabricante.
+                            </small>
+
+                        </span>
+
+                        <span class="opcao-pesquisa-seta">
+                            ›
+                        </span>
+
+                    </button>
+
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 PESQUISA POR CÓDIGO
+                 ============================================= -->
+
+            <div
+                id="pesquisaCodigo"
+                class="subtela-pesquisa"
+                style="display: none;"
+            >
+
+
+                <!-- CABEÇALHO -->
+
+                <div class="cabecalho-pagina">
+
+                    <p class="cabecalho-caminho">
+                        PMOBILE / Pesquisa / Código
+                    </p>
+
+                    <div class="cabecalho-subtela">
+
+                        <button
+                            type="button"
+                            class="botao-voltar-pesquisa"
+                            onclick="voltarPesquisa()"
+                            title="Voltar"
+                        >
+                            ←
+                        </button>
+
+                        <div>
+
+                            <h1>
+                                Pesquisar por código
+                            </h1>
+
+                            <p>
+                                Digite o código do material.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- PAINEL -->
+
+                <div class="painel">
+
+                    <h3>
+                        🔢 Código
+                    </h3>
+
+                    <div class="linha-formulario">
+
+                        <input
+                            type="text"
+                            id="campoPesquisaCodigo"
+                            placeholder="Digite o código"
+                        >
+
+                        <button
+                            class="botao-principal"
+                            onclick="pesquisarPorCodigo()"
+                        >
+                            Pesquisar
+                        </button>
+
+                    </div>
+
+
+                    <!-- RESULTADO -->
+
+                    <div id="resultadoPesquisaCodigo"></div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 PESQUISA POR DESCRIÇÃO
+                 ============================================= -->
+
+            <div
+                id="pesquisaDescricao"
+                class="subtela-pesquisa"
+                style="display: none;"
+            >
+
+
+                <!-- CABEÇALHO -->
+
+                <div class="cabecalho-pagina">
+
+                    <p class="cabecalho-caminho">
+                        PMOBILE / Pesquisa / Descrição
+                    </p>
+
+                    <div class="cabecalho-subtela">
+
+                        <button
+                            type="button"
+                            class="botao-voltar-pesquisa"
+                            onclick="voltarPesquisa()"
+                            title="Voltar"
+                        >
+                            ←
+                        </button>
+
+                        <div>
+
+                            <h1>
+                                Pesquisar por descrição
+                            </h1>
+
+                            <p>
+                                Digite o nome ou parte da descrição do material.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- PAINEL -->
+
+                <div class="painel">
+
+                    <h3>
+                        📝 Descrição
+                    </h3>
+
+                    <div class="linha-formulario">
+
+                        <input
+                            type="text"
+                            id="campoPesquisaDescricao"
+                            placeholder="Digite a descrição"
+                        >
+
+                        <button
+                            class="botao-principal"
+                            onclick="pesquisarPorDescricao()"
+                        >
+                            Pesquisar
+                        </button>
+
+                    </div>
+
+
+                    <!-- RESULTADO -->
+
+                    <div id="resultadoPesquisaDescricao"></div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 PESQUISA POR REFERÊNCIA
+                 ============================================= -->
+
+            <div
+                id="pesquisaReferencia"
+                class="subtela-pesquisa"
+                style="display: none;"
+            >
+
+
+                <!-- CABEÇALHO -->
+
+                <div class="cabecalho-pagina">
+
+                    <p class="cabecalho-caminho">
+                        PMOBILE / Pesquisa / Referência
+                    </p>
+
+                    <div class="cabecalho-subtela">
+
+                        <button
+                            type="button"
+                            class="botao-voltar-pesquisa"
+                            onclick="voltarPesquisa()"
+                            title="Voltar"
+                        >
+                            ←
+                        </button>
+
+                        <div>
+
+                            <h1>
+                                Pesquisar por referência
+                            </h1>
+
+                            <p>
+                                Digite a referência do fabricante.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- PAINEL -->
+
+                <div class="painel">
+
+                    <h3>
+                        📚 Referência
+                    </h3>
+
+                    <div class="linha-formulario">
+
+                        <input
+                            type="text"
+                            id="campoPesquisaReferencia"
+                            placeholder="Digite a referência"
+                        >
+
+                        <button
+                            class="botao-principal"
+                            onclick="pesquisarPorReferencia()"
+                        >
+                            Pesquisar
+                        </button>
+
+                    </div>
+
+
+                    <!-- RESULTADO -->
+
+                    <div id="resultadoPesquisaReferencia"></div>
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+        <!-- =================================================
+             CONFERÊNCIA
+             ================================================= -->
+
+        <section
+            id="conferencia"
+            class="tela-sistema"
+            style="display: none;"
+        >
+
+            <div class="cabecalho-pagina">
+
+                <p class="cabecalho-caminho">
+                    PMOBILE / Conferência
+                </p>
+
+                <h1>
+                    Conferência
+                </h1>
+
+            </div>
+
+
+            <div class="painel">
+
+                <div class="linha-formulario">
+
+                    <input
+                        type="text"
+                        id="campoConferencia"
+                        placeholder="Código ou descrição"
+                    >
+
+                    <button
+                        class="botao-principal"
+                        onclick="buscarMaterialConferencia()"
+                    >
+                        Buscar
+                    </button>
+
+                </div>
+
+
+                <div id="resultadoConferencia"></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             CONFERÊNCIAS REALIZADAS
+             ================================================= -->
+
+        <section
+            id="conferencias"
+            class="tela-sistema"
+            style="display: none;"
+        >
+
+            <div class="cabecalho-pagina">
+
+                <p class="cabecalho-caminho">
+                    PMOBILE / Conferências
+                </p>
+
+                <h1>
+                    Conferências realizadas
+                </h1>
+
+            </div>
+
+
+            <div class="painel">
+
+                <button
+                    class="botao-perigo"
+                    onclick="limparConferenciasSupabase()"
+                >
+                    🗑️ Limpar conferências
+                </button>
+
+                <div id="resultadoConferencias"></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             DIVERGÊNCIAS
+             ================================================= -->
+
+        <section
+            id="divergencias"
+            class="tela-sistema"
+            style="display: none;"
+        >
+
+            <div class="cabecalho-pagina">
+
+                <p class="cabecalho-caminho">
+                    PMOBILE / Divergências
+                </p>
+
+                <h1>
+                    Divergências
+                </h1>
+
+            </div>
+
+
+            <div class="painel">
+
+                <div id="resultadoDivergencias"></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             IMPORTAÇÃO
+             ================================================= -->
+
+        <section
+            id="importacao"
+            class="tela-sistema"
+            style="display: none;"
+        >
+
+            <div class="cabecalho-pagina">
+
+                <p class="cabecalho-caminho">
+                    PMOBILE / Importação
+                </p>
+
+                <h1>
+                    Importar inventário
+                </h1>
+
+                <p>
+                    Selecione o arquivo Excel exportado do DOGO.
+                </p>
+
+            </div>
+
+
+            <div class="painel">
+
+                <input
+                    type="file"
+                    id="arquivoExcel"
+                    accept=".xlsx, .xls"
+                >
+
+
+                <div class="acoes-importacao">
+
+                    <button
+                        class="botao-principal"
+                        onclick="importarExcel()"
+                    >
+                        Importar planilha
+                    </button>
+
+
+                    <button
+                        class="botao-perigo"
+                        onclick="abrirModalZerarInventario()"
+                    >
+                        🗑️ Zerar inventário
+                    </button>
+
+                </div>
+
+
+                <div id="resultadoImportacao"></div>
+
+            </div>
+
+
+            <!-- =============================================
+                 MODAL ZERAR INVENTÁRIO
+                 ============================================= -->
+
+            <div
+                id="modalZerarInventario"
+                class="modal"
+                style="display: none;"
+            >
+
+                <div class="modal-conteudo">
+
+                    <h2>
+                        🗑️ Zerar inventário
+                    </h2>
+
+                    <p>
+                        ⚠️ <strong>Atenção!</strong>
+                    </p>
+
+                    <p>
+                        Todos os materiais serão removidos
+                        do inventário.
+                    </p>
+
+                    <p>
+                        <strong>
+                            Apagar conferências também?
+                        </strong>
+                    </p>
+
+
+                    <div class="modal-acoes">
+
+                        <button
+                            class="botao-secundario"
+                            onclick="confirmarZeramento(false)"
+                        >
+                            NÃO
+                        </button>
+
+
+                        <button
+                            class="botao-perigo"
+                            onclick="confirmarZeramento(true)"
+                        >
+                            SIM
+                        </button>
+
+
+                        <button
+                            class="botao-secundario"
+                            onclick="fecharModalZerarInventario()"
+                        >
+                            CANCELAR
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             CONFIGURAÇÕES
+             ================================================= -->
+
+        <section
+            id="configuracoes"
+            class="tela-sistema"
+            style="display: none;"
+        >
+
+            <div class="cabecalho-pagina">
+
+                <p class="cabecalho-caminho">
+                    PMOBILE / Configurações
+                </p>
+
+                <h1>
+                    Configurações
+                </h1>
+
+            </div>
+
+
+            <div class="painel">
+
+                <h2>
+                    🗄️ Limpar banco de dados
+                </h2>
+
+                <p>
+                    Gerenciamento dos dados armazenados
+                    no Supabase.
+                </p>
+
+
+                <button
+                    class="botao-perigo"
+                    onclick="limparMateriaisSupabase()"
+                >
+                    🗑️ Materiais importados
+                </button>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+</div>
+
+
+<!-- =========================================================
+     BIBLIOTECAS EXTERNAS
+     ========================================================= -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+
+<!-- =========================================================
+     CONFIGURAÇÕES DO SISTEMA
+     ========================================================= -->
+
+<script src="supabase.js?v=20261016"></script>
+
+
+<!-- =========================================================
+     NÚCLEO / DADOS
+     ========================================================= -->
+
+<script src="dados.js?v=20261016"></script>
+
+
+<!-- =========================================================
+     IMPORTAÇÃO
+     ========================================================= -->
+
+<script src="bancoimportacao.js?v=20261016"></script>
+
+<script src="importacao.js?v=20261016"></script>
+
+
+<!-- =========================================================
+     PESQUISA
+     ========================================================= -->
+
+<script src="pesquisa.js?v=20261016"></script>
+
+
+<!-- =========================================================
+     CONFERÊNCIA
+     ========================================================= -->
+
+<script src="conferencia.js?v=20261016"></script>
+
+<script src="conferencias.js?v=20261016"></script>
+
+<script src="conferenciasrealizadas.js?v=20261016"></script>
+
+
+<!-- =========================================================
+     DIVERGÊNCIAS
+     ========================================================= -->
+
+<script src="divergencias.js?v=20261016"></script>
+
+
+<!-- =========================================================
+     CONTROLE GERAL
+     ========================================================= -->
+
+<script src="script.js?v=20261016"></script>

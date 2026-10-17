@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">PMOBILE</string>
+    <string name="title_activity_main">PMOBILE</string>
+    <string name="package_name">com.pmobile.app</string>
+    <string name="custom_url_scheme">com.pmobile.app</string>
+</resources>
