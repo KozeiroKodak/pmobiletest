@@ -1179,3 +1179,135 @@ async function confirmarZeramento(
 // ============================================================
 // FIM - CONTROLE DE NAVEGAÇÃO DO PMOBILE
 // ============================================================
+
+
+// ============================================================
+// BOTÃO VOLTAR DO ANDROID
+// ============================================================
+//
+// O Capacitor App converte o botão Voltar do Android no evento
+// "backbutton".
+//
+// No navegador/PC este evento não é disparado, portanto a
+// navegação web normal permanece inalterada.
+//
+// ============================================================
+
+document.addEventListener(
+    "backbutton",
+    function() {
+
+        // ====================================================
+        // PESQUISA - SUBTELAS -> MENU INTERNO
+        // ====================================================
+
+        const subtelasPesquisa = [
+            "pesquisaCodigo",
+            "pesquisaDescricao",
+            "pesquisaReferencia"
+        ];
+
+        const subtelaAberta =
+            subtelasPesquisa.some(
+                function(idTela) {
+
+                    const tela =
+                        document.getElementById(
+                            idTela
+                        );
+
+                    return (
+                        tela &&
+                        tela.style.display !== "none"
+                    );
+
+                }
+            );
+
+        if (subtelaAberta) {
+
+            voltarPesquisa();
+
+            return;
+        }
+
+
+        // ====================================================
+        // PESQUISA - MENU INTERNO -> HOME
+        // ====================================================
+
+        const pesquisa =
+            document.getElementById(
+                "pesquisa"
+            );
+
+        if (
+            pesquisa &&
+            pesquisa.style.display !== "none"
+        ) {
+
+            voltarMenu();
+
+            return;
+        }
+
+
+        // ====================================================
+        // DEMAIS TELAS PRINCIPAIS -> HOME
+        // ====================================================
+
+        const telasComRetornoHome = [
+            "conferencia",
+            "conferencias",
+            "divergencias",
+            "importacao",
+            "configuracoes"
+        ];
+
+        const telaPrincipalAberta =
+            telasComRetornoHome.some(
+                function(idTela) {
+
+                    const tela =
+                        document.getElementById(
+                            idTela
+                        );
+
+                    return (
+                        tela &&
+                        tela.style.display !== "none"
+                    );
+
+                }
+            );
+
+        if (telaPrincipalAberta) {
+
+            voltarMenu();
+
+            return;
+        }
+
+
+        // ====================================================
+        // HOME / TELA INICIAL
+        // ====================================================
+        //
+        // Quando nenhuma das telas anteriores estiver aberta,
+        // o botão Voltar mantém o comportamento esperado do
+        // Android e encerra a aplicação.
+        //
+        // ====================================================
+
+        if (
+            navigator.app &&
+            typeof navigator.app.exitApp === "function"
+        ) {
+
+            navigator.app.exitApp();
+
+        }
+        //
+
+    }
+);
