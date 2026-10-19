@@ -35,6 +35,15 @@ public class MainActivity extends BridgeActivity {
             } catch (Exception healthCheckFailure) {
                 Log.w(TAG, "Pending OTA candidate health check failed: "
                     + healthCheckFailure.getClass().getSimpleName());
+                try {
+                    java.io.File rollbackBundle =
+                        otaManager.rollbackToPreviousVersion();
+                    Log.w(TAG, "OTA rollback activated: "
+                        + rollbackBundle.getName());
+                } catch (Exception rollbackFailure) {
+                    Log.w(TAG, "OTA rollback failed; using APK assets: "
+                        + rollbackFailure.getClass().getSimpleName());
+                }
             }
 
             java.io.File activeBundle = otaManager.getHealthyActiveBundle();

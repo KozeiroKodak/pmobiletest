@@ -403,6 +403,33 @@ public class OtaManager {
         return activeBundle;
     }
 
+    public synchronized File rollbackToPreviousVersion() throws IOException {
+        String previousVersion = getPreviousVersion();
+        if (previousVersion == null || previousVersion.trim().isEmpty()
+                || previousVersion.contains("/") || previousVersion.contains("\\")
+                || previousVersion.equals(".") || previousVersion.equals("..")) {
+            throw new IOException("Previous OTA version is unavailable");
+        }
+
+        File previousBundle = new File(versionsDir, previousVersion);
+        if (!isWithinDirectory(versionsDir, previousBundle)
+                || !previousBundle.isDirectory()) {
+            throw new IOException("Previous OTA bundle is unavailable");
+        }
+
+        validateBundle(previousBundle);
+
+        if (!preferences.edit()
+                .putString(KEY_ACTIVE_VERSION, previousVersion)
+                .putString(KEY_CANDIDATE_VERSION, previousVersion)
+                .putBoolean(KEY_CANDIDATE_HEALTHY, true)
+                .commit()) {
+            throw new IOException("Unable to persist OTA rollback state");
+        }
+
+        return previousBundle;
+    }
+
     private static void validateBundle(File bundle) throws IOException {
         File[] contents = bundle.listFiles();
         File index = new File(bundle, "index.html");
