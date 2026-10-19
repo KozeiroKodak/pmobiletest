@@ -244,6 +244,31 @@ public class OtaManager {
         return getActiveVersion();
     }
 
+    /** Returns the active bundle only when its persisted health state and files are valid. */
+    public synchronized File getHealthyActiveBundle() throws IOException {
+        String activeVersion = getActiveVersion();
+        if (activeVersion == null || activeVersion.trim().isEmpty()
+                || activeVersion.contains("/") || activeVersion.contains("\\")
+                || activeVersion.equals(".") || activeVersion.equals("..")
+                || !activeVersion.equals(getCandidateVersion()) || !isCandidateHealthy()) {
+            return null;
+        }
+
+        File activeBundle = new File(versionsDir, activeVersion);
+        if (!isWithinDirectory(versionsDir, activeBundle) || !activeBundle.isDirectory()) {
+            return null;
+        }
+        try {
+            validateBundle(activeBundle);
+        } catch (IOException invalidBundle) {
+            return null;
+        }
+        if (!new File(activeBundle, "index.html").canRead()) {
+            return null;
+        }
+        return activeBundle;
+    }
+
 
     // ============================================================
     // VERSÃO OTA ANTERIOR

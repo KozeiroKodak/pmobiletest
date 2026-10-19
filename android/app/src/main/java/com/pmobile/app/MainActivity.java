@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.getcapacitor.BridgeActivity;
+import com.getcapacitor.ServerPath;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -18,6 +19,28 @@ public class MainActivity extends BridgeActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        try {
+            OtaManager otaManager = new OtaManager(getApplicationContext());
+            try {
+                otaManager.healthCheckPendingCandidate();
+            } catch (Exception healthCheckFailure) {
+                Log.w(TAG, "Pending OTA candidate health check failed: "
+                    + healthCheckFailure.getClass().getSimpleName());
+            }
+
+            java.io.File activeBundle = otaManager.getHealthyActiveBundle();
+            if (activeBundle != null) {
+                bridgeBuilder.setServerPath(new ServerPath(
+                    ServerPath.PathType.BASE_PATH,
+                    activeBundle.getAbsolutePath()
+                ));
+                Log.i(TAG, "Loading healthy OTA bundle: " + activeBundle.getName());
+            }
+        } catch (Exception otaSelectionFailure) {
+            Log.w(TAG, "No healthy OTA bundle selected; using APK assets: "
+                + otaSelectionFailure.getClass().getSimpleName());
+        }
+
         super.onCreate(savedInstanceState);
 
         OTA_MANIFEST_EXECUTOR.execute(() -> {
