@@ -2,6 +2,8 @@ package com.pmobile.app;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 
 import java.io.File;
 
@@ -50,12 +52,16 @@ public class OtaManager {
 
     private final SharedPreferences preferences;
 
+    private final Context context;
+
 
     // ============================================================
     // CONSTRUTOR
     // ============================================================
 
     public OtaManager(Context context) {
+
+        this.context = context.getApplicationContext();
 
         File filesDir =
             context.getFilesDir();
@@ -84,6 +90,22 @@ public class OtaManager {
                 Context.MODE_PRIVATE
             );
 
+    }
+
+    /** Returns the version name declared by the installed native APK. */
+    public String getCurrentNativeVersion() {
+        try {
+            PackageInfo packageInfo = context.getPackageManager().getPackageInfo(
+                context.getPackageName(),
+                0
+            );
+            if (packageInfo.versionName == null || packageInfo.versionName.trim().isEmpty()) {
+                throw new IllegalStateException("Installed APK does not declare a version name");
+            }
+            return packageInfo.versionName;
+        } catch (PackageManager.NameNotFoundException exception) {
+            throw new IllegalStateException("Unable to read installed APK version", exception);
+        }
     }
 
 

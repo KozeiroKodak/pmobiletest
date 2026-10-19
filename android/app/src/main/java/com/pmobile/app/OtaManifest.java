@@ -74,4 +74,10 @@ public final class OtaManifest {
     public boolean isNewerThan(String currentWebVersion) {
         return OtaVersion.parse(webVersion).compareTo(OtaVersion.parse(currentWebVersion)) > 0;
     }
+
+    /** Returns whether the installed native APK meets this manifest's minimum version. */
+    public boolean isCompatibleWithNativeVersion(String currentNativeVersion) {
+        return OtaVersion.parse(currentNativeVersion)
+            .compareTo(OtaVersion.parse(nativeMinVersion)) >= 0;
+    }
 }
