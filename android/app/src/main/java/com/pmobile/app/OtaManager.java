@@ -14,7 +14,7 @@ public class OtaManager {
 
     /** Central HTTPS endpoint for the optional startup manifest check. */
     public static final String REMOTE_MANIFEST_URL =
-        "https://updates.pmobile.app/manifest.json";
+        "https://kozeirokodak.github.io/pmobiletest/ota/manifest.json";
 
     // ============================================================
     // DIRETÓRIOS DO OTA

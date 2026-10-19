@@ -38,7 +38,17 @@ public final class OtaPackageDownloader {
     }
 
     /** Downloads a successful HTTPS response into a uniquely named .part file. */
+    public interface DownloadProgressListener {
+        void onProgress(long downloadedBytes, long totalBytes);
+    }
+
     public File download(String packageLocation) throws IOException {
+        return download(packageLocation, null);
+    }
+
+    public File download(
+            String packageLocation,
+            DownloadProgressListener progressListener) throws IOException {
         if (packageLocation == null || packageLocation.trim().isEmpty()) {
             throw new IOException("OTA package URL is missing");
         }
@@ -59,7 +69,7 @@ public final class OtaPackageDownloader {
             connection = (HttpsURLConnection) packageUrl.openConnection();
             connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
             connection.setReadTimeout(READ_TIMEOUT_MS);
-            connection.setInstanceFollowRedirects(false);
+            connection.setInstanceFollowRedirects(true);
             connection.setRequestMethod("GET");
             connection.setRequestProperty("Accept", "application/octet-stream");
 
@@ -77,12 +87,20 @@ public final class OtaPackageDownloader {
                 byte[] buffer = new byte[BUFFER_SIZE];
                 long total = 0;
                 int count;
+            if (progressListener != null) {
+                progressListener.onProgress(0, contentLength);
+            }
+
                 while ((count = input.read(buffer)) != -1) {
                     if (total > MAX_PACKAGE_BYTES - count) {
                         throw new IOException("OTA package exceeds size limit");
                     }
                     output.write(buffer, 0, count);
                     total += count;
+
+                if (progressListener != null) {
+                    progressListener.onProgress(total, contentLength);
+                }
                 }
                 output.flush();
             }
@@ -185,11 +203,17 @@ public final class OtaPackageDownloader {
     }
 
     /**
-     * Extracts the sole validated OTA archive into a separate prepared directory.
+     * Extracts the validated OTA archive into a separate prepared directory.
      * The validated archive is retained and no active WebView files are touched.
      */
-    public File prepareValidatedPackage() throws IOException {
-        File validatedPackage = findSoleValidatedPackage();
+    public File prepareValidatedPackage(File validatedPackage) throws IOException {
+        if (validatedPackage == null
+                || !validatedPackage.isFile()
+                || !validatedPackage.getName().endsWith(".validated")
+                || !isWithinStaging(validatedPackage)) {
+            throw new IOException("Validated OTA package is unavailable");
+        }
+
         String name = validatedPackage.getName();
         File preparedDir = new File(stagingDir,
             name.substring(0, name.length() - ".validated".length()) + ".prepared");
@@ -217,19 +241,31 @@ public final class OtaPackageDownloader {
     }
 
     /**
-     * Validates the sole prepared OTA bundle for the minimum WebView structure.
+     * Validates the prepared OTA bundle for the minimum WebView structure.
      * This only inspects staging and never installs or activates the bundle.
      */
-    public File validatePreparedPackage() throws IOException {
-        File preparedDir = findSolePreparedPackage();
+    public File validatePreparedPackage(File preparedDir) throws IOException {
+        if (preparedDir == null
+                || !preparedDir.isDirectory()
+                || !preparedDir.getName().endsWith(".prepared")
+                || !isWithinStaging(preparedDir)) {
+            throw new IOException("Prepared OTA bundle is unavailable");
+        }
+
         validatePreparedDirectory(preparedDir);
         structurallyValidatedPreparedPackages.add(preparedDir.getCanonicalPath());
         return preparedDir;
     }
 
-    /** Copies the sole structurally validated bundle to candidate staging, retaining the source. */
-    public File promoteValidatedPreparedPackage() throws IOException {
-        File preparedDir = findSolePreparedPackage();
+    /** Copies the structurally validated bundle to candidate staging, retaining the source. */
+    public File promoteValidatedPreparedPackage(File preparedDir) throws IOException {
+        if (preparedDir == null
+                || !preparedDir.isDirectory()
+                || !preparedDir.getName().endsWith(".prepared")
+                || !isWithinStaging(preparedDir)) {
+            throw new IOException("Prepared OTA bundle is unavailable");
+        }
+
         String preparedPath = preparedDir.getCanonicalPath();
         if (!structurallyValidatedPreparedPackages.contains(preparedPath)) {
             throw new IOException("Prepared OTA bundle has not passed structural validation");
@@ -252,19 +288,6 @@ public final class OtaPackageDownloader {
                 deleteTree(candidateDir);
             }
         }
-    }
-
-    private File findSolePreparedPackage() throws IOException {
-        File[] candidates = stagingDir.listFiles(file -> file.isDirectory()
-            && file.getName().endsWith(".prepared"));
-        if (candidates == null || candidates.length != 1) {
-            throw new IOException("Expected exactly one prepared OTA bundle");
-        }
-        File preparedDir = candidates[0];
-        if (!isWithinStaging(preparedDir)) {
-            throw new IOException("Prepared OTA bundle is outside staging");
-        }
-        return preparedDir;
     }
 
     private static void validatePreparedDirectory(File preparedDir) throws IOException {
@@ -308,19 +331,6 @@ public final class OtaPackageDownloader {
                 throw new IOException("Prepared OTA bundle contains an unsupported file");
             }
         }
-    }
-
-    private File findSoleValidatedPackage() throws IOException {
-        File[] candidates = stagingDir.listFiles(file -> file.isFile()
-            && file.getName().endsWith(".validated"));
-        if (candidates == null || candidates.length != 1) {
-            throw new IOException("Expected exactly one validated OTA package");
-        }
-        File candidate = candidates[0];
-        if (!isWithinStaging(candidate) || candidate.length() > MAX_PACKAGE_BYTES) {
-            throw new IOException("Validated OTA package is outside staging or too large");
-        }
-        return candidate;
     }
 
     private static void extractArchive(File archive, File destination) throws IOException {
