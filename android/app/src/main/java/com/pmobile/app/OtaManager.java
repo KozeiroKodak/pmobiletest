@@ -5,7 +5,10 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 
+import org.json.JSONException;
+
 import java.io.File;
+import java.io.IOException;
 
 public class OtaManager {
 
@@ -106,6 +109,11 @@ public class OtaManager {
         } catch (PackageManager.NameNotFoundException exception) {
             throw new IllegalStateException("Unable to read installed APK version", exception);
         }
+    }
+
+    /** Fetches and validates the configured remote manifest; invoke on a worker thread. */
+    public OtaManifest fetchRemoteManifest(String manifestUrl) throws IOException, JSONException {
+        return new OtaManifestFetcher(manifestUrl).fetch();
     }
 
 
