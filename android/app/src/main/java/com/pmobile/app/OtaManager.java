@@ -295,4 +295,67 @@ public class OtaManager {
 
     }
 
+    /**
+     * Activates the only staged candidate for the supplied manifest version.
+     * The candidate is moved into versions/ before the active state is committed,
+     * keeping the previous version directory available for a later rollback.
+     */
+    public synchronized File activateSoleCandidate(String version) throws IOException {
+        if (version == null || version.trim().isEmpty()
+                || version.contains("/") || version.contains("\\")
+                || version.equals(".") || version.equals("..")) {
+            throw new IOException("OTA candidate version is invalid");
+        }
+        ensureDirectories();
+
+        File[] candidates = stagingDir.listFiles(file -> file.isDirectory()
+            && file.getName().endsWith(".candidate"));
+        if (candidates == null || candidates.length != 1) {
+            throw new IOException("Expected exactly one OTA candidate bundle");
+        }
+        File candidate = candidates[0];
+        if (!isWithinDirectory(stagingDir, candidate)) {
+            throw new IOException("OTA candidate is outside staging");
+        }
+        validateBundle(candidate);
+
+        File activeBundle = new File(versionsDir, version);
+        if (activeBundle.exists()) {
+            throw new IOException("OTA version already exists");
+        }
+        if (!candidate.renameTo(activeBundle)) {
+            throw new IOException("Unable to move OTA candidate into versions");
+        }
+
+        String oldActiveVersion = getActiveVersion();
+        SharedPreferences.Editor editor = preferences.edit()
+            .putString(KEY_ACTIVE_VERSION, version)
+            .putString(KEY_CANDIDATE_VERSION, version)
+            .putBoolean(KEY_CANDIDATE_HEALTHY, false);
+        if (oldActiveVersion != null && !oldActiveVersion.trim().isEmpty()) {
+            editor.putString(KEY_PREVIOUS_VERSION, oldActiveVersion);
+        }
+        if (!editor.commit()) {
+            if (!activeBundle.renameTo(candidate)) {
+                throw new IOException("Unable to restore OTA candidate after state commit failure");
+            }
+            throw new IOException("Unable to persist active OTA state");
+        }
+        return activeBundle;
+    }
+
+    private static void validateBundle(File bundle) throws IOException {
+        File[] contents = bundle.listFiles();
+        File index = new File(bundle, "index.html");
+        if (contents == null || contents.length == 0 || !index.isFile()
+                || index.length() == 0 || !isWithinDirectory(bundle, index)) {
+            throw new IOException("OTA candidate bundle has invalid structure");
+        }
+    }
+
+    private static boolean isWithinDirectory(File directory, File file) throws IOException {
+        String root = directory.getCanonicalPath() + File.separator;
+        return file.getCanonicalPath().startsWith(root);
+    }
+
 }

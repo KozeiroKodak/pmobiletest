@@ -64,6 +64,11 @@ public class MainActivity extends BridgeActivity {
                                 downloader.promoteValidatedPreparedPackage();
                             Log.i(TAG, "Prepared OTA bundle copied to candidate staging: "
                                 + candidatePackage.getName());
+                            java.io.File activePackage = otaManager.activateSoleCandidate(
+                                manifest.getWebVersion()
+                            );
+                            Log.i(TAG, "OTA candidate persisted as active bundle: "
+                                + activePackage.getName());
                         } else {
                             Log.w(TAG, "OTA temporary package rejected by SHA-256 integrity check");
                         }
