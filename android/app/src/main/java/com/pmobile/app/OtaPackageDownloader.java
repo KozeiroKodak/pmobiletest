@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.MessageDigest;
+import java.util.HashMap;
+import java.util.Map;
 import javax.net.ssl.HttpsURLConnection;
 
 /** Downloads an OTA package to an untrusted temporary file in staging. */
@@ -19,6 +21,7 @@ public final class OtaPackageDownloader {
     private static final int BUFFER_SIZE = 8192;
 
     private final File stagingDir;
+    private final Map<String, byte[]> verifiedPackages = new HashMap<>();
 
     public OtaPackageDownloader(File stagingDir) {
         if (stagingDir == null) {
@@ -109,8 +112,13 @@ public final class OtaPackageDownloader {
                 }
             }
 
+            String canonicalPath = temporaryFile.getCanonicalPath();
             byte[] expected = decodeSha256(expectedSha256);
-            verified = MessageDigest.isEqual(digest.digest(), expected);
+            byte[] actual = digest.digest();
+            if (MessageDigest.isEqual(actual, expected)) {
+                verifiedPackages.put(canonicalPath, actual);
+                verified = true;
+            }
             return verified;
         } catch (Exception failure) {
             return false;
@@ -124,6 +132,69 @@ public final class OtaPackageDownloader {
                     // Best effort cleanup; a cleanup failure must not affect app startup.
                 }
             }
+        }
+    }
+
+    /**
+     * Promotes a package previously verified by this downloader to a validated
+     * staging artifact. The move stays within staging, so rename is atomic when
+     * supported by the filesystem. This does not install or activate the package.
+     */
+    public File promoteVerifiedPackage(File temporaryFile) throws IOException {
+        if (temporaryFile == null || !temporaryFile.isFile()) {
+            throw new IOException("Verified OTA package is unavailable");
+        }
+
+        String canonicalPath = temporaryFile.getCanonicalPath();
+        byte[] verifiedDigest = verifiedPackages.get(canonicalPath);
+        if (verifiedDigest == null || !isWithinStaging(temporaryFile)) {
+            throw new IOException("OTA package has not passed SHA-256 verification");
+        }
+
+        // Ensure the file has not changed since the successful verification.
+        byte[] currentDigest = calculateSha256(temporaryFile);
+        if (!MessageDigest.isEqual(verifiedDigest, currentDigest)) {
+            verifiedPackages.remove(canonicalPath);
+            throw new IOException("Verified OTA package changed before promotion");
+        }
+
+        if (!temporaryFile.getName().endsWith(".part")) {
+            throw new IOException("OTA package is not in temporary state");
+        }
+        File validatedFile = new File(
+            stagingDir,
+            temporaryFile.getName().substring(0, temporaryFile.getName().length() - 5)
+                + ".validated"
+        );
+        if (validatedFile.exists()) {
+            throw new IOException("Validated OTA package already exists");
+        }
+        if (!temporaryFile.renameTo(validatedFile)) {
+            throw new IOException("Unable to promote OTA package");
+        }
+
+        verifiedPackages.remove(canonicalPath);
+        return validatedFile;
+    }
+
+    private boolean isWithinStaging(File file) throws IOException {
+        String stagingPath = stagingDir.getCanonicalPath() + File.separator;
+        return file.getCanonicalPath().startsWith(stagingPath);
+    }
+
+    private static byte[] calculateSha256(File file) throws IOException {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            try (InputStream input = new java.io.FileInputStream(file)) {
+                byte[] buffer = new byte[BUFFER_SIZE];
+                int count;
+                while ((count = input.read(buffer)) != -1) {
+                    digest.update(buffer, 0, count);
+                }
+            }
+            return digest.digest();
+        } catch (java.security.NoSuchAlgorithmException impossible) {
+            throw new IOException("SHA-256 is unavailable", impossible);
         }
     }
 

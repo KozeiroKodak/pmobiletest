@@ -50,7 +50,11 @@ public class MainActivity extends BridgeActivity {
                             manifest.getPackageLocation()
                         );
                         if (downloader.verifySha256(temporaryPackage, manifest.getSha256())) {
-                            Log.i(TAG, "OTA temporary package passed SHA-256 integrity check");
+                            java.io.File validatedPackage = downloader.promoteVerifiedPackage(
+                                temporaryPackage
+                            );
+                            Log.i(TAG, "OTA package passed SHA-256 and was staged as validated: "
+                                + validatedPackage.getName());
                         } else {
                             Log.w(TAG, "OTA temporary package rejected by SHA-256 integrity check");
                         }
