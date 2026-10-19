@@ -2252,6 +2252,10 @@ async function importarParaSupabase(
                     )
                     .map(material => ({
 
+                        id:
+                            material.idSupabase ??
+                            material.id,
+
                         codigo:
                             material.codigo,
 
@@ -2505,8 +2509,31 @@ async function importarExcel() {
         );
 
 
+        const inventarioComIds =
+            novoInventario.map(
+                function(material, indice) {
+
+                    const id =
+                        indice + 1;
+
+                    return {
+
+                        ...material,
+
+                        idSupabase:
+                            id,
+
+                        id:
+                            id
+
+                    };
+
+                }
+            );
+
+
         await salvarInventarioLocal(
-            novoInventario
+            inventarioComIds
         );
 
 
@@ -2520,7 +2547,7 @@ async function importarExcel() {
         ) {
 
             materiais =
-                novoInventario;
+                inventarioComIds;
 
         }
 
@@ -2531,7 +2558,7 @@ async function importarExcel() {
 
 
         await importarParaSupabase(
-            novoInventario
+            inventarioComIds
         );
 
 
@@ -2564,7 +2591,7 @@ async function importarExcel() {
                 "<p style=\"text-align:center;\"><strong>100%</strong></p>" +
 
                 "<p>📦 Materiais importados: " +
-                novoInventario
+                inventarioComIds
                     .length
                     .toLocaleString(
                         "pt-BR"
