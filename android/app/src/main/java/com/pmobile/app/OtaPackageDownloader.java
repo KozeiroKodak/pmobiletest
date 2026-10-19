@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.MessageDigest;
 import javax.net.ssl.HttpsURLConnection;
 
 /** Downloads an OTA package to an untrusted temporary file in staging. */
@@ -85,5 +86,69 @@ public final class OtaPackageDownloader {
                 // Best effort cleanup; do not replace the original failure.
             }
         }
+    }
+
+    /**
+     * Verifies a downloaded temporary package against the manifest SHA-256.
+     * The file remains a .part file when valid and is removed on any failure.
+     */
+    public boolean verifySha256(File temporaryFile, String expectedSha256) {
+        boolean verified = false;
+        try {
+            if (temporaryFile == null || !temporaryFile.isFile()
+                    || !isSha256Hex(expectedSha256)) {
+                return false;
+            }
+
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            try (InputStream input = new java.io.FileInputStream(temporaryFile)) {
+                byte[] buffer = new byte[BUFFER_SIZE];
+                int count;
+                while ((count = input.read(buffer)) != -1) {
+                    digest.update(buffer, 0, count);
+                }
+            }
+
+            byte[] expected = decodeSha256(expectedSha256);
+            verified = MessageDigest.isEqual(digest.digest(), expected);
+            return verified;
+        } catch (Exception failure) {
+            return false;
+        } finally {
+            if (!verified && temporaryFile != null) {
+                try {
+                    if (temporaryFile.exists()) {
+                        temporaryFile.delete();
+                    }
+                } catch (SecurityException ignored) {
+                    // Best effort cleanup; a cleanup failure must not affect app startup.
+                }
+            }
+        }
+    }
+
+    private static boolean isSha256Hex(String value) {
+        if (value == null || value.length() != 64) {
+            return false;
+        }
+        for (int i = 0; i < value.length(); i++) {
+            char character = value.charAt(i);
+            if (!((character >= '0' && character <= '9')
+                    || (character >= 'a' && character <= 'f')
+                    || (character >= 'A' && character <= 'F'))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static byte[] decodeSha256(String value) {
+        byte[] decoded = new byte[32];
+        for (int i = 0; i < decoded.length; i++) {
+            int high = Character.digit(value.charAt(i * 2), 16);
+            int low = Character.digit(value.charAt(i * 2 + 1), 16);
+            decoded[i] = (byte) ((high << 4) | low);
+        }
+        return decoded;
     }
 }

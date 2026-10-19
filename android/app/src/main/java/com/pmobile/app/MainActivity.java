@@ -49,10 +49,13 @@ public class MainActivity extends BridgeActivity {
                         java.io.File temporaryPackage = downloader.download(
                             manifest.getPackageLocation()
                         );
-                        Log.i(TAG, "OTA package downloaded to staging; bytes="
-                            + temporaryPackage.length());
+                        if (downloader.verifySha256(temporaryPackage, manifest.getSha256())) {
+                            Log.i(TAG, "OTA temporary package passed SHA-256 integrity check");
+                        } else {
+                            Log.w(TAG, "OTA temporary package rejected by SHA-256 integrity check");
+                        }
                     } catch (Exception downloadFailure) {
-                        Log.w(TAG, "OTA package download failed: "
+                        Log.w(TAG, "OTA package download or integrity check failed: "
                             + downloadFailure.getClass().getSimpleName());
                     }
                 } else {
