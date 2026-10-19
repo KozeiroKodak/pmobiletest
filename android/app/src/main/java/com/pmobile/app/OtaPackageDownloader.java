@@ -215,6 +215,34 @@ public final class OtaPackageDownloader {
         }
     }
 
+    /**
+     * Validates the sole prepared OTA bundle for the minimum WebView structure.
+     * This only inspects staging and never installs or activates the bundle.
+     */
+    public File validatePreparedPackage() throws IOException {
+        File[] candidates = stagingDir.listFiles(file -> file.isDirectory()
+            && file.getName().endsWith(".prepared"));
+        if (candidates == null || candidates.length != 1) {
+            throw new IOException("Expected exactly one prepared OTA bundle");
+        }
+
+        File preparedDir = candidates[0];
+        if (!isWithinStaging(preparedDir)) {
+            throw new IOException("Prepared OTA bundle is outside staging");
+        }
+        File[] contents = preparedDir.listFiles();
+        if (contents == null || contents.length == 0) {
+            throw new IOException("Prepared OTA bundle is empty");
+        }
+
+        File indexFile = new File(preparedDir, "index.html");
+        if (!indexFile.isFile() || indexFile.length() == 0
+                || !isWithinDirectory(preparedDir, indexFile)) {
+            throw new IOException("Prepared OTA bundle has no valid root index.html");
+        }
+        return preparedDir;
+    }
+
     private File findSoleValidatedPackage() throws IOException {
         File[] candidates = stagingDir.listFiles(file -> file.isFile()
             && file.getName().endsWith(".validated"));
