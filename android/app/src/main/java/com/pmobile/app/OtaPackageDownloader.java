@@ -1,9 +1,14 @@
 package com.pmobile.app;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.MessageDigest;
@@ -19,6 +24,7 @@ public final class OtaPackageDownloader {
     private static final int CONNECT_TIMEOUT_MS = 15000;
     private static final int READ_TIMEOUT_MS = 30000;
     private static final int BUFFER_SIZE = 8192;
+    private static final int MAX_ARCHIVE_ENTRIES = 10000;
 
     private final File stagingDir;
     private final Map<String, byte[]> verifiedPackages = new HashMap<>();
@@ -175,6 +181,128 @@ public final class OtaPackageDownloader {
 
         verifiedPackages.remove(canonicalPath);
         return validatedFile;
+    }
+
+    /**
+     * Extracts the sole validated OTA archive into a separate prepared directory.
+     * The validated archive is retained and no active WebView files are touched.
+     */
+    public File prepareValidatedPackage() throws IOException {
+        File validatedPackage = findSoleValidatedPackage();
+        String name = validatedPackage.getName();
+        File preparedDir = new File(stagingDir,
+            name.substring(0, name.length() - ".validated".length()) + ".prepared");
+        if (preparedDir.exists()) {
+            throw new IOException("Prepared OTA package already exists");
+        }
+
+        File temporaryDir = new File(stagingDir, name + ".extracting");
+        if (temporaryDir.exists() || !temporaryDir.mkdir()) {
+            throw new IOException("Unable to create temporary OTA extraction directory");
+        }
+        boolean complete = false;
+        try {
+            extractArchive(validatedPackage, temporaryDir);
+            if (!temporaryDir.renameTo(preparedDir)) {
+                throw new IOException("Unable to finalize prepared OTA package");
+            }
+            complete = true;
+            return preparedDir;
+        } finally {
+            if (!complete) {
+                deleteTree(temporaryDir);
+            }
+        }
+    }
+
+    private File findSoleValidatedPackage() throws IOException {
+        File[] candidates = stagingDir.listFiles(file -> file.isFile()
+            && file.getName().endsWith(".validated"));
+        if (candidates == null || candidates.length != 1) {
+            throw new IOException("Expected exactly one validated OTA package");
+        }
+        File candidate = candidates[0];
+        if (!isWithinStaging(candidate) || candidate.length() > MAX_PACKAGE_BYTES) {
+            throw new IOException("Validated OTA package is outside staging or too large");
+        }
+        return candidate;
+    }
+
+    private static void extractArchive(File archive, File destination) throws IOException {
+        Set<String> paths = new HashSet<>();
+        int entries = 0;
+        long extractedBytes = 0;
+        byte[] buffer = new byte[BUFFER_SIZE];
+        try (ZipInputStream input = new ZipInputStream(new FileInputStream(archive))) {
+            ZipEntry entry;
+            while ((entry = input.getNextEntry()) != null) {
+                if (++entries > MAX_ARCHIVE_ENTRIES) {
+                    throw new IOException("OTA archive contains too many entries");
+                }
+                String entryName = entry.getName();
+                File output = resolveArchiveEntry(destination, entryName);
+                if (!paths.add(entryName) || !isWithinDirectory(destination, output)) {
+                    throw new IOException("OTA archive contains an unsafe or duplicate path");
+                }
+                if (entry.isDirectory()) {
+                    if (!output.isDirectory() && !output.mkdirs()) {
+                        throw new IOException("Unable to create OTA directory");
+                    }
+                } else {
+                    File parent = output.getParentFile();
+                    if (parent == null || (!parent.isDirectory() && !parent.mkdirs())) {
+                        throw new IOException("Unable to create OTA extraction path");
+                    }
+                    try (FileOutputStream fileOutput = new FileOutputStream(output, false)) {
+                        int count;
+                        while ((count = input.read(buffer)) != -1) {
+                            if (extractedBytes > MAX_PACKAGE_BYTES - count) {
+                                throw new IOException("Extracted OTA package exceeds size limit");
+                            }
+                            fileOutput.write(buffer, 0, count);
+                            extractedBytes += count;
+                        }
+                    }
+                }
+                input.closeEntry();
+            }
+        }
+        if (entries == 0) {
+            throw new IOException("Validated OTA archive is empty or invalid");
+        }
+    }
+
+    private static File resolveArchiveEntry(File destination, String entryName) throws IOException {
+        if (entryName == null || entryName.isEmpty() || entryName.indexOf('\\') >= 0
+                || entryName.startsWith("/") || entryName.matches("^[A-Za-z]:.*")) {
+            throw new IOException("OTA archive contains an invalid path");
+        }
+        String[] segments = entryName.split("/", -1);
+        for (String segment : segments) {
+            if (segment.equals("..") || segment.isEmpty() && !entryName.endsWith("/")) {
+                throw new IOException("OTA archive contains an invalid path");
+            }
+        }
+        return new File(destination, entryName);
+    }
+
+    private static boolean isWithinDirectory(File directory, File file) throws IOException {
+        String root = directory.getCanonicalPath() + File.separator;
+        return file.getCanonicalPath().startsWith(root);
+    }
+
+    private static void deleteTree(File file) {
+        if (file.isDirectory()) {
+            File[] children = file.listFiles();
+            if (children != null) {
+                for (File child : children) {
+                    deleteTree(child);
+                }
+            }
+        }
+        if (file.exists()) {
+            file.delete();
+        }
     }
 
     private boolean isWithinStaging(File file) throws IOException {
