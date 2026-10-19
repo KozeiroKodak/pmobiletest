@@ -23,6 +23,15 @@ public class MainActivity extends BridgeActivity {
         OTA_MANIFEST_EXECUTOR.execute(() -> {
             try {
                 OtaManager otaManager = new OtaManager(getApplicationContext());
+                try {
+                    if (otaManager.healthCheckPendingCandidate()) {
+                        Log.i(TAG, "Pending OTA candidate passed health check and was marked healthy");
+                    }
+                } catch (Exception healthCheckFailure) {
+                    Log.w(TAG, "Pending OTA candidate health check failed: "
+                        + healthCheckFailure.getClass().getSimpleName());
+                }
+
                 OtaManifest manifest = otaManager.fetchRemoteManifest(
                     OtaManager.REMOTE_MANIFEST_URL
                 );
@@ -69,6 +78,14 @@ public class MainActivity extends BridgeActivity {
                             );
                             Log.i(TAG, "OTA candidate persisted as active bundle: "
                                 + activePackage.getName());
+                            try {
+                                if (otaManager.healthCheckPendingCandidate()) {
+                                    Log.i(TAG, "Activated OTA candidate passed health check");
+                                }
+                            } catch (Exception healthCheckFailure) {
+                                Log.w(TAG, "Activated OTA candidate health check failed: "
+                                    + healthCheckFailure.getClass().getSimpleName());
+                            }
                         } else {
                             Log.w(TAG, "OTA temporary package rejected by SHA-256 integrity check");
                         }

@@ -296,6 +296,40 @@ public class OtaManager {
     }
 
     /**
+     * Revalidates a persisted pending candidate and marks it healthy only after
+     * its bundle is readable and structurally valid. A failed check leaves the
+     * pending state intact for a later rollback/fallback step.
+     */
+    public synchronized boolean healthCheckPendingCandidate() throws IOException {
+        String candidateVersion = getCandidateVersion();
+        if (candidateVersion == null || candidateVersion.trim().isEmpty()
+                || isCandidateHealthy()) {
+            return false;
+        }
+        if (!candidateVersion.equals(getActiveVersion())
+                || candidateVersion.contains("/") || candidateVersion.contains("\\")
+                || candidateVersion.equals(".") || candidateVersion.equals("..")) {
+            throw new IOException("Pending OTA candidate state is invalid");
+        }
+
+        File candidateBundle = new File(versionsDir, candidateVersion);
+        if (!isWithinDirectory(versionsDir, candidateBundle)
+                || !candidateBundle.isDirectory()) {
+            throw new IOException("Pending OTA candidate bundle is missing");
+        }
+        validateBundle(candidateBundle);
+
+        File index = new File(candidateBundle, "index.html");
+        if (!index.canRead()) {
+            throw new IOException("OTA candidate index.html is not readable");
+        }
+        if (!preferences.edit().putBoolean(KEY_CANDIDATE_HEALTHY, true).commit()) {
+            throw new IOException("Unable to persist healthy OTA candidate state");
+        }
+        return true;
+    }
+
+    /**
      * Activates the only staged candidate for the supplied manifest version.
      * The candidate is moved into versions/ before the active state is committed,
      * keeping the previous version directory available for a later rollback.
@@ -347,7 +381,7 @@ public class OtaManager {
     private static void validateBundle(File bundle) throws IOException {
         File[] contents = bundle.listFiles();
         File index = new File(bundle, "index.html");
-        if (contents == null || contents.length == 0 || !index.isFile()
+        if (!bundle.isDirectory() || contents == null || contents.length == 0 || !index.isFile()
                 || index.length() == 0 || !isWithinDirectory(bundle, index)) {
             throw new IOException("OTA candidate bundle has invalid structure");
         }
