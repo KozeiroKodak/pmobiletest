@@ -201,6 +201,15 @@ public class OtaManager {
 
     }
 
+    /**
+     * Returns the active OTA web version. A null result means the original web
+     * bundle packaged in the APK is active; its version is not tracked separately.
+     * This reads the existing persisted activeVersion value without changing state.
+     */
+    public String getActiveWebVersion() {
+        return getActiveVersion();
+    }
+
 
     // ============================================================
     // VERSÃO OTA ANTERIOR
