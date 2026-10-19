@@ -42,6 +42,19 @@ public class MainActivity extends BridgeActivity {
                 if (manifest.isNewerThan(currentWebVersion)) {
                     Log.i(TAG, "OTA update available; currentWebVersion=" + currentWebVersion
                         + ", manifestWebVersion=" + manifest.getWebVersion());
+                    try {
+                        OtaPackageDownloader downloader = new OtaPackageDownloader(
+                            otaManager.getStagingDir()
+                        );
+                        java.io.File temporaryPackage = downloader.download(
+                            manifest.getPackageLocation()
+                        );
+                        Log.i(TAG, "OTA package downloaded to staging; bytes="
+                            + temporaryPackage.length());
+                    } catch (Exception downloadFailure) {
+                        Log.w(TAG, "OTA package download failed: "
+                            + downloadFailure.getClass().getSimpleName());
+                    }
                 } else {
                     Log.i(TAG, "No OTA update needed; currentWebVersion=" + currentWebVersion
                         + ", manifestWebVersion=" + manifest.getWebVersion());
