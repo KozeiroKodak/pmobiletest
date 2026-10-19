@@ -60,6 +60,10 @@ public class MainActivity extends BridgeActivity {
                                 downloader.validatePreparedPackage();
                             Log.i(TAG, "Prepared OTA bundle passed structural validation: "
                                 + validatedPreparedPackage.getName());
+                            java.io.File candidatePackage =
+                                downloader.promoteValidatedPreparedPackage();
+                            Log.i(TAG, "Prepared OTA bundle copied to candidate staging: "
+                                + candidatePackage.getName());
                         } else {
                             Log.w(TAG, "OTA temporary package rejected by SHA-256 integrity check");
                         }

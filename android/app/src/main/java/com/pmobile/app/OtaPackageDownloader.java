@@ -28,6 +28,7 @@ public final class OtaPackageDownloader {
 
     private final File stagingDir;
     private final Map<String, byte[]> verifiedPackages = new HashMap<>();
+    private final Set<String> structurallyValidatedPreparedPackages = new HashSet<>();
 
     public OtaPackageDownloader(File stagingDir) {
         if (stagingDir == null) {
@@ -220,27 +221,93 @@ public final class OtaPackageDownloader {
      * This only inspects staging and never installs or activates the bundle.
      */
     public File validatePreparedPackage() throws IOException {
+        File preparedDir = findSolePreparedPackage();
+        validatePreparedDirectory(preparedDir);
+        structurallyValidatedPreparedPackages.add(preparedDir.getCanonicalPath());
+        return preparedDir;
+    }
+
+    /** Copies the sole structurally validated bundle to candidate staging, retaining the source. */
+    public File promoteValidatedPreparedPackage() throws IOException {
+        File preparedDir = findSolePreparedPackage();
+        String preparedPath = preparedDir.getCanonicalPath();
+        if (!structurallyValidatedPreparedPackages.contains(preparedPath)) {
+            throw new IOException("Prepared OTA bundle has not passed structural validation");
+        }
+        validatePreparedDirectory(preparedDir);
+
+        File candidateDir = new File(stagingDir,
+            preparedDir.getName().substring(0,
+                preparedDir.getName().length() - ".prepared".length()) + ".candidate");
+        if (candidateDir.exists()) {
+            throw new IOException("OTA candidate already exists");
+        }
+        boolean complete = false;
+        try {
+            copyDirectory(preparedDir, candidateDir);
+            complete = true;
+            return candidateDir;
+        } finally {
+            if (!complete) {
+                deleteTree(candidateDir);
+            }
+        }
+    }
+
+    private File findSolePreparedPackage() throws IOException {
         File[] candidates = stagingDir.listFiles(file -> file.isDirectory()
             && file.getName().endsWith(".prepared"));
         if (candidates == null || candidates.length != 1) {
             throw new IOException("Expected exactly one prepared OTA bundle");
         }
-
         File preparedDir = candidates[0];
         if (!isWithinStaging(preparedDir)) {
             throw new IOException("Prepared OTA bundle is outside staging");
         }
+        return preparedDir;
+    }
+
+    private static void validatePreparedDirectory(File preparedDir) throws IOException {
         File[] contents = preparedDir.listFiles();
         if (contents == null || contents.length == 0) {
             throw new IOException("Prepared OTA bundle is empty");
         }
-
         File indexFile = new File(preparedDir, "index.html");
         if (!indexFile.isFile() || indexFile.length() == 0
                 || !isWithinDirectory(preparedDir, indexFile)) {
             throw new IOException("Prepared OTA bundle has no valid root index.html");
         }
-        return preparedDir;
+    }
+
+    private static void copyDirectory(File source, File destination) throws IOException {
+        if (!source.isDirectory() || !destination.mkdir()) {
+            throw new IOException("Unable to create OTA candidate directory");
+        }
+        File[] children = source.listFiles();
+        if (children == null) {
+            throw new IOException("Unable to read prepared OTA bundle");
+        }
+        byte[] buffer = new byte[BUFFER_SIZE];
+        for (File child : children) {
+            File target = new File(destination, child.getName());
+            if (!isWithinDirectory(source, child) || !isWithinDirectory(destination, target)) {
+                throw new IOException("Prepared OTA bundle contains an unsafe path");
+            }
+            if (child.isDirectory()) {
+                copyDirectory(child, target);
+            } else if (child.isFile()) {
+                try (InputStream input = new FileInputStream(child);
+                     FileOutputStream output = new FileOutputStream(target, false)) {
+                    int count;
+                    while ((count = input.read(buffer)) != -1) {
+                        output.write(buffer, 0, count);
+                    }
+                    output.flush();
+                }
+            } else {
+                throw new IOException("Prepared OTA bundle contains an unsupported file");
+            }
+        }
     }
 
     private File findSoleValidatedPackage() throws IOException {
