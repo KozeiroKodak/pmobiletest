@@ -166,9 +166,22 @@ async function limparContagensManuais() {
 
     try {
         const cliente = obterClienteSupabase();
+        const usuarioSessao =
+            (typeof usuarioPmobileAtual !== "undefined" && usuarioPmobileAtual?.usuario)
+                ? usuarioPmobileAtual
+                : window.usuarioPmobileAtual;
+        const credencialSessao =
+            (typeof credencialPmobileAtual !== "undefined" && credencialPmobileAtual)
+                ? credencialPmobileAtual
+                : window.credencialPmobileAtual;
+
+        if (!usuarioSessao?.usuario || !credencialSessao) {
+            throw new Error("Sessão administrativa sem credencial disponível.");
+        }
+
         const { error } = await cliente.rpc("limpar_contagens_manuais", {
-            p_usuario: window.usuarioPmobileAtual?.usuario ?? "",
-            p_credencial: window.credencialPmobileAtual ?? (typeof credencialPmobileAtual !== "undefined" ? credencialPmobileAtual : "")
+            p_usuario: usuarioSessao.usuario,
+            p_credencial: credencialSessao
         });
 
         if (error) throw error;
