@@ -159,16 +159,19 @@ async function limparContagensManuais() {
 
     fecharMenuConfiguracoesContagemManual();
 
-    try {
-        if (navigator.onLine && typeof obterClienteSupabase === "function") {
-            const cliente = obterClienteSupabase();
-            const { error } = await cliente
-                .from(TABELA_CONTAGENS_MANUAIS_SUPABASE)
-                .delete()
-                .not("id", "is", null);
+    if (!navigator.onLine || typeof obterClienteSupabase !== "function") {
+        alert("❌ É necessário estar conectado ao Supabase para limpar a contagem manual.");
+        return;
+    }
 
-            if (error) throw error;
-        }
+    try {
+        const cliente = obterClienteSupabase();
+        const { error } = await cliente
+            .from(TABELA_CONTAGENS_MANUAIS_SUPABASE)
+            .delete()
+            .not("id", "is", null);
+
+        if (error) throw error;
 
         localStorage.removeItem(CHAVE_CONTAGENS_MANUAIS);
         materialContagemManualSelecionado = null;
