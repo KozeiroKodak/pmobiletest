@@ -116,7 +116,10 @@ const itensMenuSistema = [
 //
 // ============================================================
 
-const PMOBILE_LOGIN_STORAGE_KEY = "pmobile_login_persistente";
+const PMOBILE_LOGIN_STORAGE_KEY = "pmobile_login_persistente_v2";
+
+let usuarioPmobileCadastroSenha = null;
+let tokenPmobileCadastroSenha = null;
 
 const telasPesquisa = [
 
@@ -501,6 +504,14 @@ function sairPmobile() {
         campoToken.value = "";
     }
 
+    usuarioPmobileCadastroSenha = null;
+    tokenPmobileCadastroSenha = null;
+
+    const criarSenha = document.getElementById("criarSenhaPmobile");
+    if (criarSenha) {
+        criarSenha.style.display = "none";
+    }
+
     if (campoUsuario) {
         campoUsuario.value = "";
         campoUsuario.focus();
@@ -516,14 +527,14 @@ function sairPmobile() {
 }
 
 
-function salvarLoginPmobile(usuario, token, dadosUsuario) {
+function salvarLoginPmobile(usuario, senha, dadosUsuario) {
 
     try {
         localStorage.setItem(
             PMOBILE_LOGIN_STORAGE_KEY,
             JSON.stringify({
                 usuario: usuario,
-                token: token,
+                senha: senha,
                 dadosUsuario: dadosUsuario,
                 salvoEm: new Date().toISOString()
             })
@@ -560,7 +571,7 @@ function obterLoginPmobileSalvo() {
         if (
             !dados ||
             !dados.usuario ||
-            !dados.token ||
+            !dados.senha ||
             !dados.dadosUsuario
         ) {
             limparLoginPmobileSalvo();
@@ -578,20 +589,22 @@ function obterLoginPmobileSalvo() {
 }
 
 
-function restaurarSessaoPmobile(dadosUsuario, token) {
+function restaurarSessaoPmobile(dadosUsuario, senha) {
 
     usuarioPmobileAtual = dadosUsuario;
     window.usuarioPmobileAtual = dadosUsuario;
-    tokenPmobileAtual = token;
+    tokenPmobileAtual = null;
 
     atualizarVisibilidadeConfiguracoes();
 
     const inicio = document.getElementById("inicio");
     const login = document.getElementById("loginPmobile");
+    const criarSenha = document.getElementById("criarSenhaPmobile");
     const aplicacao = document.getElementById("aplicacao");
 
     if (inicio) inicio.style.display = "none";
     if (login) login.style.display = "none";
+    if (criarSenha) criarSenha.style.display = "none";
     if (aplicacao) aplicacao.style.display = "block";
 
     mostrarTelaSistema("homeSistema", null);
@@ -612,14 +625,14 @@ async function tentarRestaurarLoginPmobile() {
         return;
     }
 
-    restaurarSessaoPmobile(salvo.dadosUsuario, salvo.token);
-
     if (!navigator.onLine) {
+        restaurarSessaoPmobile(salvo.dadosUsuario, salvo.senha);
         console.log("📴 PMOBILE iniciou offline com login mantido.");
         return;
     }
 
     if (!window.clienteSupabase) {
+        restaurarSessaoPmobile(salvo.dadosUsuario, salvo.senha);
         console.log("📴 Supabase indisponível; mantendo sessão salva.");
         return;
     }
@@ -630,7 +643,7 @@ async function tentarRestaurarLoginPmobile() {
             "autenticar_usuario",
             {
                 p_usuario: salvo.usuario,
-                p_token: salvo.token
+                p_credencial: salvo.senha
             }
         );
 
@@ -643,18 +656,17 @@ async function tentarRestaurarLoginPmobile() {
                 ? resultado.data[0]
                 : resultado.data;
 
-        if (!usuarioValidado) {
+        if (!usuarioValidado || usuarioValidado.precisa_criar_senha) {
             limparLoginPmobileSalvo();
-            sairPmobile();
             mostrarStatusLogin(
-                "O token salvo não é mais válido. Entre novamente.",
+                "A sessão salva não é mais válida. Entre novamente.",
                 true
             );
             return;
         }
 
-        restaurarSessaoPmobile(usuarioValidado, salvo.token);
-        salvarLoginPmobile(salvo.usuario, salvo.token, usuarioValidado);
+        restaurarSessaoPmobile(usuarioValidado, salvo.senha);
+        salvarLoginPmobile(salvo.usuario, salvo.senha, usuarioValidado);
 
         console.log("✅ Login mantido e validado pelo servidor.");
 
@@ -665,9 +677,223 @@ async function tentarRestaurarLoginPmobile() {
             erro
         );
 
-        // Se não foi possível falar com o servidor, preservamos
-        // a sessão local para permitir o uso offline.
-        restaurarSessaoPmobile(salvo.dadosUsuario, salvo.token);
+        restaurarSessaoPmobile(salvo.dadosUsuario, salvo.senha);
+
+    }
+
+}
+
+
+function abrirCriacaoSenha(usuario, token, dadosUsuario) {
+
+    usuarioPmobileCadastroSenha = usuario;
+    tokenPmobileCadastroSenha = token;
+
+    const login = document.getElementById("loginPmobile");
+    const criarSenha = document.getElementById("criarSenhaPmobile");
+    const status = document.getElementById("criarSenhaStatus");
+    const senha = document.getElementById("criarSenha");
+    const confirmar = document.getElementById("confirmarSenha");
+
+    if (login) {
+        login.style.display = "none";
+    }
+
+    if (criarSenha) {
+        criarSenha.style.display = "block";
+    }
+
+    if (status) {
+        status.textContent = "";
+        status.classList.remove("erro");
+    }
+
+    if (senha) senha.value = "";
+    if (confirmar) confirmar.value = "";
+
+    const nome = document.getElementById("criarSenhaNome");
+    if (nome && dadosUsuario && dadosUsuario.nome) {
+        nome.textContent = dadosUsuario.nome;
+    }
+
+    if (senha) {
+        setTimeout(function() {
+            senha.focus();
+        }, 0);
+    }
+
+}
+
+
+function voltarLoginCriacaoSenha() {
+
+    usuarioPmobileCadastroSenha = null;
+    tokenPmobileCadastroSenha = null;
+
+    const criarSenha = document.getElementById("criarSenhaPmobile");
+    const login = document.getElementById("loginPmobile");
+
+    if (criarSenha) {
+        criarSenha.style.display = "none";
+    }
+
+    if (login) {
+        login.style.display = "block";
+    }
+
+}
+
+
+function mostrarStatusCriarSenha(mensagem, erro = false) {
+
+    const status = document.getElementById("criarSenhaStatus");
+
+    if (!status) {
+        return;
+    }
+
+    status.textContent = mensagem;
+    status.classList.toggle("erro", erro);
+
+}
+
+
+async function criarSenhaPmobile(event) {
+
+    if (event) {
+        event.preventDefault();
+    }
+
+    const campoSenha = document.getElementById("criarSenha");
+    const campoConfirmar = document.getElementById("confirmarSenha");
+
+    const senha = campoSenha ? campoSenha.value : "";
+    const confirmar = campoConfirmar ? campoConfirmar.value : "";
+
+    if (!usuarioPmobileCadastroSenha || !tokenPmobileCadastroSenha) {
+        voltarLoginCriacaoSenha();
+        mostrarStatusLogin(
+            "A sessão de ativação expirou. Informe o token novamente.",
+            true
+        );
+        return;
+    }
+
+    if (!senha || !confirmar) {
+        mostrarStatusCriarSenha(
+            "Digite e confirme a senha.",
+            true
+        );
+        return;
+    }
+
+    if (senha.length < 8) {
+        mostrarStatusCriarSenha(
+            "A senha deve ter pelo menos 8 caracteres.",
+            true
+        );
+        return;
+    }
+
+    if (senha !== confirmar) {
+        mostrarStatusCriarSenha(
+            "As senhas não coincidem.",
+            true
+        );
+        return;
+    }
+
+    if (!window.clienteSupabase) {
+        mostrarStatusCriarSenha(
+            "Não foi possível conectar ao servidor.",
+            true
+        );
+        return;
+    }
+
+    mostrarStatusCriarSenha("Criando senha...");
+
+    try {
+
+        const { data, error } =
+            await window.clienteSupabase.rpc(
+                "criar_senha_usuario",
+                {
+                    p_usuario: usuarioPmobileCadastroSenha,
+                    p_token: tokenPmobileCadastroSenha,
+                    p_senha: senha
+                }
+            );
+
+        if (error) {
+            console.error("❌ Erro ao criar senha:", error);
+            mostrarStatusCriarSenha(
+                error.message || "Não foi possível criar a senha.",
+                true
+            );
+            return;
+        }
+
+        const usuarioCriado =
+            Array.isArray(data)
+                ? data[0]
+                : data;
+
+        if (!usuarioCriado) {
+            mostrarStatusCriarSenha(
+                "Não foi possível concluir a criação da senha.",
+                true
+            );
+            return;
+        }
+
+        const manterLogin =
+            document.getElementById("loginManterLogin");
+
+        usuarioPmobileAtual = usuarioCriado;
+        window.usuarioPmobileAtual = usuarioCriado;
+        tokenPmobileAtual = null;
+
+        if (manterLogin && manterLogin.checked) {
+            salvarLoginPmobile(
+                usuarioCriado.usuario,
+                senha,
+                usuarioCriado
+            );
+        } else {
+            limparLoginPmobileSalvo();
+        }
+
+        usuarioPmobileCadastroSenha = null;
+        tokenPmobileCadastroSenha = null;
+
+        atualizarVisibilidadeConfiguracoes();
+
+        restaurarSessaoPmobile(
+            usuarioCriado,
+            senha
+        );
+
+        console.log(
+            "✅ Senha criada e usuário ativado:",
+            {
+                id: usuarioCriado.id,
+                usuario: usuarioCriado.usuario,
+                nivel: usuarioCriado.nivel
+            }
+        );
+
+    } catch (erro) {
+
+        console.error(
+            "❌ Falha inesperada ao criar senha:",
+            erro
+        );
+
+        mostrarStatusCriarSenha(
+            "Erro ao criar a senha. Tente novamente.",
+            true
+        );
 
     }
 
@@ -717,29 +943,23 @@ async function entrarInterface(event) {
     const campoUsuario =
         document.getElementById("loginUsuario");
 
-    const campoToken =
+    const campoSenha =
         document.getElementById("loginSenha");
-
-    const login =
-        document.getElementById("loginPmobile");
-
-    const aplicacao =
-        document.getElementById("aplicacao");
 
     const usuario =
         campoUsuario
             ? campoUsuario.value.trim()
             : "";
 
-    const token =
-        campoToken
-            ? campoToken.value
+    const credencial =
+        campoSenha
+            ? campoSenha.value
             : "";
 
-    if (!usuario || !token) {
+    if (!usuario || !credencial) {
 
         mostrarStatusLogin(
-            "Informe o usuário e o token.",
+            "Informe o usuário e a senha.",
             true
         );
 
@@ -772,7 +992,7 @@ async function entrarInterface(event) {
                 "autenticar_usuario",
                 {
                     p_usuario: usuario,
-                    p_token: token
+                    p_credencial: credencial
                 }
             );
 
@@ -800,14 +1020,30 @@ async function entrarInterface(event) {
         if (!usuarioAutenticado) {
 
             mostrarStatusLogin(
-                "Usuário ou token inválido.",
+                "Usuário ou senha inválidos.",
                 true
             );
 
-            if (campoToken) {
-                campoToken.value = "";
-                campoToken.focus();
+            if (campoSenha) {
+                campoSenha.value = "";
+                campoSenha.focus();
             }
+
+            return;
+
+        }
+
+        if (usuarioAutenticado.precisa_criar_senha) {
+
+            abrirCriacaoSenha(
+                usuarioAutenticado.usuario,
+                credencial,
+                usuarioAutenticado
+            );
+
+            mostrarStatusCriarSenha(
+                "Seu usuário foi aprovado. Agora crie sua senha de acesso."
+            );
 
             return;
 
@@ -819,21 +1055,20 @@ async function entrarInterface(event) {
         window.usuarioPmobileAtual =
             usuarioAutenticado;
 
-        tokenPmobileAtual = token;
+        tokenPmobileAtual = null;
 
-        const manterLogin = document.getElementById("loginManterLogin");
+        const manterLogin =
+            document.getElementById("loginManterLogin");
 
         if (manterLogin && manterLogin.checked) {
             salvarLoginPmobile(
                 usuario,
-                token,
+                credencial,
                 usuarioAutenticado
             );
         } else {
             limparLoginPmobileSalvo();
         }
-
-        atualizarVisibilidadeConfiguracoes();
 
         atualizarVisibilidadeConfiguracoes();
 
@@ -845,6 +1080,12 @@ async function entrarInterface(event) {
                 nivel: usuarioAutenticado.nivel
             }
         );
+
+        const login =
+            document.getElementById("loginPmobile");
+
+        const aplicacao =
+            document.getElementById("aplicacao");
 
         if (login) {
             login.style.display = "none";
