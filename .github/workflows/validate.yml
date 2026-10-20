@@ -1,0 +1,84 @@
+name: Validate PMOBILE web
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '*.html'
+      - '*.css'
+      - '*.js'
+      - '**/*.html'
+      - '**/*.css'
+      - '**/*.js'
+      - '**/*.json'
+      - '.github/workflows/**'
+  push:
+    branches:
+      - main
+    paths:
+      - '*.html'
+      - '*.css'
+      - '*.js'
+      - '**/*.html'
+      - '**/*.css'
+      - '**/*.js'
+      - '**/*.json'
+      - '.github/workflows/**'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 1
+
+      - name: Validate JavaScript
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mapfile -d '' js_files < <(
+            git ls-files -z |
+            grep -zE '(^|/)[^/]+\.js$' |
+            grep -zEv '^(android/|\.github/|ota/|build/|node_modules/)'
+          )
+
+          test "${#js_files[@]}" -gt 0
+
+          for file in "${js_files[@]}"; do
+            echo "Validando JS: $file"
+            node --check "$file"
+          done
+
+      - name: Validate critical import flow
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test -f xlsx.full.min.js
+          grep -qF 'pmobile_finalizar_importacao_materiais' importacao.js
+
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+
+          source = Path("importacao.js").read_text()
+          pattern = r'\.from\(\s*["\']materiais["\']\s*\)\s*\.delete'
+          if re.search(pattern, source):
+              raise SystemExit(
+                  "importacao.js contém DELETE direto em materiais."
+              )
+          PY
+
+      - name: Validate OTA manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m json.tool ota/manifest.json >/dev/null
+          echo "Manifest JSON: OK"

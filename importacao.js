@@ -2142,217 +2142,560 @@ async function salvarInventarioLocal(
 
 
 // ============================================================
-// FUNÇÃO: importarParaSupabase
+// FUNÇÃO: gerarIdImportacao
 // ============================================================
-//
-// Envia o inventário para o Supabase.
-//
-// Usa:
-//
-// window.clienteSupabase
-//
-// A Publishable Key continua no supabase.js.
-//
+// Gera o UUID usado para identificar a carga temporária.
 // ============================================================
 
-async function importarParaSupabase(
-    materiais
+function gerarIdImportacao() {
+
+    if (
+        window.crypto &&
+        typeof window.crypto.randomUUID === "function"
+    ) {
+        return window.crypto.randomUUID();
+    }
+
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
+        /[xy]/g,
+        function(caractere) {
+
+            const aleatorio =
+                Math.floor(Math.random() * 16);
+
+            const valor =
+                caractere === "x"
+                    ? aleatorio
+                    : (
+                        aleatorio & 0x3 |
+                        0x8
+                    );
+
+            return valor.toString(16);
+        }
+    );
+}
+
+
+// ============================================================
+// FUNÇÃO: limparStagingImportacao
+// ============================================================
+// Remove somente os registros temporários desta tentativa.
+// ============================================================
+
+async function limparStagingImportacao(importacaoId) {
+
+    if (
+        !window.clienteSupabase ||
+        !importacaoId
+    ) {
+        return;
+    }
+
+    const { error } =
+        await window.clienteSupabase
+            .from("materiais_importacao_temporaria")
+            .delete()
+            .eq("importacao_id", importacaoId);
+
+    if (error) {
+        console.warn(
+            "Não foi possível limpar a staging da importação:",
+            error
+        );
+    }
+}
+
+
+// ============================================================
+// FUNÇÃO: prepararImportacaoNoSupabase
+// ============================================================
+// Envia a nova carga para a staging sem tocar no inventário oficial.
+// ============================================================
+
+async function prepararImportacaoNoSupabase(
+    materiais,
+    importacaoId
+) {
+
+    let enviados = 0;
+
+    for (
+        let inicio = 0;
+        inicio < materiais.length;
+        inicio += TAMANHO_LOTE_SUPABASE
+    ) {
+
+        const lote =
+            materiais
+                .slice(
+                    inicio,
+                    inicio + TAMANHO_LOTE_SUPABASE
+                )
+                .map(
+                    function(material, indiceLote) {
+
+                        return {
+                            importacao_id:
+                                importacaoId,
+
+                            ordem:
+                                inicio +
+                                indiceLote +
+                                1,
+
+                            codigo:
+                                material.codigo,
+
+                            descricao:
+                                material.descricao,
+
+                            referencia:
+                                material.referencia,
+
+                            marca:
+                                material.marca,
+
+                            local:
+                                material.local,
+
+                            quantidade:
+                                material.quantidade,
+
+                            quantidade_reservada:
+                                material.quantidadeReservada,
+
+                            disponivel:
+                                material.disponivel,
+
+                            ultima_entrada:
+                                material.ultimaEntrada
+                        };
+                    }
+                );
+
+        const { error } =
+            await window.clienteSupabase
+                .from("materiais_importacao_temporaria")
+                .insert(lote);
+
+        if (error) {
+            throw new Error(
+                "Erro ao preparar o lote " +
+                (
+                    Math.floor(
+                        inicio /
+                        TAMANHO_LOTE_SUPABASE
+                    ) + 1
+                ) +
+                " no Supabase: " +
+                error.message
+            );
+        }
+
+        enviados += lote.length;
+
+        const percentual =
+            50 +
+            (
+                enviados /
+                materiais.length
+            ) * 40;
+
+        atualizarBarraProgresso(
+            percentual,
+            "☁️ Preparando novo inventário no Supabase..."
+        );
+
+        await new Promise(
+            resolve =>
+                setTimeout(resolve, 0)
+        );
+    }
+
+    return enviados;
+}
+
+
+// ============================================================
+// FUNÇÃO: finalizarImportacaoNoPostgreSQL
+// ============================================================
+// A troca oficial é executada atomicamente pelo PostgreSQL.
+// ============================================================
+
+async function finalizarImportacaoNoPostgreSQL(
+    importacaoId,
+    quantidadeEsperada
+) {
+
+    atualizarBarraProgresso(
+        92,
+        "🗄️ Finalizando inventário no PostgreSQL..."
+    );
+
+    const { data, error } =
+        await window.clienteSupabase
+            .rpc(
+                "pmobile_finalizar_importacao_materiais",
+                {
+                    p_importacao_id:
+                        importacaoId
+                }
+            );
+
+    if (error) {
+        throw new Error(
+            "O PostgreSQL não conseguiu finalizar a importação: " +
+            error.message
+        );
+    }
+
+    const quantidadeInserida =
+        Number(data ?? 0);
+
+    if (
+        quantidadeInserida !==
+        quantidadeEsperada
+    ) {
+        throw new Error(
+            "A importação foi finalizada, mas a quantidade retornada pelo banco (" +
+            quantidadeInserida.toLocaleString("pt-BR") +
+            ") é diferente da quantidade esperada (" +
+            quantidadeEsperada.toLocaleString("pt-BR") +
+            ")."
+        );
+    }
+
+    return quantidadeInserida;
+}
+
+
+// ============================================================
+// FUNÇÃO: buscarInventarioOficialDoSupabase
+// ============================================================
+// Baixa os registros oficiais após a troca, incluindo os IDs
+// gerados pelo PostgreSQL.
+// ============================================================
+
+async function buscarInventarioOficialDoSupabase(
+    quantidadeEsperada
+) {
+
+    const inventarioOficial = [];
+
+    let inicio = 0;
+
+    while (true) {
+
+        const fim =
+            inicio +
+            TAMANHO_PAGINA_COPIA_LOCAL -
+            1;
+
+        const { data, error } =
+            await window.clienteSupabase
+                .from("materiais")
+                .select(
+                    "id,codigo,descricao,referencia,marca,local,quantidade,quantidade_reservada,disponivel,ultima_entrada"
+                )
+                .order(
+                    "id",
+                    {
+                        ascending: true
+                    }
+                )
+                .range(
+                    inicio,
+                    fim
+                );
+
+        if (error) {
+            throw new Error(
+                "Inventário central foi atualizado, mas não foi possível baixar a cópia offline: " +
+                error.message
+            );
+        }
+
+        if (
+            !data ||
+            data.length === 0
+        ) {
+            break;
+        }
+
+        inventarioOficial.push(
+            ...data
+        );
+
+        const percentual =
+            quantidadeEsperada > 0
+                ? 95 +
+                  Math.min(
+                      5,
+                      (
+                          inventarioOficial.length /
+                          quantidadeEsperada
+                      ) * 5
+                  )
+                : 100;
+
+        atualizarBarraProgresso(
+            percentual,
+            "💾 Atualizando cópia offline..."
+        );
+
+        if (
+            data.length <
+            TAMANHO_PAGINA_COPIA_LOCAL
+        ) {
+            break;
+        }
+
+        inicio +=
+            TAMANHO_PAGINA_COPIA_LOCAL;
+
+        await new Promise(
+            resolve =>
+                setTimeout(resolve, 0)
+        );
+    }
+
+    if (
+        inventarioOficial.length !==
+        quantidadeEsperada
+    ) {
+        throw new Error(
+            "O Supabase possui " +
+            inventarioOficial.length.toLocaleString("pt-BR") +
+            " materiais na leitura pós-importação, mas eram esperados " +
+            quantidadeEsperada.toLocaleString("pt-BR") +
+            ". A importação central foi concluída; a cópia offline não será substituída."
+        );
+    }
+
+    return inventarioOficial;
+}
+
+
+// ============================================================
+// FUNÇÃO: salvarInventarioLocalComIds
+// ============================================================
+// Atualiza o IndexedDB somente com os IDs oficiais do Supabase.
+// ============================================================
+
+async function salvarInventarioLocalComIds(
+    inventarioSupabase
 ) {
 
     if (
-        !window.clienteSupabase
+        typeof salvarCopiaLocalDoSupabase ===
+        "function"
+    ) {
+
+        await salvarCopiaLocalDoSupabase(
+            inventarioSupabase
+        );
+
+        return;
+    }
+
+    if (
+        typeof salvarMateriais !==
+        "function"
     ) {
 
         throw new Error(
-            "Cliente Supabase não está disponível."
+            "Nenhuma função de gravação do IndexedDB está disponível."
         );
-
     }
 
+    const inventarioNormalizado =
+        inventarioSupabase.map(
+            material => ({
+
+                id:
+                    material.id,
+
+                idSupabase:
+                    material.id,
+
+                codigo:
+                    material.codigo ?? "",
+
+                descricao:
+                    material.descricao ?? "",
+
+                referencia:
+                    material.referencia ?? null,
+
+                marca:
+                    material.marca ?? null,
+
+                local:
+                    material.local ?? null,
+
+                quantidade:
+                    Number(
+                        material.quantidade ?? 0
+                    ),
+
+                quantidadeReservada:
+                    Number(
+                        material.quantidade_reservada ?? 0
+                    ),
+
+                disponivel:
+                    Number(
+                        material.disponivel ?? 0
+                    ),
+
+                ultimaEntrada:
+                    material.ultima_entrada ?? null
+            })
+        );
+
+    await salvarMateriais(
+        inventarioNormalizado
+    );
+
+    if (
+        typeof materiais !==
+        "undefined"
+    ) {
+        materiais =
+            inventarioNormalizado;
+    }
+}
+
+
+// ============================================================
+// FUNÇÃO: importarParaSupabase
+// ============================================================
+// ORQUESTRADOR DA IMPORTAÇÃO CENTRAL.
+//
+// Fluxo:
+// 1. gera UUID;
+// 2. envia todos os lotes para staging;
+// 3. chama RPC transacional;
+// 4. busca IDs oficiais;
+// 5. atualiza IndexedDB.
+//
+// O JavaScript nunca apaga public.materiais diretamente.
+// ============================================================
+
+async function importarParaSupabase(
+    materiaisNovos
+) {
+
+    if (!window.clienteSupabase) {
+        throw new Error(
+            "Cliente Supabase não está disponível."
+        );
+    }
 
     if (
         importacaoSupabaseEmAndamento
     ) {
-
         throw new Error(
             "Já existe uma importação para o Supabase em andamento."
         );
-
     }
 
+    if (
+        !Array.isArray(materiaisNovos) ||
+        materiaisNovos.length === 0
+    ) {
+        throw new Error(
+            "Não existem materiais para importar."
+        );
+    }
 
     importacaoSupabaseEmAndamento =
         true;
 
+    const importacaoId =
+        gerarIdImportacao();
 
-    const resultado =
-        document.getElementById(
-            "resultadoImportacao"
-        );
-
+    let finalizacaoConcluida =
+        false;
 
     try {
 
         atualizarBarraProgresso(
             50,
-            "☁️ Enviando inventário para o Supabase..."
+            "☁️ Preparando novo inventário no Supabase..."
         );
 
-
-        // ----------------------------------------------------
-        // LIMPAR INVENTÁRIO ANTERIOR
-        // ----------------------------------------------------
-
-        const {
-            error:
-                erroExclusao
-        } =
-            await window.clienteSupabase
-                .from("materiais")
-                .delete()
-                .not(
-                    "id",
-                    "is",
-                    null
-                );
-
-
-        if (erroExclusao) {
-
-            throw new Error(
-                "Erro ao limpar inventário anterior no Supabase: " +
-                erroExclusao.message
+        const quantidadePreparada =
+            await prepararImportacaoNoSupabase(
+                materiaisNovos,
+                importacaoId
             );
 
-        }
-
-
-        // ----------------------------------------------------
-        // ENVIAR LOTES
-        // ----------------------------------------------------
-
-        let enviados = 0;
-
-
-        for (
-            let inicio = 0;
-
-            inicio < materiais.length;
-
-            inicio +=
-                TAMANHO_LOTE_SUPABASE
+        if (
+            quantidadePreparada !==
+            materiaisNovos.length
         ) {
-
-            const lote =
-                materiais
-                    .slice(
-                        inicio,
-                        inicio +
-                        TAMANHO_LOTE_SUPABASE
-                    )
-                    .map(material => ({
-
-                        id:
-                            material.idSupabase ??
-                            material.id,
-
-                        codigo:
-                            material.codigo,
-
-                        descricao:
-                            material.descricao,
-
-                        referencia:
-                            material.referencia,
-
-                        marca:
-                            material.marca,
-
-                        local:
-                            material.local,
-
-                        quantidade:
-                            material.quantidade,
-
-                        quantidade_reservada:
-                            material.quantidadeReservada,
-
-                        disponivel:
-                            material.disponivel,
-
-                        ultima_entrada:
-                            material.ultimaEntrada
-
-                    }));
-
-
-            const {
-                error
-            } =
-                await window.clienteSupabase
-                    .from("materiais")
-                    .insert(lote);
-
-
-            if (error) {
-
-                throw new Error(
-                    "Erro no lote " +
-                    (
-                        Math.floor(
-                            inicio /
-                            TAMANHO_LOTE_SUPABASE
-                        ) + 1
-                    ) +
-                    ": " +
-                    error.message
-                );
-
-            }
-
-
-            enviados +=
-                lote.length;
-
-
-            const percentual =
-                50 +
-                (enviados / materiais.length) *
-                50;
-
-            atualizarBarraProgresso(
-                percentual,
-                "☁️ Enviando inventário para o Supabase..."
+            throw new Error(
+                "A quantidade preparada no Supabase não corresponde à quantidade da planilha."
             );
-
-
-            await new Promise(
-                resolve =>
-                    setTimeout(
-                        resolve,
-                        0
-                    )
-            );
-
         }
 
+        await finalizarImportacaoNoPostgreSQL(
+            importacaoId,
+            materiaisNovos.length
+        );
+
+        finalizacaoConcluida =
+            true;
+
+        const inventarioOficial =
+            await buscarInventarioOficialDoSupabase(
+                materiaisNovos.length
+            );
+
+        await salvarInventarioLocalComIds(
+            inventarioOficial
+        );
 
         atualizarBarraProgresso(
             100,
-            "☁️ Inventário enviado ao Supabase."
+            "✅ Inventário central e cópia offline atualizados."
         );
 
+        return {
+            importacaoId,
+            quantidade:
+                materiaisNovos.length,
+            inventarioOficial
+        };
 
-        return true;
+    } catch (erro) {
 
+        if (!finalizacaoConcluida) {
+
+            try {
+
+                await limparStagingImportacao(
+                    importacaoId
+                );
+
+            } catch (erroLimpeza) {
+
+                console.warn(
+                    "Falha adicional ao limpar staging:",
+                    erroLimpeza
+                );
+            }
+        }
+
+        throw erro;
 
     } finally {
 
         importacaoSupabaseEmAndamento =
             false;
-
     }
-
 }
 
 
@@ -2500,67 +2843,17 @@ async function importarExcel() {
 
 
         // ----------------------------------------------------
-        // SALVAR LOCAL
+        // SUPABASE + CÓPIA LOCAL
         // ----------------------------------------------------
+        //
+        // A cópia local só é atualizada depois que o PostgreSQL
+        // concluir a troca atômica e devolver os IDs oficiais.
+        //
 
-        atualizarBarraProgresso(
-            50,
-            "💾 Salvando inventário localmente..."
-        );
-
-
-        const inventarioComIds =
-            novoInventario.map(
-                function(material, indice) {
-
-                    const id =
-                        indice + 1;
-
-                    return {
-
-                        ...material,
-
-                        idSupabase:
-                            id,
-
-                        id:
-                            id
-
-                    };
-
-                }
+        const resultadoImportacao =
+            await importarParaSupabase(
+                novoInventario
             );
-
-
-        await salvarInventarioLocal(
-            inventarioComIds
-        );
-
-
-        // ----------------------------------------------------
-        // ATUALIZAR ARRAY GLOBAL
-        // ----------------------------------------------------
-
-        if (
-            typeof materiais !==
-            "undefined"
-        ) {
-
-            materiais =
-                inventarioComIds;
-
-        }
-
-
-        // ----------------------------------------------------
-        // SUPABASE
-        // ----------------------------------------------------
-
-
-        await importarParaSupabase(
-            inventarioComIds
-        );
-
 
         // ----------------------------------------------------
         // FINAL
@@ -2591,12 +2884,15 @@ async function importarExcel() {
                 "<p style=\"text-align:center;\"><strong>100%</strong></p>" +
 
                 "<p>📦 Materiais importados: " +
-                inventarioComIds
-                    .length
+                resultadoImportacao
+                    .quantidade
                     .toLocaleString(
                         "pt-BR"
                     ) +
-                "</p>";
+                "</p>" +
+
+                "<p>☁️ Supabase: atualizado.</p>" +
+                "<p>💾 Cópia offline: atualizada com IDs oficiais.</p>";
 
         }
 
