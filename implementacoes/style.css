@@ -917,8 +917,13 @@
     align-items: center;
 }
 
+.botao-buscar-contagem-manual,
 .botao-config-contagem-manual {
-    min-width: 40px;
+    width: 80px;
+    min-width: 80px;
+}
+
+.botao-config-contagem-manual {
     padding-left: 9px;
     padding-right: 9px;
     font-size: 16px;
