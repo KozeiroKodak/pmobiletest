@@ -1,0 +1,224 @@
+// ============================================================
+// PMOBILE - CONTAGEM MANUAL
+// ============================================================
+// Módulo isolado das conferências existentes.
+// Primeira fase: busca no inventário + persistência local.
+// ============================================================
+
+const CHAVE_CONTAGENS_MANUAIS = "pmobile_contagens_manuais_v1";
+let materialContagemManualSelecionado = null;
+
+function normalizarTextoContagemManual(valor) {
+    return String(valor ?? "").trim().toLowerCase();
+}
+
+async function obterInventarioContagemManual() {
+    if (typeof carregarMateriais === "function") {
+        await carregarMateriais();
+    }
+    if (typeof obterMateriaisLocais !== "function") {
+        throw new Error("Banco local de materiais indisponível.");
+    }
+    const lista = await obterMateriaisLocais();
+    return Array.isArray(lista) ? lista : [];
+}
+
+async function buscarMaterialContagemManual() {
+    const campo = document.getElementById("campoContagemManual");
+    const area = document.getElementById("resultadoBuscaContagemManual");
+    if (!campo || !area) return;
+
+    const busca = normalizarTextoContagemManual(campo.value);
+    materialContagemManualSelecionado = null;
+    const painel = document.getElementById("painelRegistroContagemManual");
+    if (painel) painel.style.display = "none";
+
+    if (!busca) {
+        area.innerHTML = "<p>Digite um código, referência ou descrição.</p>";
+        return;
+    }
+
+    area.innerHTML = "<p>Pesquisando...</p>";
+
+    try {
+        const inventario = await obterInventarioContagemManual();
+        const encontrados = inventario.filter(material => {
+            return normalizarTextoContagemManual(material.codigo).includes(busca) ||
+                normalizarTextoContagemManual(material.referencia).includes(busca) ||
+                normalizarTextoContagemManual(material.descricao).includes(busca);
+        }).slice(0, 50);
+
+        renderizarResultadosContagemManual(encontrados);
+    } catch (erro) {
+        console.error("Erro na busca da contagem manual:", erro);
+        area.innerHTML = "<p>Não foi possível consultar o inventário local. Sincronize ou importe o inventário e tente novamente.</p>";
+    }
+}
+
+function renderizarResultadosContagemManual(lista) {
+    const area = document.getElementById("resultadoBuscaContagemManual");
+    if (!area) return;
+    area.innerHTML = "";
+
+    if (!lista.length) {
+        area.innerHTML = "<p>Nenhum material encontrado.</p>";
+        return;
+    }
+
+    lista.forEach((material, indice) => {
+        const bloco = document.createElement("div");
+        bloco.className = "resultado-contagem-manual";
+
+        const titulo = document.createElement("h3");
+        titulo.textContent = material.descricao || "Material";
+        bloco.appendChild(titulo);
+
+        ["codigo", "referencia", "marca", "local", "quantidade"].forEach(campo => {
+            const p = document.createElement("p");
+            const nomes = {codigo:"Código", referencia:"Referência", marca:"Marca", local:"Local atual", quantidade:"Quantidade esperada"};
+            const strong = document.createElement("strong");
+            strong.textContent = nomes[campo] + ": ";
+            p.appendChild(strong);
+            p.appendChild(document.createTextNode(String(material[campo] ?? "-")));
+            bloco.appendChild(p);
+        });
+
+        const botao = document.createElement("button");
+        botao.type = "button";
+        botao.className = "botao-principal";
+        botao.textContent = "Contar este material";
+        botao.addEventListener("click", () => selecionarMaterialContagemManual(material));
+        bloco.appendChild(botao);
+
+        if (indice < lista.length - 1) bloco.appendChild(document.createElement("hr"));
+        area.appendChild(bloco);
+    });
+}
+
+function selecionarMaterialContagemManual(material) {
+    materialContagemManualSelecionado = material;
+
+    const painel = document.getElementById("painelRegistroContagemManual");
+    const resumo = document.getElementById("materialSelecionadoContagemManual");
+    const local = document.getElementById("localContagemManual");
+    const quantidade = document.getElementById("quantidadeContagemManual");
+    const status = document.getElementById("statusContagemManual");
+
+    if (resumo) {
+        resumo.textContent = (material.codigo || "-") + " — " + (material.descricao || "Material") +
+            " | Local inventário: " + (material.local || "-");
+    }
+    if (local) local.value = material.local || "";
+    if (quantidade) quantidade.value = "";
+    if (status) status.textContent = "";
+    if (painel) painel.style.display = "block";
+    if (local) local.focus();
+}
+
+function lerContagensManuais() {
+    try {
+        const dados = JSON.parse(localStorage.getItem(CHAVE_CONTAGENS_MANUAIS) || "[]");
+        return Array.isArray(dados) ? dados : [];
+    } catch (erro) {
+        console.error("Erro ao ler contagens manuais:", erro);
+        return [];
+    }
+}
+
+function gravarContagensManuais(lista) {
+    localStorage.setItem(CHAVE_CONTAGENS_MANUAIS, JSON.stringify(lista));
+}
+
+function salvarContagemManual() {
+    const material = materialContagemManualSelecionado;
+    const localCampo = document.getElementById("localContagemManual");
+    const quantidadeCampo = document.getElementById("quantidadeContagemManual");
+    const status = document.getElementById("statusContagemManual");
+
+    if (!material || !localCampo || !quantidadeCampo) return;
+
+    const localEncontrado = localCampo.value.trim();
+    const textoQuantidade = quantidadeCampo.value.trim();
+    const quantidadeFisica = Number(textoQuantidade);
+
+    if (!localEncontrado) {
+        if (status) status.textContent = "Informe o local encontrado.";
+        localCampo.focus();
+        return;
+    }
+
+    if (textoQuantidade === "" || !Number.isFinite(quantidadeFisica) || quantidadeFisica < 0 || !Number.isInteger(quantidadeFisica)) {
+        if (status) status.textContent = "Informe uma quantidade inteira igual ou maior que zero.";
+        quantidadeCampo.focus();
+        return;
+    }
+
+    const registro = {
+        id: (crypto.randomUUID ? crypto.randomUUID() : Date.now() + "-" + Math.random().toString(16).slice(2)),
+        idSupabase: material.idSupabase ?? material.id ?? null,
+        codigo: material.codigo ?? "",
+        referencia: material.referencia ?? "",
+        descricao: material.descricao ?? "",
+        marca: material.marca ?? "",
+        localOriginal: material.local ?? "",
+        localEncontrado,
+        quantidadeEsperada: Number(material.quantidade ?? 0),
+        quantidadeFisica,
+        localAlterado: normalizarTextoContagemManual(localEncontrado) !== normalizarTextoContagemManual(material.local),
+        zerado: quantidadeFisica === 0,
+        dataHora: new Date().toISOString(),
+        sincronizado: false
+    };
+
+    const lista = lerContagensManuais();
+    lista.unshift(registro);
+    gravarContagensManuais(lista);
+
+    if (status) status.textContent = "Contagem salva neste dispositivo.";
+    quantidadeCampo.value = "";
+    exibirContagensManuais();
+}
+
+function exibirContagensManuais() {
+    const area = document.getElementById("listaContagensManuais");
+    if (!area) return;
+
+    const lista = lerContagensManuais();
+    area.innerHTML = "";
+
+    if (!lista.length) {
+        area.innerHTML = "<p>Nenhuma contagem manual registrada.</p>";
+        return;
+    }
+
+    lista.slice(0, 100).forEach(registro => {
+        const bloco = document.createElement("div");
+        bloco.className = "registro-contagem-manual";
+
+        const titulo = document.createElement("h3");
+        titulo.textContent = registro.codigo + " — " + (registro.descricao || "Material");
+        bloco.appendChild(titulo);
+
+        const detalhes = document.createElement("p");
+        detalhes.textContent = "Local: " + registro.localOriginal + " → " + registro.localEncontrado +
+            " | Esperado: " + registro.quantidadeEsperada + " | Físico: " + registro.quantidadeFisica;
+        bloco.appendChild(detalhes);
+
+        const flags = document.createElement("p");
+        flags.textContent = (registro.localAlterado ? "LOCAL ALTERADO" : "LOCAL MANTIDO") +
+            (registro.zerado ? " • ITEM ZERADO" : "");
+        bloco.appendChild(flags);
+
+        area.appendChild(bloco);
+    });
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    const campo = document.getElementById("campoContagemManual");
+    if (campo) {
+        campo.addEventListener("keydown", function(evento) {
+            if (evento.key === "Enter") buscarMaterialContagemManual();
+        });
+    }
+    exibirContagensManuais();
+});
