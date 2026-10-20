@@ -227,6 +227,8 @@ async function exibirConferencias() {
         // EXIBIR CADA CONFERÊNCIA
         // ====================================================
 
+        const registrosHTML = [];
+
         conferencias.forEach(
             function (contagem) {
 
@@ -303,7 +305,7 @@ async function exibirConferencias() {
                 // ADICIONAR AO HISTÓRICO
                 // ============================================
 
-                areaResultado.innerHTML += `
+                registrosHTML.push(`
 
                     <div class="registro-conferencia">
 
@@ -357,6 +359,12 @@ async function exibirConferencias() {
                 `;
 
             }
+
+        );
+
+        areaResultado.insertAdjacentHTML(
+            "beforeend",
+            registrosHTML.join("")
         );
 
 
