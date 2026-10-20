@@ -1062,7 +1062,7 @@ async function pesquisarMaterialSelecionado() {
         } else {
             const coluna = tipo === "referencia" ? "referencia" : "descricao";
             consulta = consulta
-                .ilike(coluna, "%" + busca + "%", { escape: "\" })
+                .ilike(coluna, "%" + busca + "%", { escape: "\\" })
                 .order(coluna, { ascending: true });
         }
 
