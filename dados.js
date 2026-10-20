@@ -1243,7 +1243,7 @@ async function sincronizarMateriaisLocaisComSupabase(
                         "materiais"
                     )
                     .select(
-                        "*"
+                        "id,codigo,descricao,referencia,marca,local,quantidade,quantidade_reservada,disponivel,ultima_entrada"
                     )
                     .order(
                         "id",
