@@ -119,7 +119,6 @@ const itensMenuSistema = [
 const PMOBILE_LOGIN_STORAGE_KEY = "pmobile_login_persistente_v2";
 
 let usuarioPmobileCadastroSenha = null;
-let tokenPmobileCadastroSenha = null;
 
 const telasPesquisa = [
 
@@ -499,8 +498,6 @@ function sairPmobile() {
     }
 
     usuarioPmobileCadastroSenha = null;
-    tokenPmobileCadastroSenha = null;
-
     const criarSenha = document.getElementById("criarSenhaPmobile");
     if (criarSenha) {
         criarSenha.style.display = "none";
@@ -681,7 +678,6 @@ async function tentarRestaurarLoginPmobile() {
 function abrirCriacaoSenha(usuario, dadosUsuario) {
 
     usuarioPmobileCadastroSenha = usuario;
-    tokenPmobileCadastroSenha = true;
 
     const login = document.getElementById("loginPmobile");
     const criarSenha = document.getElementById("criarSenhaPmobile");
@@ -722,8 +718,6 @@ function abrirCriacaoSenha(usuario, dadosUsuario) {
 function voltarLoginCriacaoSenha() {
 
     usuarioPmobileCadastroSenha = null;
-    tokenPmobileCadastroSenha = null;
-
     const criarSenha = document.getElementById("criarSenhaPmobile");
     const login = document.getElementById("loginPmobile");
 
@@ -764,7 +758,7 @@ async function criarSenhaPmobile(event) {
     const senha = campoSenha ? campoSenha.value : "";
     const confirmar = campoConfirmar ? campoConfirmar.value : "";
 
-    if (!usuarioPmobileCadastroSenha || !tokenPmobileCadastroSenha) {
+    if (!usuarioPmobileCadastroSenha) {
         voltarLoginCriacaoSenha();
         mostrarStatusLogin(
             "A ativação deste usuário não está mais disponível.",
