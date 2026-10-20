@@ -962,9 +962,6 @@ BOTÕES PADRÃO
 ÁREAS DE RESULTADOS
    ============================================================ */
 
-#resultadoPesquisaCodigo,
-#resultadoPesquisaDescricao,
-#resultadoPesquisaReferencia,
 #resultadoConferencia,
 #resultadoConferencias,
 #resultadoDivergencias,
@@ -1418,79 +1415,6 @@ BOTÕES PADRÃO
 
     background:
         var(--fundo-ativo);
-
-}
-
-
-/* ============================================================
-   RESULTADOS DAS PESQUISAS
-   ============================================================ */
-
-#resultadoPesquisaCodigo hr,
-#resultadoPesquisaDescricao hr,
-#resultadoPesquisaReferencia hr {
-
-    margin:
-        16px 0 10px;
-
-    border:
-        0;
-
-    border-top:
-        1px solid
-        var(--borda-clara);
-
-}
-
-
-#resultadoPesquisaCodigo > div:first-child hr,
-#resultadoPesquisaDescricao > div:first-child hr,
-#resultadoPesquisaReferencia > div:first-child hr {
-
-    margin-top:
-        0;
-
-}
-
-
-#resultadoPesquisaCodigo h3,
-#resultadoPesquisaDescricao h3,
-#resultadoPesquisaReferencia h3 {
-
-    margin:
-        0 0 12px;
-
-    color:
-        #ffffff;
-
-    font-size:
-        14px;
-
-    font-weight:
-        600;
-
-}
-
-
-#resultadoPesquisaCodigo p,
-#resultadoPesquisaDescricao p,
-#resultadoPesquisaReferencia p {
-
-    margin:
-        7px 0;
-
-    line-height:
-        1.45;
-
-}
-
-
-#resultadoPesquisaCodigo strong,
-#resultadoPesquisaDescricao strong,
-#resultadoPesquisaReferencia strong {
-
-    color:
-        #ffffff;
 
 }
 
