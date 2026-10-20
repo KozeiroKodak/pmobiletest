@@ -2506,41 +2506,47 @@ BOTÕES PADRÃO
 
 
 /* ============================================================
-   STATUS SUPABASE — FAIXA DESLIZANTE INFINITA
+   STATUS SUPABASE — FAIXA VERTICAL
    ============================================================ */
 
 #statusSupabase {
     overflow: hidden;
-    justify-content: flex-start;
-    white-space: nowrap;
+    position: fixed;
 }
 
 #statusSupabase .statusSupabase-faixa {
-    display: inline-flex;
-    flex: 0 0 auto;
-    min-width: max-content;
-    padding-left: 100%;
-    animation: statusSupabaseDeslizar 18s linear infinite;
+    position: absolute;
+    top: 0;
+    right: 46px;
+    bottom: 0;
+    left: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    min-width: 0;
+    padding: 0;
+    animation: statusSupabaseSubir 18s linear infinite;
 }
 
 #statusSupabase .statusSupabase-faixa span {
-    display: inline-block;
+    display: block;
     flex: 0 0 auto;
-    min-width: max-content;
+    min-width: 0;
+    white-space: nowrap;
 }
 
-@keyframes statusSupabaseDeslizar {
+@keyframes statusSupabaseSubir {
     from {
-        transform: translateX(0);
+        transform: translateY(100%);
     }
     to {
-        transform: translateX(-100%);
+        transform: translateY(-100%);
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
     #statusSupabase .statusSupabase-faixa {
         animation: none;
-        padding-left: 14px;
+        transform: none;
     }
 }
