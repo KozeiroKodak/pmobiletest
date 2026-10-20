@@ -234,7 +234,7 @@ async function lerContagensManuais() {
 
         if (Array.isArray(antigas) && antigas.length) {
             await gravarContagensManuais(antigas);
-            await gravarContagensManuais([]);
+            localStorage.removeItem(CHAVE_CONTAGENS_MANUAIS);
             return antigas;
         }
 
@@ -336,7 +336,7 @@ async function limparContagensManuais() {
 
         if (error) throw error;
 
-        localStorage.removeItem(CHAVE_CONTAGENS_MANUAIS);
+        await gravarContagensManuais([]);
         materialContagemManualSelecionado = null;
 
         const painel = document.getElementById("painelRegistroContagemManual");
@@ -421,7 +421,7 @@ async function salvarContagemManual() {
 async function sincronizarContagensManuaisPendentes(limpezaEm = null) {
     if (!navigator.onLine || typeof obterClienteSupabase !== "function") return;
 
-    const lista = lerContagensManuais();
+    const lista = await lerContagensManuais();
 
     // Uma limpeza administrativa no servidor invalida qualquer
     // contagem offline que existia antes daquele momento.
@@ -484,7 +484,7 @@ async function sincronizarContagensManuaisPendentes(limpezaEm = null) {
     }
 
     if (alterou) {
-        gravarContagensManuais(listaFiltrada);
+        await gravarContagensManuais(listaFiltrada);
         exibirContagensManuais();
     }
 
