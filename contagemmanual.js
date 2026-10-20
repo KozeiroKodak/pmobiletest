@@ -360,10 +360,40 @@ async function baixarContagensManuaisSupabase() {
     }
 }
 
+let intervaloSincronizacaoContagensManuais = null;
+let sincronizacaoContagensManuaisEmAndamento = false;
+
 async function atualizarContagensManuais() {
-    await sincronizarContagensManuaisPendentes();
-    await baixarContagensManuaisSupabase();
-    exibirContagensManuais();
+    if (sincronizacaoContagensManuaisEmAndamento) return;
+    sincronizacaoContagensManuaisEmAndamento = true;
+
+    try {
+        await sincronizarContagensManuaisPendentes();
+        await baixarContagensManuaisSupabase();
+        exibirContagensManuais();
+
+        const status = document.getElementById("statusContagemManual");
+        if (status) {
+            const pendentes = lerContagensManuais().filter(item => !item.sincronizado).length;
+            status.textContent = pendentes
+                ? "Sincronização pendente — verificando novamente em 10 segundos."
+                : "Sincronizado com o Supabase.";
+        }
+    } finally {
+        sincronizacaoContagensManuaisEmAndamento = false;
+    }
+}
+
+function iniciarMonitoramentoContagensManuais() {
+    if (intervaloSincronizacaoContagensManuais) {
+        clearInterval(intervaloSincronizacaoContagensManuais);
+    }
+
+    intervaloSincronizacaoContagensManuais = setInterval(function() {
+        atualizarContagensManuais().catch(erro => {
+            console.warn("Verificação periódica das contagens manuais falhou:", erro);
+        });
+    }, 10000);
 }
 
 function exibirContagensManuais() {
@@ -428,4 +458,5 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     exibirContagensManuais();
     atualizarContagensManuais();
+    iniciarMonitoramentoContagensManuais();
 });
