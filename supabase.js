@@ -149,6 +149,211 @@ const SUPABASE_PUBLISHABLE_KEY =
 let statusSupabasePrioritario =
     false;
 
+// ============================================================
+// STATUS GERAL DE SINCRONIZAÇÃO DO PMOBILE
+// ============================================================
+//
+// O status visual da internet não faz consultas contínuas.
+// navigator.onLine não gera tráfego de rede.
+//
+// Uma verificação leve ("ping") ao Supabase é feita no máximo
+// uma vez por minuto para confirmar a conectividade real.
+// As próprias sincronizações também atualizam este estado.
+//
+// ============================================================
+
+const estadoSincronizacaoPmobile = {
+    inventario: true,
+    contagemManual: true,
+    conferencias: true,
+    divergencias: true,
+    aviso: false,
+    erro: false,
+    internetConfirmada: null
+};
+
+let ultimoPingInternetPmobile = 0;
+let pingInternetPmobileEmAndamento = false;
+
+function registrarStatusSincronizacaoPmobile(
+    modulo,
+    sincronizado,
+    erro = false
+) {
+    if (Object.prototype.hasOwnProperty.call(
+        estadoSincronizacaoPmobile,
+        modulo
+    )) {
+        estadoSincronizacaoPmobile[modulo] =
+            sincronizado === true;
+    }
+
+    if (erro === true) {
+        estadoSincronizacaoPmobile.erro = true;
+    }
+
+    atualizarStatusGeralPmobile();
+}
+
+function registrarAvisoPmobile(temAviso) {
+    estadoSincronizacaoPmobile.aviso =
+        temAviso === true;
+
+    atualizarStatusGeralPmobile();
+}
+
+function registrarErroPmobile(temErro) {
+    if (temErro === true) {
+        estadoSincronizacaoPmobile.erro = true;
+    } else {
+        estadoSincronizacaoPmobile.erro = false;
+    }
+
+    atualizarStatusGeralPmobile();
+}
+
+function todasSincronizacoesPmobileOk() {
+    return (
+        estadoSincronizacaoPmobile.inventario === true &&
+        estadoSincronizacaoPmobile.contagemManual === true &&
+        estadoSincronizacaoPmobile.conferencias === true &&
+        estadoSincronizacaoPmobile.divergencias === true
+    );
+}
+
+function atualizarStatusGeralPmobile() {
+    const online =
+        navigator.onLine === true &&
+        estadoSincronizacaoPmobile.internetConfirmada !== false;
+
+    const sincronizado =
+        todasSincronizacoesPmobileOk();
+
+    let mensagem;
+
+    if (online) {
+        mensagem =
+            sincronizado && !estadoSincronizacaoPmobile.aviso &&
+            !estadoSincronizacaoPmobile.erro
+                ? "Sincronizado - Ok"
+                : "Sincronizado - atenção";
+    } else {
+        if (sincronizado && !estadoSincronizacaoPmobile.aviso &&
+            !estadoSincronizacaoPmobile.erro) {
+            mensagem = "Offline - ok";
+        } else if (sincronizado && !estadoSincronizacaoPmobile.erro) {
+            mensagem = "Offline - atenção";
+        } else {
+            mensagem = "Offline - erro";
+        }
+    }
+
+    if (typeof mostrarStatusSupabase === "function") {
+        mostrarStatusSupabase(
+            mensagem,
+            true
+        );
+    }
+}
+
+async function verificarInternetPmobile(forcar = false) {
+    const agora = Date.now();
+
+    if (
+        !forcar &&
+        agora - ultimoPingInternetPmobile < 60000
+    ) {
+        atualizarStatusGeralPmobile();
+        return;
+    }
+
+    if (pingInternetPmobileEmAndamento) {
+        return;
+    }
+
+    if (navigator.onLine !== true) {
+        estadoSincronizacaoPmobile.internetConfirmada = false;
+        atualizarStatusGeralPmobile();
+        return;
+    }
+
+    pingInternetPmobileEmAndamento = true;
+    ultimoPingInternetPmobile = agora;
+
+    const controlador =
+        typeof AbortController === "function"
+            ? new AbortController()
+            : null;
+
+    const temporizador =
+        controlador
+            ? setTimeout(
+                function() {
+                    controlador.abort();
+                },
+                3000
+            )
+            : null;
+
+    try {
+        await fetch(
+            SUPABASE_URL + "/auth/v1/health",
+            {
+                method: "GET",
+                cache: "no-store",
+                credentials: "omit",
+                signal: controlador
+                    ? controlador.signal
+                    : undefined
+            }
+        );
+
+        estadoSincronizacaoPmobile.internetConfirmada = true;
+
+    } catch (erro) {
+        estadoSincronizacaoPmobile.internetConfirmada = false;
+    } finally {
+        if (temporizador) {
+            clearTimeout(temporizador);
+        }
+
+        pingInternetPmobileEmAndamento = false;
+        atualizarStatusGeralPmobile();
+    }
+}
+
+window.addEventListener(
+    "online",
+    function() {
+        estadoSincronizacaoPmobile.internetConfirmada = true;
+        verificarInternetPmobile(true);
+        atualizarStatusGeralPmobile();
+    }
+);
+
+window.addEventListener(
+    "offline",
+    function() {
+        estadoSincronizacaoPmobile.internetConfirmada = false;
+        atualizarStatusGeralPmobile();
+    }
+);
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+        verificarInternetPmobile(true);
+
+        setInterval(
+            function() {
+                verificarInternetPmobile(false);
+            },
+            60000
+        );
+    }
+);
+
+
 
 
 
@@ -837,9 +1042,8 @@ async function testarLeituraSupabase() {
             totalEncontrado === 0
         ) {
 
-            mostrarStatusSupabase(
-                "🟢 Sincronizado — 0 materiais"
-            );
+            registrarAvisoPmobile(false);
+            registrarStatusSincronizacaoPmobile("inventario", true);
 
             return;
 
@@ -862,13 +1066,8 @@ async function testarLeituraSupabase() {
             quantidadeErros === 0
         ) {
 
-            mostrarStatusSupabase(
-                "🟢 Sincronizado — " +
-                totalEncontrado.toLocaleString(
-                    "pt-BR"
-                ) +
-                " materiais"
-            );
+            registrarAvisoPmobile(false);
+            registrarStatusSincronizacaoPmobile("inventario", true);
 
 
             console.log(
@@ -1140,6 +1339,9 @@ async function testarLeituraSupabase() {
         //
         // ====================================================
 
+        registrarAvisoPmobile(quantidadeErros > 0);
+        registrarStatusSincronizacaoPmobile("inventario", true);
+
         mostrarErrosSupabase(
             erros,
             totalEncontrado,
@@ -1148,6 +1350,8 @@ async function testarLeituraSupabase() {
 
 
     } catch (erro) {
+
+        registrarStatusSincronizacaoPmobile("inventario", false, true);
 
         // ====================================================
         // ERRO DURANTE A VERIFICAÇÃO
