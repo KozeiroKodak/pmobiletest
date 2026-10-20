@@ -2190,10 +2190,19 @@ async function importarParaSupabase(
             typeof crypto !== "undefined" &&
             typeof crypto.randomUUID === "function"
                 ? crypto.randomUUID()
-                : (
-                    Date.now().toString(16) +
-                    "-" +
-                    Math.random().toString(16).slice(2)
+                : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
+                    /[xy]/g,
+                    function (caractere) {
+                        const aleatorio =
+                            Math.random() * 16 | 0;
+
+                        const valor =
+                            caractere === "x"
+                                ? aleatorio
+                                : (aleatorio & 0x3 | 0x8);
+
+                        return valor.toString(16);
+                    }
                 );
 
         const tamanhoLote =
