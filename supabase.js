@@ -213,6 +213,8 @@ function registrarErroPmobile(temErro) {
 }
 
 async function avaliarSincronizacoesPmobile() {
+    estadoSincronizacaoPmobile.erro = false;
+
     try {
         if (typeof obterDataUltimaSincronizacao === "function") {
             estadoSincronizacaoPmobile.inventario =
