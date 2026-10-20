@@ -1876,7 +1876,7 @@ async function sincronizarConferenciasPendentes() {
         );
 
         mostrarStatusSincronizacaoConferencias(
-            "📴 Offline — sincronização de conferências aguardando conexão."
+            "🟡 Sincronização aguardando conexão com o Supabase."
         );
 
         return;
