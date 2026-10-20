@@ -401,46 +401,214 @@ function sanitizarCampoUsuarioPmobile(campo) {
 
 }
 
-function salvarLoginPmobile(usuario, senha, dadosUsuario) {
+// ============================================================
+// SESSÃO PERSISTENTE LOCAL — INDEXEDDB
+// ============================================================
+//
+// O login mantido não depende de localStorage.
+// A sessão é armazenada em uma base local persistente,
+// apropriada para o web layer do PMOBILE.
+//
+// ============================================================
 
-    try {
-        localStorage.setItem(
-            PMOBILE_LOGIN_STORAGE_KEY,
-            JSON.stringify({
-                usuario: usuario,
-                senha: senha,
-                dadosUsuario: dadosUsuario,
-                salvoEm: new Date().toISOString()
-            })
-        );
-    } catch (erro) {
-        console.warn("⚠️ Não foi possível salvar o login:", erro);
-    }
-
-}
+const PMOBILE_IDB_NOME = "PMOBILE_LOCAL";
+const PMOBILE_IDB_VERSAO = 1;
+const PMOBILE_IDB_STORE = "sessao";
+const PMOBILE_IDB_CHAVE_LOGIN = "login";
 
 
-function limparLoginPmobileSalvo() {
+function abrirBancoLocalPmobile() {
 
-    try {
-        localStorage.removeItem(PMOBILE_LOGIN_STORAGE_KEY);
-    } catch (erro) {
-        console.warn("⚠️ Não foi possível remover o login salvo:", erro);
-    }
+    return new Promise(function(resolve, reject) {
 
-}
-
-
-function obterLoginPmobileSalvo() {
-
-    try {
-        const salvo = localStorage.getItem(PMOBILE_LOGIN_STORAGE_KEY);
-
-        if (!salvo) {
-            return null;
+        if (!window.indexedDB) {
+            reject(new Error("IndexedDB indisponível neste dispositivo."));
+            return;
         }
 
-        const dados = JSON.parse(salvo);
+        const requisicao =
+            window.indexedDB.open(
+                PMOBILE_IDB_NOME,
+                PMOBILE_IDB_VERSAO
+            );
+
+        requisicao.onupgradeneeded = function(evento) {
+
+            const banco = evento.target.result;
+
+            if (!banco.objectStoreNames.contains(PMOBILE_IDB_STORE)) {
+                banco.createObjectStore(PMOBILE_IDB_STORE);
+            }
+
+        };
+
+        requisicao.onsuccess = function() {
+            resolve(requisicao.result);
+        };
+
+        requisicao.onerror = function() {
+            reject(requisicao.error || new Error("Não foi possível abrir o armazenamento local."));
+        };
+
+    });
+
+}
+
+
+async function salvarLoginPmobile(usuario, senha, dadosUsuario) {
+
+    try {
+
+        const banco =
+            await abrirBancoLocalPmobile();
+
+        await new Promise(function(resolve, reject) {
+
+            const transacao =
+                banco.transaction(
+                    PMOBILE_IDB_STORE,
+                    "readwrite"
+                );
+
+            const loja =
+                transacao.objectStore(
+                    PMOBILE_IDB_STORE
+                );
+
+            loja.put(
+                {
+                    usuario: usuario,
+                    senha: senha,
+                    dadosUsuario: dadosUsuario,
+                    salvoEm: new Date().toISOString()
+                },
+                PMOBILE_IDB_CHAVE_LOGIN
+            );
+
+            transacao.oncomplete = resolve;
+            transacao.onerror = function() {
+                reject(
+                    transacao.error ||
+                    new Error("Não foi possível salvar a sessão.")
+                );
+            };
+            transacao.onabort = function() {
+                reject(
+                    transacao.error ||
+                    new Error("A gravação da sessão foi cancelada.")
+                );
+            };
+
+        });
+
+        banco.close();
+
+    } catch (erro) {
+
+        console.warn(
+            "⚠️ Não foi possível salvar o login local:",
+            erro
+        );
+
+    }
+
+}
+
+
+async function limparLoginPmobileSalvo() {
+
+    try {
+
+        const banco =
+            await abrirBancoLocalPmobile();
+
+        await new Promise(function(resolve, reject) {
+
+            const transacao =
+                banco.transaction(
+                    PMOBILE_IDB_STORE,
+                    "readwrite"
+                );
+
+            const loja =
+                transacao.objectStore(
+                    PMOBILE_IDB_STORE
+                );
+
+            loja.delete(
+                PMOBILE_IDB_CHAVE_LOGIN
+            );
+
+            transacao.oncomplete = resolve;
+            transacao.onerror = function() {
+                reject(
+                    transacao.error ||
+                    new Error("Não foi possível remover a sessão.")
+                );
+            };
+            transacao.onabort = function() {
+                reject(
+                    transacao.error ||
+                    new Error("A remoção da sessão foi cancelada.")
+                );
+            };
+
+        });
+
+        banco.close();
+
+    } catch (erro) {
+
+        console.warn(
+            "⚠️ Não foi possível remover o login salvo:",
+            erro
+        );
+
+    }
+
+}
+
+
+async function obterLoginPmobileSalvo() {
+
+    try {
+
+        const banco =
+            await abrirBancoLocalPmobile();
+
+        const dados =
+            await new Promise(function(resolve, reject) {
+
+                const transacao =
+                    banco.transaction(
+                        PMOBILE_IDB_STORE,
+                        "readonly"
+                    );
+
+                const loja =
+                    transacao.objectStore(
+                        PMOBILE_IDB_STORE
+                    );
+
+                const requisicao =
+                    loja.get(
+                        PMOBILE_IDB_CHAVE_LOGIN
+                    );
+
+                requisicao.onsuccess = function() {
+                    resolve(requisicao.result || null);
+                };
+
+                requisicao.onerror = function() {
+                    reject(
+                        requisicao.error ||
+                        new Error("Não foi possível ler a sessão.")
+                    );
+                };
+
+            });
+
+        banco.close();
 
         if (
             !dados ||
@@ -448,16 +616,20 @@ function obterLoginPmobileSalvo() {
             !dados.senha ||
             !dados.dadosUsuario
         ) {
-            limparLoginPmobileSalvo();
             return null;
         }
 
         return dados;
 
     } catch (erro) {
-        console.warn("⚠️ Login salvo inválido:", erro);
-        limparLoginPmobileSalvo();
+
+        console.warn(
+            "⚠️ Login local indisponível:",
+            erro
+        );
+
         return null;
+
     }
 
 }
@@ -541,7 +713,7 @@ async function tentarRestaurarLoginPmobile() {
         }
 
         restaurarSessaoPmobile(usuarioValidado, salvo.senha);
-        salvarLoginPmobile(salvo.usuario, salvo.senha, usuarioValidado);
+        await salvarLoginPmobile(salvo.usuario, salvo.senha, usuarioValidado);
 
         console.log("✅ Login mantido e validado pelo servidor.");
 
@@ -730,7 +902,7 @@ async function criarSenhaPmobile(event) {
         window.credencialPmobileAtual = senha;
 
         if (manterLogin && manterLogin.checked) {
-            salvarLoginPmobile(
+            await salvarLoginPmobile(
                 usuarioCriado.usuario,
                 senha,
                 usuarioCriado
@@ -990,7 +1162,7 @@ async function entrarInterface(event) {
             document.getElementById("loginManterLogin");
 
         if (manterLogin && manterLogin.checked) {
-            salvarLoginPmobile(
+            await salvarLoginPmobile(
                 usuario,
                 senha,
                 usuarioAutenticado
