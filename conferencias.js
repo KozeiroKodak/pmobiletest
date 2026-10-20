@@ -1316,10 +1316,20 @@ async function sincronizarConferenciasAutomaticamente() {
         snapshotConferenciasSupabase =
             snapshot;
 
+        const totalMateriais =
+            Number(
+                window.totalMateriaisSupabaseVerificados ?? 0
+            );
+
+        const textoStatus =
+            totalMateriais > 0
+                ? "🟢 Sincronizado — " +
+                  totalMateriais.toLocaleString("pt-BR") +
+                  " materiais"
+                : "🟢 Sincronizado";
+
         mostrarStatusSupabase(
-            "🟢 Sincronizado — " +
-            snapshot.quantidade.toLocaleString("pt-BR") +
-            " conferência(s)"
+            textoStatus
         );
 
     } catch (erro) {
@@ -1487,7 +1497,7 @@ async function salvarConferenciaSupabase(
                     .from("conferencias")
 
                     .select(
-                        "id,conferencia_id,material_id,codigo_material,descricao_material,referencia_material,quantidade_esperada,quantidade_fisica,diferenca,status,usuario_id,criado_em"
+                        "id,conferencia_id,material_id,codigo_material,descricao_material,referencia_material,quantidade_esperada,quantidade_fisica,diferenca,status,usuario_id,usuario_nome,criado_em"
                     )
 
                     .eq(
