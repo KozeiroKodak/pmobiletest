@@ -177,53 +177,45 @@ async function pesquisarLocalmente(
         // FILTRAR RESULTADOS
         // =====================================
 
-        return materiaisLocais.filter(
-            function(material) {
+        const resultados = [];
 
-                if (!material) {
-                    return false;
-                }
+        for (
+            let indice = 0;
+            indice < materiaisLocais.length &&
+            resultados.length < 100;
+            indice++
+        ) {
 
+            const material =
+                materiaisLocais[indice];
 
-                let valorCampo = "";
-
-
-                if (
-                    campoPesquisa === "codigo"
-                ) {
-
-                    valorCampo =
-                        material.codigo ?? "";
-
-                }
-
-
-                if (
-                    campoPesquisa === "descricao"
-                ) {
-
-                    valorCampo =
-                        material.descricao ?? "";
-
-                }
-
-
-                if (
-                    campoPesquisa === "referencia"
-                ) {
-
-                    valorCampo =
-                        material.referencia ?? "";
-
-                }
-
-
-                return String(valorCampo)
-                    .toLowerCase()
-                    .includes(busca);
-
+            if (!material) {
+                continue;
             }
-        ).slice(0, 100);
+
+            let valorCampo = "";
+
+            if (campoPesquisa === "codigo") {
+                valorCampo =
+                    material.codigo ?? "";
+            } else if (campoPesquisa === "descricao") {
+                valorCampo =
+                    material.descricao ?? "";
+            } else if (campoPesquisa === "referencia") {
+                valorCampo =
+                    material.referencia ?? "";
+            }
+
+            if (
+                String(valorCampo)
+                    .toLowerCase()
+                    .includes(busca)
+            ) {
+                resultados.push(material);
+            }
+        }
+
+        return resultados;
 
 
     } catch (erro) {
