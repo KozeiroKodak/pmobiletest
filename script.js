@@ -412,8 +412,9 @@ function sanitizarCampoUsuarioPmobile(campo) {
 // ============================================================
 
 const PMOBILE_IDB_NOME = "PMOBILE_LOCAL";
-const PMOBILE_IDB_VERSAO = 1;
+const PMOBILE_IDB_VERSAO = 2;
 const PMOBILE_IDB_STORE = "sessao";
+const PMOBILE_IDB_STORE_CONTAGENS_MANUAIS = "contagensManuais";
 const PMOBILE_IDB_CHAVE_LOGIN = "login";
 
 
@@ -438,6 +439,12 @@ function abrirBancoLocalPmobile() {
 
             if (!banco.objectStoreNames.contains(PMOBILE_IDB_STORE)) {
                 banco.createObjectStore(PMOBILE_IDB_STORE);
+            }
+
+            if (!banco.objectStoreNames.contains(PMOBILE_IDB_STORE_CONTAGENS_MANUAIS)) {
+                banco.createObjectStore(PMOBILE_IDB_STORE_CONTAGENS_MANUAIS, {
+                    keyPath: "id"
+                });
             }
 
         };
@@ -662,7 +669,7 @@ function restaurarSessaoPmobile(dadosUsuario, senha) {
 async function tentarRestaurarLoginPmobile() {
 
     const checkbox = document.getElementById("loginManterLogin");
-    const salvo = obterLoginPmobileSalvo();
+    const salvo = await obterLoginPmobileSalvo();
 
     if (checkbox) {
         checkbox.checked = !!salvo;
@@ -2379,7 +2386,7 @@ async function confirmarZeramento(
 // ============================================================
 //
 // Executada depois que todo o web layer foi carregado.
-// O localStorage permanece mesmo após:
+// O IndexedDB permanece mesmo após:
 //
 // - fechar o aplicativo;
 // - reiniciar o aparelho;
