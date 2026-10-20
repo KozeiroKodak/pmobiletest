@@ -337,9 +337,28 @@ async function baixarContagensManuaisSupabase() {
     if (!navigator.onLine || typeof obterClienteSupabase !== "function") return;
     try {
         const cliente = obterClienteSupabase();
-        const { data, error } = await cliente.from(TABELA_CONTAGENS_MANUAIS_SUPABASE)
-            .select("*").order("data_hora", { ascending: false }).limit(1000);
-        if (error) throw error;
+        const tamanhoPagina = 1000;
+        let inicio = 0;
+        let dados = [];
+
+        while (true) {
+            const fim = inicio + tamanhoPagina - 1;
+
+            const { data, error } = await cliente
+                .from(TABELA_CONTAGENS_MANUAIS_SUPABASE)
+                .select("*")
+                .order("data_hora", { ascending: false })
+                .range(inicio, fim);
+
+            if (error) throw error;
+
+            const pagina = Array.isArray(data) ? data : [];
+            dados = dados.concat(pagina);
+
+            if (pagina.length < tamanhoPagina) break;
+            inicio += tamanhoPagina;
+        }
+
         // O Supabase é a fonte oficial.
         // Somente registros locais ainda pendentes são preservados.
         // Registros já sincronizados que não existem mais no Supabase
@@ -350,7 +369,7 @@ async function baixarContagensManuaisSupabase() {
             pendentesLocais.map(item => [String(item.id), item])
         );
 
-        (data || []).forEach(item => {
+        dados.forEach(item => {
             porId.set(String(item.id), {
                 id: item.id,
                 idSupabase: item.material_id ?? null,
