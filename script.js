@@ -658,6 +658,134 @@ function avisoLoginTeste() {
 
 
 // ============================================================
+// SOLICITAÇÃO DE NOVO USUÁRIO
+// ============================================================
+
+function abrirSolicitacaoCadastro() {
+
+    const modal = document.getElementById("modalSolicitacaoCadastro");
+    const status = document.getElementById("cadastroStatus");
+
+    if (modal) {
+        modal.style.display = "flex";
+    }
+
+    if (status) {
+        status.textContent = "";
+        status.classList.remove("erro");
+    }
+
+    const nome = document.getElementById("cadastroNome");
+    if (nome) {
+        setTimeout(function() {
+            nome.focus();
+        }, 0);
+    }
+
+}
+
+
+function fecharSolicitacaoCadastro() {
+
+    const modal = document.getElementById("modalSolicitacaoCadastro");
+
+    if (modal) {
+        modal.style.display = "none";
+    }
+
+}
+
+
+function mostrarStatusCadastro(mensagem, erro = false) {
+
+    const status = document.getElementById("cadastroStatus");
+
+    if (!status) {
+        return;
+    }
+
+    status.textContent = mensagem;
+    status.classList.toggle("erro", erro);
+
+}
+
+
+async function enviarSolicitacaoCadastro(event) {
+
+    if (event) {
+        event.preventDefault();
+    }
+
+    const campoNome = document.getElementById("cadastroNome");
+    const campoUsuario = document.getElementById("cadastroUsuario");
+
+    const nome = campoNome ? campoNome.value.trim() : "";
+    const usuario = campoUsuario ? campoUsuario.value.trim() : "";
+
+    if (!nome || !usuario) {
+        mostrarStatusCadastro("Informe o nome e o usuário desejado.", true);
+        return;
+    }
+
+    if (!window.clienteSupabase) {
+        mostrarStatusCadastro("Não foi possível conectar ao servidor.", true);
+        return;
+    }
+
+    mostrarStatusCadastro("Enviando solicitação...");
+
+    try {
+
+        const { data, error } = await window.clienteSupabase.rpc(
+            "solicitar_cadastro_usuario",
+            {
+                p_nome: nome,
+                p_usuario: usuario
+            }
+        );
+
+        if (error) {
+            console.error("❌ Erro na solicitação de cadastro:", error);
+            mostrarStatusCadastro(
+                error.message || "Não foi possível enviar a solicitação.",
+                true
+            );
+            return;
+        }
+
+        const solicitacao = Array.isArray(data) ? data[0] : data;
+
+        if (!solicitacao) {
+            mostrarStatusCadastro("Não foi possível registrar a solicitação.", true);
+            return;
+        }
+
+        mostrarStatusCadastro(
+            "Solicitação enviada. Aguarde a aprovação do administrador."
+        );
+
+        if (campoNome) {
+            campoNome.value = "";
+        }
+
+        if (campoUsuario) {
+            campoUsuario.value = "";
+        }
+
+    } catch (erro) {
+
+        console.error("❌ Falha na solicitação de cadastro:", erro);
+        mostrarStatusCadastro(
+            "Erro ao enviar a solicitação. Tente novamente.",
+            true
+        );
+
+    }
+
+}
+
+
+// ============================================================
 // PESQUISA
 // ============================================================
 //
