@@ -35,6 +35,45 @@ function mostrarOpcoesCurtasContagemManual(seletor) {
     });
 }
 
+function alternarSeletorContagemManual() {
+    const menu = document.getElementById("menuTipoBuscaContagemManual");
+    const botao = document.getElementById("botaoTipoBuscaContagemManual");
+    if (!menu || !botao) return;
+
+    const aberto = menu.style.display !== "none";
+    menu.style.display = aberto ? "none" : "block";
+    botao.setAttribute("aria-expanded", aberto ? "false" : "true");
+}
+
+function selecionarTipoBuscaContagemManual(tipo) {
+    const seletor = document.getElementById("tipoBuscaContagemManual");
+    const botao = document.getElementById("botaoTipoBuscaContagemManual");
+    const menu = document.getElementById("menuTipoBuscaContagemManual");
+    if (!seletor || !botao || !menu) return;
+
+    const nomesCurtos = {
+        codigo: "CÓD",
+        referencia: "REF",
+        descricao: "DESC"
+    };
+
+    seletor.value = tipo;
+    botao.textContent = nomesCurtos[tipo] || "CÓD";
+    menu.style.display = "none";
+    botao.setAttribute("aria-expanded", "false");
+}
+
+document.addEventListener("click", function(evento) {
+    const menu = document.getElementById("menuTipoBuscaContagemManual");
+    const botao = document.getElementById("botaoTipoBuscaContagemManual");
+    const wrapper = botao?.closest(".seletor-contagem-manual-wrapper");
+
+    if (menu && wrapper && !wrapper.contains(evento.target)) {
+        menu.style.display = "none";
+        botao.setAttribute("aria-expanded", "false");
+    }
+});
+
 function normalizarTextoContagemManual(valor) {
     return String(valor ?? "").trim().toLowerCase();
 }
