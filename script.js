@@ -14,13 +14,10 @@
 //
 // Somente o conteúdo localizado à direita da sidebar muda.
 //
-// A tela Pesquisa possui também navegação interna:
+// A tela Pesquisa utiliza uma interface unificada:
 //
 // Pesquisa
-// ├── Menu de pesquisa
-// ├── Pesquisa por código
-// ├── Pesquisa por descrição
-// └── Pesquisa por referência
+// └── Código / Referência / Descrição
 //
 // A lógica específica de:
 //
@@ -248,99 +245,6 @@ function mostrarTelaSistema(
             );
 
         }
-
-    }
-
-}
-
-
-// ============================================================
-// FUNÇÃO: esconderTelasPesquisa()
-// ============================================================
-//
-// OBJETIVO:
-//
-// Esconder todas as áreas internas da Pesquisa.
-//
-// Esta função NÃO fecha a tela principal #pesquisa.
-//
-// Dessa forma, a sidebar continua mostrando:
-//
-//     Pesquisar material
-//
-// como item ativo.
-//
-// ============================================================
-
-function esconderTelasPesquisa() {
-
-    telasPesquisa.forEach(
-
-        function(idTela) {
-
-            const tela =
-                document.getElementById(
-                    idTela
-                );
-
-
-            if (tela) {
-
-                tela.style.display =
-                    "none";
-
-            }
-
-        }
-
-    );
-
-}
-
-
-// ============================================================
-// FUNÇÃO: mostrarTelaPesquisa()
-// ============================================================
-//
-// OBJETIVO:
-//
-// Controlar exclusivamente a navegação interna do módulo
-// Pesquisa.
-//
-// PARÂMETRO:
-//
-// idTela
-//     Área interna que deverá ser mostrada.
-//
-// FUNCIONAMENTO:
-//
-// 1. Esconde todas as áreas internas.
-// 2. Localiza a área solicitada.
-// 3. Mostra somente essa área.
-//
-// IMPORTANTE:
-//
-// Esta função NÃO altera a sidebar.
-//
-// ============================================================
-
-function mostrarTelaPesquisa(
-    idTela
-) {
-
-    esconderTelasPesquisa();
-
-
-    const tela =
-        document.getElementById(
-            idTela
-        );
-
-
-    if (tela) {
-
-        tela.style.display =
-            "block";
 
     }
 
@@ -2215,8 +2119,8 @@ async function confirmarZeramento(
 
             }
 
-            // Pesquisa: primeiro volta das subtelas
-            // para o menu interno.
+            // Pesquisa: como existe uma única tela de pesquisa,
+            // o botão Voltar retorna diretamente para Home.
             const pesquisa =
                 document.getElementById(
                     "pesquisa"
@@ -2226,38 +2130,6 @@ async function confirmarZeramento(
                 pesquisa &&
                 pesquisa.style.display !== "none"
             ) {
-
-                const menuInterno =
-                    document.getElementById(
-                        "menuPesquisaInterno"
-                    );
-
-                const subtelas =
-                    [
-                        "pesquisaCodigo",
-                        "pesquisaDescricao",
-                        "pesquisaReferencia"
-                    ];
-
-                const subtelaAberta =
-                    subtelas.some(
-                        function(id) {
-
-                            const tela =
-                                document.getElementById(id);
-
-                            return tela &&
-                                tela.style.display !== "none";
-
-                        }
-                    );
-
-                if (subtelaAberta) {
-
-                    voltarPesquisa();
-                    return;
-
-                }
 
                 voltarMenu();
                 return;
