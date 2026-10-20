@@ -444,6 +444,7 @@ function abrirSistema() {
 // ============================================================
 
 let usuarioPmobileAtual = null;
+let tokenPmobileAtual = null;
 
 
 function voltarInicio() {
@@ -606,6 +607,10 @@ async function entrarInterface(event) {
 
         window.usuarioPmobileAtual =
             usuarioAutenticado;
+
+        tokenPmobileAtual = token;
+
+        atualizarVisibilidadeConfiguracoes();
 
         atualizarVisibilidadeConfiguracoes();
 
@@ -1315,13 +1320,25 @@ function voltarMenuImportacao() {
 
 function atualizarVisibilidadeConfiguracoes() {
 
-    const botao = document.getElementById("menuConfiguracoes");
-    if (!botao) return;
-
     const usuario = window.usuarioPmobileAtual;
-    const isAdmin = usuario && usuario.nivel === "ADMIN";
+    const nivel = usuario ? usuario.nivel : null;
+    const isAdmin = nivel === "ADMIN";
+    const isNivel2 = nivel === "NIVEL2";
 
-    botao.style.display = isAdmin ? "" : "none";
+    const regras = {
+        menuConfiguracoes: isAdmin,
+        menuImportacao: isAdmin,
+        menuConferencia: isAdmin,
+        menuConferencias: isAdmin,
+        menuPesquisa: isAdmin || isNivel2,
+        menuContagemManual: isAdmin || isNivel2,
+        menuDivergencias: isAdmin || isNivel2
+    };
+
+    Object.keys(regras).forEach(function(id) {
+        const botao = document.getElementById(id);
+        if (botao) botao.style.display = regras[id] ? "" : "none";
+    });
 
 }
 
@@ -1366,15 +1383,133 @@ function abrirManutencaoBanco() {
 }
 
 
-function abrirGerenciamentoUsuarios() {
+async function abrirGerenciamentoUsuarios() {
 
-    if (!window.usuarioPmobileAtual || window.usuarioPmobileAtual.nivel !== "ADMIN") {
+    if (!window.usuarioPmobileAtual || window.usuarioPmobileAtual.nivel !== "ADMIN" || !tokenPmobileAtual) {
         alert("Acesso administrativo negado.");
         return;
     }
 
-    alert("Gerenciamento de usuários será conectado às solicitações de cadastro na próxima etapa.");
+    const painel = document.getElementById("painelGerenciamentoUsuarios");
+    const manutencao = document.getElementById("painelConfiguracoesManutencao");
+    const reset = document.getElementById("painelGerenciamentoReset");
+    const lista = document.getElementById("listaSolicitacoesCadastro");
 
+    if (painel) painel.style.display = "block";
+    if (manutencao) manutencao.style.display = "none";
+    if (reset) reset.style.display = "none";
+    if (!lista) return;
+
+    lista.innerHTML = "<p>Carregando solicitações...</p>";
+
+    try {
+        const { data, error } = await window.clienteSupabase.rpc("listar_solicitacoes_cadastro", {
+            p_admin_usuario: window.usuarioPmobileAtual.usuario,
+            p_admin_token: tokenPmobileAtual
+        });
+
+        if (error) throw error;
+
+        const solicitacoes = Array.isArray(data) ? data : [];
+        const pendentes = solicitacoes.filter(function(s) { return s.status === "PENDENTE"; });
+
+        if (!pendentes.length) {
+            lista.innerHTML = "<p>Nenhuma solicitação de cadastro pendente.</p>";
+            return;
+        }
+
+        lista.innerHTML = pendentes.map(function(solicitacao) {
+            return '<div class="solicitacao-usuario-card">' +
+                '<strong>' + escapeHtmlPmobile(solicitacao.nome) + '</strong>' +
+                '<span>Usuário: ' + escapeHtmlPmobile(solicitacao.usuario) + '</span>' +
+                '<small>Solicitado em: ' + escapeHtmlPmobile(solicitacao.solicitado_em || "") + '</small>' +
+                '<label>Nível de acesso</label>' +
+                '<select id="nivelSolicitacao_' + solicitacao.id + '" class="seletor-nivel-usuario">' +
+                    '<option value="NIVEL2">Nível 2 — Pesquisa, Contagem manual e Divergências</option>' +
+                    '<option value="ADMIN">Administrativo — acesso total</option>' +
+                '</select>' +
+                '<div class="solicitacao-usuario-acoes">' +
+                    '<button class="botao-principal" onclick="aprovarCadastroUsuario(' + solicitacao.id + ')">✓ Aprovar</button>' +
+                    '<button class="botao-perigo" onclick="recusarCadastroUsuario(' + solicitacao.id + ')">✕ Recusar</button>' +
+                '</div>' +
+            '</div>';
+        }).join("");
+
+    } catch (erro) {
+        console.error("Erro ao listar solicitações:", erro);
+        lista.innerHTML = "<p class=\"erro\">Não foi possível carregar as solicitações.</p>";
+    }
+
+}
+
+
+async function aprovarCadastroUsuario(solicitacaoId) {
+
+    if (!window.usuarioPmobileAtual || window.usuarioPmobileAtual.nivel !== "ADMIN" || !tokenPmobileAtual) return;
+
+    const seletor = document.getElementById("nivelSolicitacao_" + solicitacaoId);
+    const nivel = seletor ? seletor.value : "NIVEL2";
+
+    if (!confirm("Aprovar este usuário como " + (nivel === "ADMIN" ? "ADMINISTRATIVO" : "NÍVEL 2") + "?")) return;
+
+    try {
+        const { data, error } = await window.clienteSupabase.rpc("aprovar_solicitacao_cadastro", {
+            p_admin_usuario: window.usuarioPmobileAtual.usuario,
+            p_admin_token: tokenPmobileAtual,
+            p_solicitacao_id: solicitacaoId,
+            p_nivel: nivel
+        });
+
+        if (error) throw error;
+
+        const usuarioCriado = Array.isArray(data) ? data[0] : data;
+        if (!usuarioCriado) throw new Error("O servidor não retornou o novo usuário.");
+
+        alert("Usuário aprovado!\\n\\nUsuário: " + usuarioCriado.usuario +
+            "\\nNível: " + usuarioCriado.nivel +
+            "\\n\\nTOKEN DE ACESSO (copie agora):\\n" + usuarioCriado.token);
+
+        await abrirGerenciamentoUsuarios();
+
+    } catch (erro) {
+        console.error("Erro ao aprovar usuário:", erro);
+        alert(erro.message || "Não foi possível aprovar o usuário.");
+    }
+
+}
+
+
+async function recusarCadastroUsuario(solicitacaoId) {
+
+    if (!window.usuarioPmobileAtual || window.usuarioPmobileAtual.nivel !== "ADMIN" || !tokenPmobileAtual) return;
+    if (!confirm("Recusar esta solicitação de cadastro?")) return;
+
+    try {
+        const { error } = await window.clienteSupabase.rpc("recusar_solicitacao_cadastro", {
+            p_admin_usuario: window.usuarioPmobileAtual.usuario,
+            p_admin_token: tokenPmobileAtual,
+            p_solicitacao_id: solicitacaoId,
+            p_motivo: "Recusada pelo administrador"
+        });
+
+        if (error) throw error;
+        await abrirGerenciamentoUsuarios();
+
+    } catch (erro) {
+        console.error("Erro ao recusar usuário:", erro);
+        alert(erro.message || "Não foi possível recusar a solicitação.");
+    }
+
+}
+
+
+function escapeHtmlPmobile(valor) {
+    return String(valor == null ? "" : valor)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
 
 
