@@ -46,6 +46,73 @@
 </div>
 
 
+
+<!-- =========================================================
+     LOGIN — INTERFACE INICIAL
+     Referência de UX: tela de acesso D4swing
+     ========================================================= -->
+
+<div id="loginPmobile" class="login-pmobile" style="display: none;">
+
+    <div class="login-pmobile-topo">
+        <button type="button" class="login-voltar" onclick="voltarInicio()" aria-label="Voltar">‹</button>
+        <strong>PMOBILE</strong>
+        <span class="login-topo-espaco"></span>
+    </div>
+
+    <div class="login-pmobile-corpo">
+
+        <div class="login-pmobile-marca">
+            <div class="login-pmobile-logo">P</div>
+            <h1>Entrar</h1>
+            <p>Acesse o PMOBILE para continuar.</p>
+        </div>
+
+        <form class="login-pmobile-form" onsubmit="entrarInterface(event)">
+
+            <label for="loginUsuario">Usuário</label>
+            <input
+                type="text"
+                id="loginUsuario"
+                name="usuario"
+                placeholder="Usuário"
+                autocomplete="username"
+            >
+
+            <label for="loginSenha">Senha</label>
+            <div class="login-senha-campo">
+                <input
+                    type="password"
+                    id="loginSenha"
+                    name="senha"
+                    placeholder="Senha"
+                    autocomplete="current-password"
+                >
+                <button
+                    type="button"
+                    class="login-mostrar-senha"
+                    onclick="alternarSenhaLogin()"
+                    aria-label="Mostrar ou ocultar senha"
+                >Mostrar</button>
+            </div>
+
+            <button type="submit" class="login-entrar">ENTRAR</button>
+
+            <button
+                type="button"
+                class="login-esqueceu"
+                onclick="avisoLoginTeste()"
+            >Esqueceu sua senha?</button>
+
+        </form>
+
+        <p id="loginStatus" class="login-status" aria-live="polite"></p>
+
+    </div>
+
+</div>
+
+
 <!-- =========================================================
      APLICAÇÃO
      ========================================================= -->

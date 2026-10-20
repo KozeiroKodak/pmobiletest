@@ -398,50 +398,108 @@ function mostrarTelaPesquisa(
 
 function abrirSistema() {
 
-    const inicio =
-        document.getElementById(
-            "inicio"
-        );
-
-
-    const aplicacao =
-        document.getElementById(
-            "aplicacao"
-        );
-
-
-    // ========================================================
-    // ESCONDER TELA INICIAL
-    // ========================================================
+    const inicio = document.getElementById("inicio");
+    const login = document.getElementById("loginPmobile");
+    const aplicacao = document.getElementById("aplicacao");
 
     if (inicio) {
-
-        inicio.style.display =
-            "none";
-
+        inicio.style.display = "none";
     }
-
-
-    // ========================================================
-    // MOSTRAR APLICAÇÃO
-    // ========================================================
 
     if (aplicacao) {
-
-        aplicacao.style.display =
-            "block";
-
+        aplicacao.style.display = "none";
     }
 
+    if (login) {
+        login.style.display = "block";
 
-    // ========================================================
-    // ABRIR HOME
-    // ========================================================
+        const usuario = document.getElementById("loginUsuario");
+
+        if (usuario) {
+            setTimeout(function() {
+                usuario.focus();
+            }, 0);
+        }
+    }
+
+}
+
+
+// ============================================================
+// LOGIN — NAVEGAÇÃO E COMPORTAMENTO VISUAL
+// ============================================================
+// Nesta primeira etapa não existe autenticação real.
+// O formulário serve somente para testar layout e fluxo.
+
+function voltarInicio() {
+
+    const inicio = document.getElementById("inicio");
+    const login = document.getElementById("loginPmobile");
+
+    if (login) {
+        login.style.display = "none";
+    }
+
+    if (inicio) {
+        inicio.style.display = "block";
+    }
+
+}
+
+
+function alternarSenhaLogin() {
+
+    const senha = document.getElementById("loginSenha");
+    const botao = document.querySelector(".login-mostrar-senha");
+
+    if (!senha) {
+        return;
+    }
+
+    const mostrar = senha.type === "password";
+
+    senha.type = mostrar ? "text" : "password";
+
+    if (botao) {
+        botao.textContent = mostrar ? "Ocultar" : "Mostrar";
+    }
+
+}
+
+
+function entrarInterface(event) {
+
+    if (event) {
+        event.preventDefault();
+    }
+
+    const login = document.getElementById("loginPmobile");
+    const aplicacao = document.getElementById("aplicacao");
+
+    if (login) {
+        login.style.display = "none";
+    }
+
+    if (aplicacao) {
+        aplicacao.style.display = "block";
+    }
 
     mostrarTelaSistema(
         "homeSistema",
         null
     );
+
+}
+
+
+function avisoLoginTeste() {
+
+    const status = document.getElementById("loginStatus");
+
+    if (status) {
+        status.textContent =
+            "Recuperação de senha será conectada na etapa de usuários.";
+    }
 
 }
 
