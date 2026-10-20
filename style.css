@@ -974,6 +974,78 @@ input[type="file"] {
 
 
 /* ============================================================
+   BOTÕES DAS ABAS PESQUISA MANUAL E IMPORTAÇÃO
+   ============================================================ */
+
+.botao-aba {
+
+    min-height:
+        40px;
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    gap:
+        10px;
+
+    padding:
+        8px 10px;
+
+    border:
+        0;
+
+    border-radius:
+        6px;
+
+    background:
+        transparent;
+
+    color:
+        var(--texto-secundario);
+
+    font-family:
+        inherit;
+
+    font-size:
+        13px;
+
+    font-weight:
+        400;
+
+    cursor:
+        pointer;
+
+    transition:
+        background 0.12s ease,
+        color 0.12s ease;
+
+}
+
+.botao-aba:hover {
+
+    background:
+        var(--fundo-hover);
+
+    color:
+        #ffffff;
+
+}
+
+.botao-aba:active {
+
+    background:
+        var(--fundo-ativo);
+
+}
+
+
+/* ============================================================
    AÇÕES DA IMPORTAÇÃO
    ============================================================ */
 
