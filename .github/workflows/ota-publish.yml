@@ -26,31 +26,114 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Calculate next OTA version
-        id: version
+      - name: Preflight web layer
         shell: bash
         run: |
           set -euo pipefail
 
-          current_version="$(python3 - <<'PY'
+          echo "== PMOBILE OTA PREFLIGHT =="
+
+          test -f index.html
+          test -f style.css
+          test -f script.js
+
+          grep -qF 'window.PMOBILE_OK = true;' script.js
+
+          echo "Arquivos essenciais: OK"
+          echo "PMOBILE_OK: OK"
+
+          python3 - <<'PY'
           import json
           from pathlib import Path
 
-          manifest = Path("ota/manifest.json")
-          if not manifest.exists():
+          path = Path("ota/manifest.json")
+          data = json.loads(path.read_text())
+
+          version = data.get("webVersion")
+          if not isinstance(version, str):
+              raise SystemExit("webVersion inválido no manifest.")
+
+          parts = version.split(".")
+          if len(parts) != 3 or not all(p.isdigit() for p in parts):
+              raise SystemExit(f"Versão inválida: {version}")
+
+          print(f"Manifest JSON: OK ({version})")
+          PY
+
+          shopt -s nullglob
+          js_files=( *.js )
+
+          if (( ${#js_files[@]} == 0 )); then
+            echo "Nenhum arquivo JS encontrado."
+            exit 1
+          fi
+
+          for file in "${js_files[@]}"; do
+            echo "Validando JS: $file"
+            node --check "$file"
+          done
+
+          echo "Sintaxe JavaScript: OK"
+          echo "== PREFLIGHT APROVADO =="
+
+      - name: Calculate next OTA version
+        id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          release_versions="$(
+            gh api --paginate \
+              "repos/${GITHUB_REPOSITORY}/releases?per_page=100" \
+              --jq '.[].tag_name' |
+              sed -n 's/^ota-web-\([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\)$/\1/p'
+          )"
+
+          manifest_version="$(
+            python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("ota/manifest.json")
+          if not path.exists():
               print("0.0.0")
           else:
-              data = json.loads(manifest.read_text())
-              print(data.get("webVersion", "0.0.0"))
+              try:
+                  data = json.loads(path.read_text())
+                  print(data.get("webVersion", "0.0.0"))
+              except Exception:
+                  print("0.0.0")
           PY
+          )"
+
+          current_version="$(
+            printf '%s\n%s\n' "$release_versions" "$manifest_version" |
+            python3 -c '
+          import sys
+          import re
+
+          versions = []
+
+          for line in sys.stdin:
+              line = line.strip()
+              if re.fullmatch(r"\d+\.\d+\.\d+", line):
+                  versions.append(tuple(map(int, line.split("."))))
+
+          if not versions:
+              print("0.0.0")
+          else:
+              print(".".join(map(str, max(versions))))
+          '
           )"
 
           IFS='.' read -r major minor patch <<< "$current_version"
           next_patch=$((patch + 1))
           next_version="${major}.${minor}.${next_patch}"
 
-          echo "current=$current_version"
-          echo "next=$next_version"
+          echo "Versão atual: $current_version"
+          echo "Próxima OTA: $next_version"
 
           echo "current=$current_version" >> "$GITHUB_OUTPUT"
           echo "next=$next_version" >> "$GITHUB_OUTPUT"
@@ -62,6 +145,7 @@ jobs:
         run: |
           set -euo pipefail
 
+          rm -rf build/ota
           mkdir -p build/ota
 
           find . -maxdepth 1 -type f \
@@ -70,6 +154,14 @@ jobs:
 
           cd build/ota
           zip -qr "../../pmobile-web-${VERSION}.zip" .
+
+          cd ../..
+
+          test -s "pmobile-web-${VERSION}.zip"
+          unzip -t "pmobile-web-${VERSION}.zip" >/dev/null
+
+          echo "Pacote OTA: OK"
+          echo "Tamanho: $(du -h "pmobile-web-${VERSION}.zip" | awk '{print $1}')"
 
       - name: Calculate SHA-256
         id: sha
@@ -80,6 +172,9 @@ jobs:
           set -euo pipefail
 
           sha256="$(sha256sum "pmobile-web-${VERSION}.zip" | awk '{print $1}')"
+
+          test "${#sha256}" -eq 64
+
           echo "sha256=$sha256" >> "$GITHUB_OUTPUT"
           echo "SHA-256: $sha256"
 
@@ -87,16 +182,20 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.version.outputs.next }}
+          ZIP: pmobile-web-${{ steps.version.outputs.next }}.zip
         shell: bash
         run: |
           set -euo pipefail
 
           gh release create \
             "ota-web-${VERSION}" \
-            "pmobile-web-${VERSION}.zip" \
+            "$ZIP" \
             --repo "${GITHUB_REPOSITORY}" \
+            --target "${GITHUB_SHA}" \
             --title "OTA Web ${VERSION}" \
             --notes "Automated PMOBILE web OTA release."
+
+          echo "release_created=true" >> "$GITHUB_ENV"
 
       - name: Update OTA manifest
         env:
@@ -132,6 +231,11 @@ jobs:
           )
           PY
 
+          python3 -m json.tool ota/manifest.json >/dev/null
+
+          echo "Manifest atualizado:"
+          cat ota/manifest.json
+
       - name: Commit updated manifest
         env:
           VERSION: ${{ steps.version.outputs.next }}
@@ -143,5 +247,51 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           git add ota/manifest.json
+
+          if git diff --cached --quiet; then
+            echo "Nenhuma alteração no manifest."
+            exit 1
+          fi
+
           git commit -m "ota: publica web ${VERSION}"
-          git push origin main
+
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then
+              echo "Manifest publicado com sucesso."
+              exit 0
+            fi
+
+            echo "Push falhou. Atualizando main e tentando novamente (${attempt}/3)..."
+
+            git fetch origin main
+            git rebase origin/main
+          done
+
+          echo "Não foi possível publicar o manifest."
+          exit 1
+
+      - name: Finalize publication
+        if: success()
+        env:
+          VERSION: ${{ steps.version.outputs.next }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "OTA ${VERSION} publicado com sucesso."
+
+      - name: Cleanup orphan release
+        if: failure() && env.release_created == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.next }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "Limpando Release órfão ota-web-${VERSION}..."
+
+          gh release delete \
+            "ota-web-${VERSION}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --cleanup-tag \
+            --yes || true
