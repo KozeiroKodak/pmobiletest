@@ -138,6 +138,38 @@ jobs:
           echo "current=$current_version" >> "$GITHUB_OUTPUT"
           echo "next=$next_version" >> "$GITHUB_OUTPUT"
 
+      - name: Apply automatic cache busting
+        env:
+          VERSION: ${{ steps.version.outputs.next }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          python3 - <<'PY'
+          import os
+          import re
+          from pathlib import Path
+
+          version = os.environ["VERSION"]
+          path = Path("index.html")
+          html = path.read_text()
+
+          # Versiona somente assets locais do PMOBILE. URLs externas ficam intactas.
+          pattern = re.compile(r'(?P<prefix>(?:src|href)=["\\\'])(?P<file>(?!https?://)[^"\\\'?]+\\.(?:js|css))(?:\\?v=[^"\\\']*)?(?P<suffix>["\\\'])')
+          html, count = pattern.subn(
+              lambda m: f'{m.group("prefix")}{m.group("file")}?v={version}{m.group("suffix")}',
+              html,
+          )
+
+          if count == 0:
+              raise SystemExit("Nenhum asset local JS/CSS encontrado para versionar.")
+
+          path.write_text(html)
+          print(f"Cache busting aplicado em {count} assets locais com v={version}")
+          PY
+
+          grep -E '(src|href)="[^h][^"]*\\.(js|css)\\?v=' index.html
+
       - name: Prepare OTA package
         env:
           VERSION: ${{ steps.version.outputs.next }}
@@ -246,7 +278,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add ota/manifest.json
+          git add index.html ota/manifest.json
 
           if git diff --cached --quiet; then
             echo "Nenhuma alteração no manifest."
