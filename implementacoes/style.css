@@ -450,3 +450,125 @@
         padding-top: 66px;
     }
 }
+
+
+/* ============================================================
+   PENTE FINO VISUAL — ESPAÇAMENTO E ALINHAMENTO
+   Escala única: 4 / 8 / 12 / 16 / 24 / 32 px.
+   ============================================================ */
+
+:root {
+    --espaco-1: 4px;
+    --espaco-2: 8px;
+    --espaco-3: 12px;
+    --espaco-4: 16px;
+    --espaco-6: 24px;
+    --espaco-8: 32px;
+}
+
+.tela-sistema { padding: var(--espaco-6) var(--espaco-8); }
+.cabecalho-pagina { margin-bottom: var(--espaco-6); }
+.cabecalho-caminho { margin: 0 0 var(--espaco-2); }
+.cabecalho-pagina > p:not(.cabecalho-caminho) {
+    margin: var(--espaco-2) 0 0;
+    line-height: 1.5;
+}
+
+.painel {
+    margin-bottom: var(--espaco-4);
+    padding: var(--espaco-6);
+}
+.painel > h2,
+.painel > h3 { margin-bottom: var(--espaco-4); }
+.painel > p {
+    margin-top: 0;
+    margin-bottom: var(--espaco-4);
+    line-height: 1.5;
+}
+.painel > :last-child { margin-bottom: 0; }
+
+.linha-formulario { gap: var(--espaco-2); }
+input,
+.seletor-contagem-manual,
+.botao-principal,
+.botao-secundario,
+.botao-perigo,
+.botao-aba { min-height: 40px; }
+input { padding: var(--espaco-2) var(--espaco-3); }
+
+#resultadoPesquisaCodigo,
+#resultadoPesquisaDescricao,
+#resultadoPesquisaReferencia,
+#resultadoConferencia,
+#resultadoConferencias,
+#resultadoDivergencias,
+#resultadoImportacao,
+#resultadoBuscaContagemManual,
+#statusContagemManual,
+#listaContagensManuais { margin-top: var(--espaco-4); }
+
+.sidebar-topo {
+    gap: var(--espaco-3);
+    padding: var(--espaco-3);
+}
+.sidebar-menu { padding: var(--espaco-2); }
+.sidebar-item {
+    gap: var(--espaco-2);
+    margin: var(--espaco-1) 0;
+    padding: var(--espaco-2) var(--espaco-3);
+}
+.sidebar-rodape { padding: var(--espaco-2); }
+
+.menu-pesquisa { gap: var(--espaco-1); }
+.opcao-pesquisa {
+    gap: var(--espaco-2);
+    margin: 0;
+    padding: var(--espaco-2) var(--espaco-3);
+}
+.cabecalho-subtela { gap: var(--espaco-3); }
+
+.acoes-importacao {
+    gap: var(--espaco-2);
+    margin-top: var(--espaco-4);
+}
+
+#loginPmobile .login-pmobile-corpo {
+    width: calc(100% - 32px);
+    padding: var(--espaco-8) 0;
+}
+#loginPmobile .login-pmobile-marca { margin-bottom: var(--espaco-6); }
+#loginPmobile .login-pmobile-logo { margin-bottom: var(--espaco-4); }
+#loginPmobile .login-pmobile-form { padding: var(--espaco-6); }
+#loginPmobile .login-pmobile-form label { margin-bottom: var(--espaco-2); }
+#loginPmobile .login-pmobile-form > input,
+#loginPmobile .login-senha-campo { margin-bottom: var(--espaco-4); }
+#loginPmobile .login-entrar { margin-top: var(--espaco-1); }
+#loginPmobile .login-esqueceu { margin-top: var(--espaco-2); }
+#loginPmobile .login-status { margin-top: var(--espaco-4); }
+
+@media (max-width: 700px) {
+    .tela-sistema {
+        padding: var(--espaco-4) var(--espaco-3);
+    }
+    .cabecalho-pagina {
+        margin-bottom: var(--espaco-4);
+    }
+    .painel {
+        padding: var(--espaco-4);
+        margin-bottom: var(--espaco-3);
+    }
+    .linha-formulario {
+        align-items: stretch;
+        flex-wrap: wrap;
+    }
+    .linha-formulario > input {
+        flex: 1 1 180px;
+    }
+    #loginPmobile .login-pmobile-corpo {
+        width: calc(100% - 24px);
+        padding: var(--espaco-6) 0;
+    }
+    #loginPmobile .login-pmobile-form {
+        padding: var(--espaco-4);
+    }
+}
