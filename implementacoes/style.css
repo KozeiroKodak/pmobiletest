@@ -1334,7 +1334,7 @@ input {
 }
 
 
-/* Pesquisa unificada */
+/* Pesquisa unificada — mesmo padrão visual da Contagem Manual */
 .linha-pesquisa-material {
     flex-direction: row;
     align-items: center;
@@ -1367,9 +1367,11 @@ input {
     font-family: inherit;
     font-size: 13px;
     cursor: pointer;
+    transition: background 0.12s ease, color 0.12s ease;
 }
 
-.seletor-pesquisa-material:hover {
+.seletor-pesquisa-material:hover,
+.seletor-pesquisa-material:focus {
     background: var(--fundo-hover);
     color: #ffffff;
 }
@@ -1389,6 +1391,7 @@ input {
 .menu-tipo-busca-pesquisa-material button {
     display: block;
     width: 100%;
+    min-height: 38px;
     padding: 8px 10px;
     border: 0;
     border-radius: 4px;
@@ -1398,6 +1401,7 @@ input {
     font-family: inherit;
     font-size: 13px;
     cursor: pointer;
+    transition: background 0.12s ease, color 0.12s ease;
 }
 
 .menu-tipo-busca-pesquisa-material button:hover {
