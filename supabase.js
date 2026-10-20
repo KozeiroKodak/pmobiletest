@@ -797,6 +797,9 @@ async function testarLeituraSupabase() {
                 0
             );
 
+        window.totalMateriaisSupabaseVerificados =
+            totalEncontrado;
+
 
         const quantidadeErros =
             Number(
