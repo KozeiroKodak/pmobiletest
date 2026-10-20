@@ -43,11 +43,14 @@ async function buscarMaterialContagemManual() {
 
     try {
         const inventario = await obterInventarioContagemManual();
-        const encontrados = inventario.filter(material => {
-            return normalizarTextoContagemManual(material.codigo).includes(busca) ||
-                normalizarTextoContagemManual(material.referencia).includes(busca) ||
-                normalizarTextoContagemManual(material.descricao).includes(busca);
-        }).slice(0, 50);
+        const seletor = document.getElementById("tipoBuscaContagemManual");
+        const tipoBusca = seletor ? seletor.value : "codigo";
+        const camposPermitidos = ["codigo", "descricao", "referencia"];
+        const campoBusca = camposPermitidos.includes(tipoBusca) ? tipoBusca : "codigo";
+
+        const encontrados = inventario.filter(material =>
+            normalizarTextoContagemManual(material[campoBusca]).includes(busca)
+        ).slice(0, 50);
 
         renderizarResultadosContagemManual(encontrados);
     } catch (erro) {
@@ -312,6 +315,17 @@ function exibirContagensManuais() {
 
 document.addEventListener("DOMContentLoaded", function() {
     const campo = document.getElementById("campoContagemManual");
+    const tipoBusca = document.getElementById("tipoBuscaContagemManual");
+    const placeholders = { codigo: "Digite o código", descricao: "Digite a descrição", referencia: "Digite a referência" };
+    if (tipoBusca && campo) {
+        tipoBusca.addEventListener("change", function() {
+            campo.value = "";
+            campo.placeholder = placeholders[tipoBusca.value] || "Digite para buscar";
+            const area = document.getElementById("resultadoBuscaContagemManual");
+            if (area) area.innerHTML = "";
+            campo.focus();
+        });
+    }
     if (campo) {
         campo.addEventListener("keydown", function(evento) {
             if (evento.key === "Enter") buscarMaterialContagemManual();
