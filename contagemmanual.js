@@ -166,10 +166,7 @@ async function limparContagensManuais() {
 
     try {
         const cliente = obterClienteSupabase();
-        const { error } = await cliente
-            .from(TABELA_CONTAGENS_MANUAIS_SUPABASE)
-            .delete()
-            .not("id", "is", null);
+        const { error } = await cliente.rpc("limpar_contagens_manuais");
 
         if (error) throw error;
 
