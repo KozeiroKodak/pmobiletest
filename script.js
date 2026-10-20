@@ -1176,6 +1176,149 @@ async function confirmarZeramento(
 }
 
 
+
+// ============================================================
+// BOTÃO VOLTAR DO ANDROID
+// ============================================================
+//
+// O PMOBILE usa navegação visual por telas, sem histórico
+// de navegador. Por isso o botão físico/gestual do Android
+// precisa ser tratado pelo plugin App do Capacitor.
+//
+// Ordem:
+// 1. Subtela da Pesquisa -> menu da Pesquisa.
+// 2. Qualquer módulo -> Home.
+// 3. Home -> fecha o aplicativo.
+//
+// IMPORTANTE:
+// Este listener é carregado no web layer para funcionar
+// também quando o arquivo for atualizado via OTA.
+// ============================================================
+
+(function configurarBotaoVoltarAndroid() {
+
+    const capacitor =
+        window.Capacitor;
+
+    const app =
+        capacitor &&
+        capacitor.Plugins &&
+        capacitor.Plugins.App;
+
+    if (
+        !app ||
+        typeof app.addListener !== "function"
+    ) {
+
+        return;
+
+    }
+
+    app.addListener(
+        "backButton",
+        function() {
+
+            const aplicacao =
+                document.getElementById(
+                    "aplicacao"
+                );
+
+            const inicio =
+                document.getElementById(
+                    "inicio"
+                );
+
+            // Fora da aplicação: não interfere.
+            if (
+                !aplicacao ||
+                aplicacao.style.display === "none"
+            ) {
+
+                return;
+
+            }
+
+            // Pesquisa: primeiro volta das subtelas
+            // para o menu interno.
+            const pesquisa =
+                document.getElementById(
+                    "pesquisa"
+                );
+
+            if (
+                pesquisa &&
+                pesquisa.style.display !== "none"
+            ) {
+
+                const menuInterno =
+                    document.getElementById(
+                        "menuPesquisaInterno"
+                    );
+
+                const subtelas =
+                    [
+                        "pesquisaCodigo",
+                        "pesquisaDescricao",
+                        "pesquisaReferencia"
+                    ];
+
+                const subtelaAberta =
+                    subtelas.some(
+                        function(id) {
+
+                            const tela =
+                                document.getElementById(id);
+
+                            return tela &&
+                                tela.style.display !== "none";
+
+                        }
+                    );
+
+                if (subtelaAberta) {
+
+                    voltarPesquisa();
+                    return;
+
+                }
+
+                voltarMenu();
+                return;
+
+            }
+
+            // Qualquer módulo principal retorna para Home.
+            const home =
+                document.getElementById(
+                    "homeSistema"
+                );
+
+            if (
+                home &&
+                home.style.display === "block"
+            ) {
+
+                if (
+                    typeof app.exitApp ===
+                    "function"
+                ) {
+
+                    app.exitApp();
+
+                }
+
+                return;
+
+            }
+
+            voltarMenu();
+
+        }
+    );
+
+})();
+
+
 // ============================================================
 // FIM - CONTROLE DE NAVEGAÇÃO DO PMOBILE
 // ============================================================
