@@ -1179,3 +1179,5 @@ async function confirmarZeramento(
 // ============================================================
 // FIM - CONTROLE DE NAVEGAÇÃO DO PMOBILE
 // ============================================================
+
+window.PMOBILE_OK = true;
