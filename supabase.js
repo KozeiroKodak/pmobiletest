@@ -1285,18 +1285,30 @@ async function limparMateriaisSupabase() {
         //
         // ====================================================
 
+        const usuarioSessao =
+            (typeof usuarioPmobileAtual !== "undefined" && usuarioPmobileAtual?.usuario)
+                ? usuarioPmobileAtual
+                : window.usuarioPmobileAtual;
+
+        const credencialSessao =
+            (typeof credencialPmobileAtual !== "undefined" && credencialPmobileAtual)
+                ? credencialPmobileAtual
+                : window.credencialPmobileAtual;
+
+        if (!usuarioSessao?.usuario || !credencialSessao) {
+            throw new Error("Sessão administrativa sem credencial disponível.");
+        }
+
         const {
             error
         } =
-            await window.clienteSupabase
-                .from(
-                    "materiais"
-                )
-                .delete()
-                .neq(
-                    "id",
-                    0
-                );
+            await window.clienteSupabase.rpc(
+                "limpar_materiais",
+                {
+                    p_usuario: usuarioSessao.usuario,
+                    p_credencial: credencialSessao
+                }
+            );
 
 
         // ====================================================
