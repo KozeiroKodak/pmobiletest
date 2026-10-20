@@ -2472,3 +2472,44 @@ BOTÕES PADRÃO
 /* OTA automation test */
 
 /* OTA 0.0.10 - teste de automacao */
+
+
+/* ============================================================
+   STATUS SUPABASE — FAIXA DESLIZANTE INFINITA
+   ============================================================ */
+
+#statusSupabase {
+    overflow: hidden;
+    justify-content: flex-start;
+    white-space: nowrap;
+}
+
+#statusSupabase .statusSupabase-faixa {
+    display: inline-flex;
+    flex: 0 0 auto;
+    min-width: max-content;
+    padding-left: 100%;
+    animation: statusSupabaseDeslizar 18s linear infinite;
+}
+
+#statusSupabase .statusSupabase-faixa span {
+    display: inline-block;
+    flex: 0 0 auto;
+    min-width: max-content;
+}
+
+@keyframes statusSupabaseDeslizar {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-100%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #statusSupabase .statusSupabase-faixa {
+        animation: none;
+        padding-left: 14px;
+    }
+}
