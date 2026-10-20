@@ -360,13 +360,83 @@ jobs:
               exit 0
             fi
 
-            echo "Push falhou. Atualizando main e tentando novamente (${attempt}/3)..."
+            if (( attempt == 3 )); then
+              break
+            fi
 
+            echo "Push falhou por avanço concorrente da main. Rebaseando e reaplicando os arquivos gerados (tentativa ${attempt}/3)..."
+
+            git rebase --abort >/dev/null 2>&1 || true
             git fetch origin main
-            git rebase origin/main
+
+            # Não fazemos rebase cego do commit automático: index.html pode ter
+            # recebido novas alterações enquanto a OTA era preparada. Voltamos
+            # ao estado atual da main e reaplicamos somente o cache busting e o
+            # manifest desta versão, preservando o código mais recente.
+            git reset --hard origin/main
+
+            VERSION="${VERSION}" python3 - <<'PY'
+          import os
+          import re
+          from pathlib import Path
+
+          version = os.environ["VERSION"]
+          path = Path("index.html")
+          html = path.read_text()
+
+          pattern = re.compile(
+              r'''(?P<prefix>(?:src|href)=["'])'''
+              r'''(?P<file>(?!https?://)[^"']+\.(?:js|css))'''
+              r'''(?:\?v=[^"']*)?'''
+              r'''(?P<suffix>["'])'''
+          )
+
+          html, count = pattern.subn(
+              lambda m: (
+                  f'{m.group("prefix")}{m.group("file")}'
+                  f'?v={version}{m.group("suffix")}'
+              ),
+              html,
+          )
+
+          if count == 0:
+              raise SystemExit("Nenhum asset local JS/CSS encontrado após sincronização.")
+
+          path.write_text(html)
+          print(f"Cache busting reaplicado com v={version} em {count} assets.")
+          PY
+
+            VERSION="${VERSION}" SHA256="${{ steps.sha.outputs.sha256 }}" python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          version = os.environ["VERSION"]
+          sha256 = os.environ["SHA256"]
+
+          manifest = {
+              "webVersion": version,
+              "nativeMinVersion": "1.0",
+              "package": (
+                  f"https://github.com/{os.environ['GITHUB_REPOSITORY']}"
+                  f"/releases/download/ota-web-{version}/"
+                  f"pmobile-web-{version}.zip"
+              ),
+              "sha256": sha256,
+              "mandatory": False
+          }
+
+          Path("ota/manifest.json").write_text(
+              json.dumps(manifest, indent=2, ensure_ascii=False) + "\n"
+          )
+          PY
+
+            git add index.html ota/manifest.json
+            git commit -m "ota: publica web ${VERSION} (retry)"
+
           done
 
-          echo "Não foi possível publicar o manifest."
+          echo "Não foi possível publicar o manifest após 3 tentativas."
           exit 1
 
       - name: Finalize publication
