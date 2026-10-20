@@ -1394,15 +1394,19 @@ async function abrirGerenciamentoUsuarios() {
 
     const painel = document.getElementById("painelGerenciamentoUsuarios");
     const manutencao = document.getElementById("painelConfiguracoesManutencao");
-    const reset = document.getElementById("painelGerenciamentoReset");
+    const admin = document.getElementById("painelConfiguracoesAdmin");
+    const conta = document.getElementById("painelConfiguracoesUsuario");
     const lista = document.getElementById("listaSolicitacoesCadastro");
 
-    if (painel) painel.style.display = "block";
+    if (admin) admin.style.display = "none";
     if (manutencao) manutencao.style.display = "none";
-    if (reset) reset.style.display = "none";
+    if (conta) conta.style.display = "none";
+    if (painel) painel.style.display = "block";
+    mostrarFiltroSolicitacoes("cadastro");
+
     if (!lista) return;
 
-    lista.innerHTML = "<p>Carregando solicitações...</p>";
+    lista.innerHTML = "<div class=\"solicitacao-carregando\">Carregando solicitações...</div>";
 
     try {
         const { data, error } = await window.clienteSupabase.rpc("listar_solicitacoes_cadastro", {
@@ -1413,37 +1417,117 @@ async function abrirGerenciamentoUsuarios() {
         if (error) throw error;
 
         const solicitacoes = Array.isArray(data) ? data : [];
-        const pendentes = solicitacoes.filter(function(s) { return s.status === "PENDENTE"; });
+        const pendentes = solicitacoes.filter(function(s) {
+            return s.status === "PENDENTE";
+        });
+
+        const contador = document.getElementById("contadorSolicitacoesCadastro");
+        if (contador) contador.textContent = String(pendentes.length);
 
         if (!pendentes.length) {
-            lista.innerHTML = "<p>Nenhuma solicitação de cadastro pendente.</p>";
+            lista.innerHTML =
+                '<div class="solicitacao-vazia">' +
+                    '<span class="solicitacao-vazia-icone">✓</span>' +
+                    '<strong>Nenhuma solicitação pendente</strong>' +
+                    '<p>Quando alguém solicitar um cadastro, ele aparecerá aqui.</p>' +
+                '</div>';
             return;
         }
 
         lista.innerHTML = pendentes.map(function(solicitacao) {
-            return '<div class="solicitacao-usuario-card">' +
-                '<strong>' + escapeHtmlPmobile(solicitacao.nome) + '</strong>' +
-                '<span>Usuário: ' + escapeHtmlPmobile(solicitacao.usuario) + '</span>' +
-                '<small>Solicitado em: ' + escapeHtmlPmobile(solicitacao.solicitado_em || "") + '</small>' +
-                '<label>Nível de acesso</label>' +
-                '<select id="nivelSolicitacao_' + solicitacao.id + '" class="seletor-nivel-usuario">' +
-                    '<option value="NIVEL2">Nível 2 — Pesquisa, Contagem manual e Divergências</option>' +
-                    '<option value="ADMIN">Administrativo — acesso total</option>' +
-                '</select>' +
-                '<div class="solicitacao-usuario-acoes">' +
-                    '<button class="botao-principal" onclick="aprovarCadastroUsuario(' + solicitacao.id + ')">✓ Aprovar</button>' +
-                    '<button class="botao-perigo" onclick="recusarCadastroUsuario(' + solicitacao.id + ')">✕ Recusar</button>' +
+            const nome = escapeHtmlPmobile(solicitacao.nome);
+            const usuario = escapeHtmlPmobile(solicitacao.usuario);
+            const dataSolicitacao = formatarDataSolicitacaoPmobile(solicitacao.solicitado_em);
+            const inicial = escapeHtmlPmobile(
+                String(solicitacao.nome || solicitacao.usuario || "?").trim().charAt(0).toUpperCase()
+            );
+
+            return '<article class="solicitacao-facebook-card">' +
+                '<div class="solicitacao-facebook-corpo">' +
+                    '<div class="solicitacao-avatar" aria-hidden="true">' + inicial + '</div>' +
+                    '<div class="solicitacao-dados">' +
+                        '<strong>' + nome + '</strong>' +
+                        '<span>@' + usuario + '</span>' +
+                        '<small>Solicitou acesso ao PMOBILE · ' + dataSolicitacao + '</small>' +
+                    '</div>' +
                 '</div>' +
-            '</div>';
+                '<div class="solicitacao-facebook-nivel">' +
+                    '<label for="nivelSolicitacao_' + solicitacao.id + '">Nível de acesso</label>' +
+                    '<select id="nivelSolicitacao_' + solicitacao.id + '" class="seletor-nivel-usuario">' +
+                        '<option value="NIVEL2">Nível 2 — Pesquisa, Contagem manual e Divergências</option>' +
+                        '<option value="ADMIN">Administrativo — acesso total</option>' +
+                    '</select>' +
+                '</div>' +
+                '<div class="solicitacao-facebook-acoes">' +
+                    '<button type="button" class="botao-aprovar-solicitacao" onclick="aprovarCadastroUsuario(' + solicitacao.id + ')">Aprovar</button>' +
+                    '<button type="button" class="botao-recusar-solicitacao" onclick="recusarCadastroUsuario(' + solicitacao.id + ')">Recusar</button>' +
+                '</div>' +
+            '</article>';
         }).join("");
 
     } catch (erro) {
         console.error("Erro ao listar solicitações:", erro);
-        lista.innerHTML = "<p class=\"erro\">Não foi possível carregar as solicitações.</p>";
+        lista.innerHTML =
+            '<div class="solicitacao-vazia solicitacao-vazia-erro">' +
+                '<span class="solicitacao-vazia-icone">!</span>' +
+                '<strong>Não foi possível carregar</strong>' +
+                '<p>Tente novamente em alguns instantes.</p>' +
+            '</div>';
     }
 
 }
 
+
+function fecharGerenciamentoUsuarios() {
+
+    const painel = document.getElementById("painelGerenciamentoUsuarios");
+    const admin = document.getElementById("painelConfiguracoesAdmin");
+    const conta = document.getElementById("painelConfiguracoesUsuario");
+
+    if (painel) painel.style.display = "none";
+    if (admin) admin.style.display = "block";
+    if (conta) conta.style.display = "block";
+
+}
+
+
+function mostrarFiltroSolicitacoes(tipo) {
+
+    const cadastro = document.getElementById("listaSolicitacoesCadastro");
+    const reset = document.getElementById("listaSolicitacoesReset");
+    const filtroCadastro = document.getElementById("filtroSolicitacoesCadastro");
+    const filtroReset = document.getElementById("filtroSolicitacoesReset");
+
+    const ehCadastro = tipo === "cadastro";
+
+    if (cadastro) cadastro.style.display = ehCadastro ? "block" : "none";
+    if (reset) reset.style.display = ehCadastro ? "none" : "block";
+
+    if (filtroCadastro) filtroCadastro.classList.toggle("ativo", ehCadastro);
+    if (filtroReset) filtroReset.classList.toggle("ativo", !ehCadastro);
+
+}
+
+
+function formatarDataSolicitacaoPmobile(valor) {
+
+    if (!valor) return "agora";
+
+    const data = new Date(valor);
+
+    if (Number.isNaN(data.getTime())) {
+        return String(valor);
+    }
+
+    return data.toLocaleString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+
+}
 
 async function aprovarCadastroUsuario(solicitacaoId) {
 
