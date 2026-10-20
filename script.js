@@ -53,6 +53,8 @@ const telasSistema = [
 
     "pesquisa",
 
+    "contagemManual",
+
     "conferencia",
 
     "conferencias",
@@ -80,6 +82,8 @@ const itensMenuSistema = [
     "menuPesquisa",
 
     "menuImportacao",
+
+    "menuContagemManual",
 
     "menuConferencia",
 
@@ -684,6 +688,29 @@ function voltarMenu() {
         "homeSistema",
         null
     );
+
+}
+
+
+// ============================================================
+// CONTAGEM MANUAL
+// ============================================================
+
+function abrirContagemManual() {
+
+    mostrarTelaSistema(
+        "contagemManual",
+        "menuContagemManual"
+    );
+
+    if (typeof exibirContagensManuais === "function") {
+        exibirContagensManuais();
+    }
+
+    const campo = document.getElementById("campoContagemManual");
+    if (campo) {
+        campo.focus();
+    }
 
 }
 
