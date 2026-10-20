@@ -3,12 +3,16 @@ package com.pmobile.app;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.getcapacitor.BridgeActivity;
+import com.getcapacitor.WebViewListener;
+import android.webkit.WebView;
 import com.getcapacitor.ServerPath;
 
 import java.util.concurrent.ExecutorService;
@@ -25,6 +29,54 @@ public class MainActivity extends BridgeActivity {
     private AlertDialog otaProgressDialog;
     private TextView otaStatusText;
     private ProgressBar otaProgressBar;
+    private volatile boolean webHealthReceived = false;
+    private volatile boolean activeOtaBundleSelected = false;
+    private final Handler webHealthHandler = new Handler(Looper.getMainLooper());
+
+    private void handleWebHealthFailure() {
+        Log.w(TAG, "PMOBILE web health check failed");
+
+        if (!activeOtaBundleSelected) {
+            Log.w(TAG, "APK assets are active; no OTA recovery required");
+            return;
+        }
+
+        try {
+            OtaManager otaManager = new OtaManager(getApplicationContext());
+            String previousVersion = otaManager.getPreviousVersion();
+
+            if (previousVersion != null && !previousVersion.trim().isEmpty()) {
+                java.io.File rollbackBundle = otaManager.rollbackToPreviousVersion();
+                Log.w(TAG, "OTA rollback activated: " + rollbackBundle.getName());
+            } else {
+                otaManager.fallbackToApkAssets();
+                Log.w(TAG, "No previous OTA version available; falling back to APK assets");
+            }
+
+            Intent restartIntent = new Intent(MainActivity.this, MainActivity.class);
+            restartIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(restartIntent);
+            finish();
+        } catch (Exception recoveryFailure) {
+            Log.e(TAG, "OTA web health recovery failed", recoveryFailure);
+        }
+    }
+
+    private void checkWebHealth(WebView webView, long deadline) {
+        webView.evaluateJavascript("window.PMOBILE_OK === true", value -> {
+            if ("true".equals(value)) {
+                webHealthReceived = true;
+                Log.i(TAG, "PMOBILE health signal received");
+                return;
+            }
+
+            if (System.currentTimeMillis() < deadline) {
+                webHealthHandler.postDelayed(() -> checkWebHealth(webView, deadline), 500);
+            } else {
+                handleWebHealthFailure();
+            }
+        });
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +100,7 @@ public class MainActivity extends BridgeActivity {
 
             java.io.File activeBundle = otaManager.getHealthyActiveBundle();
             if (activeBundle != null) {
+                activeOtaBundleSelected = true;
                 bridgeBuilder.setServerPath(new ServerPath(
                     ServerPath.PathType.BASE_PATH,
                     activeBundle.getAbsolutePath()
@@ -60,6 +113,18 @@ public class MainActivity extends BridgeActivity {
         }
 
         super.onCreate(savedInstanceState);
+
+        bridge.addWebViewListener(new WebViewListener() {
+            @Override
+            public void onPageLoaded(WebView webView) {
+                Log.i(TAG, "WebView page loaded"); checkWebHealth(webView, System.currentTimeMillis() + 10000);
+            }
+
+            @Override
+            public void onReceivedError(WebView webView) {
+                Log.w(TAG, "WebView load error");
+            }
+        });
 
         OTA_MANIFEST_EXECUTOR.execute(() -> {
             try {

@@ -1311,3 +1311,6 @@ document.addEventListener(
 
     }
 );
+
+window.PMOBILE_OK = true;
+

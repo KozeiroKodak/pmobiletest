@@ -403,6 +403,17 @@ public class OtaManager {
         return activeBundle;
     }
 
+    public synchronized void fallbackToApkAssets() throws IOException {
+        if (preferences.edit()
+                .remove(KEY_ACTIVE_VERSION)
+                .remove(KEY_CANDIDATE_VERSION)
+                .remove(KEY_PREVIOUS_VERSION)
+                .putBoolean(KEY_CANDIDATE_HEALTHY, false)
+                .commit() == false) {
+            throw new IOException("Unable to persist APK fallback state");
+        }
+    }
+
     public synchronized File rollbackToPreviousVersion() throws IOException {
         String previousVersion = getPreviousVersion();
         if (previousVersion == null || previousVersion.trim().isEmpty()
@@ -422,6 +433,7 @@ public class OtaManager {
         if (!preferences.edit()
                 .putString(KEY_ACTIVE_VERSION, previousVersion)
                 .putString(KEY_CANDIDATE_VERSION, previousVersion)
+                .remove(KEY_PREVIOUS_VERSION)
                 .putBoolean(KEY_CANDIDATE_HEALTHY, true)
                 .commit()) {
             throw new IOException("Unable to persist OTA rollback state");
