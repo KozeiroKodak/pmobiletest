@@ -334,7 +334,7 @@ window.addEventListener("online", function() {
 });
 
 async function baixarContagensManuaisSupabase() {
-    if (!navigator.onLine || typeof obterClienteSupabase !== "function") return;
+    if (typeof obterClienteSupabase !== "function") return false;
     try {
         const cliente = obterClienteSupabase();
         const tamanhoPagina = 1000;
@@ -396,8 +396,10 @@ async function baixarContagensManuaisSupabase() {
             );
 
         gravarContagensManuais(sincronizadas);
+        return true;
     } catch (erro) {
         console.warn("Não foi possível baixar contagens manuais do Supabase:", erro);
+        throw erro;
     }
 }
 
@@ -420,6 +422,13 @@ async function atualizarContagensManuais() {
                 ? "Sincronização pendente — verificando novamente em 10 segundos."
                 : "Sincronizado com o Supabase.";
         }
+    } catch (erro) {
+        console.warn("Sincronização da contagem manual falhou:", erro);
+        const status = document.getElementById("statusContagemManual");
+        if (status) {
+            status.textContent =
+                "⚠️ Não foi possível consultar o Supabase. Tentando novamente.";
+        }
     } finally {
         sincronizacaoContagensManuaisEmAndamento = false;
     }
@@ -431,11 +440,18 @@ function iniciarMonitoramentoContagensManuais() {
     }
 
     intervaloSincronizacaoContagensManuais = setInterval(function() {
-        atualizarContagensManuais().catch(erro => {
-            console.warn("Verificação periódica das contagens manuais falhou:", erro);
-        });
+        atualizarContagensManuais();
     }, 10000);
 }
+
+function sincronizarContagemManualAoRetomar() {
+    if (document.visibilityState === "hidden") return;
+    atualizarContagensManuais();
+}
+
+window.addEventListener("focus", sincronizarContagemManualAoRetomar);
+window.addEventListener("pageshow", sincronizarContagemManualAoRetomar);
+document.addEventListener("visibilitychange", sincronizarContagemManualAoRetomar);
 
 function exibirContagensManuais() {
     const area = document.getElementById("listaContagensManuais");
