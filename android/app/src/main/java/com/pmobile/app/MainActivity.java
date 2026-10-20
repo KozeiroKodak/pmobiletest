@@ -34,6 +34,12 @@ public class MainActivity extends BridgeActivity {
     private volatile boolean activeOtaBundleSelected = false;
     private final Handler webHealthHandler = new Handler(Looper.getMainLooper());
 
+    // Controle da verificação OTA.
+    private static final long OTA_CHECK_INTERVAL_MS = 10 * 60 * 1000L;
+    private final Handler otaCheckHandler = new Handler(Looper.getMainLooper());
+    private volatile boolean otaCheckInProgress = false;
+    private volatile long lastOtaCheckStartedAt = 0L;
+
     private void handleWebHealthFailure() {
         Log.w(TAG, "PMOBILE web health check failed");
 
@@ -154,6 +160,25 @@ public class MainActivity extends BridgeActivity {
                 Log.w(TAG, "WebView load error");
             }
         });
+
+        requestOtaCheck(true);
+    }
+
+    private void requestOtaCheck(boolean force) {
+        long now = System.currentTimeMillis();
+
+        if (otaCheckInProgress) {
+            Log.i(TAG, "OTA check ignored: another check is already running");
+            return;
+        }
+
+        if (!force && now - lastOtaCheckStartedAt < OTA_CHECK_INTERVAL_MS) {
+            Log.i(TAG, "OTA check ignored: minimum interval not reached");
+            return;
+        }
+
+        otaCheckInProgress = true;
+        lastOtaCheckStartedAt = now;
 
         OTA_MANIFEST_EXECUTOR.execute(() -> {
             try {
@@ -370,9 +395,45 @@ finish();
                 // The optional check must never affect startup or expose response contents.
                 Log.w(TAG, "Remote OTA manifest check failed: "
                     + exception.getClass().getSimpleName());
+            } finally {
+                otaCheckInProgress = false;
             }
         });
     }
+
+    private final Runnable otaPeriodicCheck = new Runnable() {
+        @Override
+        public void run() {
+            requestOtaCheck(false);
+            otaCheckHandler.postDelayed(this, OTA_CHECK_INTERVAL_MS);
+        }
+    };
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // Ao voltar ao aplicativo, consulta novamente se o intervalo permitir.
+        requestOtaCheck(false);
+
+        // Mantém uma única agenda enquanto o aplicativo estiver em primeiro plano.
+        otaCheckHandler.removeCallbacks(otaPeriodicCheck);
+        otaCheckHandler.postDelayed(otaPeriodicCheck, OTA_CHECK_INTERVAL_MS);
+    }
+
+    @Override
+    public void onPause() {
+        otaCheckHandler.removeCallbacks(otaPeriodicCheck);
+        super.onPause();
+    }
+
+    @Override
+    public void onDestroy() {
+        otaCheckHandler.removeCallbacks(otaPeriodicCheck);
+        webHealthHandler.removeCallbacksAndMessages(null);
+        super.onDestroy();
+    }
+
     private void showOtaProgressDialog(String newWebVersion) {
         runOnUiThread(() -> {
             LinearLayout layout = new LinearLayout(this);

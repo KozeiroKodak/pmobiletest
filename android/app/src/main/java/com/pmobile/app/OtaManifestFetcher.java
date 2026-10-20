@@ -42,7 +42,19 @@ public final class OtaManifestFetcher {
             connection.setReadTimeout(READ_TIMEOUT_MS);
             connection.setInstanceFollowRedirects(false);
             connection.setRequestMethod("GET");
+
+            // O manifest controla a descoberta de novas versões.
+            // Nunca reutilizar uma resposta HTTP armazenada em cache.
+            connection.setUseCaches(false);
+            connection.setDefaultUseCaches(false);
             connection.setRequestProperty("Accept", "application/json");
+            connection.setRequestProperty("Cache-Control", "no-cache, no-store, max-age=0");
+            connection.setRequestProperty("Pragma", "no-cache");
+            connection.setRequestProperty("Expires", "0");
+            connection.setRequestProperty(
+                "If-Modified-Since",
+                "Thu, 01 Jan 1970 00:00:00 GMT"
+            );
 
             int status = connection.getResponseCode();
             if (status < HttpURLConnection.HTTP_OK || status >= HttpURLConnection.HTTP_MULT_CHOICE) {
