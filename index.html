@@ -697,7 +697,12 @@
 
             <div class="painel">
                 <div class="linha-formulario">
-                    <input type="text" id="campoContagemManual" placeholder="Código, referência ou descrição" autocomplete="off">
+                    <select id="tipoBuscaContagemManual" aria-label="Tipo de busca">
+                        <option value="codigo">Código</option>
+                        <option value="descricao">Descrição</option>
+                        <option value="referencia">Referência</option>
+                    </select>
+                    <input type="text" id="campoContagemManual" placeholder="Digite o código" autocomplete="off">
                     <button class="botao-principal" onclick="buscarMaterialContagemManual()">Buscar</button>
                 </div>
                 <div id="resultadoBuscaContagemManual"></div>
@@ -1064,7 +1069,7 @@
      CONTAGEM MANUAL
      ========================================================= -->
 
-<script src="contagemmanual.js?v=20261020"></script>
+<script src="contagemmanual.js?v=20261020b"></script>
 
 
 <!-- =========================================================
