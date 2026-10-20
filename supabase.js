@@ -439,6 +439,18 @@ document.addEventListener(
 
 function mostrarStatusSupabase(mensagem, prioridade = false) {
 
+    if (
+        typeof mensagem === "string" &&
+        (
+            mensagem.startsWith("🟢 Offline OK") ||
+            mensagem.startsWith("🔴 Offline indisponível") ||
+            mensagem.startsWith("🔴 Falha ao sincronizar o inventário offline")
+        )
+    ) {
+        atualizarStatusGeralPmobile();
+        return;
+    }
+
     if (prioridade === true) {
         statusSupabasePrioritario = true;
     }
@@ -631,7 +643,7 @@ function mostrarErrosSupabase(
         erros
     );
 
-    mostrarStatusSupabase(mensagem);
+    registrarAvisoPmobile(quantidade > 0);
 }
 
 
