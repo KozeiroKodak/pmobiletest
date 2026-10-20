@@ -206,11 +206,17 @@ async function pesquisarLocalmente(
                     material.referencia ?? "";
             }
 
-            if (
+            const valorNormalizado =
                 String(valorCampo)
-                    .toLowerCase()
-                    .includes(busca)
-            ) {
+                    .trim()
+                    .toLowerCase();
+
+            const corresponde =
+                campoPesquisa === "codigo"
+                    ? valorNormalizado === busca
+                    : valorNormalizado.includes(busca);
+
+            if (corresponde) {
                 resultados.push(material);
             }
         }
@@ -464,12 +470,6 @@ async function pesquisarPorCodigo() {
     // MODO ONLINE
     // =====================================
 
-    const busca =
-        escaparBuscaILike(
-            buscaOriginal
-        );
-
-
     try {
 
         const clienteSupabase =
@@ -485,12 +485,9 @@ async function pesquisarPorCodigo() {
                     "id,codigo,descricao,referencia,marca,local,quantidade"
                 )
 
-                .ilike(
+                .eq(
                     "codigo",
-                    "%" + busca + "%",
-                    {
-                        escape: "\\"
-                    }
+                    buscaOriginal
                 )
 
                 .order(
