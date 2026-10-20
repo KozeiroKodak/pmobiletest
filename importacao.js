@@ -35,7 +35,7 @@
 // ============================================================
 
 const LIMITE_ARQUIVO_MB = 100;
-const TAMANHO_LOTE_SUPABASE = 500;
+const TAMANHO_LOTE_SUPABASE = 1000;
 
 
 // ============================================================
@@ -2206,10 +2206,7 @@ async function importarParaSupabase(
                 );
 
         const tamanhoLote =
-            Math.max(
-                500,
-                TAMANHO_LOTE_SUPABASE * 2
-            );
+            TAMANHO_LOTE_SUPABASE;
 
         let enviados = 0;
 
