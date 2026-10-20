@@ -830,6 +830,21 @@ async function entrarInterface(event) {
             ? campoUsuario.value.trim()
             : "";
 
+    // Usuário: somente letras, números, ponto, hífen e sublinhado.
+    // Impede caracteres inválidos de chegarem à autenticação ou ao login salvo.
+    if (usuario && !/^[A-Za-z0-9._-]+$/.test(usuario)) {
+        mostrarStatusLogin(
+            "Usuário contém caracteres inválidos.",
+            true
+        );
+
+        if (campoUsuario) {
+            campoUsuario.focus();
+        }
+
+        return;
+    }
+
     const senha =
         campoSenha
             ? campoSenha.value
