@@ -852,7 +852,10 @@ async function criarSenhaPmobile(event) {
 
         usuarioPmobileAtual = usuarioCriado;
         window.usuarioPmobileAtual = usuarioCriado;
-        credencialPmobileAtual = null;
+        // A senha recém-criada passa a ser a credencial administrativa da sessão.
+        // Sem isso, o usuário ADMIN conseguiria entrar no app, mas as operações
+        // administrativas seriam bloqueadas por credencial ausente.
+        credencialPmobileAtual = senha;
 
         if (manterLogin && manterLogin.checked) {
             salvarLoginPmobile(
