@@ -449,7 +449,7 @@ function abrirSistema() {
 // ============================================================
 
 let usuarioPmobileAtual = null;
-let tokenPmobileAtual = null;
+let credencialPmobileAtual = null;
 
 
 function voltarInicio() {
@@ -471,7 +471,7 @@ function voltarInicio() {
 function sairPmobile() {
 
     usuarioPmobileAtual = null;
-    tokenPmobileAtual = null;
+    credencialPmobileAtual = null;
     window.usuarioPmobileAtual = null;
 
     limparLoginPmobileSalvo();
@@ -593,7 +593,7 @@ function restaurarSessaoPmobile(dadosUsuario, senha) {
 
     usuarioPmobileAtual = dadosUsuario;
     window.usuarioPmobileAtual = dadosUsuario;
-    tokenPmobileAtual = null;
+    credencialPmobileAtual = null;
 
     atualizarVisibilidadeConfiguracoes();
 
@@ -852,7 +852,7 @@ async function criarSenhaPmobile(event) {
 
         usuarioPmobileAtual = usuarioCriado;
         window.usuarioPmobileAtual = usuarioCriado;
-        tokenPmobileAtual = null;
+        credencialPmobileAtual = null;
 
         if (manterLogin && manterLogin.checked) {
             salvarLoginPmobile(
@@ -895,6 +895,25 @@ async function criarSenhaPmobile(event) {
             true
         );
 
+    }
+
+}
+
+
+function alternarCampoSenha(idCampo, botao) {
+
+    const campo = document.getElementById(idCampo);
+
+    if (!campo) {
+        return;
+    }
+
+    const mostrar = campo.type === "password";
+
+    campo.type = mostrar ? "text" : "password";
+
+    if (botao) {
+        botao.textContent = mostrar ? "Ocultar" : "Mostrar";
     }
 
 }
@@ -1055,7 +1074,7 @@ async function entrarInterface(event) {
         window.usuarioPmobileAtual =
             usuarioAutenticado;
 
-        tokenPmobileAtual = null;
+        credencialPmobileAtual = null;
 
         const manterLogin =
             document.getElementById("loginManterLogin");
@@ -1122,7 +1141,7 @@ async function entrarInterface(event) {
 function avisoLoginTeste() {
 
     mostrarStatusLogin(
-        "A recuperação do token será feita pelo administrador."
+        "A recuperação da senha será feita pelo administrador."
     );
 
 }
@@ -1852,7 +1871,7 @@ function abrirManutencaoBanco() {
 
 async function abrirGerenciamentoUsuarios() {
 
-    if (!window.usuarioPmobileAtual || window.usuarioPmobileAtual.nivel !== "ADMIN" || !tokenPmobileAtual) {
+    if (!window.usuarioPmobileAtual || window.usuarioPmobileAtual.nivel !== "ADMIN" || !credencialPmobileAtual) {
         alert("Acesso administrativo negado.");
         return;
     }
@@ -1876,7 +1895,7 @@ async function abrirGerenciamentoUsuarios() {
     try {
         const { data, error } = await window.clienteSupabase.rpc("listar_solicitacoes_cadastro", {
             p_admin_usuario: window.usuarioPmobileAtual.usuario,
-            p_admin_token: tokenPmobileAtual
+            p_admin_credencial: credencialPmobileAtual
         });
 
         if (error) throw error;
@@ -1996,7 +2015,7 @@ function formatarDataSolicitacaoPmobile(valor) {
 
 async function aprovarCadastroUsuario(solicitacaoId) {
 
-    if (!window.usuarioPmobileAtual || window.usuarioPmobileAtual.nivel !== "ADMIN" || !tokenPmobileAtual) return;
+    if (!window.usuarioPmobileAtual || window.usuarioPmobileAtual.nivel !== "ADMIN" || !credencialPmobileAtual) return;
 
     const seletor = document.getElementById("nivelSolicitacao_" + solicitacaoId);
     const nivel = seletor ? seletor.value : "NIVEL2";
@@ -2006,7 +2025,7 @@ async function aprovarCadastroUsuario(solicitacaoId) {
     try {
         const { data, error } = await window.clienteSupabase.rpc("aprovar_solicitacao_cadastro", {
             p_admin_usuario: window.usuarioPmobileAtual.usuario,
-            p_admin_token: tokenPmobileAtual,
+            p_admin_credencial: credencialPmobileAtual,
             p_solicitacao_id: solicitacaoId,
             p_nivel: nivel
         });
@@ -2032,13 +2051,13 @@ async function aprovarCadastroUsuario(solicitacaoId) {
 
 async function recusarCadastroUsuario(solicitacaoId) {
 
-    if (!window.usuarioPmobileAtual || window.usuarioPmobileAtual.nivel !== "ADMIN" || !tokenPmobileAtual) return;
+    if (!window.usuarioPmobileAtual || window.usuarioPmobileAtual.nivel !== "ADMIN" || !credencialPmobileAtual) return;
     if (!confirm("Recusar esta solicitação de cadastro?")) return;
 
     try {
         const { error } = await window.clienteSupabase.rpc("recusar_solicitacao_cadastro", {
             p_admin_usuario: window.usuarioPmobileAtual.usuario,
-            p_admin_token: tokenPmobileAtual,
+            p_admin_credencial: credencialPmobileAtual,
             p_solicitacao_id: solicitacaoId,
             p_motivo: "Recusada pelo administrador"
         });
