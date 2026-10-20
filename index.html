@@ -831,10 +831,10 @@
 
             <div class="painel">
                 <div class="linha-formulario linha-contagem-manual-busca">
-                    <select class="seletor-contagem-manual" id="tipoBuscaContagemManual" aria-label="Tipo de busca">
-                        <option value="codigo">Código</option>
-                        <option value="descricao">Descrição</option>
-                        <option value="referencia">Referência</option>
+                    <select class="seletor-contagem-manual" id="tipoBuscaContagemManual" aria-label="Tipo de busca" onfocus="mostrarOpcoesCompletasContagemManual(this)" onblur="mostrarOpcoesCurtasContagemManual(this)">
+                        <option value="codigo">CÓD</option>
+                        <option value="descricao">DESC</option>
+                        <option value="referencia">REF</option>
                     </select>
                     <input type="text" id="campoContagemManual" placeholder="Digite o código" autocomplete="off">
                     <button class="botao-aba botao-buscar-contagem-manual" onclick="buscarMaterialContagemManual()">🔎 Buscar</button>
