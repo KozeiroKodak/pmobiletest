@@ -174,6 +174,8 @@ async function salvarContagemManual() {
         localAlterado: normalizarTextoContagemManual(localEncontrado) !== normalizarTextoContagemManual(material.local),
         zerado: quantidadeFisica === 0,
         dataHora: new Date().toISOString(),
+        usuarioId: window.usuarioPmobileAtual?.id ?? null,
+        usuarioNome: window.usuarioPmobileAtual?.nome ?? window.usuarioPmobileAtual?.usuario ?? "Usuário não identificado",
         sincronizado: false
     };
 
@@ -213,7 +215,9 @@ async function sincronizarContagensManuaisPendentes() {
                 quantidade_fisica: Number(item.quantidadeFisica || 0),
                 local_alterado: Boolean(item.localAlterado),
                 zerado: Boolean(item.zerado),
-                data_hora: item.dataHora
+                data_hora: item.dataHora,
+                usuario_id: item.usuarioId ?? window.usuarioPmobileAtual?.id ?? null,
+                usuario_nome: item.usuarioNome ?? window.usuarioPmobileAtual?.nome ?? window.usuarioPmobileAtual?.usuario ?? "Usuário não identificado"
             };
 
             const { error } = await cliente.from(TABELA_CONTAGENS_MANUAIS_SUPABASE).insert(payload);
@@ -266,6 +270,8 @@ async function baixarContagensManuaisSupabase() {
                 localAlterado: Boolean(item.local_alterado),
                 zerado: Boolean(item.zerado),
                 dataHora: item.data_hora,
+                usuarioId: item.usuario_id ?? null,
+                usuarioNome: item.usuario_nome ?? "Usuário não identificado",
                 sincronizado: true
             });
         });
@@ -306,6 +312,14 @@ function exibirContagensManuais() {
         detalhes.textContent = "Local: " + registro.localOriginal + " → " + registro.localEncontrado +
             " | Esperado: " + registro.quantidadeEsperada + " | Físico: " + registro.quantidadeFisica;
         bloco.appendChild(detalhes);
+
+        const usuario = document.createElement("p");
+        usuario.textContent = "Realizado por: " + (registro.usuarioNome || "Usuário não identificado");
+        bloco.appendChild(usuario);
+
+        const dataHora = document.createElement("p");
+        dataHora.textContent = "Data/hora: " + (registro.dataHora ? new Date(registro.dataHora).toLocaleString("pt-BR") : "-");
+        bloco.appendChild(dataHora);
 
         const flags = document.createElement("p");
         flags.textContent = (registro.localAlterado ? "LOCAL ALTERADO" : "LOCAL MANTIDO") +
