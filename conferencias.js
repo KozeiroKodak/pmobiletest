@@ -44,6 +44,20 @@
 
 let conferencias = [];
 
+// ============================================================
+// SINCRONIZAÇÃO AUTOMÁTICA DO HISTÓRICO
+// ============================================================
+
+const INTERVALO_VERIFICACAO_CONFERENCIAS_MS = 10000;
+
+let verificacaoConferenciasEmAndamento = false;
+let intervaloVerificacaoConferencias = null;
+let snapshotConferenciasSupabase = {
+    quantidade: null,
+    ultimaData: null
+};
+
+
 
 // ============================================================
 // CONFIGURAÇÃO DO HISTÓRICO LOCAL
@@ -1195,6 +1209,188 @@ async function carregarConferencias() {
 
 
 // ============================================================
+// FUNÇÃO: obterSnapshotConferenciasSupabase()
+// ============================================================
+//
+// OBJETIVO:
+// Fazer uma verificação leve a cada 10 segundos.
+//
+// A consulta retorna somente:
+// - quantidade de registros;
+// - data da conferência mais recente.
+//
+// Se o snapshot mudar, o histórico completo é recarregado.
+// Isso evita baixar todo o histórico a cada 10 segundos.
+// ============================================================
+
+async function obterSnapshotConferenciasSupabase() {
+
+    const clienteSupabase =
+        obterClienteSupabaseConferencias();
+
+    const { data, count, error } =
+        await clienteSupabase
+            .from("conferencias")
+            .select("id,criado_em", {
+                count: "exact"
+            })
+            .order("criado_em", {
+                ascending: false
+            })
+            .limit(1);
+
+    if (error) {
+        throw error;
+    }
+
+    const ultima =
+        Array.isArray(data) && data.length > 0
+            ? data[0]
+            : null;
+
+    return {
+        quantidade: Number(count ?? 0),
+        ultimaData: ultima?.criado_em ?? null
+    };
+}
+
+
+// ============================================================
+// FUNÇÃO: sincronizarConferenciasAutomaticamente()
+// ============================================================
+//
+// OBJETIVO:
+// Verificar o Supabase a cada 10 segundos.
+//
+// FLUXO:
+// 1. tenta sincronizar a fila local;
+// 2. consulta o snapshot central;
+// 3. se houver alteração, recarrega o histórico;
+// 4. se não houver alteração, mantém o status "Sincronizado";
+// 5. erros temporários não transformam o status em "Supabase offline".
+// ============================================================
+
+async function sincronizarConferenciasAutomaticamente() {
+
+    if (verificacaoConferenciasEmAndamento) {
+        return;
+    }
+
+    if (!window.clienteSupabase) {
+        return;
+    }
+
+    verificacaoConferenciasEmAndamento = true;
+
+    try {
+
+        if (typeof sincronizarConferenciasPendentes === "function") {
+            try {
+                await sincronizarConferenciasPendentes();
+            } catch (erroFila) {
+                console.warn(
+                    "⚠️ Falha temporária ao sincronizar fila de conferências:",
+                    erroFila
+                );
+            }
+        }
+
+        const snapshot =
+            await obterSnapshotConferenciasSupabase();
+
+        const mudou =
+            snapshotConferenciasSupabase.quantidade === null ||
+            snapshot.quantidade !== snapshotConferenciasSupabase.quantidade ||
+            snapshot.ultimaData !== snapshotConferenciasSupabase.ultimaData;
+
+        if (mudou) {
+
+            console.log(
+                "🔄 Atualização detectada no Supabase. Sincronizando histórico..."
+            );
+
+            await carregarConferencias();
+
+        }
+
+        snapshotConferenciasSupabase =
+            snapshot;
+
+        mostrarStatusSupabase(
+            "🟢 Sincronizado — " +
+            snapshot.quantidade.toLocaleString("pt-BR") +
+            " conferência(s)"
+        );
+
+    } catch (erro) {
+
+        console.warn(
+            "⚠️ Verificação automática do Supabase falhou temporariamente:",
+            erro
+        );
+
+        // Não exibir "Supabase offline" a cada falha transitória.
+        // A próxima verificação ocorrerá em 10 segundos.
+
+        mostrarStatusSupabase(
+            "🟡 Verificando sincronização com o Supabase..."
+        );
+
+    } finally {
+
+        verificacaoConferenciasEmAndamento = false;
+
+    }
+
+}
+
+
+// ============================================================
+// FUNÇÃO: iniciarVerificacaoAutomaticaConferencias()
+// ============================================================
+//
+// OBJETIVO:
+// Iniciar a verificação periódica de 10 em 10 segundos.
+// ============================================================
+
+function iniciarVerificacaoAutomaticaConferencias() {
+
+    if (intervaloVerificacaoConferencias !== null) {
+        return;
+    }
+
+    sincronizarConferenciasAutomaticamente();
+
+    intervaloVerificacaoConferencias =
+        setInterval(
+            sincronizarConferenciasAutomaticamente,
+            INTERVALO_VERIFICACAO_CONFERENCIAS_MS
+        );
+
+}
+
+
+// ============================================================
+// FUNÇÃO: pararVerificacaoAutomaticaConferencias()
+// ============================================================
+
+function pararVerificacaoAutomaticaConferencias() {
+
+    if (intervaloVerificacaoConferencias === null) {
+        return;
+    }
+
+    clearInterval(
+        intervaloVerificacaoConferencias
+    );
+
+    intervaloVerificacaoConferencias =
+        null;
+
+}
+
+
+// ============================================================
 // FUNÇÃO: salvarConferencias()
 // ============================================================
 //
@@ -1597,16 +1793,19 @@ window.addEventListener(
 // INICIALIZAÇÃO
 // ============================================================
 //
-// NÃO carregamos automaticamente aqui.
-//
-// Motivo:
-//
-// A tela de histórico pode controlar quando precisa dos dados.
-//
-// Isso evita consultas desnecessárias ao Supabase na abertura
-// de telas que não precisam do histórico.
-//
+// A verificação central passa a ocorrer automaticamente a cada
+// 10 segundos. A consulta é leve e somente recarrega o histórico
+// completo quando detecta alteração no Supabase.
 // ============================================================
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+        iniciarVerificacaoAutomaticaConferencias();
+
+    }
+);
 
 
 // ============================================================
