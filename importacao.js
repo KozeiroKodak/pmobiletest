@@ -2884,12 +2884,15 @@ async function importarExcel() {
                 "<p style=\"text-align:center;\"><strong>100%</strong></p>" +
 
                 "<p>📦 Materiais importados: " +
-                inventarioComIds
-                    .length
+                resultadoImportacao
+                    .quantidade
                     .toLocaleString(
                         "pt-BR"
                     ) +
-                "</p>";
+                "</p>" +
+
+                "<p>☁️ Supabase: atualizado.</p>" +
+                "<p>💾 Cópia offline: atualizada com IDs oficiais.</p>";
 
         }
 
