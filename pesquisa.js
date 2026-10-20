@@ -964,6 +964,141 @@ async function pesquisarPorReferencia() {
 }
 
 
+
+// =========================================
+// PESQUISA UNIFICADA
+// =========================================
+
+function alternarSeletorPesquisaMaterial() {
+    const menu = document.getElementById("menuTipoBuscaPesquisaMaterial");
+    const botao = document.getElementById("botaoTipoBuscaPesquisaMaterial");
+
+    if (!menu || !botao) return;
+
+    const aberto = menu.style.display !== "none";
+    menu.style.display = aberto ? "none" : "block";
+    botao.setAttribute("aria-expanded", aberto ? "false" : "true");
+}
+
+function selecionarTipoBuscaPesquisaMaterial(tipo) {
+    const seletor = document.getElementById("tipoBuscaPesquisaMaterial");
+    const botao = document.getElementById("botaoTipoBuscaPesquisaMaterial");
+    const menu = document.getElementById("menuTipoBuscaPesquisaMaterial");
+    const campo = document.getElementById("campoPesquisaMaterial");
+
+    if (!seletor || !botao || !menu || !campo) return;
+
+    const configuracoes = {
+        codigo: {
+            nome: "CÓD",
+            placeholder: "Digite o código"
+        },
+        referencia: {
+            nome: "REF",
+            placeholder: "Digite a referência"
+        },
+        descricao: {
+            nome: "DESC",
+            placeholder: "Digite a descrição"
+        }
+    };
+
+    const configuracao = configuracoes[tipo] || configuracoes.codigo;
+
+    seletor.value = tipo;
+    botao.textContent = configuracao.nome;
+    campo.placeholder = configuracao.placeholder;
+
+    menu.style.display = "none";
+    botao.setAttribute("aria-expanded", "false");
+    campo.focus();
+}
+
+async function pesquisarMaterialSelecionado() {
+    const seletor = document.getElementById("tipoBuscaPesquisaMaterial");
+    const campo = document.getElementById("campoPesquisaMaterial");
+    const areaResultado = document.getElementById("resultadoPesquisaMaterial");
+
+    if (!seletor || !campo || !areaResultado) {
+        console.error("Elementos da pesquisa unificada não encontrados.");
+        return;
+    }
+
+    const tipo = seletor.value || "codigo";
+    const buscaOriginal = campo.value.trim();
+
+    if (!buscaOriginal) {
+        areaResultado.innerHTML = "<p>Digite um termo para pesquisar.</p>";
+        campo.focus();
+        return;
+    }
+
+    limparResultado(areaResultado);
+    areaResultado.innerHTML = "<p>Pesquisando...</p>";
+
+    if (!estaOnline()) {
+        try {
+            const resultados = await pesquisarLocalmente(tipo, buscaOriginal);
+            exibirResultadosPesquisa(resultados, areaResultado);
+        } catch (erro) {
+            console.error("Erro na pesquisa offline:", erro);
+            areaResultado.innerHTML = "<p>Erro ao consultar o banco local.</p>";
+        }
+        return;
+    }
+
+    try {
+        const clienteSupabase = obterClienteSupabase();
+        const busca = escaparBuscaILike(buscaOriginal);
+
+        let consulta = clienteSupabase
+            .from("materiais")
+            .select("id,codigo,descricao,referencia,marca,local,quantidade");
+
+        if (tipo === "codigo") {
+            consulta = consulta
+                .eq("codigo", buscaOriginal)
+                .order("codigo", { ascending: true });
+        } else {
+            const coluna = tipo === "referencia" ? "referencia" : "descricao";
+            consulta = consulta
+                .ilike(coluna, "%" + busca + "%", { escape: "\" })
+                .order(coluna, { ascending: true });
+        }
+
+        const { data, error } = await consulta.limit(100);
+
+        if (error) {
+            throw error;
+        }
+
+        exibirResultadosPesquisa(data || [], areaResultado);
+
+    } catch (erro) {
+        console.error("Erro na pesquisa online:", erro);
+
+        try {
+            const resultados = await pesquisarLocalmente(tipo, buscaOriginal);
+            exibirResultadosPesquisa(resultados, areaResultado);
+        } catch (erroLocal) {
+            console.error("Erro no fallback local:", erroLocal);
+            areaResultado.innerHTML =
+                "<p>Não foi possível consultar o Supabase nem o banco local.</p>";
+        }
+    }
+}
+
+document.addEventListener("click", function(evento) {
+    const menu = document.getElementById("menuTipoBuscaPesquisaMaterial");
+    const botao = document.getElementById("botaoTipoBuscaPesquisaMaterial");
+    const wrapper = botao?.closest(".seletor-pesquisa-material-wrapper");
+
+    if (menu && wrapper && !wrapper.contains(evento.target)) {
+        menu.style.display = "none";
+        botao.setAttribute("aria-expanded", "false");
+    }
+});
+
 // =========================================
 // FIM - PESQUISA
 // =========================================
