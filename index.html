@@ -130,6 +130,19 @@
             </button>
 
 
+            <!-- CONTAGEM MANUAL -->
+
+            <button
+                id="menuContagemManual"
+                class="sidebar-item"
+                onclick="abrirContagemManual()"
+                title="Contagem manual"
+            >
+                <span class="sidebar-icone">✍️</span>
+                <span class="sidebar-texto">Contagem manual</span>
+            </button>
+
+
             <!-- CONFERÊNCIA -->
 
             <button
@@ -672,6 +685,43 @@
 
 
         <!-- =================================================
+             CONTAGEM MANUAL
+             ================================================= -->
+
+        <section id="contagemManual" class="tela-sistema" style="display: none;">
+            <div class="cabecalho-pagina">
+                <p class="cabecalho-caminho">PMOBILE / Contagem manual</p>
+                <h1>Contagem manual</h1>
+                <p>Localize um material por código, referência ou descrição e registre o local encontrado e a quantidade física.</p>
+            </div>
+
+            <div class="painel">
+                <div class="linha-formulario">
+                    <input type="text" id="campoContagemManual" placeholder="Código, referência ou descrição" autocomplete="off">
+                    <button class="botao-principal" onclick="buscarMaterialContagemManual()">Buscar</button>
+                </div>
+                <div id="resultadoBuscaContagemManual"></div>
+            </div>
+
+            <div class="painel" id="painelRegistroContagemManual" style="display: none;">
+                <h3>Registrar contagem</h3>
+                <div id="materialSelecionadoContagemManual"></div>
+                <div class="linha-formulario">
+                    <input type="text" id="localContagemManual" placeholder="Local encontrado" autocomplete="off">
+                    <input type="number" id="quantidadeContagemManual" placeholder="Quantidade física" min="0" step="1" inputmode="numeric">
+                    <button class="botao-principal" onclick="salvarContagemManual()">Salvar contagem</button>
+                </div>
+                <div id="statusContagemManual"></div>
+            </div>
+
+            <div class="painel">
+                <h3>Contagens registradas neste dispositivo</h3>
+                <div id="listaContagensManuais"></div>
+            </div>
+        </section>
+
+
+        <!-- =================================================
              CONFERÊNCIA
              ================================================= -->
 
@@ -1008,6 +1058,13 @@
      ========================================================= -->
 
 <script src="pesquisa.js?v=20261016"></script>
+
+
+<!-- =========================================================
+     CONTAGEM MANUAL
+     ========================================================= -->
+
+<script src="contagemmanual.js?v=20261020"></script>
 
 
 <!-- =========================================================
