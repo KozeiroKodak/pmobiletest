@@ -340,8 +340,16 @@ async function baixarContagensManuaisSupabase() {
         const { data, error } = await cliente.from(TABELA_CONTAGENS_MANUAIS_SUPABASE)
             .select("*").order("data_hora", { ascending: false }).limit(1000);
         if (error) throw error;
+        // O Supabase é a fonte oficial.
+        // Somente registros locais ainda pendentes são preservados.
+        // Registros já sincronizados que não existem mais no Supabase
+        // precisam desaparecer deste dispositivo também.
         const locais = lerContagensManuais();
-        const porId = new Map(locais.map(item => [String(item.id), item]));
+        const pendentesLocais = locais.filter(item => !item.sincronizado);
+        const porId = new Map(
+            pendentesLocais.map(item => [String(item.id), item])
+        );
+
         (data || []).forEach(item => {
             porId.set(String(item.id), {
                 id: item.id,
@@ -362,8 +370,13 @@ async function baixarContagensManuaisSupabase() {
                 sincronizado: true
             });
         });
-        const mescladas = Array.from(porId.values()).sort((a,b) => String(b.dataHora||"").localeCompare(String(a.dataHora||"")));
-        gravarContagensManuais(mescladas);
+
+        const sincronizadas = Array.from(porId.values())
+            .sort((a, b) =>
+                String(b.dataHora || "").localeCompare(String(a.dataHora || ""))
+            );
+
+        gravarContagensManuais(sincronizadas);
     } catch (erro) {
         console.warn("Não foi possível baixar contagens manuais do Supabase:", erro);
     }
