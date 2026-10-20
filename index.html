@@ -1119,11 +1119,47 @@
 
             </div>
 
-            <div class="painel" id="painelGerenciamentoUsuarios" style="display: none;">
-                <h2>👥 Usuários</h2>
-                <p>Solicitações de cadastro aguardando aprovação.</p>
-                <div id="listaSolicitacoesCadastro">
+            <div class="painel painel-solicitacoes" id="painelGerenciamentoUsuarios" style="display: none;">
+                <div class="solicitacoes-topo">
+                    <button
+                        type="button"
+                        class="solicitacoes-voltar"
+                        onclick="fecharGerenciamentoUsuarios()"
+                        aria-label="Voltar"
+                    >‹</button>
+
+                    <div class="solicitacoes-titulo">
+                        <span class="cabecalho-caminho">PMOBILE / Administração</span>
+                        <h2>Solicitações</h2>
+                    </div>
+                </div>
+
+                <div class="solicitacoes-filtros" role="tablist" aria-label="Tipos de solicitação">
+                    <button
+                        type="button"
+                        class="solicitacao-filtro ativo"
+                        id="filtroSolicitacoesCadastro"
+                        onclick="mostrarFiltroSolicitacoes('cadastro')"
+                    >Cadastros <span id="contadorSolicitacoesCadastro">0</span></button>
+
+                    <button
+                        type="button"
+                        class="solicitacao-filtro"
+                        id="filtroSolicitacoesReset"
+                        onclick="mostrarFiltroSolicitacoes('reset')"
+                    >Tokens</button>
+                </div>
+
+                <div id="listaSolicitacoesCadastro" class="lista-solicitacoes">
                     <p>Carregando solicitações...</p>
+                </div>
+
+                <div id="listaSolicitacoesReset" class="lista-solicitacoes" style="display:none;">
+                    <div class="solicitacao-vazia">
+                        <span class="solicitacao-vazia-icone">🔑</span>
+                        <strong>Recuperação de tokens</strong>
+                        <p>As solicitações de recuperação aparecerão aqui.</p>
+                    </div>
                 </div>
             </div>
 
