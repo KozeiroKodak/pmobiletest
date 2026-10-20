@@ -116,6 +116,8 @@ const itensMenuSistema = [
 //
 // ============================================================
 
+const PMOBILE_LOGIN_STORAGE_KEY = "pmobile_login_persistente";
+
 const telasPesquisa = [
 
     "menuPesquisaInterno",
@@ -469,6 +471,13 @@ function sairPmobile() {
     tokenPmobileAtual = null;
     window.usuarioPmobileAtual = null;
 
+    limparLoginPmobileSalvo();
+
+    const checkbox = document.getElementById("loginManterLogin");
+    if (checkbox) {
+        checkbox.checked = false;
+    }
+
     const aplicacao = document.getElementById("aplicacao");
     const login = document.getElementById("loginPmobile");
     const inicio = document.getElementById("inicio");
@@ -503,6 +512,164 @@ function sairPmobile() {
     }
 
     atualizarVisibilidadeConfiguracoes();
+
+}
+
+
+function salvarLoginPmobile(usuario, token, dadosUsuario) {
+
+    try {
+        localStorage.setItem(
+            PMOBILE_LOGIN_STORAGE_KEY,
+            JSON.stringify({
+                usuario: usuario,
+                token: token,
+                dadosUsuario: dadosUsuario,
+                salvoEm: new Date().toISOString()
+            })
+        );
+    } catch (erro) {
+        console.warn("⚠️ Não foi possível salvar o login:", erro);
+    }
+
+}
+
+
+function limparLoginPmobileSalvo() {
+
+    try {
+        localStorage.removeItem(PMOBILE_LOGIN_STORAGE_KEY);
+    } catch (erro) {
+        console.warn("⚠️ Não foi possível remover o login salvo:", erro);
+    }
+
+}
+
+
+function obterLoginPmobileSalvo() {
+
+    try {
+        const salvo = localStorage.getItem(PMOBILE_LOGIN_STORAGE_KEY);
+
+        if (!salvo) {
+            return null;
+        }
+
+        const dados = JSON.parse(salvo);
+
+        if (
+            !dados ||
+            !dados.usuario ||
+            !dados.token ||
+            !dados.dadosUsuario
+        ) {
+            limparLoginPmobileSalvo();
+            return null;
+        }
+
+        return dados;
+
+    } catch (erro) {
+        console.warn("⚠️ Login salvo inválido:", erro);
+        limparLoginPmobileSalvo();
+        return null;
+    }
+
+}
+
+
+function restaurarSessaoPmobile(dadosUsuario, token) {
+
+    usuarioPmobileAtual = dadosUsuario;
+    window.usuarioPmobileAtual = dadosUsuario;
+    tokenPmobileAtual = token;
+
+    atualizarVisibilidadeConfiguracoes();
+
+    const inicio = document.getElementById("inicio");
+    const login = document.getElementById("loginPmobile");
+    const aplicacao = document.getElementById("aplicacao");
+
+    if (inicio) inicio.style.display = "none";
+    if (login) login.style.display = "none";
+    if (aplicacao) aplicacao.style.display = "block";
+
+    mostrarTelaSistema("homeSistema", null);
+
+}
+
+
+async function tentarRestaurarLoginPmobile() {
+
+    const checkbox = document.getElementById("loginManterLogin");
+    const salvo = obterLoginPmobileSalvo();
+
+    if (checkbox) {
+        checkbox.checked = !!salvo;
+    }
+
+    if (!salvo) {
+        return;
+    }
+
+    restaurarSessaoPmobile(salvo.dadosUsuario, salvo.token);
+
+    if (!navigator.onLine) {
+        console.log("📴 PMOBILE iniciou offline com login mantido.");
+        return;
+    }
+
+    if (!window.clienteSupabase) {
+        console.log("📴 Supabase indisponível; mantendo sessão salva.");
+        return;
+    }
+
+    try {
+
+        const resultado = await window.clienteSupabase.rpc(
+            "autenticar_usuario",
+            {
+                p_usuario: salvo.usuario,
+                p_token: salvo.token
+            }
+        );
+
+        if (resultado.error) {
+            throw resultado.error;
+        }
+
+        const usuarioValidado =
+            Array.isArray(resultado.data)
+                ? resultado.data[0]
+                : resultado.data;
+
+        if (!usuarioValidado) {
+            limparLoginPmobileSalvo();
+            sairPmobile();
+            mostrarStatusLogin(
+                "O token salvo não é mais válido. Entre novamente.",
+                true
+            );
+            return;
+        }
+
+        restaurarSessaoPmobile(usuarioValidado, salvo.token);
+        salvarLoginPmobile(salvo.usuario, salvo.token, usuarioValidado);
+
+        console.log("✅ Login mantido e validado pelo servidor.");
+
+    } catch (erro) {
+
+        console.warn(
+            "⚠️ Não foi possível validar o login salvo. Mantendo sessão offline:",
+            erro
+        );
+
+        // Se não foi possível falar com o servidor, preservamos
+        // a sessão local para permitir o uso offline.
+        restaurarSessaoPmobile(salvo.dadosUsuario, salvo.token);
+
+    }
 
 }
 
@@ -653,6 +820,18 @@ async function entrarInterface(event) {
             usuarioAutenticado;
 
         tokenPmobileAtual = token;
+
+        const manterLogin = document.getElementById("loginManterLogin");
+
+        if (manterLogin && manterLogin.checked) {
+            salvarLoginPmobile(
+                usuario,
+                token,
+                usuarioAutenticado
+            );
+        } else {
+            limparLoginPmobileSalvo();
+        }
 
         atualizarVisibilidadeConfiguracoes();
 
@@ -2023,5 +2202,33 @@ async function confirmarZeramento(
 // ============================================================
 // FIM - CONTROLE DE NAVEGAÇÃO DO PMOBILE
 // ============================================================
+
+// ============================================================
+// RESTAURAÇÃO AUTOMÁTICA DO LOGIN
+// ============================================================
+//
+// Executada depois que todo o web layer foi carregado.
+// O localStorage permanece mesmo após:
+//
+// - fechar o aplicativo;
+// - reiniciar o aparelho;
+// - ficar sem internet;
+// - receber uma nova OTA.
+//
+// ============================================================
+
+if (document.readyState === "loading") {
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        tentarRestaurarLoginPmobile
+    );
+
+} else {
+
+    tentarRestaurarLoginPmobile();
+
+}
+
 
 window.PMOBILE_OK = true;
