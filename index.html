@@ -103,12 +103,48 @@
                 onclick="avisoLoginTeste()"
             >Esqueceu seu token?</button>
 
+            <button
+                type="button"
+                class="login-criar-usuario"
+                onclick="abrirSolicitacaoCadastro()"
+            >Criar usuário</button>
+
         </form>
 
         <p id="loginStatus" class="login-status" aria-live="polite"></p>
 
     </div>
 
+</div>
+
+
+<div id="modalSolicitacaoCadastro" class="modal-cadastro-usuario" style="display:none;">
+    <div class="modal-cadastro-usuario-caixa">
+        <div class="modal-cadastro-usuario-cabecalho">
+            <div>
+                <span class="modal-cadastro-usuario-caminho">PMOBILE</span>
+                <h2>Criar usuário</h2>
+            </div>
+            <button type="button" class="modal-cadastro-usuario-fechar" onclick="fecharSolicitacaoCadastro()" aria-label="Fechar">×</button>
+        </div>
+
+        <p>Informe seus dados. O cadastro ficará pendente até a aprovação de um administrador.</p>
+
+        <form onsubmit="enviarSolicitacaoCadastro(event)">
+            <label for="cadastroNome">Nome</label>
+            <input type="text" id="cadastroNome" placeholder="Seu nome" autocomplete="name">
+
+            <label for="cadastroUsuario">Usuário desejado</label>
+            <input type="text" id="cadastroUsuario" placeholder="Usuário para entrar no PMOBILE" autocomplete="off">
+
+            <p id="cadastroStatus" class="login-status" aria-live="polite"></p>
+
+            <div class="modal-cadastro-usuario-acoes">
+                <button type="button" class="botao-secundario" onclick="fecharSolicitacaoCadastro()">Cancelar</button>
+                <button type="submit" class="login-entrar">Solicitar cadastro</button>
+            </div>
+        </form>
+    </div>
 </div>
 
 
