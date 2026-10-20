@@ -2242,7 +2242,10 @@ if (document.readyState === "loading") {
 
     document.addEventListener(
         "DOMContentLoaded",
-        tentarRestaurarLoginPmobile
+        function() {
+            configurarValidacaoCampoUsuarioPmobile();
+            tentarRestaurarLoginPmobile();
+        }
     );
 
 } else {
