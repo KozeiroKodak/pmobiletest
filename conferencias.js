@@ -1144,37 +1144,77 @@ async function carregarConferencias() {
 
 
             // =================================================
-            // Substituir/mesclar com a versão oficial.
+            // Reconciliação oficial.
+            //
+            // O Supabase é a fonte central. Registros locais que
+            // já foram sincronizados e não existem mais no Supabase
+            // devem desaparecer deste aparelho.
+            //
+            // A única exceção são conferências ainda pendentes na
+            // fila offline, que precisam ser preservadas.
             // =================================================
+
+            let pendentesAtuais = [];
+
+            if (typeof obterConferenciasPendentes === "function") {
+                try {
+                    const filaAtual = await obterConferenciasPendentes();
+
+                    pendentesAtuais = filaAtual
+                        .map(item => item?.conferencia)
+                        .filter(item => item?.conferenciaId);
+                } catch (erroFilaAtual) {
+                    console.warn(
+                        "Não foi possível recuperar a fila antes da reconciliação:",
+                        erroFilaAtual
+                    );
+                }
+            }
+
+            conferencias = [];
 
             dadosSupabase.forEach(
                 adicionarConferenciaSemDuplicar
             );
 
+            pendentesAtuais.forEach(
+                adicionarConferenciaSemDuplicar
+            );
 
-            // =================================================
-            // Salvar cópia local atualizada.
-            // =================================================
-
+            // O histórico local também passa a refletir exatamente
+            // o estado central + pendências locais.
             try {
 
+                await limparHistoricoLocalConferencias();
+
                 await salvarListaNoHistoricoLocal(
-                    dadosSupabase
+                    [
+                        ...dadosSupabase,
+                        ...pendentesAtuais.filter(
+                            pendente =>
+                                !dadosSupabase.some(
+                                    central =>
+                                        central.conferenciaId ===
+                                        pendente.conferenciaId
+                                )
+                        )
+                    ]
                 );
 
             } catch (erroHistorico) {
 
                 console.warn(
-                    "Supabase carregado, mas não foi possível atualizar o histórico local:",
+                    "Supabase carregado, mas não foi possível reconciliar o histórico local:",
                     erroHistorico
                 );
 
             }
 
-
             console.log(
-                "Conferências carregadas do Supabase:",
-                dadosSupabase.length
+                "Conferências reconciliadas com o Supabase:",
+                dadosSupabase.length,
+                "| pendentes locais:",
+                pendentesAtuais.length
             );
 
 
