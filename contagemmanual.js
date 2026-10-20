@@ -200,7 +200,16 @@ async function limparContagensManuais() {
         alert("✅ Contagem manual apagada com sucesso!");
     } catch (erro) {
         console.error("Erro ao limpar contagens manuais:", erro);
-        alert("❌ Não foi possível limpar a contagem manual.");
+        const detalhe =
+            erro?.message ||
+            erro?.details ||
+            erro?.hint ||
+            String(erro);
+
+        alert(
+            "❌ Não foi possível limpar a contagem manual.\\n\\n" +
+            detalhe
+        );
     }
 }
 
