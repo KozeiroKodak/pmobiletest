@@ -189,6 +189,11 @@ async function exibirDivergencias() {
                         0
                     );
 
+                const usuarioNome =
+                    contagem.usuario_nome ??
+                    contagem.usuarioNome ??
+                    "Usuário não identificado";
+
 
                 // ============================================
                 // FALTANTE
@@ -335,6 +340,11 @@ async function exibirDivergencias() {
                             ${escaparHTMLDivergencias(
                                 codigo
                             )}
+                        </p>
+
+                        <p>
+                            <strong>Realizado por:</strong>
+                            ${escaparHTMLDivergencias(usuarioNome)}
                         </p>
 
                         <p>
