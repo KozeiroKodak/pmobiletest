@@ -431,20 +431,14 @@ function abrirSistema() {
 
 
 // ============================================================
-// LOGIN — AUTENTICAÇÃO POR SENHA / ATIVAÇÃO POR TOKEN
+// LOGIN — SENHA / PRIMEIRO ACESSO
 // ============================================================
 //
-// O acesso ao sistema depende exclusivamente de um usuário
-// ativo existente no Supabase.
+// No primeiro acesso, basta informar o usuário aprovado.
+// O banco verifica internamente se existe uma ativação pendente
+// (token de aprovação ainda válido e nenhuma senha criada).
 //
-// O token é enviado somente para a função PostgreSQL:
-//
-//     autenticar_usuario(usuario, credencial)
-//
-// O banco compara o hash armazenado e retorna o usuário
-// somente quando as credenciais são válidas.
-//
-// Nenhum usuário válido = nenhum acesso à aplicação.
+// Depois que a senha existe, o login normal usa usuário + senha.
 //
 // ============================================================
 
@@ -485,7 +479,7 @@ function sairPmobile() {
     const login = document.getElementById("loginPmobile");
     const inicio = document.getElementById("inicio");
     const campoUsuario = document.getElementById("loginUsuario");
-    const campoToken = document.getElementById("loginSenha");
+    const campoSenha = document.getElementById("loginSenha");
     const status = document.getElementById("loginStatus");
 
     if (aplicacao) {
@@ -500,8 +494,8 @@ function sairPmobile() {
         inicio.style.display = "none";
     }
 
-    if (campoToken) {
-        campoToken.value = "";
+    if (campoSenha) {
+        campoSenha.value = "";
     }
 
     usuarioPmobileCadastroSenha = null;
@@ -684,10 +678,10 @@ async function tentarRestaurarLoginPmobile() {
 }
 
 
-function abrirCriacaoSenha(usuario, token, dadosUsuario) {
+function abrirCriacaoSenha(usuario, dadosUsuario) {
 
     usuarioPmobileCadastroSenha = usuario;
-    tokenPmobileCadastroSenha = token;
+    tokenPmobileCadastroSenha = true;
 
     const login = document.getElementById("loginPmobile");
     const criarSenha = document.getElementById("criarSenhaPmobile");
@@ -773,7 +767,7 @@ async function criarSenhaPmobile(event) {
     if (!usuarioPmobileCadastroSenha || !tokenPmobileCadastroSenha) {
         voltarLoginCriacaoSenha();
         mostrarStatusLogin(
-            "A sessão de ativação expirou. Informe o token novamente.",
+            "A ativação deste usuário não está mais disponível.",
             true
         );
         return;
@@ -820,7 +814,6 @@ async function criarSenhaPmobile(event) {
                 "criar_senha_usuario",
                 {
                     p_usuario: usuarioPmobileCadastroSenha,
-                    p_token: tokenPmobileCadastroSenha,
                     p_senha: senha
                 }
             );
@@ -973,39 +966,84 @@ async function entrarInterface(event) {
             ? campoUsuario.value.trim()
             : "";
 
-    const credencial =
+    const senha =
         campoSenha
             ? campoSenha.value
             : "";
 
-    if (!usuario || !credencial) {
-
+    if (!usuario) {
         mostrarStatusLogin(
-            "Informe o usuário e a senha.",
+            "Informe o usuário.",
             true
         );
-
         return;
-
     }
 
     if (!window.clienteSupabase) {
-
         mostrarStatusLogin(
             "Não foi possível conectar ao servidor.",
             true
         );
-
         return;
-
     }
 
-    mostrarStatusLogin(
-        "Validando acesso..."
-    );
+    mostrarStatusLogin("Validando acesso...");
 
     try {
 
+        // Primeiro acesso: usuário aprovado, ainda sem senha.
+        if (!senha) {
+
+            const { data, error } =
+                await window.clienteSupabase.rpc(
+                    "autenticar_usuario",
+                    {
+                        p_usuario: usuario
+                    }
+                );
+
+            if (error) {
+                console.error(
+                    "❌ Erro ao verificar primeiro acesso:",
+                    error
+                );
+
+                mostrarStatusLogin(
+                    "Não foi possível validar o acesso.",
+                    true
+                );
+                return;
+            }
+
+            const usuarioAtivacao =
+                Array.isArray(data)
+                    ? data[0]
+                    : data;
+
+            if (
+                usuarioAtivacao &&
+                usuarioAtivacao.precisa_criar_senha
+            ) {
+                abrirCriacaoSenha(
+                    usuarioAtivacao.usuario,
+                    usuarioAtivacao
+                );
+
+                mostrarStatusCriarSenha(
+                    "Seu usuário foi aprovado. Agora crie sua senha de acesso."
+                );
+
+                return;
+            }
+
+            mostrarStatusLogin(
+                "Usuário ou senha inválidos.",
+                true
+            );
+            return;
+        }
+
+        // Login normal: usuário + senha.
         const {
             data,
             error
@@ -1014,12 +1052,11 @@ async function entrarInterface(event) {
                 "autenticar_usuario",
                 {
                     p_usuario: usuario,
-                    p_credencial: credencial
+                    p_credencial: senha
                 }
             );
 
         if (error) {
-
             console.error(
                 "❌ Erro na autenticação:",
                 error
@@ -1029,9 +1066,7 @@ async function entrarInterface(event) {
                 "Não foi possível validar o acesso.",
                 true
             );
-
             return;
-
         }
 
         const usuarioAutenticado =
@@ -1040,7 +1075,6 @@ async function entrarInterface(event) {
                 : data;
 
         if (!usuarioAutenticado) {
-
             mostrarStatusLogin(
                 "Usuário ou senha inválidos.",
                 true
@@ -1052,32 +1086,11 @@ async function entrarInterface(event) {
             }
 
             return;
-
         }
 
-        if (usuarioAutenticado.precisa_criar_senha) {
-
-            abrirCriacaoSenha(
-                usuarioAutenticado.usuario,
-                credencial,
-                usuarioAutenticado
-            );
-
-            mostrarStatusCriarSenha(
-                "Seu usuário foi aprovado. Agora crie sua senha de acesso."
-            );
-
-            return;
-
-        }
-
-        usuarioPmobileAtual =
-            usuarioAutenticado;
-
-        window.usuarioPmobileAtual =
-            usuarioAutenticado;
-
-        credencialPmobileAtual = null;
+        usuarioPmobileAtual = usuarioAutenticado;
+        window.usuarioPmobileAtual = usuarioAutenticado;
+        credencialPmobileAtual = senha;
 
         const manterLogin =
             document.getElementById("loginManterLogin");
@@ -1085,7 +1098,7 @@ async function entrarInterface(event) {
         if (manterLogin && manterLogin.checked) {
             salvarLoginPmobile(
                 usuario,
-                credencial,
+                senha,
                 usuarioAutenticado
             );
         } else {
@@ -1103,11 +1116,18 @@ async function entrarInterface(event) {
             }
         );
 
+        const inicio =
+            document.getElementById("inicio");
+
         const login =
             document.getElementById("loginPmobile");
 
         const aplicacao =
             document.getElementById("aplicacao");
+
+        if (inicio) {
+            inicio.style.display = "none";
+        }
 
         if (login) {
             login.style.display = "none";
@@ -1122,17 +1142,15 @@ async function entrarInterface(event) {
             null
         );
 
-        mostrarStatusLogin("");
-
     } catch (erro) {
 
         console.error(
-            "❌ Falha inesperada na autenticação:",
+            "❌ Falha inesperada no login:",
             erro
         );
 
         mostrarStatusLogin(
-            "Erro ao tentar entrar. Tente novamente.",
+            "Erro ao entrar no PMOBILE. Tente novamente.",
             true
         );
 
