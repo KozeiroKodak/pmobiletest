@@ -838,6 +838,18 @@
                     </select>
                     <input type="text" id="campoContagemManual" placeholder="Digite o código" autocomplete="off">
                     <button class="botao-aba" onclick="buscarMaterialContagemManual()">🔎 Buscar</button>
+                    <div class="acoes-contagem-manual-config">
+                        <button
+                            type="button"
+                            class="botao-aba botao-config-contagem-manual"
+                            onclick="alternarMenuConfiguracoesContagemManual()"
+                            aria-label="Configurações da contagem manual"
+                            title="Configurações"
+                        >⚙️</button>
+                        <div id="menuConfiguracoesContagemManual" class="menu-config-contagem-manual" style="display: none;">
+                            <button type="button" onclick="limparContagensManuais()">🗑️ Limpar contagem manual</button>
+                        </div>
+                    </div>
                 </div>
                 <div id="resultadoBuscaContagemManual"></div>
             </div>
