@@ -348,7 +348,7 @@ async function exibirDivergencias() {
 
                     </div>
 
-                `;
+                `);
 
             }
 
