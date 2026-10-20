@@ -207,152 +207,43 @@ let statusSupabasePrioritario =
 //
 // ============================================================
 
-function mostrarStatusSupabase(
-    mensagem,
-    prioridade = false
-) {
+function mostrarStatusSupabase(mensagem, prioridade = false) {
 
-    // ========================================================
-    // ATIVAR STATUS PRIORITÁRIO
-    // ========================================================
-    //
-    // O dados.js chama esta função com prioridade = true
-    // quando está sincronizando o inventário offline.
-    //
-    // ========================================================
-
-    if (
-        prioridade === true
-    ) {
-
-        statusSupabasePrioritario =
-            true;
-
+    if (prioridade === true) {
+        statusSupabasePrioritario = true;
     }
-
-
-    // ========================================================
-    // BLOQUEAR MENSAGENS NORMAIS
-    // ========================================================
-    //
-    // Se existe uma operação prioritária ativa e a nova
-    // mensagem não é prioritária, ela não poderá substituir
-    // o status atual.
-    //
-    // ========================================================
 
     if (
         statusSupabasePrioritario === true &&
         prioridade !== true
     ) {
-
         console.log(
-            "ℹ️ Status comum do Supabase ignorado porque " +
-            "existe um status prioritário ativo:",
+            "ℹ️ Status comum do Supabase ignorado porque existe " +
+            "um status prioritário ativo:",
             mensagem
         );
-
         return;
-
     }
 
+    let status = document.getElementById("statusSupabase");
 
-    // ========================================================
-    // PROCURAR AVISO EXISTENTE
-    // ========================================================
-
-    let status =
-        document.getElementById(
-            "statusSupabase"
-        );
-
-
-    // ========================================================
-    // CRIAR AVISO CASO NÃO EXISTA
-    // ========================================================
-
-    if (
-        !status
-    ) {
-
-        status =
-            document.createElement(
-                "div"
-            );
-
-        status.id =
-            "statusSupabase";
-
-        document.body.appendChild(
-            status
-        );
-
+    if (!status) {
+        status = document.createElement("div");
+        status.id = "statusSupabase";
+        document.body.appendChild(status);
     }
 
+    status.innerHTML = "";
 
-    // ========================================================
-    // LIMPAR CONTEÚDO ANTERIOR
-    // ========================================================
+    const faixa = document.createElement("div");
+    faixa.className = "statusSupabase-faixa";
 
-    status.innerHTML =
-        "";
+    const textoStatus = document.createElement("span");
+    textoStatus.textContent = mensagem;
 
-
-    // ========================================================
-    // CRIAR TEXTO
-    // ========================================================
-
-    const textoStatus =
-        document.createElement(
-            "span"
-        );
-
-    textoStatus.textContent =
-        mensagem;
-
-
-    // ========================================================
-    // ADICIONAR TEXTO
-    // ========================================================
-
-    status.appendChild(
-        textoStatus
-    );
-
-
-    // ========================================================
-    // CRIAR BOTÃO FECHAR
-    // ========================================================
-
-    const botaoFechar =
-        document.createElement(
-            "button"
-        );
-
-    botaoFechar.type =
-        "button";
-
-    botaoFechar.textContent =
-        "✕";
-
-    botaoFechar.title =
-        "Fechar aviso";
-
-    botaoFechar.onclick =
-        fecharStatusSupabase;
-
-
-    // ========================================================
-    // ADICIONAR BOTÃO
-    // ========================================================
-
-    status.appendChild(
-        botaoFechar
-    );
-
+    faixa.appendChild(textoStatus);
+    status.appendChild(faixa);
 }
-
-
 
 
 // ============================================================
@@ -495,172 +386,23 @@ function mostrarErrosSupabase(
     quantidadeErros
 ) {
 
-    // ========================================================
-    // PROCURAR PAINEL
-    // ========================================================
+    const quantidade = Number(quantidadeErros || 0);
+    const total = Number(totalEncontrado || 0);
 
-    let area =
-        document.getElementById(
-            "resultadoVerificacaoSupabase"
-        );
+    const mensagem =
+        "ℹ️ Supabase: " +
+        total.toLocaleString("pt-BR") +
+        " materiais verificados — " +
+        quantidade.toLocaleString("pt-BR") +
+        " inconsistências encontradas para revisão.";
 
-
-    // ========================================================
-    // CRIAR PAINEL
-    // ========================================================
-
-    if (
-        !area
-    ) {
-
-        area =
-            document.createElement(
-                "div"
-            );
-
-        area.id =
-            "resultadoVerificacaoSupabase";
-
-        document.body.appendChild(
-            area
-        );
-
-    }
-
-
-    // ========================================================
-    // INICIAR HTML
-    // ========================================================
-
-    let html =
-        "";
-
-
-    // ========================================================
-    // TÍTULO
-    // ========================================================
-
-    html +=
-        "<h3>⚠️ Problemas encontrados</h3>";
-
-
-    // ========================================================
-    // TOTAL DE MATERIAIS
-    // ========================================================
-
-    html +=
-        "<p><strong>" +
-        totalEncontrado.toLocaleString(
-            "pt-BR"
-        ) +
-        "</strong> materiais verificados.</p>";
-
-
-    // ========================================================
-    // TOTAL DE PROBLEMAS
-    // ========================================================
-
-    html +=
-        "<p><strong>" +
-        quantidadeErros.toLocaleString(
-            "pt-BR"
-        ) +
-        "</strong> problemas encontrados.</p>";
-
-
-    html +=
-        "<hr>";
-
-
-    // ========================================================
-    // SEM DETALHES
-    // ========================================================
-
-    if (
-        erros.length === 0
-    ) {
-
-        html +=
-            "<p>🟢 Nenhum problema detalhado encontrado.</p>";
-
-    } else {
-
-        html +=
-            "<p><strong>Detalhes:</strong></p>";
-
-        html +=
-            "<ul>";
-
-
-        // ====================================================
-        // MOSTRAR NO MÁXIMO 20 PROBLEMAS
-        // ====================================================
-
+    console.log(
+        "ℹ️ Diagnóstico encontrou inconsistências:",
         erros
-            .slice(
-                0,
-                20
-            )
-            .forEach(
-                erro => {
+    );
 
-                    html +=
-                        "<li>" +
-                        escaparHTML(
-                            erro
-                        ) +
-                        "</li>";
-
-                }
-            );
-
-
-        html +=
-            "</ul>";
-
-
-        // ====================================================
-        // MAIS DE 20 PROBLEMAS
-        // ====================================================
-
-        if (
-            erros.length > 20
-        ) {
-
-            html +=
-                "<p>" +
-                "⚠️ Apenas os primeiros 20 problemas " +
-                "estão sendo exibidos." +
-                "</p>";
-
-        }
-
-    }
-
-
-    // ========================================================
-    // BOTÃO FECHAR
-    // ========================================================
-
-    html +=
-        "<br>" +
-        "<button " +
-        "type=\"button\" " +
-        "onclick=\"fecharErrosSupabase()\">" +
-        "Fechar" +
-        "</button>";
-
-
-    // ========================================================
-    // MOSTRAR CONTEÚDO
-    // ========================================================
-
-    area.innerHTML =
-        html;
-
+    mostrarStatusSupabase(mensagem);
 }
-
-
 
 
 // ============================================================
