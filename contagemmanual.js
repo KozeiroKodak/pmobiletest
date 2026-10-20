@@ -187,18 +187,103 @@ function selecionarMaterialContagemManual(material) {
     if (local) local.focus();
 }
 
-function lerContagensManuais() {
+async function lerContagensManuais() {
     try {
-        const dados = JSON.parse(localStorage.getItem(CHAVE_CONTAGENS_MANUAIS) || "[]");
-        return Array.isArray(dados) ? dados : [];
+        const banco = await abrirBancoLocalPmobile();
+
+        const dados = await new Promise(function(resolve, reject) {
+            const transacao = banco.transaction(
+                PMOBILE_IDB_STORE_CONTAGENS_MANUAIS,
+                "readonly"
+            );
+            const tabela = transacao.objectStore(
+                PMOBILE_IDB_STORE_CONTAGENS_MANUAIS
+            );
+            const requisicao = tabela.getAll();
+
+            requisicao.onsuccess = function(evento) {
+                resolve(
+                    Array.isArray(evento.target.result)
+                        ? evento.target.result
+                        : []
+                );
+            };
+
+            requisicao.onerror = function() {
+                reject(
+                    requisicao.error ||
+                    new Error("Não foi possível ler as contagens manuais.")
+                );
+            };
+        });
+
+        banco.close();
+
+        if (dados.length) {
+            return dados;
+        }
+
+        // Migração única: preserva contagens que ainda estejam no localStorage.
+        let antigas = [];
+        try {
+            const legado = localStorage.getItem(CHAVE_CONTAGENS_MANUAIS);
+            antigas = JSON.parse(legado || "[]");
+        } catch (erroLegado) {
+            console.warn("Não foi possível ler contagens manuais antigas:", erroLegado);
+        }
+
+        if (Array.isArray(antigas) && antigas.length) {
+            await gravarContagensManuais(antigas);
+            await gravarContagensManuais([]);
+            return antigas;
+        }
+
+        return [];
     } catch (erro) {
         console.error("Erro ao ler contagens manuais:", erro);
         return [];
     }
 }
 
-function gravarContagensManuais(lista) {
-    localStorage.setItem(CHAVE_CONTAGENS_MANUAIS, JSON.stringify(lista));
+async function gravarContagensManuais(lista) {
+    const dados = Array.isArray(lista) ? lista : [];
+    const banco = await abrirBancoLocalPmobile();
+
+    try {
+        await new Promise(function(resolve, reject) {
+            const transacao = banco.transaction(
+                PMOBILE_IDB_STORE_CONTAGENS_MANUAIS,
+                "readwrite"
+            );
+            const tabela = transacao.objectStore(
+                PMOBILE_IDB_STORE_CONTAGENS_MANUAIS
+            );
+
+            tabela.clear();
+
+            dados.forEach(function(item) {
+                if (item && item.id !== undefined && item.id !== null) {
+                    tabela.put(item);
+                }
+            });
+
+            transacao.oncomplete = resolve;
+            transacao.onerror = function() {
+                reject(
+                    transacao.error ||
+                    new Error("Não foi possível salvar as contagens manuais.")
+                );
+            };
+            transacao.onabort = function() {
+                reject(
+                    transacao.error ||
+                    new Error("A gravação das contagens manuais foi cancelada.")
+                );
+            };
+        });
+    } finally {
+        banco.close();
+    }
 }
 
 function alternarMenuConfiguracoesContagemManual() {
@@ -322,9 +407,9 @@ async function salvarContagemManual() {
         sincronizado: false
     };
 
-    const lista = lerContagensManuais();
+    const lista = await lerContagensManuais();
     lista.unshift(registro);
-    gravarContagensManuais(lista);
+    await gravarContagensManuais(lista);
 
     if (status) status.textContent = "Contagem salva offline. Sincronizando...";
     quantidadeCampo.value = "";
@@ -351,7 +436,7 @@ async function sincronizarContagensManuaisPendentes(limpezaEm = null) {
         : lista;
 
     if (listaFiltrada.length !== lista.length) {
-        gravarContagensManuais(listaFiltrada);
+        await gravarContagensManuais(listaFiltrada);
     }
     const pendentes = listaFiltrada.filter(item => !item.sincronizado);
     if (!pendentes.length) return;
@@ -454,7 +539,7 @@ async function baixarContagensManuaisSupabase(limpezaEm = null) {
         // Somente registros locais ainda pendentes são preservados.
         // Registros já sincronizados que não existem mais no Supabase
         // precisam desaparecer deste dispositivo também.
-        const locais = lerContagensManuais();
+        const locais = await lerContagensManuais();
         const limiteLimpeza = limpezaEm ? new Date(limpezaEm).getTime() : null;
         const pendentesLocais = locais.filter(item => {
             if (item.sincronizado) return false;
@@ -493,7 +578,7 @@ async function baixarContagensManuaisSupabase(limpezaEm = null) {
                 String(b.dataHora || "").localeCompare(String(a.dataHora || ""))
             );
 
-        gravarContagensManuais(sincronizadas);
+        await gravarContagensManuais(sincronizadas);
         return true;
     } catch (erro) {
         console.warn("Não foi possível baixar contagens manuais do Supabase:", erro);
@@ -520,7 +605,7 @@ async function atualizarContagensManuais() {
 
         const status = document.getElementById("statusContagemManual");
         if (status) {
-            const pendentes = lerContagensManuais().filter(item => !item.sincronizado).length;
+            const pendentes = (await lerContagensManuais()).filter(item => !item.sincronizado).length;
             status.textContent = pendentes
                 ? "Sincronização pendente — verificando novamente em 10 segundos."
                 : "Sincronizado com o Supabase.";
@@ -556,11 +641,11 @@ window.addEventListener("focus", sincronizarContagemManualAoRetomar);
 window.addEventListener("pageshow", sincronizarContagemManualAoRetomar);
 document.addEventListener("visibilitychange", sincronizarContagemManualAoRetomar);
 
-function exibirContagensManuais() {
+async function exibirContagensManuais() {
     const area = document.getElementById("listaContagensManuais");
     if (!area) return;
 
-    const lista = lerContagensManuais();
+    const lista = await lerContagensManuais();
     area.innerHTML = "";
 
     if (!lista.length) {
