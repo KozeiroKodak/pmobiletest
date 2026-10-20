@@ -386,6 +386,21 @@ function sairPmobile() {
 }
 
 
+function sanitizarCampoUsuarioPmobile(campo) {
+
+    if (!campo) {
+        return;
+    }
+
+    const valorAnterior = campo.value;
+
+    campo.value = valorAnterior.replace(
+        /[^A-Za-z0-9._-]/g,
+        ""
+    );
+
+}
+
 function salvarLoginPmobile(usuario, senha, dadosUsuario) {
 
     try {
@@ -2200,6 +2215,28 @@ async function confirmarZeramento(
 // - receber uma nova OTA.
 //
 // ============================================================
+
+function configurarValidacaoCampoUsuarioPmobile() {
+
+    const campoUsuario =
+        document.getElementById("loginUsuario");
+
+    if (!campoUsuario || campoUsuario.dataset.pmobileUsuarioSanitizado === "true") {
+        return;
+    }
+
+    campoUsuario.dataset.pmobileUsuarioSanitizado = "true";
+
+    campoUsuario.addEventListener(
+        "input",
+        function() {
+            sanitizarCampoUsuarioPmobile(campoUsuario);
+        }
+    );
+
+    sanitizarCampoUsuarioPmobile(campoUsuario);
+
+}
 
 if (document.readyState === "loading") {
 
