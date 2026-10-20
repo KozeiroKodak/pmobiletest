@@ -183,187 +183,241 @@
 
 
 /* ============================================================
-   LOGIN PMOBILE — PRIMEIRA INTERFACE PARA TESTES
-   Layout isolado do estilo base.
+   LOGIN PMOBILE
+   Configurações individuais: não reutiliza estilos da sidebar,
+   botões gerais, painéis ou formulários do restante do PMOBILE.
    ============================================================ */
 
-.login-pmobile {
+#loginPmobile.login-pmobile {
+    --login-fundo: #ffffff;
+    --login-texto: #202124;
+    --login-secundario: #777777;
+    --login-borda: #d8d8d8;
+    --login-campo: #ffffff;
+    --login-acao: #222222;
+    --login-acao-texto: #ffffff;
+
+    width: 100%;
     min-height: 100vh;
-    background: #121212;
-    color: #ffffff;
+    padding: 0;
+    background: var(--login-fundo);
+    color: var(--login-texto);
+    font-family: Arial, Helvetica, sans-serif;
 }
 
-.login-pmobile-topo {
-    min-height: 54px;
+#loginPmobile .login-pmobile-topo {
+    width: 100%;
+    min-height: 58px;
     display: grid;
-    grid-template-columns: 44px 1fr 44px;
+    grid-template-columns: 52px 1fr 52px;
     align-items: center;
-    padding: 0 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 0 14px;
+    border: 0;
+    border-bottom: 1px solid #eeeeee;
+    background: #ffffff;
     text-align: center;
 }
 
-.login-pmobile-topo strong {
-    font-size: 14px;
-    letter-spacing: 0.08em;
+#loginPmobile .login-pmobile-topo strong {
+    color: #242424;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0;
 }
 
-.login-topo-espaco {
-    width: 44px;
+#loginPmobile .login-topo-espaco {
+    width: 52px;
 }
 
-.login-voltar {
-    width: 40px;
-    height: 40px;
+#loginPmobile .login-voltar {
+    width: 42px;
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
     border: 0;
+    border-radius: 50%;
     background: transparent;
-    color: #ffffff;
+    color: #333333;
+    font-family: Arial, Helvetica, sans-serif;
     font-size: 32px;
+    font-weight: 300;
     line-height: 1;
     cursor: pointer;
 }
 
-.login-pmobile-corpo {
-    width: min(100% - 40px, 420px);
-    margin: 0 auto;
-    padding: 54px 0 36px;
+#loginPmobile .login-voltar:hover {
+    background: #f3f3f3;
 }
 
-.login-pmobile-marca {
-    margin-bottom: 34px;
+#loginPmobile .login-pmobile-corpo {
+    width: calc(100% - 44px);
+    max-width: 390px;
+    margin: 0 auto;
+    padding: 58px 0 42px;
+}
+
+#loginPmobile .login-pmobile-marca {
+    margin: 0 0 38px;
     text-align: center;
 }
 
-.login-pmobile-logo {
-    width: 64px;
-    height: 64px;
+#loginPmobile .login-pmobile-logo {
+    width: 72px;
+    height: 72px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 22px;
+    margin: 0 auto 24px;
+    border: 1px solid #e4e4e4;
     border-radius: 50%;
     background: #ffffff;
-    color: #121212;
-    font-size: 30px;
+    color: #202020;
+    font-size: 31px;
     font-weight: 700;
 }
 
-.login-pmobile-marca h1 {
-    margin: 0 0 8px;
+#loginPmobile .login-pmobile-marca h1 {
+    margin: 0 0 10px;
+    color: #202020;
     font-size: 25px;
-    font-weight: 600;
+    font-weight: 500;
+    line-height: 1.2;
 }
 
-.login-pmobile-marca p {
+#loginPmobile .login-pmobile-marca p {
     margin: 0;
-    color: #a9a9a9;
+    color: var(--login-secundario);
     font-size: 14px;
+    line-height: 1.45;
 }
 
-.login-pmobile-form {
+#loginPmobile .login-pmobile-form {
+    width: 100%;
     display: flex;
     flex-direction: column;
+    margin: 0;
+    padding: 0;
 }
 
-.login-pmobile-form label {
-    margin: 0 0 7px;
-    color: #cfcfcf;
+#loginPmobile .login-pmobile-form label {
+    margin: 0 0 8px;
+    color: #555555;
     font-size: 13px;
+    font-weight: 400;
 }
 
-.login-pmobile-form > input,
-.login-senha-campo {
+#loginPmobile .login-pmobile-form > input,
+#loginPmobile .login-senha-campo {
     width: 100%;
-    min-height: 50px;
-    margin-bottom: 18px;
-    border: 1px solid #3a3a3a;
-    border-radius: 7px;
-    background: #1d1d1d;
+    min-height: 48px;
+    margin: 0 0 18px;
+    border: 1px solid var(--login-borda);
+    border-radius: 4px;
+    background: var(--login-campo);
+    box-shadow: none;
 }
 
-.login-pmobile-form > input,
-.login-senha-campo input {
-    box-sizing: border-box;
-    color: #ffffff;
-    font-family: inherit;
+#loginPmobile .login-pmobile-form > input,
+#loginPmobile .login-senha-campo input {
+    color: #222222;
+    font-family: Arial, Helvetica, sans-serif;
     font-size: 15px;
+}
+
+#loginPmobile .login-pmobile-form > input {
+    padding: 0 14px;
     outline: none;
 }
 
-.login-pmobile-form > input {
-    padding: 0 14px;
+#loginPmobile .login-pmobile-form > input::placeholder,
+#loginPmobile .login-senha-campo input::placeholder {
+    color: #a0a0a0;
 }
 
-.login-pmobile-form > input:focus,
-.login-senha-campo:focus-within {
-    border-color: #8a8a8a;
+#loginPmobile .login-pmobile-form > input:focus,
+#loginPmobile .login-senha-campo:focus-within {
+    border-color: #777777;
+    outline: none;
 }
 
-.login-senha-campo {
+#loginPmobile .login-senha-campo {
     display: flex;
     align-items: center;
+    overflow: hidden;
 }
 
-.login-senha-campo input {
+#loginPmobile .login-senha-campo input {
     min-width: 0;
     flex: 1;
-    height: 48px;
-    padding: 0 12px 0 14px;
+    height: 46px;
+    padding: 0 8px 0 14px;
     border: 0;
+    outline: none;
     background: transparent;
 }
 
-.login-mostrar-senha {
-    height: 48px;
-    padding: 0 14px;
+#loginPmobile .login-mostrar-senha {
+    height: 46px;
+    padding: 0 13px;
     border: 0;
     background: transparent;
-    color: #bdbdbd;
-    font-family: inherit;
+    color: #666666;
+    font-family: Arial, Helvetica, sans-serif;
     font-size: 12px;
     cursor: pointer;
 }
 
-.login-entrar {
+#loginPmobile .login-entrar {
     width: 100%;
-    min-height: 50px;
-    margin-top: 6px;
+    min-height: 48px;
+    margin: 6px 0 0;
+    padding: 0 18px;
     border: 0;
-    border-radius: 7px;
-    background: #ffffff;
-    color: #121212;
-    font-family: inherit;
+    border-radius: 4px;
+    background: var(--login-acao);
+    color: var(--login-acao-texto);
+    font-family: Arial, Helvetica, sans-serif;
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 600;
+    letter-spacing: 0.02em;
     cursor: pointer;
 }
 
-.login-entrar:active {
-    background: #e6e6e6;
+#loginPmobile .login-entrar:hover {
+    background: #333333;
 }
 
-.login-esqueceu {
+#loginPmobile .login-entrar:active {
+    background: #111111;
+}
+
+#loginPmobile .login-esqueceu {
     align-self: center;
-    margin-top: 22px;
-    padding: 8px;
+    margin: 18px 0 0;
+    padding: 8px 10px;
     border: 0;
     background: transparent;
-    color: #bdbdbd;
-    font-family: inherit;
+    color: #666666;
+    font-family: Arial, Helvetica, sans-serif;
     font-size: 13px;
+    text-decoration: underline;
     cursor: pointer;
 }
 
-.login-status {
+#loginPmobile .login-status {
     min-height: 20px;
     margin: 18px 0 0;
-    color: #a9a9a9;
+    color: #777777;
     font-size: 13px;
+    line-height: 1.4;
     text-align: center;
 }
 
 @media (min-width: 700px) {
-    .login-pmobile-corpo {
-        padding-top: 72px;
+    #loginPmobile .login-pmobile-corpo {
+        max-width: 410px;
+        padding-top: 76px;
     }
 }
