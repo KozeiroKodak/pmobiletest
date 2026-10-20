@@ -158,6 +158,9 @@ function converterConferenciaSupabaseParaPMobile(
         usuarioId:
             registro.usuario_id ?? null,
 
+        usuarioNome:
+            registro.usuario_nome ?? "",
+
         data:
             registro.criado_em ?? null,
 
@@ -237,7 +240,13 @@ function converterConferenciaPMobileParaSupabase(
             ),
 
         status:
-            contagem.status ?? "CONFERIDO"
+            contagem.status ?? "CONFERIDO",
+
+        usuario_id:
+            contagem.usuarioId ?? (window.usuarioPmobileAtual?.id ?? null),
+
+        usuario_nome:
+            contagem.usuarioNome ?? (window.usuarioPmobileAtual?.nome ?? window.usuarioPmobileAtual?.usuario ?? null)
 
     };
 
