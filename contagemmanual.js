@@ -265,14 +265,30 @@ async function salvarContagemManual() {
     quantidadeCampo.value = "";
     exibirContagensManuais();
 
-    await sincronizarContagensManuaisPendentes();
+    await atualizarContagensManuais();
 }
 
-async function sincronizarContagensManuaisPendentes() {
+async function sincronizarContagensManuaisPendentes(limpezaEm = null) {
     if (!navigator.onLine || typeof obterClienteSupabase !== "function") return;
 
     const lista = lerContagensManuais();
-    const pendentes = lista.filter(item => !item.sincronizado);
+
+    // Uma limpeza administrativa no servidor invalida qualquer
+    // contagem offline que existia antes daquele momento.
+    // Contagens criadas depois da limpeza continuam válidas.
+    const limiteLimpeza = limpezaEm ? new Date(limpezaEm).getTime() : null;
+    const listaFiltrada = limiteLimpeza !== null
+        ? lista.filter(item => {
+            if (item.sincronizado) return true;
+            const dataItem = new Date(item.dataHora || 0).getTime();
+            return !Number.isFinite(dataItem) || dataItem > limiteLimpeza;
+        })
+        : lista;
+
+    if (listaFiltrada.length !== lista.length) {
+        gravarContagensManuais(listaFiltrada);
+    }
+    const pendentes = listaFiltrada.filter(item => !item.sincronizado);
     if (!pendentes.length) return;
 
     const cliente = obterClienteSupabase();
@@ -318,12 +334,12 @@ async function sincronizarContagensManuaisPendentes() {
     }
 
     if (alterou) {
-        gravarContagensManuais(lista);
+        gravarContagensManuais(listaFiltrada);
         exibirContagensManuais();
     }
 
     const status = document.getElementById("statusContagemManual");
-    const restantes = lista.filter(item => !item.sincronizado).length;
+    const restantes = listaFiltrada.filter(item => !item.sincronizado).length;
     if (status) status.textContent = restantes ?
         "Contagem salva offline. Sincronização pendente." :
         "Contagem salva e sincronizada com o Supabase.";
@@ -333,7 +349,17 @@ window.addEventListener("online", function() {
     atualizarContagensManuais();
 });
 
-async function baixarContagensManuaisSupabase() {
+async function obterLimpezaContagensManuaisSupabase() {
+    if (typeof obterClienteSupabase !== "function") return null;
+
+    const cliente = obterClienteSupabase();
+    const { data, error } = await cliente.rpc("obter_limpeza_contagens_manuais");
+
+    if (error) throw error;
+    return data || null;
+}
+
+async function baixarContagensManuaisSupabase(limpezaEm = null) {
     if (typeof obterClienteSupabase !== "function") return false;
     try {
         const cliente = obterClienteSupabase();
@@ -364,7 +390,14 @@ async function baixarContagensManuaisSupabase() {
         // Registros já sincronizados que não existem mais no Supabase
         // precisam desaparecer deste dispositivo também.
         const locais = lerContagensManuais();
-        const pendentesLocais = locais.filter(item => !item.sincronizado);
+        const limiteLimpeza = limpezaEm ? new Date(limpezaEm).getTime() : null;
+        const pendentesLocais = locais.filter(item => {
+            if (item.sincronizado) return false;
+            if (limiteLimpeza === null) return true;
+
+            const dataItem = new Date(item.dataHora || 0).getTime();
+            return !Number.isFinite(dataItem) || dataItem > limiteLimpeza;
+        });
         const porId = new Map(
             pendentesLocais.map(item => [String(item.id), item])
         );
@@ -411,8 +444,13 @@ async function atualizarContagensManuais() {
     sincronizacaoContagensManuaisEmAndamento = true;
 
     try {
-        await sincronizarContagensManuaisPendentes();
-        await baixarContagensManuaisSupabase();
+        // Primeiro consultamos a marca de limpeza central.
+        // Assim uma contagem offline antiga não consegue ressuscitar
+        // registros que o ADMIN acabou de apagar em outro aparelho.
+        const limpezaEm = await obterLimpezaContagensManuaisSupabase();
+
+        await sincronizarContagensManuaisPendentes(limpezaEm);
+        await baixarContagensManuaisSupabase(limpezaEm);
         exibirContagensManuais();
 
         const status = document.getElementById("statusContagemManual");
