@@ -873,7 +873,7 @@ async function carregarConferenciasSupabase() {
                 .from("conferencias")
 
                 .select(
-                    "id,conferencia_id,material_id,codigo_material,descricao_material,referencia_material,quantidade_esperada,quantidade_fisica,diferenca,status,usuario_id,criado_em"
+                    "id,conferencia_id,material_id,codigo_material,descricao_material,referencia_material,quantidade_esperada,quantidade_fisica,diferenca,status,usuario_id,usuario_nome,criado_em"
                 )
 
                 .order(
@@ -1679,18 +1679,25 @@ async function limparConferenciasSupabase() {
 
     try {
 
+        const usuarioSessao =
+            (typeof usuarioPmobileAtual !== "undefined" && usuarioPmobileAtual?.usuario)
+                ? usuarioPmobileAtual
+                : window.usuarioPmobileAtual;
+
+        const credencialSessao =
+            (typeof credencialPmobileAtual !== "undefined" && credencialPmobileAtual)
+                ? credencialPmobileAtual
+                : window.credencialPmobileAtual;
+
+        if (!usuarioSessao?.usuario || !credencialSessao) {
+            throw new Error("Sessão administrativa sem credencial disponível.");
+        }
+
         const { error } =
-            await clienteSupabase
-
-                .from("conferencias")
-
-                .delete()
-
-                .not(
-                    "id",
-                    "is",
-                    null
-                );
+            await clienteSupabase.rpc("limpar_conferencias", {
+                p_usuario: usuarioSessao.usuario,
+                p_credencial: credencialSessao
+            });
 
 
         if (
