@@ -48,9 +48,12 @@ async function buscarMaterialContagemManual() {
         const camposPermitidos = ["codigo", "descricao", "referencia"];
         const campoBusca = camposPermitidos.includes(tipoBusca) ? tipoBusca : "codigo";
 
-        const encontrados = inventario.filter(material =>
-            normalizarTextoContagemManual(material[campoBusca]).includes(busca)
-        ).slice(0, 50);
+        const encontrados = inventario.filter(material => {
+            const valorCampo = normalizarTextoContagemManual(material[campoBusca]);
+            return campoBusca === "codigo"
+                ? valorCampo === busca
+                : valorCampo.includes(busca);
+        }).slice(0, 50);
 
         renderizarResultadosContagemManual(encontrados);
     } catch (erro) {
