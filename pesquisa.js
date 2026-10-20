@@ -223,7 +223,7 @@ async function pesquisarLocalmente(
                     .includes(busca);
 
             }
-        );
+        ).slice(0, 100);
 
 
     } catch (erro) {
@@ -506,7 +506,9 @@ async function pesquisarPorCodigo() {
                     {
                         ascending: true
                     }
-                );
+                )
+
+                .limit(100);
 
 
         if (error) {
@@ -715,7 +717,9 @@ async function pesquisarPorDescricao() {
                     {
                         ascending: true
                     }
-                );
+                )
+
+                .limit(100);
 
 
         if (error) {
@@ -905,7 +909,9 @@ async function pesquisarPorReferencia() {
                     {
                         ascending: true
                     }
-                );
+                )
+
+                .limit(100);
 
 
         if (error) {
