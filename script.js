@@ -1318,6 +1318,60 @@ function abrirConfiguracoes() {
         "menuConfiguracoes"
     );
 
+    const admin = document.getElementById("painelConfiguracoesAdmin");
+    const manutencao = document.getElementById("painelConfiguracoesManutencao");
+    const conta = document.getElementById("painelConfiguracoesUsuario");
+    const resumo = document.getElementById("resumoContaPmobile");
+    const usuario = window.usuarioPmobileAtual;
+    const isAdmin = usuario && usuario.nivel === "ADMIN";
+
+    if (admin) admin.style.display = isAdmin ? "block" : "none";
+    if (manutencao) manutencao.style.display = "none";
+    if (conta) conta.style.display = "block";
+
+    if (resumo) {
+        resumo.innerHTML = usuario
+            ? "<strong>" + (usuario.nome || usuario.usuario) + "</strong><br>Usuário: " + usuario.usuario + "<br>Nível: " + usuario.nivel
+            : "Nenhum usuário autenticado.";
+    }
+
+}
+
+
+function abrirManutencaoBanco() {
+
+    if (!window.usuarioPmobileAtual || window.usuarioPmobileAtual.nivel !== "ADMIN") {
+        alert("Acesso administrativo negado.");
+        return;
+    }
+
+    const manutencao = document.getElementById("painelConfiguracoesManutencao");
+    if (manutencao) manutencao.style.display = "block";
+
+}
+
+
+function abrirGerenciamentoUsuarios() {
+
+    if (!window.usuarioPmobileAtual || window.usuarioPmobileAtual.nivel !== "ADMIN") {
+        alert("Acesso administrativo negado.");
+        return;
+    }
+
+    alert("Gerenciamento de usuários será conectado às solicitações de cadastro na próxima etapa.");
+
+}
+
+
+function abrirSolicitacoesResetToken() {
+
+    if (!window.usuarioPmobileAtual || window.usuarioPmobileAtual.nivel !== "ADMIN") {
+        alert("Acesso administrativo negado.");
+        return;
+    }
+
+    alert("Solicitações de recuperação de token serão exibidas nesta área na próxima etapa.");
+
 }
 
 
