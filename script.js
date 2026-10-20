@@ -1352,6 +1352,8 @@ function abrirConfiguracoes() {
 
     const admin = document.getElementById("painelConfiguracoesAdmin");
     const manutencao = document.getElementById("painelConfiguracoesManutencao");
+    const usuarios = document.getElementById("painelGerenciamentoUsuarios");
+    const reset = document.getElementById("painelGerenciamentoReset");
     const conta = document.getElementById("painelConfiguracoesUsuario");
     const resumo = document.getElementById("resumoContaPmobile");
     const usuario = window.usuarioPmobileAtual;
@@ -1359,6 +1361,8 @@ function abrirConfiguracoes() {
 
     if (admin) admin.style.display = isAdmin ? "block" : "none";
     if (manutencao) manutencao.style.display = "none";
+    if (usuarios) usuarios.style.display = "none";
+    if (reset) reset.style.display = "none";
     if (conta) conta.style.display = "block";
 
     if (resumo) {
