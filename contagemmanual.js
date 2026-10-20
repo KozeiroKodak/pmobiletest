@@ -298,13 +298,22 @@ async function sincronizarContagensManuaisPendentes() {
                 usuario_nome: item.usuarioNome ?? window.usuarioPmobileAtual?.nome ?? window.usuarioPmobileAtual?.usuario ?? "Usuário não identificado"
             };
 
-            const { error } = await cliente.from(TABELA_CONTAGENS_MANUAIS_SUPABASE).insert(payload);
-            if (error && error.code !== "23505") throw error;
+            const { error } = await cliente
+                .from(TABELA_CONTAGENS_MANUAIS_SUPABASE)
+                .upsert(payload, { onConflict: "id" });
+
+            if (error) throw error;
 
             item.sincronizado = true;
             alterou = true;
         } catch (erro) {
             console.warn("Contagem manual mantida offline para nova tentativa:", erro);
+
+            const statusErro = document.getElementById("statusContagemManual");
+            if (statusErro) {
+                statusErro.textContent =
+                    "⚠️ Falha ao sincronizar contagem manual. Nova tentativa em 10 segundos.";
+            }
         }
     }
 
