@@ -136,6 +136,59 @@ function gravarContagensManuais(lista) {
     localStorage.setItem(CHAVE_CONTAGENS_MANUAIS, JSON.stringify(lista));
 }
 
+function alternarMenuConfiguracoesContagemManual() {
+    const menu = document.getElementById("menuConfiguracoesContagemManual");
+    if (!menu) return;
+    menu.style.display = menu.style.display === "none" ? "block" : "none";
+}
+
+function fecharMenuConfiguracoesContagemManual() {
+    const menu = document.getElementById("menuConfiguracoesContagemManual");
+    if (menu) menu.style.display = "none";
+}
+
+async function limparContagensManuais() {
+    const confirmar = confirm(
+        "⚠️ ATENÇÃO!\n\n" +
+        "Todas as contagens manuais serão apagadas.\n\n" +
+        "Os materiais do inventário NÃO serão apagados.\n\n" +
+        "Deseja continuar?"
+    );
+
+    if (!confirmar) return;
+
+    fecharMenuConfiguracoesContagemManual();
+
+    try {
+        if (navigator.onLine && typeof obterClienteSupabase === "function") {
+            const cliente = obterClienteSupabase();
+            const { error } = await cliente
+                .from(TABELA_CONTAGENS_MANUAIS_SUPABASE)
+                .delete()
+                .not("id", "is", null);
+
+            if (error) throw error;
+        }
+
+        localStorage.removeItem(CHAVE_CONTAGENS_MANUAIS);
+        materialContagemManualSelecionado = null;
+
+        const painel = document.getElementById("painelRegistroContagemManual");
+        if (painel) painel.style.display = "none";
+
+        exibirContagensManuais();
+
+        const status = document.getElementById("statusContagemManual");
+        if (status) status.textContent = "Todas as contagens manuais foram apagadas.";
+
+        alert("✅ Contagem manual apagada com sucesso!");
+    } catch (erro) {
+        console.error("Erro ao limpar contagens manuais:", erro);
+        alert("❌ Não foi possível limpar a contagem manual.");
+    }
+}
+
+
 async function salvarContagemManual() {
     const material = materialContagemManualSelecionado;
     const localCampo = document.getElementById("localContagemManual");
