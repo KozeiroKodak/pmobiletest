@@ -2308,6 +2308,20 @@ async function importarParaSupabase(
             "☁️ Finalizando inventário no Supabase..."
         );
 
+        const usuarioSessao =
+            (typeof usuarioPmobileAtual !== "undefined" && usuarioPmobileAtual?.usuario)
+                ? usuarioPmobileAtual
+                : window.usuarioPmobileAtual;
+
+        const credencialSessao =
+            (typeof credencialPmobileAtual !== "undefined" && credencialPmobileAtual)
+                ? credencialPmobileAtual
+                : window.credencialPmobileAtual;
+
+        if (!usuarioSessao?.usuario || !credencialSessao) {
+            throw new Error("Sessão administrativa sem credencial disponível.");
+        }
+
         const {
             data: totalInserido,
             error: erroFinalizacao
@@ -2315,8 +2329,9 @@ async function importarParaSupabase(
             await window.clienteSupabase.rpc(
                 "pmobile_finalizar_importacao_materiais",
                 {
-                    p_importacao_id:
-                        importacaoId
+                    p_importacao_id: importacaoId,
+                    p_usuario: usuarioSessao.usuario,
+                    p_credencial: credencialSessao
                 }
             );
 
