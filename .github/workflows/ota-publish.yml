@@ -5,9 +5,9 @@ on:
     branches:
       - main
     paths:
-      - '*.html'
-      - '*.css'
-      - '*.js'
+      - '**/*.html'
+      - '**/*.css'
+      - '**/*.js'
   workflow_dispatch:
 
 permissions:
