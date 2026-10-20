@@ -537,3 +537,22 @@
 .modal-cadastro-usuario-acoes button {
     flex: 1;
 }
+
+
+/* ============================================================
+   CONFIGURAÇÕES / PAINEL ADMINISTRATIVO
+   ============================================================ */
+
+.configuracoes-acoes {
+    display: grid;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.configuracoes-acoes button {
+    width: 100%;
+}
+
+.configuracoes-painel-admin {
+    border-left: 4px solid currentColor;
+}
