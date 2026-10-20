@@ -55,6 +55,9 @@
     --sidebar-largura: 240px;
     --sidebar-mobile: 58px;
 
+    /* ALTURA RESERVADA PARA A BARRA DE STATUS */
+    --status-altura: 52px;
+
 
     /* FUNDOS */
 
@@ -339,6 +342,14 @@ body {
     border-right:
         1px solid
         var(--borda);
+
+    /*
+       A barra de status fica fixed sobre a janela.
+       Reservamos espaço dentro da sidebar para que o botão
+       Configurações nunca fique atrás dela.
+    */
+    padding-bottom:
+        var(--status-altura);
 
     z-index:
         1000;
@@ -1711,7 +1722,7 @@ input[type="file"] {
         100%;
 
     min-height:
-        44px;
+        var(--status-altura);
 
 
     /* ========================================================
