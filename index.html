@@ -14,7 +14,7 @@
 
     <link
         rel="stylesheet"
-        href="style.css?v=0.0.23"
+        href="style.css?v=20261020-botoes"
     >
 
 </head>
@@ -703,7 +703,7 @@
                         <option value="referencia">Referência</option>
                     </select>
                     <input type="text" id="campoContagemManual" placeholder="Digite o código" autocomplete="off">
-                    <button class="botao-principal" onclick="buscarMaterialContagemManual()">Buscar</button>
+                    <button class="botao-aba" onclick="buscarMaterialContagemManual()">🔎 Buscar</button>
                 </div>
                 <div id="resultadoBuscaContagemManual"></div>
             </div>
@@ -714,7 +714,7 @@
                 <div class="linha-formulario">
                     <input type="text" id="localContagemManual" placeholder="Local encontrado" autocomplete="off">
                     <input type="number" id="quantidadeContagemManual" placeholder="Quantidade física" min="0" step="1" inputmode="numeric">
-                    <button class="botao-principal" onclick="salvarContagemManual()">Salvar contagem</button>
+                    <button class="botao-aba" onclick="salvarContagemManual()">✓ Salvar contagem</button>
                 </div>
                 <div id="statusContagemManual"></div>
             </div>
@@ -886,7 +886,7 @@
                 <div class="acoes-importacao">
 
                     <button
-                        class="botao-principal"
+                        class="botao-aba"
                         onclick="importarExcel()"
                     >
                         Importar planilha
@@ -894,7 +894,7 @@
 
 
                     <button
-                        class="botao-perigo"
+                        class="botao-aba"
                         onclick="abrirModalZerarInventario()"
                     >
                         🗑️ Zerar inventário
