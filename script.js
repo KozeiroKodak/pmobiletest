@@ -426,10 +426,25 @@ function abrirSistema() {
 
 
 // ============================================================
-// LOGIN — NAVEGAÇÃO E COMPORTAMENTO VISUAL
+// LOGIN — AUTENTICAÇÃO POR TOKEN
 // ============================================================
-// Nesta primeira etapa não existe autenticação real.
-// O formulário serve somente para testar layout e fluxo.
+//
+// O acesso ao sistema depende exclusivamente de um usuário
+// ativo existente no Supabase.
+//
+// O token é enviado somente para a função PostgreSQL:
+//
+//     autenticar_usuario(usuario, token)
+//
+// O banco compara o hash armazenado e retorna o usuário
+// somente quando as credenciais são válidas.
+//
+// Nenhum usuário válido = nenhum acesso à aplicação.
+//
+// ============================================================
+
+let usuarioPmobileAtual = null;
+
 
 function voltarInicio() {
 
@@ -467,39 +482,177 @@ function alternarSenhaLogin() {
 }
 
 
-function entrarInterface(event) {
+function mostrarStatusLogin(mensagem, erro = false) {
+
+    const status = document.getElementById("loginStatus");
+
+    if (!status) {
+        return;
+    }
+
+    status.textContent = mensagem;
+    status.classList.toggle("erro", erro);
+
+}
+
+
+async function entrarInterface(event) {
 
     if (event) {
         event.preventDefault();
     }
 
-    const login = document.getElementById("loginPmobile");
-    const aplicacao = document.getElementById("aplicacao");
+    const campoUsuario =
+        document.getElementById("loginUsuario");
 
-    if (login) {
-        login.style.display = "none";
+    const campoToken =
+        document.getElementById("loginSenha");
+
+    const login =
+        document.getElementById("loginPmobile");
+
+    const aplicacao =
+        document.getElementById("aplicacao");
+
+    const usuario =
+        campoUsuario
+            ? campoUsuario.value.trim()
+            : "";
+
+    const token =
+        campoToken
+            ? campoToken.value
+            : "";
+
+    if (!usuario || !token) {
+
+        mostrarStatusLogin(
+            "Informe o usuário e o token.",
+            true
+        );
+
+        return;
+
     }
 
-    if (aplicacao) {
-        aplicacao.style.display = "block";
+    if (!window.clienteSupabase) {
+
+        mostrarStatusLogin(
+            "Não foi possível conectar ao servidor.",
+            true
+        );
+
+        return;
+
     }
 
-    mostrarTelaSistema(
-        "homeSistema",
-        null
+    mostrarStatusLogin(
+        "Validando acesso..."
     );
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await window.clienteSupabase.rpc(
+                "autenticar_usuario",
+                {
+                    p_usuario: usuario,
+                    p_token: token
+                }
+            );
+
+        if (error) {
+
+            console.error(
+                "❌ Erro na autenticação:",
+                error
+            );
+
+            mostrarStatusLogin(
+                "Não foi possível validar o acesso.",
+                true
+            );
+
+            return;
+
+        }
+
+        const usuarioAutenticado =
+            Array.isArray(data)
+                ? data[0]
+                : data;
+
+        if (!usuarioAutenticado) {
+
+            mostrarStatusLogin(
+                "Usuário ou token inválido.",
+                true
+            );
+
+            if (campoToken) {
+                campoToken.value = "";
+                campoToken.focus();
+            }
+
+            return;
+
+        }
+
+        usuarioPmobileAtual =
+            usuarioAutenticado;
+
+        window.usuarioPmobileAtual =
+            usuarioAutenticado;
+
+        console.log(
+            "✅ Usuário autenticado:",
+            {
+                id: usuarioAutenticado.id,
+                usuario: usuarioAutenticado.usuario,
+                nivel: usuarioAutenticado.nivel
+            }
+        );
+
+        if (login) {
+            login.style.display = "none";
+        }
+
+        if (aplicacao) {
+            aplicacao.style.display = "block";
+        }
+
+        mostrarTelaSistema(
+            "homeSistema",
+            null
+        );
+
+        mostrarStatusLogin("");
+
+    } catch (erro) {
+
+        console.error(
+            "❌ Falha inesperada na autenticação:",
+            erro
+        );
+
+        mostrarStatusLogin(
+            "Erro ao tentar entrar. Tente novamente.",
+            true
+        );
+
+    }
 
 }
 
 
 function avisoLoginTeste() {
 
-    const status = document.getElementById("loginStatus");
-
-    if (status) {
-        status.textContent =
-            "Recuperação de senha será conectada na etapa de usuários.";
-    }
+    mostrarStatusLogin(
+        "A recuperação do token será feita pelo administrador."
+    );
 
 }
 
