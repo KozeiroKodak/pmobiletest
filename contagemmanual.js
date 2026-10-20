@@ -168,7 +168,7 @@ async function limparContagensManuais() {
         const cliente = obterClienteSupabase();
         const { error } = await cliente.rpc("limpar_contagens_manuais", {
             p_usuario: window.usuarioPmobileAtual?.usuario ?? "",
-            p_credencial: typeof credencialPmobileAtual !== "undefined" ? credencialPmobileAtual : ""
+            p_credencial: window.credencialPmobileAtual ?? (typeof credencialPmobileAtual !== "undefined" ? credencialPmobileAtual : "")
         });
 
         if (error) throw error;
