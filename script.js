@@ -1318,23 +1318,16 @@ async function enviarSolicitacaoCadastro(event) {
 
 function abrirPesquisa() {
 
-    // ========================================================
-    // MOSTRAR TELA PRINCIPAL DA PESQUISA
-    // ========================================================
-
     mostrarTelaSistema(
         "pesquisa",
         "menuPesquisa"
     );
 
+    const campo = document.getElementById("campoPesquisaMaterial");
 
-    // ========================================================
-    // MOSTRAR MENU INTERNO DA PESQUISA
-    // ========================================================
-
-    mostrarTelaPesquisa(
-        "menuPesquisaInterno"
-    );
+    if (campo) {
+        campo.focus();
+    }
 
 }
 
