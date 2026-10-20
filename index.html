@@ -78,14 +78,14 @@
                 autocomplete="username"
             >
 
-            <label for="loginSenha">Token</label>
+            <label for="loginSenha">Senha</label>
             <div class="login-senha-campo">
                 <input
                     type="password"
                     id="loginSenha"
                     name="senha"
-                    placeholder="Token de acesso"
-                    autocomplete="off"
+                    placeholder="Senha de acesso"
+                    autocomplete="current-password"
                 >
                 <button
                     type="button"
@@ -94,6 +94,10 @@
                     aria-label="Mostrar ou ocultar senha"
                 >Mostrar</button>
             </div>
+
+            <p class="login-ajuda">
+                No primeiro acesso, use o token de aprovação no campo senha.
+            </p>
 
             <label class="login-manter-login">
                 <input
@@ -109,7 +113,7 @@
                 type="button"
                 class="login-esqueceu"
                 onclick="avisoLoginTeste()"
-            >Esqueceu seu token?</button>
+            >Esqueceu sua senha?</button>
 
             <button
                 type="button"
@@ -1210,6 +1214,101 @@
 
 
     </main>
+
+
+</div>
+
+
+<!-- =========================================================
+     CRIAÇÃO DA SENHA — PRIMEIRO ACESSO
+     ========================================================= -->
+
+<div id="criarSenhaPmobile" class="login-pmobile" style="display: none;">
+
+    <div class="login-pmobile-topo">
+        <button
+            type="button"
+            class="login-voltar"
+            onclick="voltarLoginCriacaoSenha()"
+            aria-label="Voltar"
+        >‹</button>
+
+        <strong>PMOBILE</strong>
+        <span class="login-topo-espaco"></span>
+    </div>
+
+    <div class="login-pmobile-corpo">
+
+        <div class="login-pmobile-marca">
+            <div class="login-pmobile-logo">P</div>
+            <h1>Criar senha</h1>
+            <p id="criarSenhaNome">Crie sua senha de acesso ao PMOBILE.</p>
+        </div>
+
+        <form
+            class="login-pmobile-form"
+            onsubmit="criarSenhaPmobile(event)"
+        >
+
+            <label for="criarSenha">Digite sua senha</label>
+
+            <div class="login-senha-campo">
+                <input
+                    type="password"
+                    id="criarSenha"
+                    name="criarSenha"
+                    placeholder="Digite sua senha"
+                    autocomplete="new-password"
+                >
+
+                <button
+                    type="button"
+                    class="login-mostrar-senha"
+                    onclick="alternarCampoSenha('criarSenha', this)"
+                    aria-label="Mostrar ou ocultar senha"
+                >Mostrar</button>
+            </div>
+
+
+            <label for="confirmarSenha">Confirmar senha</label>
+
+            <div class="login-senha-campo">
+                <input
+                    type="password"
+                    id="confirmarSenha"
+                    name="confirmarSenha"
+                    placeholder="Confirme sua senha"
+                    autocomplete="new-password"
+                >
+
+                <button
+                    type="button"
+                    class="login-mostrar-senha"
+                    onclick="alternarCampoSenha('confirmarSenha', this)"
+                    aria-label="Mostrar ou ocultar senha"
+                >Mostrar</button>
+            </div>
+
+
+            <p class="login-ajuda">
+                A senha deve ter pelo menos 8 caracteres.
+            </p>
+
+
+            <button
+                type="submit"
+                class="login-entrar"
+            >CRIAR SENHA</button>
+
+        </form>
+
+        <p
+            id="criarSenhaStatus"
+            class="login-status"
+            aria-live="polite"
+        ></p>
+
+    </div>
 
 </div>
 
