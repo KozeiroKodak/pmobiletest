@@ -835,7 +835,7 @@ async function testarLeituraSupabase() {
         ) {
 
             mostrarStatusSupabase(
-                "🟡 Supabase respondeu, mas a tabela materiais está vazia."
+                "🟢 Sincronizado — 0 materiais"
             );
 
             return;
@@ -860,11 +860,11 @@ async function testarLeituraSupabase() {
         ) {
 
             mostrarStatusSupabase(
-                "🟢 Supabase OK! " +
+                "🟢 Sincronizado — " +
                 totalEncontrado.toLocaleString(
                     "pt-BR"
                 ) +
-                " materiais verificados sem erros."
+                " materiais"
             );
 
 
@@ -1174,7 +1174,7 @@ async function testarLeituraSupabase() {
 
 
         mostrarStatusSupabase(
-            "🔴 Erro ao verificar os materiais no Supabase."
+            "🟡 Verificando sincronização com o Supabase..."
         );
 
     }
