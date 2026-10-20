@@ -465,6 +465,7 @@ function sairPmobile() {
 
     usuarioPmobileAtual = null;
     credencialPmobileAtual = null;
+    window.credencialPmobileAtual = null;
     window.usuarioPmobileAtual = null;
 
     limparLoginPmobileSalvo();
@@ -585,6 +586,7 @@ function restaurarSessaoPmobile(dadosUsuario, senha) {
     usuarioPmobileAtual = dadosUsuario;
     window.usuarioPmobileAtual = dadosUsuario;
     credencialPmobileAtual = senha;
+    window.credencialPmobileAtual = senha;
 
     atualizarVisibilidadeConfiguracoes();
 
@@ -843,6 +845,7 @@ async function criarSenhaPmobile(event) {
         // Sem isso, o usuário ADMIN conseguiria entrar no app, mas as operações
         // administrativas seriam bloqueadas por credencial ausente.
         credencialPmobileAtual = senha;
+        window.credencialPmobileAtual = senha;
 
         if (manterLogin && manterLogin.checked) {
             salvarLoginPmobile(
