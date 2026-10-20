@@ -1105,25 +1105,30 @@
             </div>
 
 
-            <div class="painel">
+            <div class="painel configuracoes-painel-admin" id="painelConfiguracoesAdmin" style="display: none;">
 
-                <h2>
-                    🗄️ Limpar banco de dados
-                </h2>
+                <h2>👑 Administração</h2>
 
-                <p>
-                    Gerenciamento dos dados armazenados
-                    no Supabase.
-                </p>
+                <p>Gerenciamento de usuários, tokens e solicitações.</p>
 
+                <div class="configuracoes-acoes">
+                    <button class="botao-aba" onclick="abrirGerenciamentoUsuarios()">👥 Usuários</button>
+                    <button class="botao-aba" onclick="abrirSolicitacoesResetToken()">🔑 Recuperação de tokens</button>
+                    <button class="botao-perigo" onclick="abrirManutencaoBanco()">🛠️ Manutenção</button>
+                </div>
 
-                <button
-                    class="botao-perigo"
-                    onclick="limparMateriaisSupabase()"
-                >
-                    🗑️ Materiais importados
-                </button>
+            </div>
 
+            <div class="painel" id="painelConfiguracoesManutencao" style="display: none;">
+                <h2>🛠️ Manutenção</h2>
+                <p>Operações administrativas do banco de dados.</p>
+                <button class="botao-perigo" onclick="limparMateriaisSupabase()">🗑️ Materiais importados</button>
+            </div>
+
+            <div class="painel" id="painelConfiguracoesUsuario" style="display: none;">
+                <h2>👤 Conta</h2>
+                <p>Informações da conta atualmente conectada.</p>
+                <div id="resumoContaPmobile"></div>
             </div>
 
         </section>
