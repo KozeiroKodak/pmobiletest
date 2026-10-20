@@ -54,10 +54,17 @@ jobs:
 
           grep -qF 'pmobile_finalizar_importacao_materiais' importacao.js
 
-          if grep -qE '\\.from\\(["'"']materiais["'"']\\)[[:space:]]*\\.delete' importacao.js; then
-            echo "ERRO: importacao.js ainda executa DELETE direto em materiais."
-            exit 1
-          fi
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+
+          source = Path("importacao.js").read_text()
+          pattern = r'\\.from\\(\\s*["\\\']materiais["\\\']\\s*\\)\\s*\\.delete'
+          if re.search(pattern, source):
+              raise SystemExit(
+                  "ERRO: importacao.js ainda executa DELETE direto em materiais."
+              )
+          PY
 
           echo "Importação atômica: OK"
 
