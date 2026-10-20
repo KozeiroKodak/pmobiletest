@@ -270,6 +270,11 @@ async function exibirDivergencias() {
                 // OBTER DADOS
                 // ============================================
 
+                const usuarioNome =
+                    contagem.usuario_nome ??
+                    contagem.usuarioNome ??
+                    "Usuário não identificado";
+
                 const codigo =
                     contagem.codigo_material ??
                     contagem.codigo ??
