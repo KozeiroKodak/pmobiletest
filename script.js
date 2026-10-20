@@ -760,9 +760,7 @@ async function enviarSolicitacaoCadastro(event) {
             return;
         }
 
-        const solicitacao = Array.isArray(data) ? data[0] : data;
-
-        if (!solicitacao) {
+        if (data == null) {
             mostrarStatusCadastro("Não foi possível registrar a solicitação.", true);
             return;
         }
