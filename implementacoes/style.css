@@ -1,0 +1,100 @@
+/* ============================================================
+   PMOBILE
+   ARQUIVO: implementacoes/style.css
+   ============================================================
+
+   Estilos visuais adicionados durante implementações específicas.
+   Este arquivo fica separado do estilo estrutural principal.
+
+   ============================================================ */
+
+.botao-aba {
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--texto-secundario);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: background 0.12s ease, color 0.12s ease;
+}
+
+.botao-aba:hover {
+    background: var(--fundo-hover);
+    color: #ffffff;
+}
+
+.botao-aba:active {
+    background: var(--fundo-ativo);
+}
+
+.seletor-contagem-manual {
+    min-height: 40px;
+    padding: 8px 34px 8px 10px;
+    border: 0;
+    border-radius: 6px;
+    outline: none;
+    background: transparent;
+    color: var(--texto-secundario);
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.12s ease, color 0.12s ease;
+}
+
+.seletor-contagem-manual:hover,
+.seletor-contagem-manual:focus {
+    background: var(--fundo-hover);
+    color: #ffffff;
+}
+
+.seletor-contagem-manual option {
+    background: var(--fundo-painel);
+    color: #ffffff;
+}
+
+.arquivo-importacao {
+    max-width: 100%;
+    min-height: 40px;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--texto-secundario);
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.arquivo-importacao::file-selector-button {
+    min-height: 40px;
+    margin-right: 8px;
+    padding: 8px 10px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--texto-secundario);
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.12s ease, color 0.12s ease;
+}
+
+.arquivo-importacao::file-selector-button:hover {
+    background: var(--fundo-hover);
+    color: #ffffff;
+}
+
+.acoes-importacao {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+}
