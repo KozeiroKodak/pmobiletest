@@ -1,7 +1,7 @@
 {
-  "webVersion": "0.0.82",
+  "webVersion": "0.0.83",
   "nativeMinVersion": "1.0",
-  "package": "https://github.com/KozeiroKodak/pmobiletest/releases/download/ota-web-0.0.82/pmobile-web-0.0.82.zip",
-  "sha256": "4e112809e5714fb20dda79adab5f53ee4c8e11921e26c09c7b9568f17a3ed557",
+  "package": "https://github.com/KozeiroKodak/pmobiletest/releases/download/ota-web-0.0.83/pmobile-web-0.0.83.zip",
+  "sha256": "77e397ab6ed78053b6056cde778e67aee08fc74681899da92f0de63f6f52515c",
   "mandatory": false
 }
