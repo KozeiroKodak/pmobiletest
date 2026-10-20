@@ -2159,172 +2159,134 @@ async function importarParaSupabase(
     materiais
 ) {
 
-    if (
-        !window.clienteSupabase
-    ) {
-
+    if (!window.clienteSupabase) {
         throw new Error(
             "Cliente Supabase não está disponível."
         );
-
     }
 
-
-    if (
-        importacaoSupabaseEmAndamento
-    ) {
-
+    if (importacaoSupabaseEmAndamento) {
         throw new Error(
             "Já existe uma importação para o Supabase em andamento."
         );
-
     }
 
-
-    importacaoSupabaseEmAndamento =
-        true;
-
-
-    const resultado =
-        document.getElementById(
-            "resultadoImportacao"
+    if (!Array.isArray(materiais) || materiais.length === 0) {
+        throw new Error(
+            "Nenhum material válido para enviar ao Supabase."
         );
+    }
 
+    importacaoSupabaseEmAndamento = true;
 
     try {
 
         atualizarBarraProgresso(
             50,
-            "☁️ Enviando inventário para o Supabase..."
+            "☁️ Preparando importação segura..."
         );
 
-
-        // ----------------------------------------------------
-        // LIMPAR INVENTÁRIO ANTERIOR
-        // ----------------------------------------------------
-
-        const {
-            error:
-                erroExclusao
-        } =
-            await window.clienteSupabase
-                .from("materiais")
-                .delete()
-                .not(
-                    "id",
-                    "is",
-                    null
+        const importacaoId =
+            typeof crypto !== "undefined" &&
+            typeof crypto.randomUUID === "function"
+                ? crypto.randomUUID()
+                : (
+                    Date.now().toString(16) +
+                    "-" +
+                    Math.random().toString(16).slice(2)
                 );
 
-
-        if (erroExclusao) {
-
-            throw new Error(
-                "Erro ao limpar inventário anterior no Supabase: " +
-                erroExclusao.message
+        const tamanhoLote =
+            Math.max(
+                500,
+                TAMANHO_LOTE_SUPABASE * 2
             );
-
-        }
-
-
-        // ----------------------------------------------------
-        // ENVIAR LOTES
-        // ----------------------------------------------------
 
         let enviados = 0;
 
-
         for (
             let inicio = 0;
-
             inicio < materiais.length;
-
-            inicio +=
-                TAMANHO_LOTE_SUPABASE
+            inicio += tamanhoLote
         ) {
 
             const lote =
                 materiais
                     .slice(
                         inicio,
-                        inicio +
-                        TAMANHO_LOTE_SUPABASE
+                        inicio + tamanhoLote
                     )
-                    .map(material => ({
+                    .map(
+                        (material, indice) => ({
+                            importacao_id:
+                                importacaoId,
 
-                        id:
-                            material.idSupabase ??
-                            material.id,
+                            ordem:
+                                inicio + indice + 1,
 
-                        codigo:
-                            material.codigo,
+                            codigo:
+                                material.codigo ?? "",
 
-                        descricao:
-                            material.descricao,
+                            descricao:
+                                material.descricao ?? "",
 
-                        referencia:
-                            material.referencia,
+                            referencia:
+                                material.referencia ?? null,
 
-                        marca:
-                            material.marca,
+                            marca:
+                                material.marca ?? null,
 
-                        local:
-                            material.local,
+                            local:
+                                material.local ?? null,
 
-                        quantidade:
-                            material.quantidade,
+                            quantidade:
+                                material.quantidade ?? 0,
 
-                        quantidade_reservada:
-                            material.quantidadeReservada,
+                            quantidade_reservada:
+                                material.quantidadeReservada ?? 0,
 
-                        disponivel:
-                            material.disponivel,
+                            disponivel:
+                                material.disponivel ?? 0,
 
-                        ultima_entrada:
-                            material.ultimaEntrada
+                            ultima_entrada:
+                                material.ultimaEntrada ?? null
 
-                    }));
-
+                        })
+                    );
 
             const {
                 error
             } =
                 await window.clienteSupabase
-                    .from("materiais")
+                    .from(
+                        "materiais_importacao_temporaria"
+                    )
                     .insert(lote);
 
-
             if (error) {
-
                 throw new Error(
-                    "Erro no lote " +
+                    "Erro no lote temporário " +
                     (
                         Math.floor(
-                            inicio /
-                            TAMANHO_LOTE_SUPABASE
+                            inicio / tamanhoLote
                         ) + 1
                     ) +
                     ": " +
                     error.message
                 );
-
             }
 
-
-            enviados +=
-                lote.length;
-
+            enviados += lote.length;
 
             const percentual =
                 50 +
                 (enviados / materiais.length) *
-                50;
+                40;
 
             atualizarBarraProgresso(
                 percentual,
-                "☁️ Enviando inventário para o Supabase..."
+                "☁️ Preparando importação segura..."
             );
-
 
             await new Promise(
                 resolve =>
@@ -2333,28 +2295,71 @@ async function importarParaSupabase(
                         0
                     )
             );
-
         }
 
+        atualizarBarraProgresso(
+            92,
+            "☁️ Finalizando inventário no Supabase..."
+        );
+
+        const {
+            data: totalInserido,
+            error: erroFinalizacao
+        } =
+            await window.clienteSupabase.rpc(
+                "pmobile_finalizar_importacao_materiais",
+                {
+                    p_importacao_id:
+                        importacaoId
+                }
+            );
+
+        if (erroFinalizacao) {
+            throw new Error(
+                "Erro ao finalizar importação: " +
+                erroFinalizacao.message
+            );
+        }
+
+        const quantidadeFinal =
+            Number(totalInserido);
+
+        if (
+            !Number.isFinite(quantidadeFinal) ||
+            quantidadeFinal !== materiais.length
+        ) {
+            throw new Error(
+                "A importação foi finalizada com quantidade inesperada: " +
+                String(totalInserido) +
+                " de " +
+                materiais.length +
+                "."
+            );
+        }
 
         atualizarBarraProgresso(
             100,
             "☁️ Inventário enviado ao Supabase."
         );
 
-
         return true;
 
+    } catch (erro) {
+
+        console.error(
+            "Erro durante a importação no Supabase:",
+            erro
+        );
+
+        throw erro;
 
     } finally {
 
-        importacaoSupabaseEmAndamento =
-            false;
+        importacaoSupabaseEmAndamento = false;
 
     }
 
 }
-
 
 // ============================================================
 // FUNÇÃO: importarExcel
