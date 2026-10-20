@@ -607,6 +607,8 @@ async function entrarInterface(event) {
         window.usuarioPmobileAtual =
             usuarioAutenticado;
 
+        atualizarVisibilidadeConfiguracoes();
+
         console.log(
             "✅ Usuário autenticado:",
             {
@@ -1310,6 +1312,19 @@ function voltarMenuImportacao() {
 // Abre a tela Configurações.
 //
 // ============================================================
+
+function atualizarVisibilidadeConfiguracoes() {
+
+    const botao = document.getElementById("menuConfiguracoes");
+    if (!botao) return;
+
+    const usuario = window.usuarioPmobileAtual;
+    const isAdmin = usuario && usuario.nivel === "ADMIN";
+
+    botao.style.display = isAdmin ? "" : "none";
+
+}
+
 
 function abrirConfiguracoes() {
 
