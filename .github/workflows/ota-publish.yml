@@ -20,6 +20,9 @@ concurrency:
 
 jobs:
   publish-ota:
+    # O commit gerado pelo próprio workflow altera index.html/manifest.
+    # Ele não deve disparar uma nova publicação OTA.
+    if: github.actor != 'github-actions[bot]' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
 
     steps:
@@ -62,8 +65,13 @@ jobs:
           print(f"Manifest JSON: OK ({version})")
           PY
 
-          shopt -s nullglob
-          js_files=( *.js )
+          mapfile -d '' js_files < <(
+            find . -type f -name '*.js' \
+              ! -path './.git/*' \
+              ! -path './node_modules/*' \
+              ! -path './build/*' \
+              -print0
+          )
 
           if (( ${#js_files[@]} == 0 )); then
             echo "Nenhum arquivo JS encontrado."
@@ -71,11 +79,41 @@ jobs:
           fi
 
           for file in "${js_files[@]}"; do
+            file="${file#./}"
             echo "Validando JS: $file"
             node --check "$file"
           done
 
-          echo "Sintaxe JavaScript: OK"
+          echo "Sintaxe JavaScript recursiva: OK"
+
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+
+          html = Path("index.html").read_text()
+          refs = re.findall(
+              r'''(?:src|href)=["']((?!https?://|//)[^"']+\.(?:js|css)(?:\?v=[^"']*)?)["']''',
+              html,
+          )
+
+          if not refs:
+              raise SystemExit("Nenhum asset local JS/CSS foi encontrado no index.html.")
+
+          missing = []
+          for ref in refs:
+              local = ref.split("?", 1)[0].split("#", 1)[0]
+              if not Path(local).is_file():
+                  missing.append(local)
+
+          if missing:
+              print("Assets locais ausentes:")
+              for item in missing:
+                  print(f" - {item}")
+              raise SystemExit("Preflight reprovado: asset local referenciado não existe.")
+
+          print(f"Assets locais referenciados: {len(refs)} — todos encontrados.")
+          PY
+
           echo "== PREFLIGHT APROVADO =="
 
       - name: Calculate next OTA version
