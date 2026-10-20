@@ -9,6 +9,7 @@ import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.getcapacitor.BridgeActivity;
 import com.getcapacitor.WebViewListener;
@@ -41,9 +42,14 @@ public class MainActivity extends BridgeActivity {
             return;
         }
 
+        Toast.makeText(this, "Falha na atualização. Restaurando versão de segurança...", Toast.LENGTH_LONG).show();
+
         try {
             OtaManager otaManager = new OtaManager(getApplicationContext());
+            String failedVersion = otaManager.getActiveVersion();
             String previousVersion = otaManager.getPreviousVersion();
+
+            otaManager.markRecoveryPending();
 
             if (previousVersion != null && !previousVersion.trim().isEmpty()) {
                 java.io.File rollbackBundle = otaManager.rollbackToPreviousVersion();
@@ -53,10 +59,19 @@ public class MainActivity extends BridgeActivity {
                 Log.w(TAG, "No previous OTA version available; falling back to APK assets");
             }
 
+            try {
+                otaManager.deleteFailedVersion(failedVersion);
+                Log.w(TAG, "Failed OTA version removed: " + failedVersion);
+            } catch (Exception cleanupFailure) {
+                Log.e(TAG, "Unable to remove failed OTA version", cleanupFailure);
+            }
+
             Intent restartIntent = new Intent(MainActivity.this, MainActivity.class);
             restartIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(restartIntent);
-            finish();
+            webHealthHandler.postDelayed(() -> {
+                startActivity(restartIntent);
+                finish();
+            }, 3500);
         } catch (Exception recoveryFailure) {
             Log.e(TAG, "OTA web health recovery failed", recoveryFailure);
         }
@@ -67,6 +82,20 @@ public class MainActivity extends BridgeActivity {
             if ("true".equals(value)) {
                 webHealthReceived = true;
                 Log.i(TAG, "PMOBILE health signal received");
+
+                try {
+                    OtaManager otaManager = new OtaManager(getApplicationContext());
+                    if (otaManager.consumeRecoveryPending()) {
+                        Toast.makeText(
+                            MainActivity.this,
+                            "Versão de segurança restaurada com sucesso.",
+                            Toast.LENGTH_LONG
+                        ).show();
+                    }
+                } catch (Exception recoveryStateFailure) {
+                    Log.e(TAG, "Unable to consume OTA recovery state", recoveryStateFailure);
+                }
+
                 return;
             }
 
@@ -258,7 +287,8 @@ public class MainActivity extends BridgeActivity {
 
 
                                     otaManager.activateSoleCandidate(
-                                            manifest.getWebVersion()
+                                            manifest.getWebVersion(),
+                                        candidatePackage
                                         );
 
                                     Log.i(TAG,

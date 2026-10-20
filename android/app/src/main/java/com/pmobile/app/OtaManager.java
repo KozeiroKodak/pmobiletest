@@ -43,6 +43,9 @@ public class OtaManager {
     private static final String KEY_CANDIDATE_HEALTHY =
         "candidateHealthy";
 
+    private static final String KEY_RECOVERY_PENDING =
+        "recoveryPending";
+
 
     // ============================================================
     // DIRETÓRIOS
@@ -359,7 +362,7 @@ public class OtaManager {
      * The candidate is moved into versions/ before the active state is committed,
      * keeping the previous version directory available for a later rollback.
      */
-    public synchronized File activateSoleCandidate(String version) throws IOException {
+    public synchronized File activateSoleCandidate(String version, File candidate) throws IOException {
         if (version == null || version.trim().isEmpty()
                 || version.contains("/") || version.contains("\\")
                 || version.equals(".") || version.equals("..")) {
@@ -367,12 +370,10 @@ public class OtaManager {
         }
         ensureDirectories();
 
-        File[] candidates = stagingDir.listFiles(file -> file.isDirectory()
-            && file.getName().endsWith(".candidate"));
-        if (candidates == null || candidates.length != 1) {
-            throw new IOException("Expected exactly one OTA candidate bundle");
+        if (candidate == null || !candidate.isDirectory()
+                || !candidate.getName().endsWith(".candidate")) {
+            throw new IOException("OTA candidate bundle is invalid");
         }
-        File candidate = candidates[0];
         if (!isWithinDirectory(stagingDir, candidate)) {
             throw new IOException("OTA candidate is outside staging");
         }
@@ -401,6 +402,24 @@ public class OtaManager {
             throw new IOException("Unable to persist active OTA state");
         }
         return activeBundle;
+    }
+
+    public synchronized void markRecoveryPending() throws IOException {
+        if (preferences.edit().putBoolean(KEY_RECOVERY_PENDING, true).commit() == false) {
+            throw new IOException("Unable to persist OTA recovery state");
+        }
+    }
+
+    public synchronized boolean consumeRecoveryPending() throws IOException {
+        if (!preferences.getBoolean(KEY_RECOVERY_PENDING, false)) {
+            return false;
+        }
+
+        if (preferences.edit().remove(KEY_RECOVERY_PENDING).commit() == false) {
+            throw new IOException("Unable to clear OTA recovery state");
+        }
+
+        return true;
     }
 
     public synchronized void fallbackToApkAssets() throws IOException {
@@ -448,6 +467,44 @@ public class OtaManager {
         if (!bundle.isDirectory() || contents == null || contents.length == 0 || !index.isFile()
                 || index.length() == 0 || !isWithinDirectory(bundle, index)) {
             throw new IOException("OTA candidate bundle has invalid structure");
+        }
+    }
+
+    public synchronized void deleteFailedVersion(String version) throws IOException {
+        if (version == null || version.trim().isEmpty()
+                || version.contains("/") || version.contains("\\")
+                || version.equals(".") || version.equals("..")) {
+            throw new IOException("Invalid OTA version for deletion");
+        }
+
+        String activeVersion = getActiveVersion();
+        if (version.equals(activeVersion)) {
+            throw new IOException("Refusing to delete active OTA version");
+        }
+
+        File failedBundle = new File(versionsDir, version);
+        if (!isWithinDirectory(versionsDir, failedBundle)) {
+            throw new IOException("OTA version is outside versions directory");
+        }
+
+        if (failedBundle.exists()) {
+            deleteRecursively(failedBundle);
+        }
+    }
+
+    private static void deleteRecursively(File file) throws IOException {
+        if (file.isDirectory()) {
+            File[] children = file.listFiles();
+            if (children == null) {
+                throw new IOException("Unable to read OTA directory for deletion");
+            }
+            for (File child : children) {
+                deleteRecursively(child);
+            }
+        }
+
+        if (file.exists() && !file.delete()) {
+            throw new IOException("Unable to delete OTA file: " + file.getName());
         }
     }
 
