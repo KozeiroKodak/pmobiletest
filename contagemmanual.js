@@ -316,7 +316,7 @@ async function sincronizarContagensManuaisPendentes(limpezaEm = null) {
 
             const { error } = await cliente
                 .from(TABELA_CONTAGENS_MANUAIS_SUPABASE)
-                .upsert(payload, { onConflict: "id" });
+                .insert(payload);
 
             if (error) throw error;
 
