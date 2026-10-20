@@ -402,3 +402,40 @@ async function exibirDivergencias() {
     }
 
 }
+
+let intervaloSincronizacaoBackgroundDivergencias = null;
+let sincronizacaoBackgroundDivergenciasEmAndamento = false;
+
+async function sincronizarDivergenciasEmBackground() {
+    const areaResultado = document.getElementById("resultadoDivergencias");
+    if (!areaResultado || navigator.onLine === false || sincronizacaoBackgroundDivergenciasEmAndamento) {
+        return;
+    }
+
+    sincronizacaoBackgroundDivergenciasEmAndamento = true;
+    try {
+        await exibirDivergencias();
+    } catch (erro) {
+        console.warn("Sincronização em background das divergências falhou:", erro);
+    } finally {
+        sincronizacaoBackgroundDivergenciasEmAndamento = false;
+    }
+}
+
+function iniciarSincronizacaoBackgroundDivergencias() {
+    if (intervaloSincronizacaoBackgroundDivergencias !== null) {
+        return;
+    }
+
+    sincronizarDivergenciasEmBackground();
+    intervaloSincronizacaoBackgroundDivergencias = setInterval(
+        sincronizarDivergenciasEmBackground,
+        10000
+    );
+}
+
+window.addEventListener("online", sincronizarDivergenciasEmBackground);
+
+document.addEventListener("DOMContentLoaded", function() {
+    iniciarSincronizacaoBackgroundDivergencias();
+});
