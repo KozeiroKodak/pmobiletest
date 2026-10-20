@@ -166,7 +166,7 @@ async function limparContagensManuais() {
 
     try {
         const cliente = obterClienteSupabase();
-        const { error } = await cliente.rpc("limpar_contagens_manuais");
+        const { error } = await cliente.rpc("limpar_contagens_manuais", {\n            p_usuario: window.usuarioPmobileAtual?.usuario ?? "",\n            p_credencial: window.credencialPmobileAtual ?? ""\n        });
 
         if (error) throw error;
 
