@@ -233,8 +233,48 @@ async function sincronizarContagensManuaisPendentes() {
 }
 
 window.addEventListener("online", function() {
-    sincronizarContagensManuaisPendentes();
+    atualizarContagensManuais();
 });
+
+async function baixarContagensManuaisSupabase() {
+    if (!navigator.onLine || typeof obterClienteSupabase !== "function") return;
+    try {
+        const cliente = obterClienteSupabase();
+        const { data, error } = await cliente.from(TABELA_CONTAGENS_MANUAIS_SUPABASE)
+            .select("*").order("data_hora", { ascending: false }).limit(1000);
+        if (error) throw error;
+        const locais = lerContagensManuais();
+        const porId = new Map(locais.map(item => [String(item.id), item]));
+        (data || []).forEach(item => {
+            porId.set(String(item.id), {
+                id: item.id,
+                idSupabase: item.material_id ?? null,
+                codigo: item.codigo_material ?? "",
+                referencia: item.referencia_material ?? "",
+                descricao: item.descricao_material ?? "",
+                marca: item.marca_material ?? "",
+                localOriginal: item.local_original ?? "",
+                localEncontrado: item.local_encontrado ?? "",
+                quantidadeEsperada: Number(item.quantidade_esperada ?? 0),
+                quantidadeFisica: Number(item.quantidade_fisica ?? 0),
+                localAlterado: Boolean(item.local_alterado),
+                zerado: Boolean(item.zerado),
+                dataHora: item.data_hora,
+                sincronizado: true
+            });
+        });
+        const mescladas = Array.from(porId.values()).sort((a,b) => String(b.dataHora||"").localeCompare(String(a.dataHora||"")));
+        gravarContagensManuais(mescladas);
+    } catch (erro) {
+        console.warn("Não foi possível baixar contagens manuais do Supabase:", erro);
+    }
+}
+
+async function atualizarContagensManuais() {
+    await sincronizarContagensManuaisPendentes();
+    await baixarContagensManuaisSupabase();
+    exibirContagensManuais();
+}
 
 function exibirContagensManuais() {
     const area = document.getElementById("listaContagensManuais");
@@ -278,5 +318,5 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
     exibirContagensManuais();
-    sincronizarContagensManuaisPendentes();
+    atualizarContagensManuais();
 });
