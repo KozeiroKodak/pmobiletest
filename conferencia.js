@@ -2173,11 +2173,32 @@ window.addEventListener(
 // Se o aplicativo abrir online, verifica a fila anterior.
 // ============================================================
 
+let intervaloSincronizacaoBackgroundConferencia = null;
+
+function iniciarSincronizacaoBackgroundConferencia() {
+
+    if (intervaloSincronizacaoBackgroundConferencia !== null) {
+        return;
+    }
+
+    sincronizarQuandoPossivel();
+
+    intervaloSincronizacaoBackgroundConferencia = setInterval(
+        function() {
+            if (navigator.onLine === true) {
+                sincronizarConferenciasPendentes();
+            }
+        },
+        10000
+    );
+
+}
+
 document.addEventListener(
     "DOMContentLoaded",
     function() {
 
-        sincronizarQuandoPossivel();
+        iniciarSincronizacaoBackgroundConferencia();
 
     }
 );
