@@ -212,9 +212,9 @@ async function pesquisarLocalmente(
                     .toLowerCase();
 
             const corresponde =
-                campoPesquisa === "descricao"
-                    ? valorNormalizado.includes(busca)
-                    : valorNormalizado === busca;
+                campoPesquisa === "codigo"
+                    ? valorNormalizado === busca
+                    : valorNormalizado.includes(busca);
 
             if (corresponde) {
                 resultados.push(material);
@@ -885,9 +885,12 @@ async function pesquisarPorReferencia() {
                     "id,codigo,descricao,referencia,marca,local,quantidade"
                 )
 
-                .eq(
+                .ilike(
                     "referencia",
-                    buscaOriginal
+                    "%" + busca + "%",
+                    {
+                        escape: "\\"
+                    }
                 )
 
                 .order(
