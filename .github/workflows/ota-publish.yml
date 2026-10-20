@@ -8,6 +8,7 @@ on:
       - '*.html'
       - '*.css'
       - '*.js'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -156,10 +157,10 @@ jobs:
 
           # Versiona somente assets locais do PMOBILE. URLs externas ficam intactas.
           pattern = re.compile(
-              r'(?P<prefix>(?:src|href)=["\\\'])'
-              r'(?P<file>(?!https?://)[^"\\\'?]+\\.(?:js|css))'
-              r'(?:\\?v=[^"\\\']*)?'
-              r'(?P<suffix>["\\\'])'
+              r'''(?P<prefix>(?:src|href)=["'])'''
+              r'''(?P<file>(?!https?://)[^"']+\.(?:js|css))'''
+              r'''(?:\?v=[^"']*)?'''
+              r'''(?P<suffix>["'])'''
           )
           html, count = pattern.subn(
               lambda m: (
@@ -182,7 +183,7 @@ jobs:
 
           html = Path("index.html").read_text()
           assets = re.findall(
-              r'(?:src|href)=["\\\']((?!https?://)[^"\\\']+\\.(?:js|css)\\?v=[^"\\\']+)["\\\']',
+              r'''(?:src|href)=["']((?!https?://)[^"']+\.(?:js|css)\?v=[^"']+)["']''',
               html,
           )
 
