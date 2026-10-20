@@ -212,13 +212,32 @@ function registrarErroPmobile(temErro) {
     atualizarStatusGeralPmobile();
 }
 
-function todasSincronizacoesPmobileOk() {
-    return (
-        estadoSincronizacaoPmobile.inventario === true &&
-        estadoSincronizacaoPmobile.contagemManual === true &&
-        estadoSincronizacaoPmobile.conferencias === true &&
-        estadoSincronizacaoPmobile.divergencias === true
-    );
+async function avaliarSincronizacoesPmobile() {
+    try {
+        if (typeof obterDataUltimaSincronizacao === "function") {
+            estadoSincronizacaoPmobile.inventario =
+                Boolean(await obterDataUltimaSincronizacao());
+        }
+
+        if (typeof lerContagensManuais === "function") {
+            const contagens = lerContagensManuais();
+            estadoSincronizacaoPmobile.contagemManual =
+                contagens.every(item => item.sincronizado === true);
+        }
+
+        if (typeof obterConferenciasPendentes === "function") {
+            const pendentes = await obterConferenciasPendentes();
+            estadoSincronizacaoPmobile.conferencias =
+                Array.isArray(pendentes) && pendentes.length === 0;
+        }
+
+        estadoSincronizacaoPmobile.divergencias = true;
+
+    } catch (erro) {
+        console.warn("Não foi possível avaliar todas as sincronizações:", erro);
+    }
+
+    atualizarStatusGeralPmobile();
 }
 
 function atualizarStatusGeralPmobile() {
@@ -227,7 +246,10 @@ function atualizarStatusGeralPmobile() {
         estadoSincronizacaoPmobile.internetConfirmada !== false;
 
     const sincronizado =
-        todasSincronizacoesPmobileOk();
+        estadoSincronizacaoPmobile.inventario === true &&
+        estadoSincronizacaoPmobile.contagemManual === true &&
+        estadoSincronizacaoPmobile.conferencias === true &&
+        estadoSincronizacaoPmobile.divergencias === true;
 
     let mensagem;
 
@@ -347,9 +369,12 @@ document.addEventListener(
         setInterval(
             function() {
                 verificarInternetPmobile(false);
+                avaliarSincronizacoesPmobile();
             },
-            60000
+            10000
         );
+
+        avaliarSincronizacoesPmobile();
     }
 );
 
