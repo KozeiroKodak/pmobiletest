@@ -463,6 +463,50 @@ function voltarInicio() {
 }
 
 
+function sairPmobile() {
+
+    usuarioPmobileAtual = null;
+    tokenPmobileAtual = null;
+    window.usuarioPmobileAtual = null;
+
+    const aplicacao = document.getElementById("aplicacao");
+    const login = document.getElementById("loginPmobile");
+    const inicio = document.getElementById("inicio");
+    const campoUsuario = document.getElementById("loginUsuario");
+    const campoToken = document.getElementById("loginSenha");
+    const status = document.getElementById("loginStatus");
+
+    if (aplicacao) {
+        aplicacao.style.display = "none";
+    }
+
+    if (login) {
+        login.style.display = "block";
+    }
+
+    if (inicio) {
+        inicio.style.display = "none";
+    }
+
+    if (campoToken) {
+        campoToken.value = "";
+    }
+
+    if (campoUsuario) {
+        campoUsuario.value = "";
+        campoUsuario.focus();
+    }
+
+    if (status) {
+        status.textContent = "";
+        status.classList.remove("erro");
+    }
+
+    atualizarVisibilidadeConfiguracoes();
+
+}
+
+
 function alternarSenhaLogin() {
 
     const senha = document.getElementById("loginSenha");
@@ -1324,6 +1368,7 @@ function atualizarVisibilidadeConfiguracoes() {
     const isNivel2 = nivel === "NIVEL2";
 
     const regras = {
+        menuSair: !!usuario,
         menuConfiguracoes: isAdmin,
         menuImportacao: isAdmin,
         menuConferencia: isAdmin,
