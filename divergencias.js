@@ -256,6 +256,8 @@ async function exibirDivergencias() {
         // EXIBIR CADA DIVERGÊNCIA
         // ====================================================
 
+        const registrosHTML = [];
+
         divergencias.forEach(
             function (contagem) {
 
@@ -318,7 +320,7 @@ async function exibirDivergencias() {
                 // EXIBIR MATERIAL
                 // ============================================
 
-                areaResultado.innerHTML += `
+                registrosHTML.push(`
 
                     <div class="registro-divergencia">
 
@@ -349,6 +351,12 @@ async function exibirDivergencias() {
                 `;
 
             }
+
+        );
+
+        areaResultado.insertAdjacentHTML(
+            "beforeend",
+            registrosHTML.join("")
         );
 
 
