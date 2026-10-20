@@ -431,7 +431,7 @@ function abrirSistema() {
 
 
 // ============================================================
-// LOGIN — AUTENTICAÇÃO POR TOKEN
+// LOGIN — AUTENTICAÇÃO POR SENHA / ATIVAÇÃO POR TOKEN
 // ============================================================
 //
 // O acesso ao sistema depende exclusivamente de um usuário
@@ -439,7 +439,7 @@ function abrirSistema() {
 //
 // O token é enviado somente para a função PostgreSQL:
 //
-//     autenticar_usuario(usuario, token)
+//     autenticar_usuario(usuario, credencial)
 //
 // O banco compara o hash armazenado e retorna o usuário
 // somente quando as credenciais são válidas.
@@ -593,7 +593,7 @@ function restaurarSessaoPmobile(dadosUsuario, senha) {
 
     usuarioPmobileAtual = dadosUsuario;
     window.usuarioPmobileAtual = dadosUsuario;
-    credencialPmobileAtual = null;
+    credencialPmobileAtual = senha;
 
     atualizarVisibilidadeConfiguracoes();
 
