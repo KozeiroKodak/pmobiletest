@@ -6,6 +6,7 @@
 // ============================================================
 
 const CHAVE_CONTAGENS_MANUAIS = "pmobile_contagens_manuais_v1";
+const TABELA_CONTAGENS_MANUAIS_SUPABASE = "contagens_manuais";
 let materialContagemManualSelecionado = null;
 
 function normalizarTextoContagemManual(valor) {
@@ -129,7 +130,7 @@ function gravarContagensManuais(lista) {
     localStorage.setItem(CHAVE_CONTAGENS_MANUAIS, JSON.stringify(lista));
 }
 
-function salvarContagemManual() {
+async function salvarContagemManual() {
     const material = materialContagemManualSelecionado;
     const localCampo = document.getElementById("localContagemManual");
     const quantidadeCampo = document.getElementById("quantidadeContagemManual");
@@ -174,10 +175,66 @@ function salvarContagemManual() {
     lista.unshift(registro);
     gravarContagensManuais(lista);
 
-    if (status) status.textContent = "Contagem salva neste dispositivo.";
+    if (status) status.textContent = "Contagem salva offline. Sincronizando...";
     quantidadeCampo.value = "";
     exibirContagensManuais();
+
+    await sincronizarContagensManuaisPendentes();
 }
+
+async function sincronizarContagensManuaisPendentes() {
+    if (!navigator.onLine || typeof obterClienteSupabase !== "function") return;
+
+    const lista = lerContagensManuais();
+    const pendentes = lista.filter(item => !item.sincronizado);
+    if (!pendentes.length) return;
+
+    const cliente = obterClienteSupabase();
+    let alterou = false;
+
+    for (const item of pendentes) {
+        try {
+            const payload = {
+                id: item.id,
+                material_id: item.idSupabase || null,
+                codigo_material: item.codigo || "",
+                descricao_material: item.descricao || "",
+                referencia_material: item.referencia || null,
+                marca_material: item.marca || null,
+                local_original: item.localOriginal || null,
+                local_encontrado: item.localEncontrado,
+                quantidade_esperada: Number(item.quantidadeEsperada || 0),
+                quantidade_fisica: Number(item.quantidadeFisica || 0),
+                local_alterado: Boolean(item.localAlterado),
+                zerado: Boolean(item.zerado),
+                data_hora: item.dataHora
+            };
+
+            const { error } = await cliente.from(TABELA_CONTAGENS_MANUAIS_SUPABASE).insert(payload);
+            if (error && error.code !== "23505") throw error;
+
+            item.sincronizado = true;
+            alterou = true;
+        } catch (erro) {
+            console.warn("Contagem manual mantida offline para nova tentativa:", erro);
+        }
+    }
+
+    if (alterou) {
+        gravarContagensManuais(lista);
+        exibirContagensManuais();
+    }
+
+    const status = document.getElementById("statusContagemManual");
+    const restantes = lista.filter(item => !item.sincronizado).length;
+    if (status) status.textContent = restantes ?
+        "Contagem salva offline. Sincronização pendente." :
+        "Contagem salva e sincronizada com o Supabase.";
+}
+
+window.addEventListener("online", function() {
+    sincronizarContagensManuaisPendentes();
+});
 
 function exibirContagensManuais() {
     const area = document.getElementById("listaContagensManuais");
@@ -221,4 +278,5 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
     exibirContagensManuais();
+    sincronizarContagensManuaisPendentes();
 });
