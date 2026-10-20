@@ -155,9 +155,17 @@ jobs:
           html = path.read_text()
 
           # Versiona somente assets locais do PMOBILE. URLs externas ficam intactas.
-          pattern = re.compile(r'(?P<prefix>(?:src|href)=["\\\'])(?P<file>(?!https?://)[^"\\\'?]+\\.(?:js|css))(?:\\?v=[^"\\\']*)?(?P<suffix>["\\\'])')
+          pattern = re.compile(
+              r'(?P<prefix>(?:src|href)=["\\\'])'
+              r'(?P<file>(?!https?://)[^"\\\'?]+\\.(?:js|css))'
+              r'(?:\\?v=[^"\\\']*)?'
+              r'(?P<suffix>["\\\'])'
+          )
           html, count = pattern.subn(
-              lambda m: f'{m.group("prefix")}{m.group("file")}?v={version}{m.group("suffix")}',
+              lambda m: (
+                  f'{m.group("prefix")}{m.group("file")}'
+                  f'?v={version}{m.group("suffix")}'
+              ),
               html,
           )
 
@@ -168,7 +176,23 @@ jobs:
           print(f"Cache busting aplicado em {count} assets locais com v={version}")
           PY
 
-          grep -E '(src|href)="[^h][^"]*\\.(js|css)\\?v=' index.html
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+
+          html = Path("index.html").read_text()
+          assets = re.findall(
+              r'(?:src|href)=["\\\']((?!https?://)[^"\\\']+\\.(?:js|css)\\?v=[^"\\\']+)["\\\']',
+              html,
+          )
+
+          if not assets:
+              raise SystemExit("Cache busting não encontrado no index.html.")
+
+          print("Assets versionados:")
+          for asset in assets:
+              print(f" - {asset}")
+          PY
 
       - name: Prepare OTA package
         env:
