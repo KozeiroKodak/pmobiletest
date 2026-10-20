@@ -1954,11 +1954,18 @@ async function abrirGerenciamentoUsuarios() {
                     '</div>' +
                 '</div>' +
                 '<div class="solicitacao-facebook-nivel">' +
-                    '<label for="nivelSolicitacao_' + solicitacao.id + '">Nível de acesso</label>' +
-                    '<select id="nivelSolicitacao_' + solicitacao.id + '" class="seletor-nivel-usuario">' +
-                        '<option value="NIVEL2">Nível 2 — Pesquisa, Contagem manual e Divergências</option>' +
-                        '<option value="ADMIN">Administrativo — acesso total</option>' +
-                    '</select>' +
+                    '<label>Nível de acesso</label>' +
+                    '<div class="seletor-nivel-usuario-wrapper">' +
+                        '<select id="nivelSolicitacao_' + solicitacao.id + '" class="seletor-nivel-usuario-nativo" aria-hidden="true" tabindex="-1">' +
+                            '<option value="NIVEL2">Nível 2</option>' +
+                            '<option value="ADMIN">Administrativo</option>' +
+                        '</select>' +
+                        '<button type="button" class="seletor-nivel-usuario" id="botaoNivelSolicitacao_' + solicitacao.id + '" onclick="alternarSeletorNivelUsuario(' + solicitacao.id + ')" aria-haspopup="listbox" aria-expanded="false">Nível 2</button>' +
+                        '<div id="menuNivelSolicitacao_' + solicitacao.id + '" class="menu-nivel-usuario" role="listbox" style="display:none;">' +
+                            '<button type="button" onclick="selecionarNivelUsuario(' + solicitacao.id + ', \'NIVEL2\')">Nível 2 — Pesquisa, Contagem manual e Divergências</button>' +
+                            '<button type="button" onclick="selecionarNivelUsuario(' + solicitacao.id + ', \'ADMIN\')">Administrativo — acesso total</button>' +
+                        '</div>' +
+                    '</div>' +
                 '</div>' +
                 '<div class="solicitacao-facebook-acoes">' +
                     '<button type="button" class="botao-aprovar-solicitacao" onclick="aprovarCadastroUsuario(' + solicitacao.id + ')">Aprovar</button>' +
@@ -2030,6 +2037,39 @@ function formatarDataSolicitacaoPmobile(valor) {
     });
 
 }
+
+function alternarSeletorNivelUsuario(solicitacaoId) {
+    const menu = document.getElementById("menuNivelSolicitacao_" + solicitacaoId);
+    const botao = document.getElementById("botaoNivelSolicitacao_" + solicitacaoId);
+    if (!menu || !botao) return;
+
+    const aberto = menu.style.display !== "none";
+    menu.style.display = aberto ? "none" : "block";
+    botao.setAttribute("aria-expanded", aberto ? "false" : "true");
+}
+
+function selecionarNivelUsuario(solicitacaoId, nivel) {
+    const seletor = document.getElementById("nivelSolicitacao_" + solicitacaoId);
+    const botao = document.getElementById("botaoNivelSolicitacao_" + solicitacaoId);
+    const menu = document.getElementById("menuNivelSolicitacao_" + solicitacaoId);
+    if (!seletor || !botao || !menu) return;
+
+    seletor.value = nivel;
+    botao.textContent = nivel === "ADMIN" ? "Administrativo" : "Nível 2";
+    menu.style.display = "none";
+    botao.setAttribute("aria-expanded", "false");
+}
+
+document.addEventListener("click", function(evento) {
+    document.querySelectorAll(".menu-nivel-usuario").forEach(function(menu) {
+        const wrapper = menu.closest(".seletor-nivel-usuario-wrapper");
+        if (wrapper && !wrapper.contains(evento.target)) {
+            menu.style.display = "none";
+            const botao = wrapper.querySelector(".seletor-nivel-usuario");
+            if (botao) botao.setAttribute("aria-expanded", "false");
+        }
+    });
+});
 
 async function aprovarCadastroUsuario(solicitacaoId) {
 
