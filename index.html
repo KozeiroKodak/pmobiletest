@@ -315,6 +315,19 @@
             </button>
 
 
+            <!-- RESERVAS -->
+
+            <button
+                id="menuReservas"
+                class="sidebar-item"
+                onclick="abrirReservas()"
+                title="Reservas"
+            >
+                <span class="sidebar-icone">📦</span>
+                <span class="sidebar-texto">Reservas</span>
+            </button>
+
+
             <!-- DIVERGÊNCIAS -->
 
             <button
@@ -598,6 +611,23 @@
                 <div id="painelLocaisDerivados" style="display: none;"><div id="listaLocaisDerivados"></div></div>
             </div>
         </section>
+
+        <!-- =================================================
+             RESERVAS
+             ================================================= -->
+
+        <section id="reservas" class="tela-sistema" style="display: none;">
+            <div class="cabecalho-pagina">
+                <p class="cabecalho-caminho">PMOBILE / Reservas</p>
+                <h1>Reservas</h1>
+                <p>Materiais com quantidade reservada maior que zero.</p>
+            </div>
+
+            <div class="painel painel-reservas">
+                <div id="listaReservas"></div>
+            </div>
+        </section>
+
 
         <section id="detalhesLocaisVazios" class="tela-sistema" style="display: none;">
             <div class="cabecalho-pagina">
@@ -1100,6 +1130,7 @@
      ========================================================= -->
 
 <script src="contagemmanual.js?v=0.0.121"></script>\n\n<script src="locais.js?v=0.0.121"></script>
+<script src="reservas.js?v=0.0.121"></script>
 
 
 <!-- =========================================================
