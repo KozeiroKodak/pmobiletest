@@ -2305,6 +2305,69 @@ async function obterStatusSincronizacaoMateriais() {
 
 }
 
+// ============================================================
+// INICIALIZAÇÃO AUTOMÁTICA DO INVENTÁRIO LOCAL
+// ============================================================
+//
+// A cópia local precisa ser garantida na abertura do PMOBILE.
+// Antes, as funções de sincronização existiam, mas não havia
+// uma chamada global que disparasse a primeira sincronização.
+//
+// Regras:
+// - se já existe IndexedDB, utiliza a cópia local;
+// - se não existe e há internet, baixa do Supabase;
+// - se não existe e está offline, preserva o estado offline;
+// - quando a conexão voltar e ainda não houver cópia local,
+//   tenta novamente.
+// ============================================================
+
+let inicializacaoInventarioLocalEmAndamento = false;
+
+async function iniciarInventarioLocalPmobile() {
+
+    if (inicializacaoInventarioLocalEmAndamento) {
+        return;
+    }
+
+    inicializacaoInventarioLocalEmAndamento = true;
+
+    try {
+        await garantirInventarioLocal();
+    } catch (erro) {
+        console.error(
+            "❌ Falha ao inicializar inventário local:",
+            erro
+        );
+    } finally {
+        inicializacaoInventarioLocalEmAndamento = false;
+    }
+}
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+        // Aguarda a inicialização do cliente Supabase e das
+        // demais estruturas da página antes da primeira tentativa.
+        setTimeout(
+            iniciarInventarioLocalPmobile,
+            800
+        );
+    }
+);
+
+window.addEventListener(
+    "online",
+    function() {
+        // Se o dispositivo voltar à rede sem possuir cópia
+        // local, garantirInventarioLocal() fará a primeira carga.
+        setTimeout(
+            iniciarInventarioLocalPmobile,
+            500
+        );
+    }
+);
+
+
 
 // ============================================================
 // EVENTO: VOLTOU A INTERNET
