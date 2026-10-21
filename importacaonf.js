@@ -113,7 +113,7 @@ async function prepararImportacaoNFOnline() {
     try {
 
         atualizarStatusImportacaoNF(
-            "🟡 Baixando planilha online..."
+            "🟡 Lendo planilha online pelo Supabase..."
         );
 
         const urlDownload =
@@ -131,10 +131,6 @@ async function prepararImportacaoNFOnline() {
             hostOnline === "onedrive.live.com" ||
             hostOnline.endsWith(".onedrive.live.com") ||
             hostOnline === "automotivacba-my.sharepoint.com";
-
-        let buffer;
-        let nomeArquivo;
-        let tipo;
 
         if (microsoft365) {
 
@@ -220,6 +216,12 @@ async function prepararImportacaoNFOnline() {
         const buffer =
             await resposta.arrayBuffer();
 
+        if (!buffer.byteLength) {
+            throw new Error(
+                "O link não retornou nenhum arquivo."
+            );
+        }
+
         const nomeArquivo =
             obterNomeArquivoOnlineNF(
                 resposta,
@@ -229,30 +231,6 @@ async function prepararImportacaoNFOnline() {
         const tipo =
             resposta.headers.get("content-type") ||
             "application/octet-stream";
-
-        if (!buffer.byteLength) {
-            throw new Error(
-                "O link não retornou nenhum arquivo."
-            );
-        }
-
-        const arquivo =
-            new File(
-                [buffer],
-                nomeArquivo,
-                {
-                    type: tipo
-                }
-            );
-
-        await analisarArquivoImportacaoNF(
-            arquivo
-        );
-
-            throw new Error(
-                "O link não retornou nenhum arquivo."
-            );
-        }
 
         const arquivo =
             new File(
