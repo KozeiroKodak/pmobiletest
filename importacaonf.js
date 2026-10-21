@@ -370,6 +370,17 @@ function normalizarUrlPlanilhaOnlineNF(
         host === "automotivacba-my.sharepoint.com"
     ) {
 
+        // Links de compartilhamento SharePoint/Excel no formato
+        // /:x:/g/... usam o parâmetro "e" apenas para a página
+        // de compartilhamento. Para solicitar o arquivo real,
+        // descartamos esses parâmetros e enviamos somente download=1.
+        if (
+            url.pathname.startsWith("/:x:/g/")
+        ) {
+            url.search = "?download=1";
+            return url.toString();
+        }
+
         url.searchParams.set(
             "download",
             "1"
