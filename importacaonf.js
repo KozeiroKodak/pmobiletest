@@ -143,7 +143,7 @@ async function prepararImportacaoNFOnline() {
                     "pmobile-nf-download",
                     {
                         body: {
-                            url: urlDownload
+                            url: urlInformada
                         }
                     }
                 );
@@ -151,59 +151,54 @@ async function prepararImportacaoNFOnline() {
             if (respostaProxy.error) {
                 throw new Error(
                     respostaProxy.error.message ||
-                    "Não foi possível baixar a planilha pelo Microsoft 365."
+                    "Não foi possível ler a planilha pelo Microsoft 365."
                 );
             }
 
             const dadosProxy =
                 respostaProxy.data;
 
-            if (dadosProxy instanceof Blob) {
-
-                buffer =
-                    await dadosProxy.arrayBuffer();
-
-                tipo =
-                    dadosProxy.type ||
-                    "application/octet-stream";
-
-            } else if (
-                typeof dadosProxy === "string"
+            if (
+                !dadosProxy ||
+                !Array.isArray(dadosProxy.colunas) ||
+                !Array.isArray(dadosProxy.linhas)
             ) {
+                throw new Error(
+                    dadosProxy?.error ||
+                    "O Supabase não retornou os dados da planilha."
+                );
+            }
 
-                buffer =
-                    new TextEncoder()
-                        .encode(dadosProxy)
-                        .buffer;
+            window.dadosImportacaoNFAtual = {
+                arquivo: {
+                    name:
+                        dadosProxy.nome_arquivo ||
+                        "planilha-sharepoint.xlsx",
+                    size:
+                        Number(dadosProxy.tamanho_bytes || 0)
+                },
+                nomeAba:
+                    dadosProxy.nome_aba ||
+                    "Planilha",
+                colunas:
+                    dadosProxy.colunas,
+                linhas:
+                    dadosProxy.linhas,
+                sha256:
+                    dadosProxy.sha256 || null,
+                tamanhoBytes:
+                    Number(dadosProxy.tamanho_bytes || 0)
+            };
 
-                tipo =
-                    "application/octet-stream";
+            mostrarResumoImportacaoNF();
 
-            } else if (
-                dadosProxy instanceof ArrayBuffer
-            ) {
+            atualizarStatusImportacaoNF(
+                "🟢 Planilha lida pelo Supabase. Revise as colunas antes de enviar."
+            );
 
-                buffer =
-                    dadosProxy;
+            return;
 
-                tipo =
-                    "application/octet-stream";
-
-            } else if (
-                ArrayBuffer.isView(dadosProxy)
-            ) {
-
-                buffer =
-                    dadosProxy.buffer.slice(
-                        dadosProxy.byteOffset,
-                        dadosProxy.byteOffset +
-                        dadosProxy.byteLength
-                    );
-
-                tipo =
-                    "application/octet-stream";
-
-            } else {
+        } else {
 
                 throw new Error(
                     "O Microsoft 365 não retornou um arquivo utilizável."
