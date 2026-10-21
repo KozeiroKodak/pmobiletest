@@ -19,7 +19,32 @@
 
     <link
         rel="stylesheet"
+        href="implementacoes/pesquisa.css"
+    >
+
+    <link
+        rel="stylesheet"
         href="implementacoes/importacao.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="implementacoes/conferencia.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="implementacoes/conferencias.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="implementacoes/divergencias.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="implementacoes/contagemmanual.css"
     >
 
 </head>
@@ -170,6 +195,26 @@
 
                 <span class="sidebar-texto">
                     Conferências
+                </span>
+
+            </button>
+
+
+            <!-- DIVERGÊNCIAS -->
+
+            <button
+                id="menuDivergencias"
+                class="sidebar-item"
+                onclick="abrirDivergencias()"
+                title="Divergências"
+            >
+
+                <span class="sidebar-icone">
+                    ⚠️
+                </span>
+
+                <span class="sidebar-texto">
+                    Divergências
                 </span>
 
             </button>
@@ -944,26 +989,6 @@
                     onclick="limparMateriaisSupabase()"
                 >
                     🗑️ Materiais importados
-                </button>
-
-            </div>
-
-
-            <div class="painel">
-
-                <h2>
-                    ⚠️ Divergências
-                </h2>
-
-                <p>
-                    Consulte os materiais com divergência de contagem.
-                </p>
-
-                <button
-                    class="botao-secundario"
-                    onclick="abrirDivergenciasConfiguracoes()"
-                >
-                    ⚠️ Ver divergências
                 </button>
 
             </div>
