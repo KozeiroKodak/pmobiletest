@@ -158,6 +158,9 @@ function converterConferenciaSupabaseParaPMobile(
         usuarioId:
             registro.usuario_id ?? null,
 
+        usuarioNome:
+            registro.usuario_nome ?? "",
+
         data:
             registro.criado_em ?? null,
 
@@ -638,7 +641,116 @@ async function obterHistoricoLocalConferencias() {
 // Esta função é usada internamente quando necessário.
 // ============================================================
 
-async function limparHistoricoLocalConferencias() {
+async function limparHistoricoLocalConferenciasDoUsuario(
+    usuarioId
+) {
+
+    if (
+        usuarioId === null ||
+        usuarioId === undefined ||
+        Number.isNaN(Number(usuarioId))
+    ) {
+        throw new Error(
+            "ID do usuário não informado para limpeza local."
+        );
+    }
+
+    const banco =
+        await abrirBancoHistoricoConferencias();
+
+    const transacao =
+        banco.transaction(
+            nomeTabelaHistoricoConferencias,
+            "readwrite"
+        );
+
+    const tabela =
+        transacao.objectStore(
+            nomeTabelaHistoricoConferencias
+        );
+
+    const requisicao =
+        tabela.getAll();
+
+    return new Promise(
+        function(resolve, reject) {
+
+            requisicao.onsuccess =
+                function(evento) {
+
+                    const registros =
+                        Array.isArray(evento.target.result)
+                            ? evento.target.result
+                            : [];
+
+                    registros.forEach(
+                        function(registro) {
+
+                            if (
+                                Number(registro?.usuarioId) ===
+                                Number(usuarioId)
+                            ) {
+                                tabela.delete(
+                                    registro.conferenciaId
+                                );
+                            }
+
+                        }
+                    );
+
+                };
+
+            requisicao.onerror =
+                function(evento) {
+
+                    banco.close();
+
+                    reject(
+                        evento.target.error
+                    );
+
+                };
+
+            transacao.oncomplete =
+                function() {
+
+                    banco.close();
+
+                    resolve();
+
+                };
+
+            transacao.onerror =
+                function(evento) {
+
+                    banco.close();
+
+                    reject(
+                        evento.target.error
+                    );
+
+                };
+
+            transacao.onabort =
+                function(evento) {
+
+                    banco.close();
+
+                    reject(
+                        evento.target.error ||
+                        new Error(
+                            "Transação do histórico local foi abortada."
+                        )
+                    );
+
+                };
+
+        }
+    );
+
+}
+
+
 
     const banco =
         await abrirBancoHistoricoConferencias();
@@ -864,7 +976,7 @@ async function carregarConferenciasSupabase() {
                 .from("conferencias")
 
                 .select(
-                    "id,conferencia_id,material_id,codigo_material,descricao_material,referencia_material,quantidade_esperada,quantidade_fisica,diferenca,status,usuario_id,criado_em"
+                    "id,conferencia_id,material_id,codigo_material,descricao_material,referencia_material,quantidade_esperada,quantidade_fisica,diferenca,status,usuario_id,usuario_nome,criado_em"
                 )
 
                 .order(
@@ -1606,7 +1718,7 @@ window.addEventListener(
 //
 // OBJETIVO:
 //
-// Apagar todas as conferências do Supabase.
+// Apagar somente as conferências do usuário atual no Supabase.
 //
 // IMPORTANTE:
 //
@@ -1614,9 +1726,9 @@ window.addEventListener(
 //
 // Depois da limpeza:
 //
-// - Supabase = vazio
-// - variável local = vazia
-// - histórico local = vazio
+// - Supabase = somente as conferências do usuário são removidas
+// - demais usuários permanecem intactos
+// - histórico local remove somente o usuário atual
 // - fila offline = NÃO é apagada automaticamente
 //
 // A fila não deve ser destruída sem sincronização/decisão
@@ -1628,7 +1740,8 @@ async function limparConferenciasSupabase() {
     const confirmar =
         confirm(
             "⚠️ ATENÇÃO!\n\n" +
-            "Todas as conferências realizadas serão apagadas.\n\n" +
+            "Somente as suas conferências serão apagadas.\n\n" +
+            "As conferências dos demais usuários NÃO serão afetadas.\n\n" +
             "Os materiais do inventário NÃO serão apagados.\n\n" +
             "Deseja continuar?"
         );
@@ -1670,18 +1783,38 @@ async function limparConferenciasSupabase() {
 
     try {
 
+        const usuarioSessao =
+            (typeof usuarioPmobileAtual !== "undefined" &&
+                usuarioPmobileAtual?.usuario)
+                ? usuarioPmobileAtual
+                : window.usuarioPmobileAtual;
+
+        if (
+            !usuarioSessao?.usuario ||
+            !window.credencialPmobileAtual
+        ) {
+            throw new Error(
+                "Sessão do usuário não está disponível."
+            );
+        }
+
+        const usuarioIdAtual =
+            Number(usuarioSessao.id);
+
+        if (Number.isNaN(usuarioIdAtual)) {
+            throw new Error(
+                "ID do usuário não está disponível."
+            );
+        }
+
         const { error } =
-            await clienteSupabase
-
-                .from("conferencias")
-
-                .delete()
-
-                .not(
-                    "id",
-                    "is",
-                    null
-                );
+            await clienteSupabase.rpc(
+                "limpar_conferencias",
+                {
+                    p_usuario: usuarioSessao.usuario,
+                    p_credencial: window.credencialPmobileAtual
+                }
+            );
 
 
         if (
@@ -1698,7 +1831,11 @@ async function limparConferenciasSupabase() {
         // ====================================================
 
         conferencias =
-            [];
+            conferencias.filter(
+                function(contagem) {
+                    return Number(contagem?.usuarioId) !== usuarioIdAtual;
+                }
+            );
 
 
         // ====================================================
@@ -1709,7 +1846,9 @@ async function limparConferenciasSupabase() {
 
         try {
 
-            await limparHistoricoLocalConferencias();
+            await limparHistoricoLocalConferenciasDoUsuario(
+                usuarioIdAtual
+            );
 
         } catch (erroLocal) {
 
@@ -1732,13 +1871,13 @@ async function limparConferenciasSupabase() {
         ) {
 
             resultado.innerHTML =
-                "<p>✅ Todas as conferências foram apagadas.</p>";
+                "<p>✅ Suas conferências foram apagadas. As dos demais usuários foram preservadas.</p>";
 
         }
 
 
         alert(
-            "✅ Conferências apagadas com sucesso!"
+            "✅ Suas conferências foram apagadas com sucesso!"
         );
 
 
