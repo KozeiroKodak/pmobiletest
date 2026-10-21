@@ -1767,6 +1767,7 @@ function abrirConfiguracoes() {
     const usuarios = document.getElementById("painelGerenciamentoUsuarios");
     const reset = document.getElementById("painelGerenciamentoReset");
     const conta = document.getElementById("painelConfiguracoesUsuario");
+    const arquivos = document.getElementById("painelArquivosTeste");
     const resumo = document.getElementById("resumoContaPmobile");
     const usuario = window.usuarioPmobileAtual;
     const isAdmin = usuario && usuario.nivel === "ADMIN";
@@ -1776,6 +1777,7 @@ function abrirConfiguracoes() {
     if (usuarios) usuarios.style.display = "none";
     if (reset) reset.style.display = "none";
     if (conta) conta.style.display = "block";
+    if (arquivos) arquivos.style.display = "none";
 
     if (resumo) {
         resumo.innerHTML = usuario
@@ -1794,6 +1796,8 @@ function abrirManutencaoBanco() {
     }
 
     const manutencao = document.getElementById("painelConfiguracoesManutencao");
+    const arquivos = document.getElementById("painelArquivosTeste");
+    if (arquivos) arquivos.style.display = "none";
     if (manutencao) manutencao.style.display = "block";
 
 }
