@@ -48,22 +48,12 @@ async function carregarReservas() {
 }
 
 async function buscarTodosMateriaisReservas(cliente) {
-    const pagina = 1000;
-    const registros = [];
+    const { data, error } = await cliente
+        .rpc("listar_reservas");
 
-    for (let inicio = 0; ; inicio += pagina) {
-        const { data, error } = await cliente
-            .from("materiais")
-            .select("codigo,descricao,quantidade_reservada")
-            .range(inicio, inicio + pagina - 1);
+    if (error) throw error;
 
-        if (error) throw error;
-
-        const lote = Array.isArray(data) ? data : [];
-        registros.push.apply(registros, lote);
-
-        if (lote.length < pagina) break;
-    }
+    const registros = Array.isArray(data) ? data : [];
 
     return registros
         .filter(function(item) {
