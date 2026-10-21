@@ -56,6 +56,10 @@ const telasSistema = [
 
     "conferencias",
 
+    "locais",
+
+    "detalhesLocaisVazios",
+
     "divergencias",
 
     "importacao",
@@ -85,6 +89,8 @@ const itensMenuSistema = [
     "menuConferencia",
 
     "menuConferencias",
+
+    "menuLocais",
 
     "menuDivergencias",
 
