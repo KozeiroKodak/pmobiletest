@@ -19,6 +19,16 @@ const ESTRUTURA_LOCAIS_PMP = SETORES_PADRAO_LOCAIS_PMP.map(function(area) {
     };
 });
 
+// Posições especiais de pallets cruzados, fisicamente válidas mesmo
+// estando à frente de outra estante. São endereços individuais.
+const LOCAIS_CRUZADOS_PMP = {
+    "B01": ["B01A01"],
+    "D01": ["D01C01"],
+    "F01": ["F01E01"],
+    "H01": ["H01G01"],
+    "J01": ["J01I01"]
+};
+
 let abaLocaisAtual = "alterados";
 let localVaziosDetalheAtual = null;
 
@@ -28,7 +38,9 @@ function abrirLocais() {
 }
 
 function alternarAbaLocais(aba) {
-    abaLocaisAtual = aba === "vazios" ? "vazios" : "alterados";
+    abaLocaisAtual = ["alterados", "vazios", "derivados"].includes(aba)
+        ? aba
+        : "alterados";
 
     const alterados = document.getElementById("painelLocaisAlterados");
     const vazios = document.getElementById("painelLocaisVazios");
@@ -381,6 +393,10 @@ function gerarPosicoesAreaPmobile(estrutura) {
                 String(numero).padStart(2, "0")
             );
         }
+    });
+
+    (LOCAIS_CRUZADOS_PMP[estrutura.area] || []).forEach(function(local) {
+        resultado.push(local);
     });
 
     return resultado;
