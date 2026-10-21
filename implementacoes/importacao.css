@@ -1,0 +1,45 @@
+/* ============================================================
+   IMPORTAÇÃO
+   CSS específico da funcionalidade.
+   ============================================================ */
+
+/* ============================================================
+   AÇÕES DA IMPORTAÇÃO
+   ============================================================ */
+
+.acoes-importacao {
+
+    display:
+        flex;
+
+    gap:
+        8px;
+
+    flex-wrap:
+        wrap;
+
+    margin-top:
+        16px;
+
+}
+
+
+/* ============================================================
+   ÁREAS DE RESULTADOS
+   ============================================================ */
+
+#resultadoPesquisaCodigo,
+#resultadoPesquisaDescricao,
+#resultadoPesquisaReferencia,
+#resultadoConferencia,
+#resultadoConferencias,
+#resultadoDivergencias,
+#resultadoImportacao {
+
+    margin-top:
+        16px;
+
+}
+
+
+
