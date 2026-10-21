@@ -790,7 +790,31 @@ function abrirDivergencias() {
 
     mostrarTelaSistema(
         "divergencias",
-        "menuDivergencias"
+        null
+    );
+
+
+    if (
+        typeof exibirDivergencias ===
+        "function"
+    ) {
+
+        exibirDivergencias();
+
+    }
+
+}
+
+
+// ============================================================
+// ABRIR DIVERGÊNCIAS A PARTIR DE CONFIGURAÇÕES
+// ============================================================
+
+function abrirDivergenciasConfiguracoes() {
+
+    mostrarTelaSistema(
+        "divergencias",
+        "menuConfiguracoes"
     );
 
 
@@ -813,8 +837,8 @@ function abrirDivergencias() {
 function voltarMenuDivergencias() {
 
     mostrarTelaSistema(
-        "homeSistema",
-        null
+        "configuracoes",
+        "menuConfiguracoes"
     );
 
 }
