@@ -37,7 +37,14 @@ let paginaLocaisDerivadosAtual = 1;
 const ITENS_POR_PAGINA_LOCAIS_DERIVADOS = 20;
 
 function abrirLocais() {
-    mostrarTelaSistema("locais", "menuLocais");
+    const usuario = window.usuarioPmobileAtual;
+
+    if (!usuario || usuario.nivel !== "ADMIN") {
+        alert("Acesso administrativo negado.");
+        return;
+    }
+
+    mostrarTelaSistema("locais", "menuConfiguracoes");
     alternarAbaLocais("alterados");
 }
 

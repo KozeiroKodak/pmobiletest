@@ -89,10 +89,7 @@ const itensMenuSistema = [
     "menuConferencia",
 
     "menuConferencias",
-
-    "menuLocais",
-
-    "menuDivergencias",
+"menuDivergencias",
 
     "menuConfiguracoes"
 
