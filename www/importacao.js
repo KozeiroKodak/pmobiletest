@@ -95,26 +95,51 @@ function atualizarBarraProgresso(percentual, mensagem) {
             Math.min(100, Math.round(percentual))
         );
 
-    resultado.innerHTML =
-        "<p><strong>" +
-        (mensagem || "Importando inventário...") +
-        "</strong></p>" +
+    let barra =
+        resultado.querySelector(".barra-progresso");
 
-        "<div class=\"barra-progresso-container\">" +
+    if (!barra) {
 
-            "<progress " +
-                "class=\"barra-progresso\" " +
-                "max=\"100\" " +
-                "value=\"" + valor + "\" " +
-                "aria-label=\"Progresso da importação\">" +
-            "</progress>" +
+        resultado.innerHTML =
+            "<p class=\"mensagem-progresso\"></p>" +
 
-        "</div>" +
+            "<div class=\"barra-progresso-container\">" +
 
-        "<p class=\"progresso-percentual\"><strong>" +
-            valor +
-            "%" +
-        "</strong></p>";
+                "<progress " +
+                    "class=\"barra-progresso\" " +
+                    "max=\"100\" " +
+                    "value=\"0\" " +
+                    "aria-label=\"Progresso da importação\">" +
+                "</progress>" +
+
+            "</div>" +
+
+            "<p class=\"progresso-percentual\"><strong>0%</strong></p>";
+
+        barra =
+            resultado.querySelector(".barra-progresso");
+    }
+
+    const mensagemElemento =
+        resultado.querySelector(".mensagem-progresso");
+
+    const percentualElemento =
+        resultado.querySelector(".progresso-percentual strong");
+
+    if (mensagemElemento) {
+        mensagemElemento.textContent =
+            mensagem || "Importando inventário...";
+    }
+
+    if (barra) {
+        barra.value = valor;
+        barra.setAttribute("aria-valuenow", String(valor));
+    }
+
+    if (percentualElemento) {
+        percentualElemento.textContent =
+            valor + "%";
+    }
 }
 
 
