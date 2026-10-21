@@ -100,25 +100,18 @@ function atualizarBarraProgresso(percentual, mensagem) {
         (mensagem || "Importando inventário...") +
         "</strong></p>" +
 
-        "<div style=\"" +
-            "width:100%;" +
-            "height:22px;" +
-            "background:#e5e7eb;" +
-            "border-radius:11px;" +
-            "overflow:hidden;" +
-            "margin:10px 0;" +
-        "\">" +
+        "<div class=\"barra-progresso-container\">" +
 
-            "<div style=\"" +
-                "width:" + valor + "%;" +
-                "height:100%;" +
-                "background:#2563eb;" +
-                "transition:width 0.15s ease;" +
-            "\"></div>" +
+            "<progress " +
+                "class=\"barra-progresso\" " +
+                "max=\"100\" " +
+                "value=\"" + valor + "\" " +
+                "aria-label=\"Progresso da importação\">" +
+            "</progress>" +
 
         "</div>" +
 
-        "<p style=\"text-align:center;\"><strong>" +
+        "<p class=\"progresso-percentual\"><strong>" +
             valor +
             "%" +
         "</strong></p>";
@@ -2289,24 +2282,18 @@ async function importarExcel() {
             resultado.innerHTML =
                 "<p><strong>✅ Importação concluída!</strong></p>" +
 
-                "<div style=\"" +
-                    "width:100%;" +
-                    "height:22px;" +
-                    "background:#e5e7eb;" +
-                    "border-radius:11px;" +
-                    "overflow:hidden;" +
-                    "margin:10px 0;" +
-                "\">" +
+                "<div class=\"barra-progresso-container barra-progresso-container--sucesso\">" +
 
-                    "<div style=\"" +
-                        "width:100%;" +
-                        "height:100%;" +
-                        "background:#16a34a;" +
-                    "\"></div>" +
+                    "<progress " +
+                        "class=\"barra-progresso barra-progresso--sucesso\" " +
+                        "max=\"100\" " +
+                        "value=\"100\" " +
+                        "aria-label=\"Importação concluída\">" +
+                    "</progress>" +
 
                 "</div>" +
 
-                "<p style=\"text-align:center;\"><strong>100%</strong></p>" +
+                "<p class=\"progresso-percentual\"><strong>100%</strong></p>" +
 
                 "<p>📦 Materiais importados: " +
                 resultadoImportacao
