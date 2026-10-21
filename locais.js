@@ -2,14 +2,22 @@
 // LOCAIS — ALTERADOS / VAZIOS
 // ============================================================
 
-const ESTRUTURA_LOCAIS_PMP = [
-    {
-        area: "A01",
+const SETORES_PADRAO_LOCAIS_PMP = [
+    "A01", "B01", "C01", "D01", "E01", "F01", "G01",
+    "H01", "I01", "J01", "K01", "L01", "M01", "P01", "P02"
+];
+
+// A grade física segue o mesmo padrão informado para A01.
+// A estrutura fica centralizada aqui para ajustes futuros sem
+// alterar a lógica de ocupação.
+const ESTRUTURA_LOCAIS_PMP = SETORES_PADRAO_LOCAIS_PMP.map(function(area) {
+    return {
+        area,
         letras: ["A", "B", "C", "D", "E", "F"],
         inicio: 1,
         fim: 30
-    }
-];
+    };
+});
 
 let abaLocaisAtual = "alterados";
 let localVaziosDetalheAtual = null;
@@ -26,17 +34,92 @@ function alternarAbaLocais(aba) {
     const vazios = document.getElementById("painelLocaisVazios");
     const botaoAlterados = document.getElementById("abaLocaisAlterados");
     const botaoVazios = document.getElementById("abaLocaisVazios");
+    const botaoDerivados = document.getElementById("abaLocaisDerivados");
+    const derivados = document.getElementById("painelLocaisDerivados");
 
     if (alterados) alterados.style.display = abaLocaisAtual === "alterados" ? "block" : "none";
     if (vazios) vazios.style.display = abaLocaisAtual === "vazios" ? "block" : "none";
+    if (derivados) derivados.style.display = abaLocaisAtual === "derivados" ? "block" : "none";
 
     if (botaoAlterados) botaoAlterados.classList.toggle("ativo", abaLocaisAtual === "alterados");
     if (botaoVazios) botaoVazios.classList.toggle("ativo", abaLocaisAtual === "vazios");
+    if (botaoDerivados) botaoDerivados.classList.toggle("ativo", abaLocaisAtual === "derivados");
 
     if (abaLocaisAtual === "alterados") {
         carregarLocaisAlterados();
-    } else {
+    } else if (abaLocaisAtual === "vazios") {
         carregarLocaisVazios();
+    } else {
+        carregarLocaisDerivados();
+    }
+}
+
+async function carregarLocaisDerivados() {
+    const area = document.getElementById("listaLocaisDerivados");
+    if (!area) return;
+
+    area.innerHTML = '<div class="locais-carregando">Carregando materiais fora dos setores padrão...</div>';
+
+    try {
+        const cliente = obterClienteSupabase();
+        if (!cliente) throw new Error("Supabase indisponível.");
+
+        const { data, error } = await cliente
+            .from("materiais")
+            .select("codigo,local")
+            .not("local", "is", null)
+            .neq("local", "");
+
+        if (error) throw error;
+
+        const registros = (Array.isArray(data) ? data : [])
+            .filter(function(item) {
+                const local = normalizarLocalPmobile(item.local);
+                return local && !SETORES_PADRAO_LOCAIS_PMP.some(function(setor) {
+                    return local === setor || local.startsWith(setor);
+                });
+            })
+            .sort(function(a, b) {
+                return String(a.local || "").localeCompare(String(b.local || ""), "pt-BR", { numeric: true })
+                    || String(a.codigo || "").localeCompare(String(b.codigo || ""), "pt-BR", { numeric: true });
+            });
+
+        if (!registros.length) {
+            area.innerHTML =
+                '<div class="locais-vazio">' +
+                    '<span>✓</span>' +
+                    '<strong>Nenhum material derivado</strong>' +
+                    '<p>Todos os materiais com local estão dentro dos setores padrão.</p>' +
+                '</div>';
+            return;
+        }
+
+        area.innerHTML =
+            '<div class="locais-resumo-derivados">' +
+                '<strong>' + registros.length + '</strong> material(is) fora dos setores padrão' +
+            '</div>' +
+            registros.map(function(item) {
+                return (
+                    '<article class="local-derivado-card">' +
+                        '<div>' +
+                            '<span class="local-alterado-legenda">Código</span>' +
+                            '<strong>' + escapeHtmlPmobile(item.codigo || "-") + '</strong>' +
+                        '</div>' +
+                        '<div>' +
+                            '<span class="local-alterado-legenda">Local atual</span>' +
+                            '<strong class="local-derivado-local">' + escapeHtmlPmobile(item.local || "-") + '</strong>' +
+                        '</div>' +
+                    '</article>'
+                );
+            }).join("");
+
+    } catch (erro) {
+        console.error("Erro ao carregar materiais derivados:", erro);
+        area.innerHTML =
+            '<div class="locais-vazio locais-vazio-erro">' +
+                '<span>!</span><strong>Não foi possível carregar</strong>' +
+                '<p>' + escapeHtmlPmobile(erro?.message || "Erro ao consultar os materiais.") + '</p>' +
+            '</div>';
     }
 }
 
@@ -274,7 +357,7 @@ function abrirDetalhesLocaisVazios(areaNome) {
 
     localVaziosDetalheAtual = estrutura;
 
-    const painel = document.getElementById("paginaDetalhesLocaisVazios");
+    const painel = document.getElementById("detalhesLocaisVazios");
     const titulo = document.getElementById("tituloDetalhesLocaisVazios");
     const lista = document.getElementById("listaDetalhesLocaisVazios");
 
