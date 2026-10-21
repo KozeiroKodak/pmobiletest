@@ -33,6 +33,8 @@ let abaLocaisAtual = "alterados";
 let localVaziosDetalheAtual = null;
 let paginaLocaisDerivadosAtual = 1;
 const ITENS_POR_PAGINA_LOCAIS_DERIVADOS = 20;
+let paginaLocaisDerivadosAtual = 1;
+const ITENS_POR_PAGINA_LOCAIS_DERIVADOS = 20;
 
 function abrirLocais() {
     mostrarTelaSistema("locais", "menuLocais");
@@ -78,11 +80,25 @@ async function carregarLocaisDerivados() {
         const cliente = obterClienteSupabase();
         if (!cliente) throw new Error("Supabase indisponível.");
 
-        const { data, error } = await cliente.rpc("listar_locais_derivados");
+        const registros = [];
+        const LIMITE_RPC = 1000;
+        let offset = 0;
 
-        if (error) throw error;
+        while (true) {
+            const { data, error } = await cliente.rpc("listar_locais_derivados", {
+                p_limit: LIMITE_RPC,
+                p_offset: offset
+            });
 
-        const registros = Array.isArray(data) ? data : [];
+            if (error) throw error;
+
+            const lote = Array.isArray(data) ? data : [];
+            registros.push(...lote);
+
+            if (lote.length < LIMITE_RPC) break;
+
+            offset += LIMITE_RPC;
+        }
 
         if (!registros.length) {
             area.innerHTML =
