@@ -67,15 +67,276 @@ async function prepararImportacaoNF() {
     const arquivo =
         document.getElementById("arquivoImportacaoNF")?.files?.[0];
 
-    const resultado =
-        document.getElementById("resultadoImportacaoNF");
-
     if (!arquivo) {
         mostrarResultadoImportacaoNF(
             "erro",
             "Selecione uma planilha Excel antes de importar."
         );
         return;
+    }
+
+    await analisarArquivoImportacaoNF(
+        arquivo
+    );
+
+}
+
+
+// ============================================================
+// LER PLANILHA ONLINE
+// ============================================================
+
+async function prepararImportacaoNFOnline() {
+
+    const campo =
+        document.getElementById("linkImportacaoNF");
+
+    const urlInformada =
+        campo?.value?.trim();
+
+    if (!urlInformada) {
+        mostrarResultadoImportacaoNF(
+            "erro",
+            "Insira o link público da planilha."
+        );
+        return;
+    }
+
+    if (!window.XLSX) {
+        mostrarResultadoImportacaoNF(
+            "erro",
+            "A biblioteca Excel ainda não foi carregada."
+        );
+        return;
+    }
+
+    try {
+
+        atualizarStatusImportacaoNF(
+            "🟡 Baixando planilha online..."
+        );
+
+        const urlDownload =
+            normalizarUrlPlanilhaOnlineNF(
+                urlInformada
+            );
+
+        const resposta =
+            await fetch(
+                urlDownload,
+                {
+                    method: "GET",
+                    redirect: "follow"
+                }
+            );
+
+        if (!resposta.ok) {
+            throw new Error(
+                "O link respondeu HTTP " +
+                resposta.status +
+                "."
+            );
+        }
+
+        const buffer =
+            await resposta.arrayBuffer();
+
+        if (!buffer.byteLength) {
+            throw new Error(
+                "O link não retornou nenhum arquivo."
+            );
+        }
+
+        const nomeArquivo =
+            obterNomeArquivoOnlineNF(
+                resposta,
+                urlDownload
+            );
+
+        const tipo =
+            resposta.headers.get("content-type") ||
+            "application/octet-stream";
+
+        const arquivo =
+            new File(
+                [buffer],
+                nomeArquivo,
+                {
+                    type: tipo
+                }
+            );
+
+        await analisarArquivoImportacaoNF(
+            arquivo
+        );
+
+    } catch (erro) {
+
+        console.error(
+            "❌ Erro ao ler planilha online:",
+            erro
+        );
+
+        mostrarResultadoImportacaoNF(
+            "erro",
+            "Não foi possível ler o link. " +
+            (
+                erro.message ||
+                "Verifique se a planilha é pública e permite download."
+            )
+        );
+
+    }
+
+}
+
+
+// ============================================================
+// NORMALIZAR LINK ONLINE
+// ============================================================
+
+function normalizarUrlPlanilhaOnlineNF(
+    urlInformada
+) {
+
+    let url;
+
+    try {
+        url =
+            new URL(
+                urlInformada
+            );
+    } catch {
+        throw new Error(
+            "O link informado não é uma URL válida."
+        );
+    }
+
+    if (
+        url.protocol !== "https:" &&
+        url.protocol !== "http:"
+    ) {
+        throw new Error(
+            "O link deve começar com http:// ou https://."
+        );
+    }
+
+    const host =
+        url.hostname.toLowerCase();
+
+    const matchGoogle =
+        url.pathname.match(
+            /^\\/spreadsheets\\/d\\/([^/]+)/
+        );
+
+    if (
+        (
+            host === "docs.google.com" ||
+            host === "sheets.google.com"
+        ) &&
+        matchGoogle
+    ) {
+
+        return (
+            "https://docs.google.com/spreadsheets/d/" +
+            encodeURIComponent(matchGoogle[1]) +
+            "/export?format=xlsx"
+        );
+
+    }
+
+    const matchDrive =
+        url.pathname.match(
+            /^\\/file\\/d\\/([^/]+)/
+        );
+
+    if (
+        host === "drive.google.com" &&
+        matchDrive
+    ) {
+
+        return (
+            "https://drive.google.com/uc?export=download&id=" +
+            encodeURIComponent(matchDrive[1])
+        );
+
+    }
+
+    return url.toString();
+
+}
+
+
+// ============================================================
+// NOME DO ARQUIVO ONLINE
+// ============================================================
+
+function obterNomeArquivoOnlineNF(
+    resposta,
+    url
+) {
+
+    const disposicao =
+        resposta.headers.get(
+            "content-disposition"
+        );
+
+    const nomeHeader =
+        disposicao?.match(
+            /filename\\*?=(?:UTF-8''|")?([^";]+)/
+        )?.[1];
+
+    if (nomeHeader) {
+        try {
+            return decodeURIComponent(
+                nomeHeader
+            ).trim();
+        } catch {
+            return nomeHeader.trim();
+        }
+    }
+
+    try {
+
+        const pathname =
+            new URL(url).pathname;
+
+        const nome =
+            decodeURIComponent(
+                pathname.split("/").pop() || ""
+            ).trim();
+
+        if (
+            nome &&
+            /\\.(xlsx?|xlsm|csv)$/i.test(nome)
+        ) {
+            return nome;
+        }
+
+    } catch {
+        // usa nome padrão abaixo
+    }
+
+    return "planilha-online.xlsx";
+
+}
+
+
+// ============================================================
+// ANALISAR ARQUIVO
+// ============================================================
+
+async function analisarArquivoImportacaoNF(
+    arquivo
+) {
+
+    const resultado =
+        document.getElementById("resultadoImportacaoNF");
+
+    if (!arquivo) {
+        throw new Error(
+            "Arquivo não informado."
+        );
     }
 
     if (!window.XLSX) {
@@ -104,7 +365,9 @@ async function prepararImportacaoNF() {
             workbook.SheetNames?.[0];
 
         if (!nomeAba) {
-            throw new Error("A planilha não possui uma aba utilizável.");
+            throw new Error(
+                "A planilha não possui uma aba utilizável."
+            );
         }
 
         const planilha =
@@ -122,7 +385,9 @@ async function prepararImportacaoNF() {
             );
 
         if (!matriz.length) {
-            throw new Error("A planilha está vazia.");
+            throw new Error(
+                "A planilha está vazia."
+            );
         }
 
         const cabecalhoBruto =
@@ -138,7 +403,11 @@ async function prepararImportacaoNF() {
         const linhas =
             [];
 
-        for (let i = 1; i < matriz.length; i++) {
+        for (
+            let i = 1;
+            i < matriz.length;
+            i++
+        ) {
 
             const valores =
                 Array.isArray(matriz[i])
@@ -160,7 +429,10 @@ async function prepararImportacaoNF() {
                 {};
 
             colunas.forEach(
-                (coluna, indice) => {
+                (
+                    coluna,
+                    indice
+                ) => {
 
                     let valor =
                         indice < valores.length
@@ -211,6 +483,10 @@ async function prepararImportacaoNF() {
 
         mostrarResumoImportacaoNF();
 
+        atualizarStatusImportacaoNF(
+            "🟢 Planilha analisada. Revise as colunas antes de enviar."
+        );
+
     } catch (erro) {
 
         console.error(
@@ -230,7 +506,6 @@ async function prepararImportacaoNF() {
     }
 
 }
-
 
 // ============================================================
 // NORMALIZAR COLUNAS
