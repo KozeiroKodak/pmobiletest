@@ -115,26 +115,21 @@ const itensMenuSistema = [
 
 function esconderTelasSistema() {
 
-    telasSistema.forEach(
+    // A navegação deve esconder TODAS as telas do sistema,
+    // inclusive qualquer tela adicionada depois à interface.
+    // Isso evita que uma tela anterior permaneça aberta
+    // enquanto outra é exibida abaixo dela.
 
-        function(idTela) {
-
-            const tela =
-                document.getElementById(
-                    idTela
-                );
-
-
-            if (tela) {
+    document
+        .querySelectorAll(".tela-sistema")
+        .forEach(
+            function(tela) {
 
                 tela.style.display =
                     "none";
 
             }
-
-        }
-
-    );
+        );
 
 }
 
