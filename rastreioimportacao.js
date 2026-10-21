@@ -315,12 +315,21 @@ function prepararLinhasRastreioParaEnvio(inicio = 0, fim = null, coletarAvisos =
             linha_origem: linha.linha_numero
         };
 
-        if (coletarAvisos && erros.length < 100) {
-            if (!item.cliente) erros.push("Linha " + linha.linha_numero + ": Cliente vazio.");
-            if (!item.notas_fiscais.trim()) erros.push("Linha " + linha.linha_numero + ": Nota Fiscal vazia.");
-            if (!item.motorista) erros.push("Linha " + linha.linha_numero + ": Motorista não definido.");
-            if (!item.data_envio) erros.push("Linha " + linha.linha_numero + ": Data Envio inválida.");
-            if (!item.turno) erros.push("Linha " + linha.linha_numero + ": Turno deve ser MANHÃ ou TARDE.");
+        if (coletarAvisos) {
+            const problemas = [];
+            if (!item.cliente) problemas.push("Cliente vazio.");
+            if (!item.notas_fiscais.trim()) problemas.push("Nota Fiscal vazia.");
+            if (!item.motorista) problemas.push("Motorista não definido.");
+            if (!item.data_envio) problemas.push("Data Envio inválida.");
+            if (!item.turno) problemas.push("Turno deve ser MANHÃ ou TARDE.");
+
+            totalErros += problemas.length;
+
+            for (const problema of problemas) {
+                if (erros.length < 100) {
+                    erros.push("Linha " + linha.linha_numero + ": " + problema);
+                }
+            }
         }
 
         resultado.push(item);
@@ -412,7 +421,7 @@ async function enviarImportacaoRastreio() {
                 true
             );
 
-            totalAvisos += lotePreparado.erros.length;
+            totalAvisos += lotePreparado.totalErros || 0;
             if (avisosAmostra.length < 100) {
                 avisosAmostra.push(...lotePreparado.erros.slice(0, 100 - avisosAmostra.length));
             }
