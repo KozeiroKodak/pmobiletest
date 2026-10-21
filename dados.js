@@ -2124,3 +2124,32 @@ window.addEventListener(
 // ============================================================
 
 carregarMateriais();
+
+
+// ============================================================
+// INICIALIZAÇÃO AUTOMÁTICA DO INVENTÁRIO LOCAL
+// ============================================================
+
+let inicializacaoInventarioLocalEmAndamento = false;
+
+async function iniciarInventarioLocalPmobile() {
+    if (inicializacaoInventarioLocalEmAndamento) return;
+
+    inicializacaoInventarioLocalEmAndamento = true;
+
+    try {
+        await garantirInventarioLocal();
+    } catch (erro) {
+        console.error("❌ Falha ao inicializar inventário local:", erro);
+    } finally {
+        inicializacaoInventarioLocalEmAndamento = false;
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    setTimeout(iniciarInventarioLocalPmobile, 800);
+});
+
+window.addEventListener("online", function() {
+    setTimeout(iniciarInventarioLocalPmobile, 500);
+});
