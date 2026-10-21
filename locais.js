@@ -64,20 +64,14 @@ async function carregarLocaisDerivados() {
         const cliente = obterClienteSupabase();
         if (!cliente) throw new Error("Supabase indisponível.");
 
-        const { data, error } = await cliente
-            .from("materiais")
-            .select("codigo,local")
-            .not("local", "is", null)
-            .neq("local", "");
+        const registrosMateriais = await buscarTodosMateriaisLocais(cliente, "codigo,local");
 
-        if (error) throw error;
+        const locaisPadrao = obterLocaisPadraoPmobile();
 
-        const registros = (Array.isArray(data) ? data : [])
+        const registros = (Array.isArray(registrosMateriais) ? registrosMateriais : [])
             .filter(function(item) {
                 const local = normalizarLocalPmobile(item.local);
-                return local && !SETORES_PADRAO_LOCAIS_PMP.some(function(setor) {
-                    return local === setor || local.startsWith(setor);
-                });
+                return local && !locaisPadrao.has(local);
             })
             .sort(function(a, b) {
                 return String(a.local || "").localeCompare(String(b.local || ""), "pt-BR", { numeric: true })
@@ -267,18 +261,10 @@ function carregarLocaisVazios() {
             const cliente = obterClienteSupabase();
             if (!cliente) throw new Error("Supabase indisponível.");
 
-            const [materiaisResposta, contagensResposta] = await Promise.all([
-                cliente.from("materiais").select("id,local,quantidade"),
-                cliente.from("contagens_manuais")
-                    .select("material_id,local_encontrado,quantidade_fisica,data_hora")
-                    .order("data_hora", { ascending: false })
+            const [materiais, contagens] = await Promise.all([
+                buscarTodosMateriaisLocais(cliente, "id,local,quantidade"),
+                buscarTodasContagensManuaisLocais(cliente)
             ]);
-
-            if (materiaisResposta.error) throw materiaisResposta.error;
-            if (contagensResposta.error) throw contagensResposta.error;
-
-            const materiais = Array.isArray(materiaisResposta.data) ? materiaisResposta.data : [];
-            const contagens = Array.isArray(contagensResposta.data) ? contagensResposta.data : [];
 
             // O inventário é a base. A contagem manual mais recente de cada
             // material substitui a posição do inventário para fins físicos.
@@ -398,6 +384,63 @@ function gerarPosicoesAreaPmobile(estrutura) {
     });
 
     return resultado;
+}
+
+
+
+async function buscarTodosMateriaisLocais(cliente, colunas) {
+    const pagina = 1000;
+    const registros = [];
+
+    for (let inicio = 0; ; inicio += pagina) {
+        const { data, error } = await cliente
+            .from("materiais")
+            .select(colunas)
+            .range(inicio, inicio + pagina - 1);
+
+        if (error) throw error;
+
+        const lote = Array.isArray(data) ? data : [];
+        registros.push.apply(registros, lote);
+
+        if (lote.length < pagina) break;
+    }
+
+    return registros;
+}
+
+async function buscarTodasContagensManuaisLocais(cliente) {
+    const pagina = 1000;
+    const registros = [];
+
+    for (let inicio = 0; ; inicio += pagina) {
+        const { data, error } = await cliente
+            .from("contagens_manuais")
+            .select("material_id,local_encontrado,quantidade_fisica,data_hora")
+            .order("data_hora", { ascending: false })
+            .range(inicio, inicio + pagina - 1);
+
+        if (error) throw error;
+
+        const lote = Array.isArray(data) ? data : [];
+        registros.push.apply(registros, lote);
+
+        if (lote.length < pagina) break;
+    }
+
+    return registros;
+}
+
+function obterLocaisPadraoPmobile() {
+    const locais = new Set();
+
+    ESTRUTURA_LOCAIS_PMP.forEach(function(estrutura) {
+        gerarPosicoesAreaPmobile(estrutura).forEach(function(local) {
+            locais.add(normalizarLocalPmobile(local));
+        });
+    });
+
+    return locais;
 }
 
 function normalizarLocalPmobile(valor) {
