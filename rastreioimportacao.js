@@ -218,7 +218,7 @@ function normalizarTurnoRastreio(valor) {
 
 function normalizarNumeroRastreio(valor) {
     if (valor == null || String(valor).trim() === "") return null;
-    let texto = String(valor).trim().replace(/\s/g, "");
+    let texto = String(valor).trim().replace(/[^0-9,.-]/g, "");
     if (texto.includes(",") && texto.includes(".")) {
         if (texto.lastIndexOf(",") > texto.lastIndexOf(".")) {
             texto = texto.replace(/\./g, "").replace(",", ".");
