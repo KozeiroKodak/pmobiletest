@@ -259,8 +259,7 @@ function renderizarLocalAlterado(item) {
 
     const admin =
         window.usuarioPmobileAtual &&
-        window.usuarioPmobileAtual.nivel === "ADMIN" &&
-        window.credencialPmobileAtual;
+        window.usuarioPmobileAtual.nivel === "ADMIN";
 
     const botaoConfirmar = status === "PENDENTE" && admin
         ? '<button type="button" class="botao-local-confirmar" onclick="confirmarAlteracaoLocal(\'' +
