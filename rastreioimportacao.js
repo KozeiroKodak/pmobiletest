@@ -42,81 +42,116 @@ async function prepararImportacaoRastreio() {
         mostrarStatusImportacaoRastreio("🟡 Lendo planilha de Rastreio...");
 
         const buffer = await arquivo.arrayBuffer();
-        const workbook = window.XLSX.read(buffer, { type: "array", cellDates: false });
+        // Primeiro lê somente a estrutura do arquivo para descobrir as abas.
+        // Depois o SheetJS processa apenas a aba operacional escolhida.
+        let workbook = window.XLSX.read(buffer, {
+            type: "array",
+            bookSheets: true
+        });
 
         if (!workbook.SheetNames?.length) {
             throw new Error("A planilha não possui uma aba utilizável.");
         }
 
-        // O arquivo operacional pode ter abas auxiliares antes de LANÇAMENTOS
-        // (por exemplo, RESUMO). Procura a primeira aba compatível com os
-        // campos de rastreio, dando preferência explícita a LANÇAMENTOS.
         const ordemAbas = [
             ...workbook.SheetNames.filter(nome => normalizarChaveRastreio(nome) === "LANCAMENTOS"),
             ...workbook.SheetNames.filter(nome => normalizarChaveRastreio(nome) !== "LANCAMENTOS")
         ];
 
         let nomeAba = null;
-        let matriz = null;
+        let indiceCabecalho = -1;
         let colunas = null;
         let modelo = null;
 
         for (const candidata of ordemAbas) {
-            const matrizCandidata = window.XLSX.utils.sheet_to_json(workbook.Sheets[candidata], {
-                header: 1,
-                defval: null,
-                raw: false,
-                blankrows: false
+            const descoberta = window.XLSX.read(buffer, {
+                type: "array",
+                sheets: candidata,
+                sheetRows: 30,
+                cellDates: false,
+                cellHTML: false,
+                cellFormula: false,
+                cellStyles: false,
+                dense: true
             });
 
-            if (!matrizCandidata.length) continue;
+            const matrizCandidata = window.XLSX.utils.sheet_to_json(
+                descoberta.Sheets[candidata],
+                {
+                    header: 1,
+                    defval: null,
+                    raw: false,
+                    blankrows: false
+                }
+            );
 
-            // Algumas planilhas possuem títulos/linhas auxiliares antes do cabeçalho.
-            // Procura o cabeçalho real nas primeiras 30 linhas.
-            const limiteCabecalho = Math.min(matrizCandidata.length, 30);
-
-            for (let indiceCabecalho = 0; indiceCabecalho < limiteCabecalho; indiceCabecalho++) {
-                const linhaCabecalho = matrizCandidata[indiceCabecalho] || [];
-                const colunasCandidata = normalizarColunasRastreio(linhaCabecalho);
+            for (let indice = 0; indice < Math.min(matrizCandidata.length, 30); indice++) {
+                const colunasCandidata = normalizarColunasRastreio(matrizCandidata[indice] || []);
                 const modeloCandidato = detectarModeloRastreio(colunasCandidata);
 
                 if (modeloCandidato.cliente && modeloCandidato.notaFiscal &&
                     modeloCandidato.dataEnvio && modeloCandidato.turno) {
                     nomeAba = candidata;
-                    matriz = matrizCandidata.slice(indiceCabecalho);
+                    indiceCabecalho = indice;
                     colunas = colunasCandidata;
                     modelo = modeloCandidato;
                     break;
                 }
             }
 
+            // Libera a descoberta da aba antes de analisar a próxima.
+            delete descoberta.Sheets[candidata];
+
             if (nomeAba) break;
         }
 
-        if (!nomeAba || !matriz || !colunas || !modelo) {
+        if (!nomeAba || !colunas || !modelo || indiceCabecalho < 0) {
             throw new Error(
                 "Não consegui identificar uma aba de lançamentos com Cliente, Nota Fiscal, Data Envio e Turno. " +
                 "Confira os cabeçalhos da planilha."
             );
         }
+
+        // Agora somente a aba escolhida é carregada integralmente.
+        workbook = window.XLSX.read(buffer, {
+            type: "array",
+            sheets: nomeAba,
+            cellDates: false,
+            cellHTML: false,
+            cellFormula: false,
+            cellStyles: false,
+            dense: true
+        });
+
+        const matriz = window.XLSX.utils.sheet_to_json(workbook.Sheets[nomeAba], {
+            header: 1,
+            defval: null,
+            raw: false,
+            blankrows: false
+        });
+
+        const modeloIndices = {};
+        Object.keys(modelo).forEach(chave => {
+            modeloIndices[chave] = modelo[chave] ? colunas.indexOf(modelo[chave]) : -1;
+        });
+
         const linhas = [];
+        for (let i = indiceCabecalho + 1; i < matriz.length; i++) {
+            const valoresOriginais = Array.isArray(matriz[i]) ? matriz[i] : [];
+            if (valoresOriginais.every(v => v == null || String(v).trim() === "")) continue;
 
-        for (let i = 1; i < matriz.length; i++) {
-            const valores = Array.isArray(matriz[i]) ? matriz[i] : [];
-            if (valores.every(v => v == null || String(v).trim() === "")) continue;
-
-            const dados = {};
-            colunas.forEach((coluna, indice) => {
-                let valor = indice < valores.length ? valores[indice] : null;
-                if (valor === undefined || valor === "") valor = null;
-                dados[coluna] = valor;
+            // Guarda somente o vetor de valores, evitando um objeto por célula.
+            linhas.push({
+                linha_numero: i + 1,
+                valores: valoresOriginais
             });
-
-            linhas.push({ linha_numero: i + 1, dados });
         }
 
-        if (!linhas.length) throw new Error("A planilha possui cabeçalho, mas nenhuma linha de dados.");
+        // Remove referências pesadas ao workbook/matriz antes de manter o estado da importação.
+        delete workbook.Sheets[nomeAba];
+        workbook = null;
 
+        if (!linhas.length) throw new Error("A planilha possui cabeçalho, mas nenhuma linha de dados.");
         const sha256 = await calcularSha256Rastreio(buffer);
         dadosImportacaoRastreio = {
             arquivo,
@@ -125,7 +160,8 @@ async function prepararImportacaoRastreio() {
             linhas,
             sha256,
             tamanhoBytes: arquivo.size,
-            modelo
+            modelo,
+            modeloIndices
         };
 
         mapaMotoristasRastreio = montarMapaMotoristasInicial(linhas, modelo);
@@ -191,8 +227,9 @@ function montarMapaMotoristasInicial(linhas, modelo) {
     const mapa = {};
     if (modelo.motorista) return mapa;
 
+    const indiceRegiao = dadosImportacaoRastreio?.modeloIndices?.regiao ?? -1;
     linhas.forEach(linha => {
-        const regiao = String(linha.dados?.[modelo.regiao] ?? "").trim();
+        const regiao = indiceRegiao >= 0 ? String(linha.valores?.[indiceRegiao] ?? "").trim() : "";
         if (regiao && !(regiao in mapa)) mapa[regiao] = "";
     });
 
@@ -293,31 +330,34 @@ function calcularPrevisaoRastreio(dataISO, turno) {
 }
 
 function prepararLinhasRastreioParaEnvio(inicio = 0, fim = null, coletarAvisos = false) {
-    capturarMapaMotoristasUI();
-
-    const { modelo, linhas } = dadosImportacaoRastreio;
+    const { modelo, modeloIndices, linhas } = dadosImportacaoRastreio;
     const limite = fim == null ? linhas.length : Math.min(fim, linhas.length);
     const resultado = [];
     const erros = coletarAvisos ? [] : [];
+    let totalErros = 0;
 
     for (let indice = inicio; indice < limite; indice++) {
         const linha = linhas[indice];
-        const d = linha.dados;
-        const turno = normalizarTurnoRastreio(d[modelo.turno]);
-        const dataEnvio = normalizarDataRastreio(d[modelo.dataEnvio]);
-        const regiao = modelo.regiao ? String(d[modelo.regiao] ?? "").trim() : "";
-        const motoristaPlanilha = modelo.motorista ? String(d[modelo.motorista] ?? "").trim() : "";
+        const d = linha.valores;
+        const valor = chave => {
+            const indice = modeloIndices[chave];
+            return indice >= 0 ? d[indice] : null;
+        };
+        const turno = normalizarTurnoRastreio(valor("turno"));
+        const dataEnvio = normalizarDataRastreio(valor("dataEnvio"));
+        const regiao = String(valor("regiao") ?? "").trim();
+        const motoristaPlanilha = String(valor("motorista") ?? "").trim();
         const motorista = motoristaPlanilha || mapaMotoristasRastreio[regiao] || "";
 
         const item = {
-            cliente: String(d[modelo.cliente] ?? "").trim(),
-            notas_fiscais: String(d[modelo.notaFiscal] ?? ""),
-            transportadora: modelo.transportadora ? String(d[modelo.transportadora] ?? "").trim() : "",
+            cliente: String(valor("cliente") ?? "").trim(),
+            notas_fiscais: String(valor("notaFiscal") ?? ""),
+            transportadora: String(valor("transportadora") ?? "").trim(),
             motorista,
             regiao,
-            volume: modelo.volume ? normalizarNumeroRastreio(d[modelo.volume]) : null,
-            peso: modelo.peso ? normalizarNumeroRastreio(d[modelo.peso]) : null,
-            valor_nf: modelo.valorNF ? normalizarNumeroRastreio(d[modelo.valorNF]) : null,
+            volume: normalizarNumeroRastreio(valor("volume")),
+            peso: normalizarNumeroRastreio(valor("peso")),
+            valor_nf: normalizarNumeroRastreio(valor("valorNF")),
             data_envio: dataEnvio,
             turno,
             previsao_entrega: calcularPrevisaoRastreio(dataEnvio, turno),
@@ -371,15 +411,16 @@ function renderizarPreviaImportacaoRastreio() {
                 '<span>Linha</span><span>Cliente</span><span>NF</span><span>Região</span><span>Turno</span><span>Motorista</span>' +
             '</div>' +
             amostra.map(linha => {
-                const d = linha.dados;
-                const regiao = modelo.regiao ? String(d[modelo.regiao] ?? "").trim() : "";
-                const motorista = modelo.motorista ? String(d[modelo.motorista] ?? "").trim() : (mapaMotoristasRastreio[regiao] || "—");
+                const d = linha.valores;
+                const indices = dadosImportacaoRastreio.modeloIndices;
+                const regiao = indices.regiao >= 0 ? String(d[indices.regiao] ?? "").trim() : "";
+                const motorista = indices.motorista >= 0 ? String(d[indices.motorista] ?? "").trim() : (mapaMotoristasRastreio[regiao] || "—");
                 return '<div class="linha">' +
                     '<span>' + linha.linha_numero + '</span>' +
-                    '<span>' + escaparHtmlRastreio(d[modelo.cliente]) + '</span>' +
-                    '<span>' + escaparHtmlRastreio(d[modelo.notaFiscal]) + '</span>' +
+                    '<span>' + escaparHtmlRastreio(d[indices.cliente]) + '</span>' +
+                    '<span>' + escaparHtmlRastreio(d[indices.notaFiscal]) + '</span>' +
                     '<span>' + escaparHtmlRastreio(regiao || "—") + '</span>' +
-                    '<span>' + escaparHtmlRastreio(d[modelo.turno]) + '</span>' +
+                    '<span>' + escaparHtmlRastreio(d[indices.turno]) + '</span>' +
                     '<span>' + escaparHtmlRastreio(motorista) + '</span>' +
                 '</div>';
             }).join("") +
@@ -417,6 +458,8 @@ async function enviarImportacaoRastreio() {
             importacaoId = importacaoId.pmobile_rastreio_criar_importacao || importacaoId.id;
         }
         if (!importacaoId) throw new Error("O Supabase não retornou o ID da importação.");
+
+        capturarMapaMotoristasUI();
 
         let enviadas = 0;
         let totalAvisos = 0;
