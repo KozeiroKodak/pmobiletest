@@ -8,8 +8,13 @@
     overflow: hidden;
 }
 
-#conferencias .botao-perigo { margin: 16px; }
-#resultadoConferencias { margin-top: 0; }
+#conferencias .botao-perigo {
+    margin: 16px;
+}
+
+#resultadoConferencias {
+    margin-top: 0;
+}
 
 #resultadoConferencias > p {
     margin: 0;
@@ -20,14 +25,18 @@
     line-height: 1.45;
 }
 
-#resultadoConferencias > p:first-child { padding-top: 16px; }
+#resultadoConferencias > p:first-child {
+    padding-top: 16px;
+}
 
 #resultadoConferencias > p:nth-child(3) {
     padding-bottom: 14px;
     border-bottom: 1px solid #303030;
 }
 
-#resultadoConferencias > hr { display: none; }
+#resultadoConferencias > hr {
+    display: none;
+}
 
 #resultadoConferencias .registro-conferencia {
     padding: 14px 16px;
@@ -38,8 +47,13 @@
     line-height: 1.45;
 }
 
-#resultadoConferencias .registro-conferencia:last-child { border-bottom: 0; }
-#resultadoConferencias .registro-conferencia:hover { background: #1f1f1f; }
+#resultadoConferencias .registro-conferencia:last-child {
+    border-bottom: 0;
+}
+
+#resultadoConferencias .registro-conferencia:hover {
+    background: #1f1f1f;
+}
 
 #resultadoConferencias .registro-conferencia h3 {
     margin: 0 0 12px;
@@ -60,11 +74,22 @@
     font-weight: 600;
 }
 
-#resultadoConferencias .registro-conferencia hr { display: none; }
+#resultadoConferencias .registro-conferencia hr {
+    display: none;
+}
+
+#resultadoConferencias .registro-conferencia p:last-of-type {
+    padding-bottom: 0;
+}
 
 @media (max-width: 700px) {
-    #conferencias .painel { max-width: 100%; }
-    #conferencias .botao-perigo { margin: 14px; }
+    #conferencias .painel {
+        max-width: 100%;
+    }
+
+    #conferencias .botao-perigo {
+        margin: 14px;
+    }
 
     #resultadoConferencias > p,
     #resultadoConferencias .registro-conferencia {
