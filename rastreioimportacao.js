@@ -71,17 +71,26 @@ async function prepararImportacaoRastreio() {
 
             if (!matrizCandidata.length) continue;
 
-            const colunasCandidata = normalizarColunasRastreio(matrizCandidata[0] || []);
-            const modeloCandidato = detectarModeloRastreio(colunasCandidata);
+            // Algumas planilhas possuem títulos/linhas auxiliares antes do cabeçalho.
+            // Procura o cabeçalho real nas primeiras 30 linhas.
+            const limiteCabecalho = Math.min(matrizCandidata.length, 30);
 
-            if (modeloCandidato.cliente && modeloCandidato.notaFiscal &&
-                modeloCandidato.dataEnvio && modeloCandidato.turno) {
-                nomeAba = candidata;
-                matriz = matrizCandidata;
-                colunas = colunasCandidata;
-                modelo = modeloCandidato;
-                break;
+            for (let indiceCabecalho = 0; indiceCabecalho < limiteCabecalho; indiceCabecalho++) {
+                const linhaCabecalho = matrizCandidata[indiceCabecalho] || [];
+                const colunasCandidata = normalizarColunasRastreio(linhaCabecalho);
+                const modeloCandidato = detectarModeloRastreio(colunasCandidata);
+
+                if (modeloCandidato.cliente && modeloCandidato.notaFiscal &&
+                    modeloCandidato.dataEnvio && modeloCandidato.turno) {
+                    nomeAba = candidata;
+                    matriz = matrizCandidata.slice(indiceCabecalho);
+                    colunas = colunasCandidata;
+                    modelo = modeloCandidato;
+                    break;
+                }
             }
+
+            if (nomeAba) break;
         }
 
         if (!nomeAba || !matriz || !colunas || !modelo) {
@@ -335,7 +344,7 @@ function prepararLinhasRastreioParaEnvio(inicio = 0, fim = null, coletarAvisos =
         resultado.push(item);
     }
 
-    return { resultado, erros };
+    return { resultado, erros, totalErros };
 }
 function renderizarPreviaImportacaoRastreio() {
     const area = document.getElementById("rastreioImportacaoPrevia");
