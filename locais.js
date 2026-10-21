@@ -33,8 +33,6 @@ let abaLocaisAtual = "alterados";
 let localVaziosDetalheAtual = null;
 let paginaLocaisDerivadosAtual = 1;
 const ITENS_POR_PAGINA_LOCAIS_DERIVADOS = 20;
-let paginaLocaisDerivadosAtual = 1;
-const ITENS_POR_PAGINA_LOCAIS_DERIVADOS = 20;
 
 function abrirLocais() {
     const usuario = window.usuarioPmobileAtual;
