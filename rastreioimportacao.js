@@ -118,7 +118,7 @@ async function prepararImportacaoRastreio() {
             dense: true
         });
 
-        const matriz = window.XLSX.utils.sheet_to_json(workbook.Sheets[nomeAba], {
+        let matriz = window.XLSX.utils.sheet_to_json(workbook.Sheets[nomeAba], {
             header: 1,
             defval: null,
             raw: false,
@@ -130,25 +130,25 @@ async function prepararImportacaoRastreio() {
             modeloIndices[chave] = modelo[chave] ? colunas.indexOf(modelo[chave]) : -1;
         });
 
-        // Mantém somente os vetores de dados. Não cria um objeto "dados" por
-        // linha, evitando uma segunda grande estrutura em memória.
-        const linhas = [];
-        for (let i = indiceCabecalho + 1; i < matriz.length; i++) {
-            const valores = Array.isArray(matriz[i]) ? matriz[i] : [];
-            if (valores.every(v => v == null || String(v).trim() === "")) continue;
-            linhas.push({ linha_numero: i + 1, valores });
-        }
+        // Mantém somente a lista de linhas da aba escolhida.
+        // As linhas continuam sendo os próprios vetores do SheetJS; não criamos
+        // um objeto adicional para cada registro.
+        const deslocamentoLinha = indiceCabecalho + 2;
+        const linhas = matriz.slice(indiceCabecalho + 1);
 
         if (!linhas.length) throw new Error("A planilha possui cabeçalho, mas nenhuma linha de dados.");
 
-        // A matriz original já não é necessária depois da compactação.
-        workbook = null;
+        // Libera a referência à matriz externa; os vetores das linhas continuam
+        // vivos através de "linhas", sem duplicar seus dados.
+        matriz = null;
+
         const sha256 = await calcularSha256Rastreio(buffer);
         dadosImportacaoRastreio = {
             arquivo,
             nomeAba,
             colunas,
             linhas,
+            deslocamentoLinha,
             sha256,
             tamanhoBytes: arquivo.size,
             modelo,
@@ -328,8 +328,7 @@ function prepararLinhasRastreioParaEnvio(inicio = 0, fim = null, coletarAvisos =
     let totalErros = 0;
 
     for (let indice = inicio; indice < limite; indice++) {
-        const linha = linhas[indice];
-        const d = linha.valores;
+        const d = linhas[indice];
         const valor = chave => {
             const indice = modeloIndices[chave];
             return indice >= 0 ? d[indice] : null;
@@ -352,7 +351,7 @@ function prepararLinhasRastreioParaEnvio(inicio = 0, fim = null, coletarAvisos =
             data_envio: dataEnvio,
             turno,
             previsao_entrega: calcularPrevisaoRastreio(dataEnvio, turno),
-            linha_origem: linha.linha_numero
+            linha_origem: (indice + deslocamentoLinha)
         };
 
         if (coletarAvisos) {
@@ -401,13 +400,13 @@ function renderizarPreviaImportacaoRastreio() {
             '<div class="cab">' +
                 '<span>Linha</span><span>Cliente</span><span>NF</span><span>Região</span><span>Turno</span><span>Motorista</span>' +
             '</div>' +
-            amostra.map(linha => {
-                const d = linha.valores;
+            amostra.map((linha, indiceAmostra) => {
+                const d = linha;
                 const indices = dadosImportacaoRastreio.modeloIndices;
                 const regiao = indices.regiao >= 0 ? String(d[indices.regiao] ?? "").trim() : "";
                 const motorista = indices.motorista >= 0 ? String(d[indices.motorista] ?? "").trim() : (mapaMotoristasRastreio[regiao] || "—");
                 return '<div class="linha">' +
-                    '<span>' + linha.linha_numero + '</span>' +
+                    '<span>' + (dadosImportacaoRastreio.deslocamentoLinha + indiceAmostra) + '</span>' +
                     '<span>' + escaparHtmlRastreio(d[indices.cliente]) + '</span>' +
                     '<span>' + escaparHtmlRastreio(d[indices.notaFiscal]) + '</span>' +
                     '<span>' + escaparHtmlRastreio(regiao || "—") + '</span>' +
