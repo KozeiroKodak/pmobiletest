@@ -52,6 +52,62 @@
     padding: 14px 16px;
 }
 
+.importacao-nf-divisor {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 4px 16px 14px;
+    color: #666;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}
+
+.importacao-nf-divisor::before,
+.importacao-nf-divisor::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #292929;
+}
+
+.importacao-nf-online {
+    padding: 0 16px 16px;
+}
+
+.importacao-nf-online label {
+    display: block;
+    margin-bottom: 7px;
+    color: #bbb;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.importacao-nf-online-linha {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+}
+
+.importacao-nf-online-linha input {
+    flex: 1;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.importacao-nf-online-linha button {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+.importacao-nf-online small {
+    display: block;
+    margin-top: 7px;
+    color: #777;
+    font-size: 11px;
+    line-height: 1.45;
+}
+
 .importacao-nf-resultado {
     margin-top: 12px;
     color: #aaa;
