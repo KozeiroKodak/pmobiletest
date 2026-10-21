@@ -43,20 +43,53 @@ async function prepararImportacaoRastreio() {
 
         const buffer = await arquivo.arrayBuffer();
         const workbook = window.XLSX.read(buffer, { type: "array", cellDates: false });
-        const nomeAba = workbook.SheetNames?.[0];
 
-        if (!nomeAba) throw new Error("A planilha não possui uma aba utilizável.");
+        if (!workbook.SheetNames?.length) {
+            throw new Error("A planilha não possui uma aba utilizável.");
+        }
 
-        const matriz = window.XLSX.utils.sheet_to_json(workbook.Sheets[nomeAba], {
-            header: 1,
-            defval: null,
-            raw: false,
-            blankrows: false
-        });
+        // O arquivo operacional pode ter abas auxiliares antes de LANÇAMENTOS
+        // (por exemplo, RESUMO). Procura a primeira aba compatível com os
+        // campos de rastreio, dando preferência explícita a LANÇAMENTOS.
+        const ordemAbas = [
+            ...workbook.SheetNames.filter(nome => normalizarChaveRastreio(nome) === "LANCAMENTOS"),
+            ...workbook.SheetNames.filter(nome => normalizarChaveRastreio(nome) !== "LANCAMENTOS")
+        ];
 
-        if (!matriz.length) throw new Error("A planilha está vazia.");
+        let nomeAba = null;
+        let matriz = null;
+        let colunas = null;
+        let modelo = null;
 
-        const colunas = normalizarColunasRastreio(matriz[0] || []);
+        for (const candidata of ordemAbas) {
+            const matrizCandidata = window.XLSX.utils.sheet_to_json(workbook.Sheets[candidata], {
+                header: 1,
+                defval: null,
+                raw: false,
+                blankrows: false
+            });
+
+            if (!matrizCandidata.length) continue;
+
+            const colunasCandidata = normalizarColunasRastreio(matrizCandidata[0] || []);
+            const modeloCandidato = detectarModeloRastreio(colunasCandidata);
+
+            if (modeloCandidato.cliente && modeloCandidato.notaFiscal &&
+                modeloCandidato.dataEnvio && modeloCandidato.turno) {
+                nomeAba = candidata;
+                matriz = matrizCandidata;
+                colunas = colunasCandidata;
+                modelo = modeloCandidato;
+                break;
+            }
+        }
+
+        if (!nomeAba || !matriz || !colunas || !modelo) {
+            throw new Error(
+                "Não consegui identificar uma aba de lançamentos com Cliente, Nota Fiscal, Data Envio e Turno. " +
+                "Confira os cabeçalhos da planilha."
+            );
+        }
         const linhas = [];
 
         for (let i = 1; i < matriz.length; i++) {
@@ -76,15 +109,6 @@ async function prepararImportacaoRastreio() {
         if (!linhas.length) throw new Error("A planilha possui cabeçalho, mas nenhuma linha de dados.");
 
         const sha256 = await calcularSha256Rastreio(buffer);
-        const modelo = detectarModeloRastreio(colunas);
-
-        if (!modelo.cliente || !modelo.notaFiscal || !modelo.dataEnvio || !modelo.turno) {
-            throw new Error(
-                "Não consegui identificar automaticamente Cliente, Nota Fiscal, Data Envio e Turno. " +
-                "Confira os cabeçalhos da planilha."
-            );
-        }
-
         dadosImportacaoRastreio = {
             arquivo,
             nomeAba,
