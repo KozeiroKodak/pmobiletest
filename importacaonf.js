@@ -158,21 +158,61 @@ async function prepararImportacaoNFOnline() {
             const dadosProxy =
                 respostaProxy.data;
 
-            if (!(dadosProxy instanceof Blob)) {
+            if (dadosProxy instanceof Blob) {
+
+                buffer =
+                    await dadosProxy.arrayBuffer();
+
+                tipo =
+                    dadosProxy.type ||
+                    "application/octet-stream";
+
+            } else if (
+                typeof dadosProxy === "string"
+            ) {
+
+                buffer =
+                    new TextEncoder()
+                        .encode(dadosProxy)
+                        .buffer;
+
+                tipo =
+                    "application/octet-stream";
+
+            } else if (
+                dadosProxy instanceof ArrayBuffer
+            ) {
+
+                buffer =
+                    dadosProxy;
+
+                tipo =
+                    "application/octet-stream";
+
+            } else if (
+                ArrayBuffer.isView(dadosProxy)
+            ) {
+
+                buffer =
+                    dadosProxy.buffer.slice(
+                        dadosProxy.byteOffset,
+                        dadosProxy.byteOffset +
+                        dadosProxy.byteLength
+                    );
+
+                tipo =
+                    "application/octet-stream";
+
+            } else {
+
                 throw new Error(
                     "O Microsoft 365 não retornou um arquivo utilizável."
                 );
-            }
 
-            buffer =
-                await dadosProxy.arrayBuffer();
+            }
 
             nomeArquivo =
                 "planilha-sharepoint.xlsx";
-
-            tipo =
-                dadosProxy.type ||
-                "application/octet-stream";
 
         } else {
 
