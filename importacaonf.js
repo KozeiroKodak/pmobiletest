@@ -121,41 +121,98 @@ async function prepararImportacaoNFOnline() {
                 urlInformada
             );
 
-        const resposta =
-            await fetch(
-                urlDownload,
-                {
-                    method: "GET",
-                    redirect: "follow"
-                }
-            );
+        const hostOnline =
+            new URL(urlDownload)
+                .hostname
+                .toLowerCase();
 
-        if (!resposta.ok) {
-            throw new Error(
-                "O link respondeu HTTP " +
-                resposta.status +
-                "."
-            );
+        const microsoft365 =
+            hostOnline === "1drv.ms" ||
+            hostOnline === "onedrive.live.com" ||
+            hostOnline.endsWith(".onedrive.live.com") ||
+            hostOnline === "automotivacba-my.sharepoint.com";
+
+        let buffer;
+        let nomeArquivo;
+        let tipo;
+
+        if (microsoft365) {
+
+            const respostaProxy =
+                await window.clienteSupabase.functions.invoke(
+                    "pmobile-nf-download",
+                    {
+                        body: {
+                            url: urlDownload
+                        }
+                    }
+                );
+
+            if (respostaProxy.error) {
+                throw new Error(
+                    respostaProxy.error.message ||
+                    "Não foi possível baixar a planilha pelo Microsoft 365."
+                );
+            }
+
+            const dadosProxy =
+                respostaProxy.data;
+
+            if (!(dadosProxy instanceof Blob)) {
+                throw new Error(
+                    "O Microsoft 365 não retornou um arquivo utilizável."
+                );
+            }
+
+            buffer =
+                await dadosProxy.arrayBuffer();
+
+            nomeArquivo =
+                "planilha-sharepoint.xlsx";
+
+            tipo =
+                dadosProxy.type ||
+                "application/octet-stream";
+
+        } else {
+
+            const resposta =
+                await fetch(
+                    urlDownload,
+                    {
+                        method: "GET",
+                        redirect: "follow"
+                    }
+                );
+
+            if (!resposta.ok) {
+                throw new Error(
+                    "O link respondeu HTTP " +
+                    resposta.status +
+                    "."
+                );
+            }
+
+            buffer =
+                await resposta.arrayBuffer();
+
+            nomeArquivo =
+                obterNomeArquivoOnlineNF(
+                    resposta,
+                    urlDownload
+                );
+
+            tipo =
+                resposta.headers.get("content-type") ||
+                "application/octet-stream";
+
         }
-
-        const buffer =
-            await resposta.arrayBuffer();
 
         if (!buffer.byteLength) {
             throw new Error(
                 "O link não retornou nenhum arquivo."
             );
         }
-
-        const nomeArquivo =
-            obterNomeArquivoOnlineNF(
-                resposta,
-                urlDownload
-            );
-
-        const tipo =
-            resposta.headers.get("content-type") ||
-            "application/octet-stream";
 
         const arquivo =
             new File(
