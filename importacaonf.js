@@ -198,52 +198,57 @@ async function prepararImportacaoNFOnline() {
 
             return;
 
-        } else {
-
-                throw new Error(
-                    "O Microsoft 365 não retornou um arquivo utilizável."
-                );
-
-            }
-
-            nomeArquivo =
-                "planilha-sharepoint.xlsx";
-
-        } else {
-
-            const resposta =
-                await fetch(
-                    urlDownload,
-                    {
-                        method: "GET",
-                        redirect: "follow"
-                    }
-                );
-
-            if (!resposta.ok) {
-                throw new Error(
-                    "O link respondeu HTTP " +
-                    resposta.status +
-                    "."
-                );
-            }
-
-            buffer =
-                await resposta.arrayBuffer();
-
-            nomeArquivo =
-                obterNomeArquivoOnlineNF(
-                    resposta,
-                    urlDownload
-                );
-
-            tipo =
-                resposta.headers.get("content-type") ||
-                "application/octet-stream";
-
         }
 
+        const resposta =
+            await fetch(
+                urlDownload,
+                {
+                    method: "GET",
+                    redirect: "follow"
+                }
+            );
+
+        if (!resposta.ok) {
+            throw new Error(
+                "O link respondeu HTTP " +
+                resposta.status +
+                "."
+            );
+        }
+
+        const buffer =
+            await resposta.arrayBuffer();
+
+        const nomeArquivo =
+            obterNomeArquivoOnlineNF(
+                resposta,
+                urlDownload
+            );
+
+        const tipo =
+            resposta.headers.get("content-type") ||
+            "application/octet-stream";
+
         if (!buffer.byteLength) {
+            throw new Error(
+                "O link não retornou nenhum arquivo."
+            );
+        }
+
+        const arquivo =
+            new File(
+                [buffer],
+                nomeArquivo,
+                {
+                    type: tipo
+                }
+            );
+
+        await analisarArquivoImportacaoNF(
+            arquivo
+        );
+
             throw new Error(
                 "O link não retornou nenhum arquivo."
             );
