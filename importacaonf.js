@@ -283,7 +283,7 @@ function obterNomeArquivoOnlineNF(
 
     const nomeHeader =
         disposicao?.match(
-            /filename\\*?=(?:UTF-8''|")?([^";]+)/
+            /filename\*?=(?:UTF-8''|")?([^";]+)/
         )?.[1];
 
     if (nomeHeader) {
