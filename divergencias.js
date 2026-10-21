@@ -46,6 +46,22 @@ function escaparHTMLDivergencias(valor) {
 }
 
 
+function formatarDataHoraDivergencia(valor) {
+
+    if (!valor) {
+        return "Data e hora não informadas";
+    }
+
+    const data = new Date(valor);
+
+    if (Number.isNaN(data.getTime())) {
+        return "Data e hora inválidas";
+    }
+
+    return data.toLocaleString("pt-BR");
+}
+
+
 // ============================================================
 // FUNÇÃO: exibirDivergencias()
 //
@@ -287,6 +303,17 @@ async function exibirDivergencias() {
                         0
                     );
 
+                const usuarioNome =
+                    contagem.usuario_nome ??
+                    contagem.usuarioNome ??
+                    "Usuário não identificado";
+
+                const dataHora =
+                    contagem.criado_em ??
+                    contagem.criadoEm ??
+                    contagem.data ??
+                    null;
+
 
                 // ============================================
                 // CLASSIFICAÇÃO
@@ -339,6 +366,22 @@ async function exibirDivergencias() {
                             <strong>Classificação:</strong>
                             ${escaparHTMLDivergencias(
                                 classificacao
+                            )}
+                        </p>
+
+                        <p>
+                            <strong>Contado por:</strong>
+                            ${escaparHTMLDivergencias(
+                                usuarioNome
+                            )}
+                        </p>
+
+                        <p>
+                            <strong>Data e hora:</strong>
+                            ${escaparHTMLDivergencias(
+                                formatarDataHoraDivergencia(
+                                    dataHora
+                                )
                             )}
                         </p>
 
