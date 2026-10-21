@@ -262,6 +262,25 @@ function normalizarUrlPlanilhaOnlineNF(
 
     }
 
+    // OneDrive / Microsoft 365:
+    // links compartilhados normalmente apontam para uma página
+    // de visualização. O parâmetro download=1 solicita o arquivo
+    // diretamente, mantendo a origem em somente leitura.
+    if (
+        host === "1drv.ms" ||
+        host === "onedrive.live.com" ||
+        host.endsWith(".onedrive.live.com")
+    ) {
+
+        url.searchParams.set(
+            "download",
+            "1"
+        );
+
+        return url.toString();
+
+    }
+
     return url.toString();
 
 }
