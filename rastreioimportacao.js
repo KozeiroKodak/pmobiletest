@@ -164,7 +164,7 @@ async function prepararImportacaoRastreio() {
             modeloIndices
         };
 
-        mapaMotoristasRastreio = montarMapaMotoristasInicial(linhas, modelo);
+        mapaMotoristasRastreio = montarMapaMotoristasInicial(linhas, modelo, modeloIndices);
         renderizarPreviaImportacaoRastreio();
         mostrarStatusImportacaoRastreio("🟢 Planilha analisada. Revise os motoristas antes de enviar.");
     } catch (erro) {
@@ -223,11 +223,11 @@ function detectarModeloRastreio(colunas) {
     };
 }
 
-function montarMapaMotoristasInicial(linhas, modelo) {
+function montarMapaMotoristasInicial(linhas, modelo, modeloIndices) {
     const mapa = {};
     if (modelo.motorista) return mapa;
 
-    const indiceRegiao = dadosImportacaoRastreio?.modeloIndices?.regiao ?? -1;
+    const indiceRegiao = modeloIndices?.regiao ?? -1;
     linhas.forEach(linha => {
         const regiao = indiceRegiao >= 0 ? String(linha.valores?.[indiceRegiao] ?? "").trim() : "";
         if (regiao && !(regiao in mapa)) mapa[regiao] = "";
