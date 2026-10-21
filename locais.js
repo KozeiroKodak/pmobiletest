@@ -172,36 +172,65 @@ function carregarLocaisVazios() {
 
     if (!ESTRUTURA_LOCAIS_PMP.length) {
         area.innerHTML =
-            '<div class="locais-vazio">' +
-                '<strong>Nenhuma área configurada</strong>' +
-                '<p>A estrutura física dos locais ainda não foi cadastrada no PMOBILE.</p>' +
-            '</div>';
+            '<div class="locais-vazio"><strong>Nenhuma área configurada</strong>' +
+            '<p>A estrutura física dos locais ainda não foi cadastrada no PMOBILE.</p></div>';
         return;
     }
 
-    Promise.resolve().then(async function() {
-        area.innerHTML = '<div class="locais-carregando">Calculando posições...</div>';
+    area.innerHTML = '<div class="locais-carregando">Calculando posições...</div>';
 
+    Promise.resolve().then(async function() {
         try {
             const cliente = obterClienteSupabase();
             if (!cliente) throw new Error("Supabase indisponível.");
 
-            const { data, error } = await cliente
-                .from("contagens_manuais")
-                .select("codigo_material,local_encontrado,quantidade_fisica,data_hora");
+            const [materiaisResposta, contagensResposta] = await Promise.all([
+                cliente.from("materiais").select("id,local,quantidade"),
+                cliente.from("contagens_manuais")
+                    .select("material_id,local_encontrado,quantidade_fisica,data_hora")
+                    .order("data_hora", { ascending: false })
+            ]);
 
-            if (error) throw error;
+            if (materiaisResposta.error) throw materiaisResposta.error;
+            if (contagensResposta.error) throw contagensResposta.error;
 
-            const registros = Array.isArray(data) ? data : [];
+            const materiais = Array.isArray(materiaisResposta.data) ? materiaisResposta.data : [];
+            const contagens = Array.isArray(contagensResposta.data) ? contagensResposta.data : [];
+
+            // O inventário é a base. A contagem manual mais recente de cada
+            // material substitui a posição do inventário para fins físicos.
+            const estadoMateriais = new Map();
+
+            materiais.forEach(function(material) {
+                estadoMateriais.set(String(material.id), {
+                    local: normalizarLocalPmobile(material.local),
+                    quantidade: Number(material.quantidade || 0)
+                });
+            });
+
+            const jaProcessados = new Set();
+
+            contagens.forEach(function(contagem) {
+                const materialId = String(contagem.material_id || "");
+                if (!materialId || jaProcessados.has(materialId)) return;
+
+                jaProcessados.add(materialId);
+
+                estadoMateriais.set(materialId, {
+                    local: normalizarLocalPmobile(contagem.local_encontrado),
+                    quantidade: Number(contagem.quantidade_fisica || 0)
+                });
+            });
+
             const ocupados = new Set();
 
-            registros.forEach(function(item) {
-                const local = normalizarLocalPmobile(item.local_encontrado);
-                const quantidade = Number(item.quantidade_fisica);
-                if (local && Number.isFinite(quantidade) && quantidade > 0) {
-                    ocupados.add(local);
+            estadoMateriais.forEach(function(estado) {
+                if (estado.local && Number.isFinite(estado.quantidade) && estado.quantidade > 0) {
+                    ocupados.add(estado.local);
                 }
             });
+
+            window._pmobileLocaisVaziosOcupados = ocupados;
 
             area.innerHTML = ESTRUTURA_LOCAIS_PMP.map(function(estrutura) {
                 const posicoes = gerarPosicoesAreaPmobile(estrutura);
@@ -219,22 +248,19 @@ function carregarLocaisVazios() {
                         '<div class="local-vazio-metrica"><span>Total</span><strong>' + posicoes.length + '</strong></div>' +
                         '<div class="local-vazio-metrica"><span>Ocupados</span><strong>' + ocupadas + '</strong></div>' +
                         '<div class="local-vazio-metrica destaque"><span>Vazios</span><strong>' + vazios.length + '</strong></div>' +
-                        '<button type="button" class="botao-lupa-local" onclick="abrirDetalhesLocaisVazios(\'' +
+                        '<button type="button" class="botao-lupa-local" onclick="abrirDetalhesLocaisVazios(\\'' +
                             escapeHtmlPmobile(estrutura.area) +
-                        '\')" aria-label="Ver posições vazias de ' + escapeHtmlPmobile(estrutura.area) + '" title="Ver posições vazias">⌕</button>' +
+                        '\\')" aria-label="Ver posições vazias de ' + escapeHtmlPmobile(estrutura.area) + '" title="Ver posições vazias">⌕</button>' +
                     '</article>'
                 );
             }).join("");
-
-            window._pmobileLocaisVaziosOcupados = ocupados;
 
         } catch (erro) {
             console.error("Erro ao calcular locais vazios:", erro);
             area.innerHTML =
                 '<div class="locais-vazio locais-vazio-erro">' +
-                    '<span>!</span>' +
-                    '<strong>Não foi possível calcular</strong>' +
-                    '<p>' + escapeHtmlPmobile(erro?.message || "Erro ao consultar a contagem manual.") + '</p>' +
+                    '<span>!</span><strong>Não foi possível calcular</strong>' +
+                    '<p>' + escapeHtmlPmobile(erro?.message || "Erro ao consultar o estoque.") + '</p>' +
                 '</div>';
         }
     });
