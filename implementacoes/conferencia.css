@@ -100,3 +100,9 @@
         margin: 8px 0 0;
     }
 }
+
+
+/* Área de resultado do módulo */
+#resultadoConferencia {
+    margin-top: 16px;
+}
