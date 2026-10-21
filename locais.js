@@ -31,6 +31,8 @@ const LOCAIS_CRUZADOS_PMP = {
 
 let abaLocaisAtual = "alterados";
 let localVaziosDetalheAtual = null;
+let paginaLocaisDerivadosAtual = 1;
+const ITENS_POR_PAGINA_LOCAIS_DERIVADOS = 20;
 
 function abrirLocais() {
     mostrarTelaSistema("locais", "menuLocais");
@@ -92,24 +94,8 @@ async function carregarLocaisDerivados() {
             return;
         }
 
-        area.innerHTML =
-            '<div class="locais-resumo-derivados">' +
-                '<strong>' + registros.length + '</strong> material(is) fora dos setores padrão' +
-            '</div>' +
-            registros.map(function(item) {
-                return (
-                    '<article class="local-derivado-card">' +
-                        '<div>' +
-                            '<span class="local-alterado-legenda">Código</span>' +
-                            '<strong>' + escapeHtmlPmobile(item.codigo || "-") + '</strong>' +
-                        '</div>' +
-                        '<div>' +
-                            '<span class="local-alterado-legenda">Local atual</span>' +
-                            '<strong class="local-derivado-local">' + escapeHtmlPmobile(item.local || "-") + '</strong>' +
-                        '</div>' +
-                    '</article>'
-                );
-            }).join("");
+        paginaLocaisDerivadosAtual = 1;
+        renderizarPaginaLocaisDerivados(area, registros);
 
     } catch (erro) {
         console.error("Erro ao carregar materiais derivados:", erro);
@@ -121,6 +107,78 @@ async function carregarLocaisDerivados() {
     }
 }
 
+function renderizarPaginaLocaisDerivados(area, registros) {
+    const totalPaginas = Math.max(
+        1,
+        Math.ceil(registros.length / ITENS_POR_PAGINA_LOCAIS_DERIVADOS)
+    );
+
+    paginaLocaisDerivadosAtual = Math.min(
+        Math.max(1, paginaLocaisDerivadosAtual),
+        totalPaginas
+    );
+
+    const inicio = (paginaLocaisDerivadosAtual - 1) * ITENS_POR_PAGINA_LOCAIS_DERIVADOS;
+    const pagina = registros.slice(
+        inicio,
+        inicio + ITENS_POR_PAGINA_LOCAIS_DERIVADOS
+    );
+
+    area.innerHTML =
+        '<div class="locais-resumo-derivados">' +
+            '<strong>' + registros.length + '</strong> material(is) fora dos setores padrão' +
+        '</div>' +
+        pagina.map(function(item) {
+            return (
+                '<article class="local-derivado-card">' +
+                    '<div>' +
+                        '<span class="local-alterado-legenda">Código</span>' +
+                        '<strong>' + escapeHtmlPmobile(item.codigo || "-") + '</strong>' +
+                    '</div>' +
+                    '<div>' +
+                        '<span class="local-alterado-legenda">Local atual</span>' +
+                        '<strong class="local-derivado-local">' + escapeHtmlPmobile(item.local || "-") + '</strong>' +
+                    '</div>' +
+                '</article>'
+            );
+        }).join("") +
+        '<div class="locais-paginacao-derivados">' +
+            '<button type="button" class="botao-secundario" onclick="mudarPaginaLocaisDerivados(-1)"' +
+                (paginaLocaisDerivadosAtual <= 1 ? ' disabled' : '') +
+                '>Anterior</button>' +
+            '<span>Página ' + paginaLocaisDerivadosAtual + '/' + totalPaginas + '</span>' +
+            '<button type="button" class="botao-secundario" onclick="mudarPaginaLocaisDerivados(1)"' +
+                (paginaLocaisDerivadosAtual >= totalPaginas ? ' disabled' : '') +
+                '>Próxima</button>' +
+        '</div>';
+
+    area.dataset.registrosLocaisDerivados = JSON.stringify(registros);
+}
+
+function mudarPaginaLocaisDerivados(direcao) {
+    const area = document.getElementById("listaLocaisDerivados");
+    if (!area) return;
+
+    let registros;
+    try {
+        registros = JSON.parse(area.dataset.registrosLocaisDerivados || "[]");
+    } catch (erro) {
+        console.error("Erro ao recuperar materiais derivados para paginação:", erro);
+        return;
+    }
+
+    const totalPaginas = Math.max(
+        1,
+        Math.ceil(registros.length / ITENS_POR_PAGINA_LOCAIS_DERIVADOS)
+    );
+
+    const novaPagina = paginaLocaisDerivadosAtual + Number(direcao || 0);
+
+    if (novaPagina < 1 || novaPagina > totalPaginas) return;
+
+    paginaLocaisDerivadosAtual = novaPagina;
+    renderizarPaginaLocaisDerivados(area, registros);
+}
 async function carregarLocaisAlterados() {
     const area = document.getElementById("listaLocaisAlterados");
     if (!area) return;
