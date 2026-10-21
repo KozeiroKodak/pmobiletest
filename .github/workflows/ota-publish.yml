@@ -5,6 +5,11 @@ on:
     branches:
       - main
     paths:
+      # Arquivos da raiz do WebView.
+      - '*.html'
+      - '*.css'
+      - '*.js'
+      # Arquivos Web em subpastas (incluindo implementacoes/).
       - '**/*.html'
       - '**/*.css'
       - '**/*.js'
@@ -21,6 +26,11 @@ on:
       - '**/*.otf'
       - '.github/workflows/ota-publish.yml'
   workflow_dispatch:
+    inputs:
+      motivo:
+        description: 'Motivo da publicação manual'
+        required: false
+        default: 'publicação manual'
 
 permissions:
   contents: write
@@ -33,7 +43,7 @@ jobs:
   publish-ota:
     # O commit gerado pelo próprio workflow altera index.html/manifest.
     # Ele não deve disparar uma nova publicação OTA.
-    if: github.actor != 'github-actions[bot]' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' || github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
 
     steps:
