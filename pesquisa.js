@@ -251,153 +251,87 @@ function exibirResultadosPesquisa(
         return;
     }
 
-
     limparResultado(areaResultado);
-
 
     if (
         !Array.isArray(resultados) ||
         resultados.length === 0
     ) {
-
         areaResultado.innerHTML =
             "<p>Nenhum material encontrado.</p>";
-
         return;
-
     }
 
+    const cabecalho = document.createElement("div");
+    cabecalho.className = "pesquisa-cabecalho";
 
-    const fragmento =
-        document.createDocumentFragment();
+    [
+        "ID",
+        "Descrição",
+        "Referência",
+        "Local",
+        "Marca",
+        "Quantidade",
+        "Reservada"
+    ].forEach(function(label) {
+        const celula = document.createElement("span");
+        celula.textContent = label;
+        cabecalho.appendChild(celula);
+    });
 
+    const fragmento = document.createDocumentFragment();
+    fragmento.appendChild(cabecalho);
 
-    resultados.forEach(
-        function(material) {
+    resultados.forEach(function(material) {
 
-            const bloco =
-                document.createElement("div");
+        const bloco = document.createElement("article");
+        bloco.className = "pesquisa-item";
 
+        const quantidadeTotal = Number(material.quantidade ?? 0);
+        const quantidadeReservada = Number(
+            material.quantidadeReservada ??
+            material.quantidade_reservada ??
+            0
+        );
+        const quantidadeDisponivel =
+            quantidadeTotal - quantidadeReservada;
 
-            const linha =
-                document.createElement("hr");
+        const campos = [
+            ["ID", material.codigo ?? "-", "pesquisa-id"],
+            ["Descrição", material.descricao ?? "-", "pesquisa-descricao"],
+            ["Referência", material.referencia ?? "-", "pesquisa-referencia"],
+            ["Local", material.local ?? "-", "pesquisa-local"],
+            ["Marca", material.marca ?? "-", "pesquisa-marca"],
+            [
+                "Quantidade",
+                Number.isFinite(quantidadeDisponivel)
+                    ? quantidadeDisponivel
+                    : "-",
+                "pesquisa-quantidade"
+            ],
+            [
+                "Reservada",
+                Number.isFinite(quantidadeReservada)
+                    ? quantidadeReservada
+                    : "-",
+                "pesquisa-reservada"
+            ]
+        ];
 
+        campos.forEach(function(campo) {
+            const celula = document.createElement("div");
+            celula.className =
+                "pesquisa-celula " + campo[2];
+            celula.setAttribute("data-label", campo[0]);
+            celula.textContent = campo[1];
+            bloco.appendChild(celula);
+        });
 
-            const titulo =
-                document.createElement("h3");
+        fragmento.appendChild(bloco);
+    });
 
-            titulo.textContent =
-                material.descricao ||
-                "Material";
-
-
-            const codigo =
-                document.createElement("p");
-
-            codigo.innerHTML =
-                "<strong>Código:</strong> ";
-
-            codigo.appendChild(
-                document.createTextNode(
-                    material.codigo ?? "-"
-                )
-            );
-
-
-            const referencia =
-                document.createElement("p");
-
-            referencia.innerHTML =
-                "<strong>Referência:</strong> ";
-
-            referencia.appendChild(
-                document.createTextNode(
-                    material.referencia ?? "-"
-                )
-            );
-
-
-            const local =
-                document.createElement("p");
-
-            local.innerHTML =
-                "<strong>Local:</strong> ";
-
-            local.appendChild(
-                document.createTextNode(
-                    material.local ?? "-"
-                )
-            );
-
-
-            const marca =
-                document.createElement("p");
-
-            marca.innerHTML =
-                "<strong>Marca:</strong> ";
-
-            marca.appendChild(
-                document.createTextNode(
-                    material.marca ?? "-"
-                )
-            );
-
-
-            const quantidadeTotal = Number(material.quantidade ?? 0);
-            const quantidadeReservada = Number(material.quantidadeReservada ?? material.quantidade_reservada ?? 0);
-            const quantidadeDisponivel = quantidadeTotal - quantidadeReservada;
-
-            const quantidade =
-                document.createElement("p");
-
-            quantidade.innerHTML =
-                "<strong>Quantidade:</strong> ";
-
-            quantidade.appendChild(
-                document.createTextNode(
-                    Number.isFinite(quantidadeDisponivel)
-                        ? quantidadeDisponivel
-                        : "-"
-                )
-            );
-
-            const quantidadeReservadaLinha =
-                document.createElement("p");
-
-            quantidadeReservadaLinha.innerHTML =
-                "<strong>Quantidade reservada:</strong> ";
-
-            quantidadeReservadaLinha.appendChild(
-                document.createTextNode(
-                    Number.isFinite(quantidadeReservada)
-                        ? quantidadeReservada
-                        : "-"
-                )
-            );
-
-
-            bloco.appendChild(linha);
-            bloco.appendChild(titulo);
-            bloco.appendChild(codigo);
-            bloco.appendChild(referencia);
-            bloco.appendChild(local);
-            bloco.appendChild(marca);
-            bloco.appendChild(quantidade);
-            bloco.appendChild(quantidadeReservadaLinha);
-
-
-            fragmento.appendChild(bloco);
-
-        }
-    );
-
-
-    areaResultado.appendChild(
-        fragmento
-    );
-
+    areaResultado.appendChild(fragmento);
 }
-
 
 // =========================================
 // PESQUISA UNIFICADA
