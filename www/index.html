@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Relação de estoque CBA RS</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css?v=0.0.148"
+    >
+
+    <link
+        rel="stylesheet"
+        href="implementacoes/style.css?v=0.0.148"
+    >
+
+    <link
+        rel="stylesheet"
+        href="implementacoes/locais.css?v=0.0.148"
+    >
+
+    <link
+        rel="stylesheet"
+        href="implementacoes/reservas.css?v=0.0.148"
+    >
+
+    <link
+        rel="stylesheet"
+        href="implementacoes/pesquisa.css?v=0.0.148"
+    >
+
+    <link
+        rel="stylesheet"
+        href="implementacoes/conferencia.css?v=0.0.148"
+    >
+
+    <link
+        rel="stylesheet"
+        href="implementacoes/conferenciasrealizadas.css?v=0.0.148"
+    >
+
+</head>
+
+<body>
+
+
+<!-- =========================================================
+     TELA INICIAL
+     ========================================================= -->
+
+<div id="inicio">
+
+    <h1>PMOBILE - ESTOQUE</h1>
+
+    <p>
+        Relação de estoque e contagem CBA DIESEL RS.
+    </p>
+
+    <button onclick="abrirSistema()">
+        Iniciar
+    </button>
+
+</div>
+
+
+
+<!-- =========================================================
+     LOGIN — INTERFACE INICIAL
+     ========================================================= -->
+
+<div id="loginPmobile" class="login-pmobile" style="display: none;">
+
+    <div class="login-pmobile-topo">
+        <button type="button" class="login-voltar" onclick="voltarInicio()" aria-label="Voltar">‹</button>
+        <strong>PMOBILE</strong>
+        <span class="login-topo-espaco"></span>
+    </div>
+
+    <div class="login-pmobile-corpo">
+
+        <div class="login-pmobile-marca">
+            <div class="login-pmobile-logo">P</div>
+            <h1>Entrar</h1>
+            <p>Acesse o PMOBILE para continuar.</p>
+        </div>
+
+        <form class="login-pmobile-form" onsubmit="entrarInterface(event)">
+
+            <label for="loginUsuario">Usuário</label>
+            <input
+                type="text"
+                id="loginUsuario"
+                name="usuario"
+                placeholder="Usuário"
+                autocomplete="username"
+            >
+
+            <label for="loginSenha">Senha</label>
+            <div class="login-senha-campo">
+                <input
+                    type="password"
+                    id="loginSenha"
+                    name="senha"
+                    placeholder="Senha de acesso"
+                    autocomplete="current-password"
+                >
+                <button
+                    type="button"
+                    class="login-mostrar-senha"
+                    onclick="alternarSenhaLogin()"
+                    aria-label="Mostrar ou ocultar senha"
+                >Mostrar</button>
+            </div>
+
+            <p class="login-ajuda">
+                Primeiro acesso: informe apenas o usuário para criar sua senha.
+            </p>
+
+            <label class="login-manter-login">
+                <input
+                    type="checkbox"
+                    id="loginManterLogin"
+                >
+                <span>Manter login</span>
+            </label>
+
+            <button type="submit" class="login-entrar">ENTRAR</button>
+
+            <button
+                type="button"
+                class="login-esqueceu"
+                onclick="avisoLoginTeste()"
+            >Esqueceu sua senha?</button>
+
+            <button
+                type="button"
+                class="login-criar-usuario"
+                onclick="abrirSolicitacaoCadastro()"
+            >Criar usuário</button>
+
+        </form>
+
+        <p id="loginStatus" class="login-status" aria-live="polite"></p>
+
+    </div>
+
+</div>
+
+
+<div id="modalSolicitacaoCadastro" class="modal-cadastro-usuario" style="display:none;">
+    <div class="modal-cadastro-usuario-caixa">
+        <div class="modal-cadastro-usuario-cabecalho">
+            <div>
+                <span class="modal-cadastro-usuario-caminho">PMOBILE</span>
+                <h2>Criar usuário</h2>
+            </div>
+            <button type="button" class="modal-cadastro-usuario-fechar" onclick="fecharSolicitacaoCadastro()" aria-label="Fechar">×</button>
+        </div>
+
+        <p>Informe seus dados. O cadastro ficará pendente até a aprovação de um administrador.</p>
+
+        <form onsubmit="enviarSolicitacaoCadastro(event)">
+            <label for="cadastroNome">Nome</label>
+            <input type="text" id="cadastroNome" placeholder="Seu nome" autocomplete="name">
+
+            <label for="cadastroUsuario">Usuário desejado</label>
+            <input type="text" id="cadastroUsuario" placeholder="Usuário para entrar no PMOBILE" autocomplete="off">
+
+            <p id="cadastroStatus" class="login-status" aria-live="polite"></p>
+
+            <div class="modal-cadastro-usuario-acoes">
+                <button type="button" class="botao-secundario" onclick="fecharSolicitacaoCadastro()">Cancelar</button>
+                <button type="submit" class="login-entrar">Solicitar cadastro</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<!-- =========================================================
+     APLICAÇÃO
+     ========================================================= -->
+
+<div
+    id="aplicacao"
+    style="display: none;"
+>
+
+
+    <!-- =====================================================
+         SIDEBAR
+         ===================================================== -->
+
+    <aside id="sistema">
+
+
+        <!-- =================================================
+             IDENTIFICAÇÃO
+             ================================================= -->
+
+        <div class="sidebar-topo">
+
+            <div class="sidebar-logo">
+                P
+            </div>
+
+            <div class="sidebar-titulo">
+
+                <strong>
+                    PMOBILE
+                </strong>
+
+                <span>
+                    Estoque
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             NAVEGAÇÃO PRINCIPAL
+             ================================================= -->
+
+        <nav class="sidebar-menu">
+
+
+            <!-- PESQUISA -->
+
+            <button
+                id="menuPesquisa"
+                class="sidebar-item"
+                onclick="abrirPesquisa()"
+                title="Pesquisar material"
+            >
+
+                <span class="sidebar-icone">
+                    🔎
+                </span>
+
+                <span class="sidebar-texto">
+                    Pesquisar material
+                </span>
+
+            </button>
+
+
+            <!-- IMPORTAÇÃO -->
+
+            <button
+                id="menuImportacao"
+                class="sidebar-item"
+                onclick="abrirImportacao()"
+                title="Importar inventário"
+            >
+
+                <span class="sidebar-icone">
+                    📦
+                </span>
+
+                <span class="sidebar-texto">
+                    Importar inventário
+                </span>
+
+            </button>
+
+
+            <!-- CONTAGEM MANUAL -->
+
+            <button
+                id="menuContagemManual"
+                class="sidebar-item"
+                onclick="abrirContagemManual()"
+                title="Contagem manual"
+            >
+                <span class="sidebar-icone">✍️</span>
+                <span class="sidebar-texto">Contagem manual</span>
+            </button>
+
+
+            <!-- CONFERÊNCIA -->
+
+            <button
+                id="menuConferencia"
+                class="sidebar-item"
+                onclick="abrirConferencia()"
+                title="Conferência"
+            >
+
+                <span class="sidebar-icone">
+                    📋
+                </span>
+
+                <span class="sidebar-texto">
+                    Conferência
+                </span>
+
+            </button>
+
+
+            <!-- CONFERÊNCIAS -->
+
+            <button
+                id="menuConferencias"
+                class="sidebar-item"
+                onclick="abrirConferencias()"
+                title="Conferências realizadas"
+            >
+
+                <span class="sidebar-icone">
+                    🗂️
+                </span>
+
+                <span class="sidebar-texto">
+                    Conferências
+                </span>
+
+            </button>
+            <!-- RESERVAS -->
+
+            <button
+                id="menuReservas"
+                class="sidebar-item"
+                onclick="abrirReservas()"
+                title="Reservas"
+            >
+                <span class="sidebar-icone">📦</span>
+                <span class="sidebar-texto">Reservas</span>
+            </button>
+
+
+            <!-- DIVERGÊNCIAS -->
+
+            <button
+                id="menuDivergencias"
+                class="sidebar-item"
+                onclick="abrirDivergencias()"
+                title="Divergências"
+            >
+
+                <span class="sidebar-icone">
+                    ⚠️
+                </span>
+
+                <span class="sidebar-texto">
+                    Divergências
+                </span>
+
+            </button>
+
+
+        </nav>
+
+
+        <!-- =================================================
+             PARTE INFERIOR DA SIDEBAR
+             ================================================= -->
+
+        <div class="sidebar-rodape">
+
+            <button
+                id="menuSair"
+                class="sidebar-item sidebar-item-sair"
+                onclick="sairPmobile()"
+                title="Sair"
+            >
+                <span class="sidebar-icone">
+                    🚪
+                </span>
+
+                <span class="sidebar-texto">
+                    Sair
+                </span>
+            </button>
+
+            <button
+                id="menuConfiguracoes"
+                class="sidebar-item"
+                onclick="abrirConfiguracoes()"
+                title="Configurações"
+            >
+
+                <span class="sidebar-icone">
+                    ⚙️
+                </span>
+
+                <span class="sidebar-texto">
+                    Configurações
+                </span>
+
+            </button>
+
+        </div>
+
+
+    </aside>
+
+
+    <!-- =====================================================
+         CONTEÚDO PRINCIPAL
+         ===================================================== -->
+
+    <main id="conteudoPrincipal">
+
+
+        <!-- =================================================
+             TELA PRINCIPAL
+             ================================================= -->
+
+        <section
+            id="homeSistema"
+            class="tela-sistema"
+        >
+
+            <div class="cabecalho-pagina">
+
+                <p class="cabecalho-caminho">
+                    PMOBILE
+                </p>
+
+                <h1>
+                    Estoque
+                </h1>
+
+                <p>
+                    Selecione uma opção no menu lateral.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             PESQUISA UNIFICADA
+             ================================================= -->
+
+        <section
+            id="pesquisa"
+            class="tela-sistema"
+            style="display: none;"
+        >
+
+            <div class="cabecalho-pagina">
+
+                <p class="cabecalho-caminho">
+                    PMOBILE / Pesquisa
+                </p>
+
+                <h1>
+                    Pesquisar material
+                </h1>
+
+                <p>
+                    Localize um material por código, referência ou descrição.
+                </p>
+
+            </div>
+
+            <div class="painel">
+
+                <div class="linha-formulario linha-contagem-manual-busca">
+
+                    <div class="seletor-contagem-manual-wrapper">
+
+                        <select
+                            id="tipoBuscaPesquisaMaterial"
+                            class="seletor-contagem-manual-nativo"
+                            aria-hidden="true"
+                            tabindex="-1"
+                        >
+                            <option value="codigo">CÓD</option>
+                            <option value="referencia">REF</option>
+                            <option value="descricao">DESC</option>
+                        </select>
+
+                        <button
+                            type="button"
+                            class="seletor-contagem-manual"
+                            id="botaoTipoBuscaPesquisaMaterial"
+                            onclick="alternarSeletorPesquisaMaterial()"
+                            aria-haspopup="listbox"
+                            aria-expanded="false"
+                        >CÓD</button>
+
+                        <div
+                            id="menuTipoBuscaPesquisaMaterial"
+                            class="menu-tipo-busca-contagem-manual"
+                            role="listbox"
+                            style="display: none;"
+                        >
+                            <button type="button" onclick="selecionarTipoBuscaPesquisaMaterial('codigo')">Código</button>
+                            <button type="button" onclick="selecionarTipoBuscaPesquisaMaterial('referencia')">Referência</button>
+                            <button type="button" onclick="selecionarTipoBuscaPesquisaMaterial('descricao')">Descrição</button>
+                        </div>
+
+                    </div>
+
+                    <input
+                        type="text"
+                        id="campoPesquisaMaterial"
+                        placeholder="Digite o código"
+                        autocomplete="off"
+                        onkeydown="if (event.key === 'Enter') { event.preventDefault(); pesquisarMaterialSelecionado(); }"
+                    >
+
+                    <button
+                        type="button"
+                        class="botao-principal botao-buscar-contagem-manual"
+                        onclick="pesquisarMaterialSelecionado()"
+                    >
+                        Pesquisar
+                    </button>
+
+                </div>
+
+                <div id="resultadoPesquisaMaterial"></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             CONTAGEM MANUAL
+             ================================================= -->
+
+        <section id="contagemManual" class="tela-sistema" style="display: none;">
+            <div class="cabecalho-pagina">
+                <p class="cabecalho-caminho">PMOBILE / Contagem manual</p>
+                <h1>Contagem manual</h1>
+                <p>Localize um material por código, referência ou descrição e registre o local encontrado e a quantidade física.</p>
+            </div>
+
+            <div class="painel">
+                <div class="linha-formulario linha-contagem-manual-busca">
+                    <div class="seletor-contagem-manual-wrapper">
+                        <select id="tipoBuscaContagemManual" class="seletor-contagem-manual-nativo" aria-hidden="true" tabindex="-1">
+                            <option value="codigo">CÓD</option>
+                            <option value="descricao">DESC</option>
+                            <option value="referencia">REF</option>
+                        </select>
+                        <button
+                            type="button"
+                            class="seletor-contagem-manual"
+                            id="botaoTipoBuscaContagemManual"
+                            onclick="alternarSeletorContagemManual()"
+                            aria-haspopup="listbox"
+                            aria-expanded="false"
+                        >CÓD</button>
+                        <div id="menuTipoBuscaContagemManual" class="menu-tipo-busca-contagem-manual" role="listbox" style="display: none;">
+                            <button type="button" onclick="selecionarTipoBuscaContagemManual('codigo')">Código</button>
+                            <button type="button" onclick="selecionarTipoBuscaContagemManual('referencia')">Referência</button>
+                            <button type="button" onclick="selecionarTipoBuscaContagemManual('descricao')">Descrição</button>
+                        </div>
+                    </div>
+                    <input type="text" id="campoContagemManual" placeholder="Digite o código" autocomplete="off">
+                    <button class="botao-aba botao-buscar-contagem-manual" onclick="buscarMaterialContagemManual()">🔎 Buscar</button>
+                    <div class="acoes-contagem-manual-config">
+                        <button
+                            type="button"
+                            class="botao-aba botao-config-contagem-manual"
+                            onclick="alternarMenuConfiguracoesContagemManual()"
+                            aria-label="Configurações da contagem manual"
+                            title="Configurações"
+                        >⚙️</button>
+                        <div id="menuConfiguracoesContagemManual" class="menu-config-contagem-manual" style="display: none;">
+                            <button type="button" onclick="limparContagensManuais()">🗑️ Limpar contagem manual</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="resultadoBuscaContagemManual"></div>
+            </div>
+
+            <div class="painel" id="painelRegistroContagemManual" style="display: none;">
+                <h3>Registrar contagem</h3>
+                <div id="materialSelecionadoContagemManual"></div>
+                <div class="linha-formulario">
+                    <input type="text" id="localContagemManual" placeholder="Local encontrado" autocomplete="off">
+                    <input type="number" id="quantidadeContagemManual" placeholder="Quantidade física" min="0" step="1" inputmode="numeric">
+                    <button class="botao-aba" onclick="salvarContagemManual()">✓ Salvar contagem</button>
+                </div>
+                <div id="statusContagemManual"></div>
+            </div>
+
+            <div class="painel">
+                <h3>Contagens registradas neste dispositivo</h3>
+                <div id="listaContagensManuais"></div>
+            </div>
+        </section>
+
+
+        <!-- =================================================
+             LOCAIS
+             ================================================= -->
+
+        <section id="locais" class="tela-sistema" style="display: none;">
+            <div class="cabecalho-pagina">
+                <p class="cabecalho-caminho">PMOBILE / Locais</p>
+                <h1>Locais</h1>
+                <p>Controle de alterações de endereço e posições físicas disponíveis.</p>
+            </div>
+
+            <div class="painel painel-locais">
+                <div class="abas-locais" role="tablist" aria-label="Locais">
+                    <button type="button" id="abaLocaisAlterados" class="aba-locais ativo" onclick="alternarAbaLocais('alterados')" role="tab">🔄 Alterados</button>
+                    <button type="button" id="abaLocaisVazios" class="aba-locais" onclick="alternarAbaLocais('vazios')" role="tab">🟩 Vazios</button>
+                    <button type="button" id="abaLocaisDerivados" class="aba-locais" onclick="alternarAbaLocais('derivados')" role="tab">⚠️ Derivados</button>
+                </div>
+                <div id="painelLocaisAlterados"><div id="listaLocaisAlterados"></div></div>
+                <div id="painelLocaisVazios" style="display: none;"><div id="listaAreasVazias"></div></div>
+                <div id="painelLocaisDerivados" style="display: none;"><div id="listaLocaisDerivados"></div></div>
+            </div>
+        </section>
+
+        <!-- =================================================
+             RESERVAS
+             ================================================= -->
+
+        <section id="reservas" class="tela-sistema" style="display: none;">
+            <div class="cabecalho-pagina">
+                <p class="cabecalho-caminho">PMOBILE / Reservas</p>
+                <h1>Reservas</h1>
+                <p>Materiais com quantidade reservada maior que zero.</p>
+            </div>
+
+            <div class="painel painel-reservas">
+                <div id="listaReservas"></div>
+            </div>
+        </section>
+
+
+        <section id="detalhesLocaisVazios" class="tela-sistema" style="display: none;">
+            <div class="cabecalho-pagina">
+                <p class="cabecalho-caminho">PMOBILE / Locais / Vazios</p>
+                <div class="cabecalho-linha-voltar">
+                    <button type="button" class="botao-voltar-tela" onclick="fecharDetalhesLocaisVazios()" aria-label="Voltar">‹</button>
+                    <div><h1 id="tituloDetalhesLocaisVazios">A01</h1><p>Posições disponíveis nesta área.</p></div>
+                </div>
+            </div>
+            <div class="painel"><div id="listaDetalhesLocaisVazios" class="lista-locais-vazios-detalhe"></div></div>
+        </section>
+
+
+        <!-- =================================================
+             CONFERÊNCIA
+             ================================================= -->
+
+        <section
+            id="conferencia"
+            class="tela-sistema"
+            style="display: none;"
+        >
+
+            <div class="cabecalho-pagina">
+
+                <p class="cabecalho-caminho">
+                    PMOBILE / Conferência
+                </p>
+
+                <h1>
+                    Conferência
+                </h1>
+
+            </div>
+
+
+            <div class="painel">
+
+                <div class="linha-formulario">
+
+                    <input
+                        type="text"
+                        id="campoConferencia"
+                        placeholder="Código ou descrição"
+                    >
+
+                    <button
+                        class="botao-principal"
+                        onclick="buscarMaterialConferencia()"
+                    >
+                        Buscar
+                    </button>
+
+                </div>
+
+
+                <div id="resultadoConferencia"></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             CONFERÊNCIAS REALIZADAS
+             ================================================= -->
+
+        <section
+            id="conferencias"
+            class="tela-sistema"
+            style="display: none;"
+        >
+
+            <div class="cabecalho-pagina">
+
+                <p class="cabecalho-caminho">
+                    PMOBILE / Conferências
+                </p>
+
+                <h1>
+                    Conferências realizadas
+                </h1>
+
+            </div>
+
+
+            <div class="painel">
+
+                <button
+                    class="botao-perigo"
+                    onclick="limparConferenciasSupabase()"
+                >
+                    🗑️ Limpar conferências
+                </button>
+
+                <div id="resultadoConferencias"></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             DIVERGÊNCIAS
+             ================================================= -->
+
+        <section
+            id="divergencias"
+            class="tela-sistema"
+            style="display: none;"
+        >
+
+            <div class="cabecalho-pagina">
+
+                <p class="cabecalho-caminho">
+                    PMOBILE / Divergências
+                </p>
+
+                <h1>
+                    Divergências
+                </h1>
+
+            </div>
+
+
+            <div class="painel">
+
+                <div id="resultadoDivergencias"></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             IMPORTAÇÃO
+             ================================================= -->
+
+        <section
+            id="importacao"
+            class="tela-sistema"
+            style="display: none;"
+        >
+
+            <div class="cabecalho-pagina">
+
+                <p class="cabecalho-caminho">
+                    PMOBILE / Importação
+                </p>
+
+                <h1>
+                    Importar inventário
+                </h1>
+
+                <p>
+                    Selecione o arquivo Excel exportado do DOGO.
+                </p>
+
+            </div>
+
+
+            <div class="painel">
+
+                <input
+                    type="file"
+                    id="arquivoExcel"
+                    class="arquivo-importacao"
+                    accept=".xlsx, .xls"
+                >
+
+
+                <div class="acoes-importacao">
+
+                    <button
+                        class="botao-aba botao-importar-materiais"
+                        onclick="importarExcel()"
+                    >
+                        Importar planilha
+                    </button>
+
+
+                    <button
+                        class="botao-aba"
+                        onclick="abrirModalZerarInventario()"
+                    >
+                        🗑️ Zerar inventário
+                    </button>
+
+                </div>
+
+
+                <div id="resultadoImportacao"></div>
+
+            </div>
+
+
+            <!-- =============================================
+                 MODAL ZERAR INVENTÁRIO
+                 ============================================= -->
+
+            <div
+                id="modalZerarInventario"
+                class="modal"
+                style="display: none;"
+            >
+
+                <div class="modal-conteudo">
+
+                    <h2>
+                        🗑️ Zerar inventário
+                    </h2>
+
+                    <p>
+                        ⚠️ <strong>Atenção!</strong>
+                    </p>
+
+                    <p>
+                        Todos os materiais serão removidos
+                        do inventário.
+                    </p>
+
+                    <p>
+                        <strong>
+                            Apagar conferências também?
+                        </strong>
+                    </p>
+
+
+                    <div class="modal-acoes">
+
+                        <button
+                            class="botao-secundario"
+                            onclick="confirmarZeramento(false)"
+                        >
+                            NÃO
+                        </button>
+
+
+                        <button
+                            class="botao-perigo"
+                            onclick="confirmarZeramento(true)"
+                        >
+                            SIM
+                        </button>
+
+
+                        <button
+                            class="botao-secundario"
+                            onclick="fecharModalZerarInventario()"
+                        >
+                            CANCELAR
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             CONFIGURAÇÕES
+             ================================================= -->
+
+        <section
+            id="configuracoes"
+            class="tela-sistema"
+            style="display: none;"
+        >
+
+            <div class="cabecalho-pagina">
+
+                <p class="cabecalho-caminho">
+                    PMOBILE / Configurações
+                </p>
+
+                <h1>
+                    Configurações
+                </h1>
+
+            </div>
+
+
+            <div class="painel configuracoes-painel-admin" id="painelConfiguracoesAdmin" style="display: none;">
+
+                <h2>👑 Administração</h2>
+
+                <p>Gerenciamento de usuários, tokens e solicitações.</p>
+
+                <div class="configuracoes-acoes">
+                    <button class="botao-aba" onclick="abrirGerenciamentoUsuarios()">👥 Usuários</button>
+                    <button class="botao-aba" onclick="abrirLocais()">📍 Locais</button>
+                    <button class="botao-aba" onclick="abrirSolicitacoesResetToken()">🔑 Recuperação de tokens</button>
+                    <button class="botao-perigo" onclick="abrirManutencaoBanco()">🛠️ Manutenção</button>
+                </div>
+
+            </div>
+
+            <div class="painel painel-solicitacoes" id="painelGerenciamentoUsuarios" style="display: none;">
+                <div class="solicitacoes-topo">
+                    <button
+                        type="button"
+                        class="solicitacoes-voltar"
+                        onclick="fecharGerenciamentoUsuarios()"
+                        aria-label="Voltar"
+                    >‹</button>
+
+                    <div class="solicitacoes-titulo">
+                        <span class="cabecalho-caminho">PMOBILE / Administração</span>
+                        <h2>Solicitações</h2>
+                    </div>
+                </div>
+
+                <div class="solicitacoes-filtros" role="tablist" aria-label="Tipos de solicitação">
+                    <button
+                        type="button"
+                        class="solicitacao-filtro ativo"
+                        id="filtroSolicitacoesCadastro"
+                        onclick="mostrarFiltroSolicitacoes('cadastro')"
+                    >Cadastros <span id="contadorSolicitacoesCadastro">0</span></button>
+
+                    <button
+                        type="button"
+                        class="solicitacao-filtro"
+                        id="filtroSolicitacoesReset"
+                        onclick="mostrarFiltroSolicitacoes('reset')"
+                    >Tokens</button>
+                </div>
+
+                <div id="listaSolicitacoesCadastro" class="lista-solicitacoes">
+                    <p>Carregando solicitações...</p>
+                </div>
+
+                <div id="listaSolicitacoesReset" class="lista-solicitacoes" style="display:none;">
+                    <div class="solicitacao-vazia">
+                        <span class="solicitacao-vazia-icone">🔑</span>
+                        <strong>Recuperação de tokens</strong>
+                        <p>As solicitações de recuperação aparecerão aqui.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="painel" id="painelConfiguracoesManutencao" style="display: none;">
+                <h2>🛠️ Manutenção</h2>
+                <p>Operações administrativas do banco de dados.</p>
+                <button class="botao-perigo" onclick="limparMateriaisSupabase()">🗑️ Materiais importados</button>
+            </div>
+
+            <div class="painel" id="painelConfiguracoesUsuario" style="display: none;">
+                <h2>👤 Conta</h2>
+                <p>Informações da conta atualmente conectada.</p>
+                <div id="resumoContaPmobile"></div>
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+</div>
+
+
+<!-- =========================================================
+     CRIAÇÃO DA SENHA — PRIMEIRO ACESSO
+     ========================================================= -->
+
+<div id="criarSenhaPmobile" class="login-pmobile" style="display: none;">
+
+    <div class="login-pmobile-topo">
+        <button
+            type="button"
+            class="login-voltar"
+            onclick="voltarLoginCriacaoSenha()"
+            aria-label="Voltar"
+        >‹</button>
+
+        <strong>PMOBILE</strong>
+        <span class="login-topo-espaco"></span>
+    </div>
+
+    <div class="login-pmobile-corpo">
+
+        <div class="login-pmobile-marca">
+            <div class="login-pmobile-logo">P</div>
+            <h1>Criar senha</h1>
+            <p id="criarSenhaNome">Crie sua senha de acesso ao PMOBILE.</p>
+        </div>
+
+        <form
+            class="login-pmobile-form"
+            onsubmit="criarSenhaPmobile(event)"
+        >
+
+            <label for="criarSenha">Digite sua senha</label>
+
+            <div class="login-senha-campo">
+                <input
+                    type="password"
+                    id="criarSenha"
+                    name="criarSenha"
+                    placeholder="Digite sua senha"
+                    autocomplete="new-password"
+                >
+
+                <button
+                    type="button"
+                    class="login-mostrar-senha"
+                    onclick="alternarCampoSenha('criarSenha', this)"
+                    aria-label="Mostrar ou ocultar senha"
+                >Mostrar</button>
+            </div>
+
+
+            <label for="confirmarSenha">Confirmar senha</label>
+
+            <div class="login-senha-campo">
+                <input
+                    type="password"
+                    id="confirmarSenha"
+                    name="confirmarSenha"
+                    placeholder="Confirme sua senha"
+                    autocomplete="new-password"
+                >
+
+                <button
+                    type="button"
+                    class="login-mostrar-senha"
+                    onclick="alternarCampoSenha('confirmarSenha', this)"
+                    aria-label="Mostrar ou ocultar senha"
+                >Mostrar</button>
+            </div>
+
+
+            <p class="login-ajuda">
+                A senha deve ter pelo menos 8 caracteres.
+            </p>
+
+
+            <button
+                type="submit"
+                class="login-entrar"
+            >CRIAR SENHA</button>
+
+        </form>
+
+        <p
+            id="criarSenhaStatus"
+            class="login-status"
+            aria-live="polite"
+        ></p>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     BIBLIOTECAS EXTERNAS
+     ========================================================= -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+
+<!-- =========================================================
+     CONFIGURAÇÕES DO SISTEMA
+     ========================================================= -->
+
+<script src="supabase.js?v=0.0.148"></script>
+
+
+<!-- =========================================================
+     NÚCLEO / DADOS
+     ========================================================= -->
+
+<script src="dados.js?v=0.0.148"></script>
+
+
+<!-- =========================================================
+     IMPORTAÇÃO
+     ========================================================= -->
+
+<script src="bancoimportacao.js?v=0.0.148"></script>
+
+<script src="importacao.js?v=0.0.148"></script>
+
+
+<!-- =========================================================
+     PESQUISA
+     ========================================================= -->
+
+<script src="pesquisa.js?v=0.0.148"></script>
+
+
+<!-- =========================================================
+     CONTAGEM MANUAL
+     ========================================================= -->
+
+<script src="contagemmanual.js?v=0.0.148"></script>
+
+<script src="locais.js?v=0.0.148"></script>
+<script src="reservas.js?v=0.0.148"></script>
+
+
+<!-- =========================================================
+     CONFERÊNCIA
+     ========================================================= -->
+
+<script src="conferencia.js?v=0.0.148"></script>
+
+<script src="conferencias.js?v=0.0.148"></script>
+
+<script src="conferenciasrealizadas.js?v=0.0.148"></script>
+
+
+<!-- =========================================================
+     DIVERGÊNCIAS
+     ========================================================= -->
+
+<script src="divergencias.js?v=0.0.148"></script>
+
+
+<!-- =========================================================
+     CONTROLE GERAL
+     ========================================================= -->
+
+<script src="script.js?v=0.0.148"></script>        <!-- =================================================
+
+</body>
+
+</html>
