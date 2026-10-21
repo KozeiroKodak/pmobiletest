@@ -47,6 +47,11 @@
         href="implementacoes/conferenciasrealizadas.css?v=0.0.162"
     >
 
+    <link
+        rel="stylesheet"
+        href="implementacoes/importacaonf.css?v=0.0.162"
+    >
+
 </head>
 
 <body>
@@ -459,6 +464,86 @@
 
         </section>
 
+
+
+        <!-- =================================================
+             IMPORTAÇÃO NF
+             ================================================= -->
+
+        <section
+            id="importacaoNF"
+            class="tela-sistema"
+            style="display: none;"
+        >
+
+            <div class="cabecalho-pagina">
+
+                <p class="cabecalho-caminho">
+                    PMOBILE / Importação NF
+                </p>
+
+                <h1>
+                    Importação NF
+                </h1>
+
+                <p>
+                    Importe a planilha original para uma área isolada do Supabase. Os dados serão preservados para análise antes da definição do Rastreio.
+                </p>
+
+            </div>
+
+            <div class="painel painel-importacao-nf">
+
+                <input
+                    type="file"
+                    id="arquivoImportacaoNF"
+                    class="arquivo-importacao"
+                    accept=".xlsx, .xls"
+                    onchange="prepararImportacaoNF()"
+                >
+
+                <div class="acoes-importacao">
+
+                    <button
+                        type="button"
+                        class="botao-aba"
+                        onclick="prepararImportacaoNF()"
+                    >
+                        Analisar planilha
+                    </button>
+
+                </div>
+
+                <div
+                    id="resultadoImportacaoNF"
+                    class="importacao-nf-resultado"
+                ></div>
+
+                <div
+                    id="statusImportacaoNF"
+                    class="importacao-nf-status"
+                    aria-live="polite"
+                ></div>
+
+            </div>
+
+            <div class="painel painel-importacao-nf importacao-nf-historico">
+
+                <h2>Importações realizadas</h2>
+
+                <div id="listaImportacoesNF"></div>
+
+            </div>
+
+            <div class="painel painel-importacao-nf importacao-nf-visualizacao">
+
+                <h2>Visualização</h2>
+
+                <div id="visualizacaoImportacaoNF"></div>
+
+            </div>
+
+        </section>
 
         <!-- =================================================
              PESQUISA UNIFICADA
@@ -1147,6 +1232,8 @@
 <script src="bancoimportacao.js?v=0.0.162"></script>
 
 <script src="importacao.js?v=0.0.162"></script>
+
+<script src="importacaonf.js?v=0.0.162"></script>
 
 
 <!-- =========================================================
