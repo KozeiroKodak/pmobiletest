@@ -1,0 +1,48 @@
+/* ============================================================
+   PMOBILE - IMPORTAÇÃO
+   Estilos exclusivos da funcionalidade de importação.
+   ============================================================ */
+
+.barra-progresso-container {
+    width: 100%;
+    margin: 10px 0;
+}
+
+.barra-progresso {
+    display: block;
+    width: 100%;
+    height: 22px;
+    border: 0;
+    border-radius: 11px;
+    overflow: hidden;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.barra-progresso::-webkit-progress-bar {
+    background: #e5e7eb;
+    border-radius: 11px;
+}
+
+.barra-progresso::-webkit-progress-value {
+    background: #2563eb;
+    border-radius: 11px;
+    transition: width 0.15s ease;
+}
+
+.barra-progresso::-moz-progress-bar {
+    background: #2563eb;
+    border-radius: 11px;
+}
+
+.barra-progresso-container--sucesso .barra-progresso::-webkit-progress-value {
+    background: #16a34a;
+}
+
+.barra-progresso-container--sucesso .barra-progresso::-moz-progress-bar {
+    background: #16a34a;
+}
+
+.progresso-percentual {
+    text-align: center;
+}
