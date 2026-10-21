@@ -17,6 +17,7 @@
     overflow: hidden;
     appearance: none;
     -webkit-appearance: none;
+    transition: opacity 0.15s ease;
 }
 
 .barra-progresso::-webkit-progress-bar {
