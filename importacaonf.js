@@ -226,7 +226,7 @@ function normalizarUrlPlanilhaOnlineNF(
 
     const matchGoogle =
         url.pathname.match(
-            /^\\/spreadsheets\\/d\\/([^/]+)/
+            /^\/spreadsheets\/d\/([^/]+)/
         );
 
     if (
@@ -247,7 +247,7 @@ function normalizarUrlPlanilhaOnlineNF(
 
     const matchDrive =
         url.pathname.match(
-            /^\\/file\\/d\\/([^/]+)/
+            /^\/file\/d\/([^/]+)/
         );
 
     if (
