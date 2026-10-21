@@ -15,7 +15,7 @@
 .reservas-cabecalho,
 .reserva-item {
     display: grid;
-    grid-template-columns: minmax(100px, .7fr) minmax(220px, 2fr) minmax(90px, .7fr) minmax(150px, 1fr);
+    grid-template-columns: minmax(90px, .7fr) minmax(210px, 1.8fr) minmax(120px, 1fr) minmax(120px, 1fr) minmax(90px, .7fr) minmax(140px, 1fr);
     align-items: center;
     gap: 14px;
 }
