@@ -37,3 +37,30 @@
 
 
 
+
+/* Barra de progresso da importação */
+.barra-progresso-container {
+    width: 100%;
+    height: 22px;
+    margin: 10px 0;
+    overflow: hidden;
+    border-radius: 11px;
+    background: #e5e7eb;
+}
+.barra-progresso {
+    width: 0;
+    height: 100%;
+    background: #2563eb;
+    transition: width 0.15s ease;
+}
+.barra-progresso--dinamica {
+    width: calc(var(--progresso-percentual, 0) * 1%);
+}
+.barra-progresso--completo {
+    width: 100%;
+    background: #16a34a;
+}
+.progresso-percentual {
+    margin: 0;
+    text-align: center;
+}
