@@ -283,14 +283,16 @@ function calcularPrevisaoRastreio(dataISO, turno) {
     return dataISO + (turno === "MANHA" ? "T12:00:00-03:00" : "T18:00:00-03:00");
 }
 
-function prepararLinhasRastreioParaEnvio() {
+function prepararLinhasRastreioParaEnvio(inicio = 0, fim = null, coletarAvisos = false) {
     capturarMapaMotoristasUI();
 
     const { modelo, linhas } = dadosImportacaoRastreio;
+    const limite = fim == null ? linhas.length : Math.min(fim, linhas.length);
     const resultado = [];
-    const erros = [];
+    const erros = coletarAvisos ? [] : [];
 
-    linhas.forEach(linha => {
+    for (let indice = inicio; indice < limite; indice++) {
+        const linha = linhas[indice];
         const d = linha.dados;
         const turno = normalizarTurnoRastreio(d[modelo.turno]);
         const dataEnvio = normalizarDataRastreio(d[modelo.dataEnvio]);
@@ -313,18 +315,19 @@ function prepararLinhasRastreioParaEnvio() {
             linha_origem: linha.linha_numero
         };
 
-        if (!item.cliente) erros.push("Linha " + linha.linha_numero + ": Cliente vazio.");
-        if (!item.notas_fiscais.trim()) erros.push("Linha " + linha.linha_numero + ": Nota Fiscal vazia.");
-        if (!item.motorista) erros.push("Linha " + linha.linha_numero + ": Motorista não definido.");
-        if (!item.data_envio) erros.push("Linha " + linha.linha_numero + ": Data Envio inválida.");
-        if (!item.turno) erros.push("Linha " + linha.linha_numero + ": Turno deve ser MANHÃ ou TARDE.");
+        if (coletarAvisos && erros.length < 100) {
+            if (!item.cliente) erros.push("Linha " + linha.linha_numero + ": Cliente vazio.");
+            if (!item.notas_fiscais.trim()) erros.push("Linha " + linha.linha_numero + ": Nota Fiscal vazia.");
+            if (!item.motorista) erros.push("Linha " + linha.linha_numero + ": Motorista não definido.");
+            if (!item.data_envio) erros.push("Linha " + linha.linha_numero + ": Data Envio inválida.");
+            if (!item.turno) erros.push("Linha " + linha.linha_numero + ": Turno deve ser MANHÃ ou TARDE.");
+        }
 
         resultado.push(item);
-    });
+    }
 
     return { resultado, erros };
 }
-
 function renderizarPreviaImportacaoRastreio() {
     const area = document.getElementById("rastreioImportacaoPrevia");
     if (!area || !dadosImportacaoRastreio) return;
@@ -374,13 +377,12 @@ function renderizarPreviaImportacaoRastreio() {
 async function enviarImportacaoRastreio() {
     if (importacaoRastreioEmAndamento || !dadosImportacaoRastreio) return;
 
-    const preparo = prepararLinhasRastreioParaEnvio();
+    const amostraAvisos = prepararLinhasRastreioParaEnvio(0, dadosImportacaoRastreio.linhas.length, true);
 
-    if (preparo.erros.length) {
-        console.warn("Importação de Rastreio com avisos:", preparo.erros);
+    if (amostraAvisos.erros.length) {
+        console.warn("Importação de Rastreio com avisos (amostra máxima de 100):", amostraAvisos.erros);
         mostrarStatusImportacaoRastreio(
-            "🟡 Importação liberada com " + preparo.erros.length +
-            " aviso(s). Dados ausentes serão mantidos em branco."
+            "🟡 Importação liberada com avisos. Dados ausentes serão mantidos em branco."
         );
     }
 
@@ -408,9 +410,15 @@ async function enviarImportacaoRastreio() {
         if (!importacaoId) throw new Error("O Supabase não retornou o ID da importação.");
 
         let enviadas = 0;
+        const totalLinhas = dadosImportacaoRastreio.linhas.length;
 
-        for (let inicio = 0; inicio < preparo.resultado.length; inicio += TAMANHO_LOTE_RASTREIO) {
-            const lote = preparo.resultado.slice(inicio, inicio + TAMANHO_LOTE_RASTREIO);
+        for (let inicio = 0; inicio < totalLinhas; inicio += TAMANHO_LOTE_RASTREIO) {
+            const lotePreparado = prepararLinhasRastreioParaEnvio(
+                inicio,
+                inicio + TAMANHO_LOTE_RASTREIO,
+                false
+            );
+            const lote = lotePreparado.resultado;
 
             const resposta = await window.clienteSupabase.rpc("pmobile_rastreio_inserir_lote", {
                 p_usuario: sessao.usuario,
@@ -424,10 +432,14 @@ async function enviarImportacaoRastreio() {
             enviadas += lote.length;
             mostrarStatusImportacaoRastreio(
                 "🟡 Importando Rastreio... " +
-                Math.round((enviadas / preparo.resultado.length) * 100) +
+                Math.round((enviadas / totalLinhas) * 100) +
                 "% (" + enviadas.toLocaleString("pt-BR") + "/" +
-                preparo.resultado.length.toLocaleString("pt-BR") + ")"
+                totalLinhas.toLocaleString("pt-BR") + ")"
             );
+
+            // Libera a referência do lote antes de seguir para o próximo.
+            lotePreparado.resultado.length = 0;
+            await new Promise(resolve => setTimeout(resolve, 0));
         }
 
         const finalizacao = await window.clienteSupabase.rpc("pmobile_rastreio_finalizar_importacao", {
