@@ -32,6 +32,8 @@ async function carregarReservas() {
             '<div class="reservas-cabecalho">' +
                 '<span>ID</span>' +
                 '<span>Descrição</span>' +
+                '<span>Referência</span>' +
+                '<span>Marca</span>' +
                 '<span>Quantidade</span>' +
                 '<span>Solicitante</span>' +
             '</div>' +
@@ -76,6 +78,12 @@ function renderizarReserva(item) {
             '</div>' +
             '<div class="reserva-celula reserva-descricao" data-label="Descrição">' +
                 escapeHtmlPmobile(item.descricao || "-") +
+            '</div>' +
+            '<div class="reserva-celula reserva-referencia" data-label="Referência">' +
+                escapeHtmlPmobile(item.referencia || "-") +
+            '</div>' +
+            '<div class="reserva-celula reserva-marca" data-label="Marca">' +
+                escapeHtmlPmobile(item.marca || "-") +
             '</div>' +
             '<div class="reserva-celula reserva-quantidade" data-label="Quantidade">' +
                 escapeHtmlPmobile(formatarNumeroReserva(item.quantidade_reservada)) +
