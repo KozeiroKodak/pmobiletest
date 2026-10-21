@@ -674,6 +674,10 @@ function restaurarSessaoPmobile(dadosUsuario, senha) {
 
     mostrarTelaSistema("homeSistema", null);
 
+    if (typeof iniciarInventarioLocalPmobile === "function") {
+        setTimeout(iniciarInventarioLocalPmobile, 0);
+    }
+
 }
 
 
@@ -1225,6 +1229,10 @@ async function entrarInterface(event) {
             "homeSistema",
             null
         );
+
+        if (typeof iniciarInventarioLocalPmobile === "function") {
+            setTimeout(iniciarInventarioLocalPmobile, 0);
+        }
 
     } catch (erro) {
 
