@@ -77,7 +77,6 @@ async function carregarLocaisDerivados() {
         if (!cliente) throw new Error("Supabase indisponível.");
 
         const registrosMateriais = await buscarTodosMateriaisLocais(cliente, "codigo,local");
-
         const locaisPadrao = obterLocaisPadraoPmobile();
 
         const registros = (Array.isArray(registrosMateriais) ? registrosMateriais : [])
@@ -192,9 +191,9 @@ function renderizarLocalAlterado(item) {
         window.credencialPmobileAtual;
 
     const botaoConfirmar = status === "PENDENTE" && admin
-        ? '<button type="button" class="botao-local-confirmar" onclick="confirmarAlteracaoLocal(\'' +
+        ? '<button type="button" class="botao-local-confirmar" onclick="confirmarAlteracaoLocal(\\'' +
             escapeHtmlPmobile(item.id) +
-            '\')">✓ Confirmar alteração</button>'
+            '\\')">✓ Confirmar alteração</button>'
         : "";
 
     return (
@@ -329,9 +328,9 @@ function carregarLocaisVazios() {
                         '<div class="local-vazio-metrica"><span>Total</span><strong>' + posicoes.length + '</strong></div>' +
                         '<div class="local-vazio-metrica"><span>Ocupados</span><strong>' + ocupadas + '</strong></div>' +
                         '<div class="local-vazio-metrica destaque"><span>Vazios</span><strong>' + vazios.length + '</strong></div>' +
-                        '<button type="button" class="botao-lupa-local" onclick="abrirDetalhesLocaisVazios(\\'' +
+                        '<button type="button" class="botao-lupa-local" onclick="abrirDetalhesLocaisVazios(\'' +
                             escapeHtmlPmobile(estrutura.area) +
-                        '\\')" aria-label="Ver posições vazias de ' + escapeHtmlPmobile(estrutura.area) + '" title="Ver posições vazias">⌕</button>' +
+                        '\')" aria-label="Ver posições vazias de ' + escapeHtmlPmobile(estrutura.area) + '" title="Ver posições vazias">⌕</button>' +
                     '</article>'
                 );
             }).join("");
@@ -401,8 +400,6 @@ function gerarPosicoesAreaPmobile(estrutura) {
 
     return resultado;
 }
-
-
 
 async function buscarTodosMateriaisLocais(cliente, colunas) {
     const pagina = 1000;
