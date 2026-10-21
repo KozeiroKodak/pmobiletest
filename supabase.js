@@ -1635,3 +1635,69 @@ async function limparMateriaisSupabase() {
     }
 
 }
+
+// ============================================================
+// STATUS DE CONEXÃO DO PMOBILE
+// ============================================================
+//
+// A barra do rodapé também precisa reagir diretamente às
+// mudanças de conectividade do dispositivo.
+//
+// Antes existia somente o tratamento de retorno da internet
+// em dados.js. Não havia um listener global para "offline" e
+// a barra podia permanecer com uma mensagem antiga até que
+// outra operação chamasse mostrarStatusSupabase().
+//
+// A aparência continua exclusivamente no style.css.
+//
+// ============================================================
+
+function atualizarStatusConexaoPMobile() {
+
+    if (
+        navigator.onLine === true
+    ) {
+
+        mostrarStatusSupabase(
+            "🟢 Online — conexão disponível"
+        );
+
+        return;
+
+    }
+
+
+    mostrarStatusSupabase(
+        "🟡 Offline — trabalhando com os dados locais"
+    );
+
+}
+
+
+// ============================================================
+// EVENTOS DE CONECTIVIDADE
+// ============================================================
+
+window.addEventListener(
+    "online",
+    atualizarStatusConexaoPMobile
+);
+
+
+window.addEventListener(
+    "offline",
+    atualizarStatusConexaoPMobile
+);
+
+
+// ============================================================
+// ESTADO INICIAL
+// ============================================================
+//
+// O script é carregado no final do documento. Portanto podemos
+// inicializar a barra imediatamente, sem depender de um evento
+// posterior para que ela apareça.
+//
+// ============================================================
+
+atualizarStatusConexaoPMobile();
