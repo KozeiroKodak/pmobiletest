@@ -50,6 +50,8 @@ const telasSistema = [
 
     "pesquisa",
 
+    "rastreio",
+
     "contagemManual",
 
     "conferencia",
@@ -85,6 +87,8 @@ const itensMenuSistema = [
     "menuImportacao",
 
     "menuImportacaoNF",
+
+    "menuRastreio",
 
     "menuContagemManual",
 
@@ -1740,6 +1744,8 @@ function atualizarVisibilidadeConfiguracoes() {
         menuSair: !!usuario,
         menuConfiguracoes: isAdmin,
         menuImportacao: isAdmin,
+        menuImportacaoNF: isAdmin,
+        menuRastreio: isAdmin || isNivel2,
         menuConferencia: isAdmin,
         menuConferencias: isAdmin,
         menuPesquisa: isAdmin || isNivel2,
