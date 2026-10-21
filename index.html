@@ -14,12 +14,12 @@
 
     <link
         rel="stylesheet"
-        href="style.css?v=0.0.119"
+        href="style.css?v=0.0.120"
     >
 
     <link
         rel="stylesheet"
-        href="implementacoes/style.css?v=0.0.119"
+        href="implementacoes/style.css?v=0.0.120"
     >
 
 </head>
@@ -590,10 +590,12 @@
             <div class="painel painel-locais">
                 <div class="abas-locais" role="tablist" aria-label="Locais">
                     <button type="button" id="abaLocaisAlterados" class="aba-locais ativo" onclick="alternarAbaLocais('alterados')" role="tab">🔄 Alterados</button>
-                    <button type="button" id="abaLocaisVazios" class="aba-locais" onclick="alternarAbaLocais('vazios')" role="tab">🟩 Vazios</button>
+                    <button type="button"  id="abaLocaisVazios" class="aba-locais" onclick="alternarAbaLocais('vazios')" role="tab">🟩 Vazios</button>
+                    <button type="button" id="abaLocaisDerivados" class="aba-locais" onclick="alternarAbaLocais('derivados')" role="tab">⚠️ Derivados</button>
                 </div>
                 <div id="painelLocaisAlterados"><div id="listaLocaisAlterados"></div></div>
                 <div id="painelLocaisVazios" style="display: none;"><div id="listaAreasVazias"></div></div>
+                <div id="painelLocaisDerivados" style="display: none;"><div id="listaLocaisDerivados"></div></div>
             </div>
         </section>
 
@@ -1067,7 +1069,7 @@
      CONFIGURAÇÕES DO SISTEMA
      ========================================================= -->
 
-<script src="supabase.js?v=0.0.119"></script>
+<script src="supabase.js?v=0.0.120"></script>
 
 
 <!-- =========================================================
