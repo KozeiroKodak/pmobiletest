@@ -377,15 +377,6 @@ function renderizarPreviaImportacaoRastreio() {
 async function enviarImportacaoRastreio() {
     if (importacaoRastreioEmAndamento || !dadosImportacaoRastreio) return;
 
-    const amostraAvisos = prepararLinhasRastreioParaEnvio(0, dadosImportacaoRastreio.linhas.length, true);
-
-    if (amostraAvisos.erros.length) {
-        console.warn("Importação de Rastreio com avisos (amostra máxima de 100):", amostraAvisos.erros);
-        mostrarStatusImportacaoRastreio(
-            "🟡 Importação liberada com avisos. Dados ausentes serão mantidos em branco."
-        );
-    }
-
     importacaoRastreioEmAndamento = true;
     let importacaoId = null;
 
@@ -410,14 +401,21 @@ async function enviarImportacaoRastreio() {
         if (!importacaoId) throw new Error("O Supabase não retornou o ID da importação.");
 
         let enviadas = 0;
+        let totalAvisos = 0;
+        const avisosAmostra = [];
         const totalLinhas = dadosImportacaoRastreio.linhas.length;
 
         for (let inicio = 0; inicio < totalLinhas; inicio += TAMANHO_LOTE_RASTREIO) {
             const lotePreparado = prepararLinhasRastreioParaEnvio(
                 inicio,
                 inicio + TAMANHO_LOTE_RASTREIO,
-                false
+                true
             );
+
+            totalAvisos += lotePreparado.erros.length;
+            if (avisosAmostra.length < 100) {
+                avisosAmostra.push(...lotePreparado.erros.slice(0, 100 - avisosAmostra.length));
+            }
             const lote = lotePreparado.resultado;
 
             const resposta = await window.clienteSupabase.rpc("pmobile_rastreio_inserir_lote", {
@@ -440,6 +438,13 @@ async function enviarImportacaoRastreio() {
             // Libera a referência do lote antes de seguir para o próximo.
             lotePreparado.resultado.length = 0;
             await new Promise(resolve => setTimeout(resolve, 0));
+        }
+
+        if (totalAvisos > 0) {
+            console.warn("Importação de Rastreio com avisos:", {
+                total: totalAvisos,
+                amostra: avisosAmostra
+            });
         }
 
         const finalizacao = await window.clienteSupabase.rpc("pmobile_rastreio_finalizar_importacao", {
