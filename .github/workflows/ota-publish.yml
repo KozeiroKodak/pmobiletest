@@ -7,6 +7,10 @@ on:
   push:
     branches:
       - main
+  # Fallback automático: se um push não gerar evento de execução,
+  # o agendamento detecta a main pendente e publica a OTA.
+  schedule:
+    - cron: '*/5 * * * *'
   workflow_dispatch:
     inputs:
       motivo:
@@ -22,10 +26,43 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  ota-gate:
+    runs-on: ubuntu-latest
+    outputs:
+      publish: ${{ steps.gate.outputs.publish }}
+    steps:
+      - name: Verificar se existe OTA pendente
+        id: gate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${GITHUB_EVENT_NAME}" != "schedule" ]]; then
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+            echo "Evento ${GITHUB_EVENT_NAME}: publicação autorizada."
+            exit 0
+          fi
+
+          latest_target="$(gh api "repos/${GITHUB_REPOSITORY}/releases?per_page=1" --jq '.[0].target_commitish // empty')"
+
+          echo "HEAD da main: ${GITHUB_SHA}"
+          echo "Último release OTA aponta para: ${latest_target:-<nenhum>}"
+
+          if [[ -z "${latest_target}" || "${latest_target}" != "${GITHUB_SHA}" ]]; then
+            echo "OTA pendente: publicação autorizada."
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Main já está publicada no último OTA."
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          fi
+
   publish-ota:
+    needs: ota-gate
     # O commit gerado pelo próprio workflow altera index.html/manifest.
     # Ele não deve disparar uma nova publicação OTA.
-    if: github.event_name == 'workflow_dispatch' || github.actor != 'github-actions[bot]'
+    if: needs.ota-gate.outputs.publish == 'true' && (github.event_name == 'workflow_dispatch' || github.actor != 'github-actions[bot]')
     runs-on: ubuntu-latest
 
     steps:
