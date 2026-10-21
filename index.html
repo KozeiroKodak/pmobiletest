@@ -57,6 +57,8 @@
         href="implementacoes/arquivosteste.css?v=0.0.176"
     >
 
+    <link rel="stylesheet" href="implementacoes/rastreio.css?v=0.0.176">
+
 </head>
 
 <body>
@@ -301,6 +303,14 @@
                     Importação NF
                 </span>
 
+            </button>
+
+
+            <!-- RASTREIO -->
+
+            <button id="menuRastreio" class="sidebar-item" onclick="abrirRastreio()" title="Rastreio">
+                <span class="sidebar-icone">🚚</span>
+                <span class="sidebar-texto">Rastreio</span>
             </button>
 
 
@@ -582,6 +592,34 @@
 
             </div>
 
+        </section>
+
+        <!-- =================================================
+             RASTREIO
+             ================================================= -->
+
+        <section id="rastreio" class="tela-sistema" style="display: none;">
+            <div class="cabecalho-pagina">
+                <p class="cabecalho-caminho">PMOBILE / Rastreio</p>
+                <h1>Rastreio</h1>
+                <p>Cada registro representa uma linha operacional da planilha.</p>
+            </div>
+
+            <div class="painel rastreio-painel">
+                <div class="rastreio-filtros">
+                    <input type="search" id="buscaRastreio" placeholder="Cliente, NF, motorista..." oninput="filtrarRastreios()">
+                    <select id="filtroStatusRastreio" onchange="filtrarRastreios()">
+                        <option value="">Todos os status</option>
+                        <option value="PENDENTE">Pendente</option>
+                        <option value="EM_TRANSPORTE">Em transporte</option>
+                        <option value="ENTREGUE">Entregue</option>
+                        <option value="ATRASADO">Atrasado</option>
+                        <option value="CANCELADO">Cancelado</option>
+                    </select>
+                </div>
+                <div id="statusRastreio" class="rastreio-status" aria-live="polite"></div>
+                <div id="listaRastreios" class="rastreio-lista"></div>
+            </div>
         </section>
 
         <!-- =================================================
@@ -1304,6 +1342,8 @@
 <script src="importacaonf.js?v=0.0.176"></script>
 
 <script src="arquivosteste.js?v=0.0.176"></script>
+
+<script src="rastreio.js?v=0.0.176"></script>
 
 
 <!-- =========================================================
