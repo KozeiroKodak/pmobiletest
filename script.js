@@ -84,6 +84,8 @@ const itensMenuSistema = [
 
     "menuImportacao",
 
+    "menuImportacaoNF",
+
     "menuContagemManual",
 
     "menuConferencia",
