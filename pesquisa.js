@@ -343,6 +343,10 @@ function exibirResultadosPesquisa(
             );
 
 
+            const quantidadeTotal = Number(material.quantidade ?? 0);
+            const quantidadeReservada = Number(material.quantidadeReservada ?? material.quantidade_reservada ?? 0);
+            const quantidadeDisponivel = quantidadeTotal - quantidadeReservada;
+
             const quantidade =
                 document.createElement("p");
 
@@ -351,7 +355,23 @@ function exibirResultadosPesquisa(
 
             quantidade.appendChild(
                 document.createTextNode(
-                    material.quantidade ?? "-"
+                    Number.isFinite(quantidadeDisponivel)
+                        ? quantidadeDisponivel
+                        : "-"
+                )
+            );
+
+            const quantidadeReservadaLinha =
+                document.createElement("p");
+
+            quantidadeReservadaLinha.innerHTML =
+                "<strong>Quantidade reservada:</strong> ";
+
+            quantidadeReservadaLinha.appendChild(
+                document.createTextNode(
+                    Number.isFinite(quantidadeReservada)
+                        ? quantidadeReservada
+                        : "-"
                 )
             );
 
@@ -363,6 +383,7 @@ function exibirResultadosPesquisa(
             bloco.appendChild(local);
             bloco.appendChild(marca);
             bloco.appendChild(quantidade);
+            bloco.appendChild(quantidadeReservadaLinha);
 
 
             fragmento.appendChild(bloco);
@@ -466,7 +487,7 @@ async function pesquisarMaterialSelecionado() {
 
         let consulta = clienteSupabase
             .from("materiais")
-            .select("id,codigo,descricao,referencia,marca,local,quantidade");
+            .select("id,codigo,descricao,referencia,marca,local,quantidade,quantidade_reservada");
 
         if (tipo === "codigo") {
             consulta = consulta
