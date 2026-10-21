@@ -2749,3 +2749,62 @@ BOTÕES PADRÃO
         font-size: 13px;
     }
 }
+
+
+/* ============================================================
+   PADRÃO GLOBAL DE BOTÕES — REFINAMENTO OTA
+   ============================================================ */
+
+/*
+   Ajuste visual controlado para validar a cadeia:
+   main → Actions → OTA → manifest → aplicativo.
+*/
+
+.botao-principal,
+.botao-secundario,
+.botao-perigo {
+    min-height: 40px;
+    padding: 9px 15px;
+    border-radius: 7px;
+    font-weight: 500;
+    line-height: 1.2;
+    transition:
+        background-color 0.14s ease,
+        border-color 0.14s ease,
+        color 0.14s ease,
+        transform 0.08s ease,
+        box-shadow 0.14s ease;
+}
+
+.botao-principal {
+    font-weight: 600;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
+}
+
+.botao-principal:hover,
+.botao-secundario:hover,
+.botao-perigo:hover {
+    transform: translateY(-1px);
+}
+
+.botao-principal:active,
+.botao-secundario:active,
+.botao-perigo:active {
+    transform: translateY(0);
+}
+
+.botao-principal:focus-visible,
+.botao-secundario:focus-visible,
+.botao-perigo:focus-visible {
+    outline: 2px solid var(--verde);
+    outline-offset: 2px;
+}
+
+.botao-principal:disabled,
+.botao-secundario:disabled,
+.botao-perigo:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
