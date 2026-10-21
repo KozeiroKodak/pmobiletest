@@ -498,7 +498,7 @@
                     type="file"
                     id="arquivoImportacaoNF"
                     class="arquivo-importacao"
-                    accept=".xlsx, .xls"
+                    accept=".xlsx, .xls, .xlsm, .csv"
                     onchange="prepararImportacaoNF()"
                 >
 
@@ -509,9 +509,43 @@
                         class="botao-aba"
                         onclick="prepararImportacaoNF()"
                     >
-                        Analisar planilha
+                        Analisar arquivo
                     </button>
 
+                </div>
+
+                <div class="importacao-nf-divisor">
+                    <span>ou</span>
+                </div>
+
+                <div class="importacao-nf-online">
+                    <label for="linkImportacaoNF">
+                        Planilha compartilhada online
+                    </label>
+
+                    <div class="importacao-nf-online-linha">
+                        <input
+                            type="url"
+                            id="linkImportacaoNF"
+                            placeholder="Insira o link aqui"
+                            autocomplete="off"
+                            inputmode="url"
+                            onkeydown="if (event.key === 'Enter') { event.preventDefault(); prepararImportacaoNFOnline(); }"
+                        >
+
+                        <button
+                            type="button"
+                            class="botao-aba"
+                            onclick="prepararImportacaoNFOnline()"
+                        >
+                            Ler link
+                        </button>
+                    </div>
+
+                    <small>
+                        Use um link público com permissão para visualizar ou baixar a planilha.
+                        Links do Google Sheets são convertidos automaticamente.
+                    </small>
                 </div>
 
                 <div
