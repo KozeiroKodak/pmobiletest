@@ -2,8 +2,12 @@
    PESQUISA
    ============================================================ */
 
+#pesquisa,
 #pesquisa .painel {
     max-width: 1180px;
+}
+
+#pesquisa .painel {
     padding: 0;
     overflow: hidden;
 }
@@ -12,11 +16,11 @@
 .pesquisa-item {
     display: grid;
     grid-template-columns:
-        minmax(80px, .65fr)
-        minmax(190px, 1.8fr)
+        minmax(90px, .7fr)
+        minmax(210px, 1.8fr)
         minmax(120px, 1fr)
-        minmax(90px, .75fr)
-        minmax(110px, 1fr)
+        minmax(100px, .8fr)
+        minmax(120px, 1fr)
         minmax(90px, .7fr)
         minmax(90px, .7fr);
     align-items: center;
