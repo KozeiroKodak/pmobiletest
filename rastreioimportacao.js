@@ -353,11 +353,11 @@ async function enviarImportacaoRastreio() {
     const preparo = prepararLinhasRastreioParaEnvio();
 
     if (preparo.erros.length) {
+        console.warn("Importação de Rastreio com avisos:", preparo.erros);
         mostrarStatusImportacaoRastreio(
-            "🔴 Corrija " + preparo.erros.length + " problema(s) antes de importar. " +
-            preparo.erros.slice(0, 3).join(" ")
+            "🟡 Importação liberada com " + preparo.erros.length +
+            " aviso(s). Dados ausentes serão mantidos em branco."
         );
-        return;
     }
 
     importacaoRastreioEmAndamento = true;
