@@ -95,51 +95,17 @@ function atualizarBarraProgresso(percentual, mensagem) {
             Math.min(100, Math.round(percentual))
         );
 
-    let barra =
-        resultado.querySelector(".barra-progresso");
-
-    if (!barra) {
-
-        resultado.innerHTML =
-            "<p class=\"mensagem-progresso\"></p>" +
-
-            "<div class=\"barra-progresso-container\">" +
-
-                "<progress " +
-                    "class=\"barra-progresso\" " +
-                    "max=\"100\" " +
-                    "value=\"0\" " +
-                    "aria-label=\"Progresso da importação\">" +
-                "</progress>" +
-
-            "</div>" +
-
-            "<p class=\"progresso-percentual\"><strong>0%</strong></p>";
-
-        barra =
-            resultado.querySelector(".barra-progresso");
-    }
-
-    const mensagemElemento =
-        resultado.querySelector(".mensagem-progresso");
-
-    const percentualElemento =
-        resultado.querySelector(".progresso-percentual strong");
-
-    if (mensagemElemento) {
-        mensagemElemento.textContent =
-            mensagem || "Importando inventário...";
-    }
-
-    if (barra) {
-        barra.value = valor;
-        barra.setAttribute("aria-valuenow", String(valor));
-    }
-
-    if (percentualElemento) {
-        percentualElemento.textContent =
-            valor + "%";
-    }
+    resultado.innerHTML =
+        "<p><strong>" +
+        (mensagem || "Importando inventário...") +
+        "</strong></p>" +
+        "<div class=\"barra-progresso-container\">" +
+            "<div class=\"barra-progresso barra-progresso--dinamica\" style=\"--progresso-percentual:" + valor + "\"></div>" +
+        "</div>" +
+        "<p class=\"progresso-percentual\"><strong>" +
+            valor +
+            "%" +
+        "</strong></p>";
 }
 
 
@@ -2308,14 +2274,7 @@ async function importarExcel() {
                 "<p><strong>✅ Importação concluída!</strong></p>" +
 
                 "<div class=\"barra-progresso-container barra-progresso-container--sucesso\">" +
-
-                    "<progress " +
-                        "class=\"barra-progresso barra-progresso--sucesso\" " +
-                        "max=\"100\" " +
-                        "value=\"100\" " +
-                        "aria-label=\"Importação concluída\">" +
-                    "</progress>" +
-
+                    "<progress class=\"barra-progresso barra-progresso--completo\" value=\"100\" max=\"100\"></progress>" +
                 "</div>" +
 
                 "<p class=\"progresso-percentual\"><strong>100%</strong></p>" +
