@@ -1718,7 +1718,7 @@ window.addEventListener(
 //
 // OBJETIVO:
 //
-// Apagar todas as conferências do Supabase.
+// Apagar somente as conferências do usuário atual no Supabase.
 //
 // IMPORTANTE:
 //
@@ -1726,9 +1726,9 @@ window.addEventListener(
 //
 // Depois da limpeza:
 //
-// - Supabase = vazio
-// - variável local = vazia
-// - histórico local = vazio
+// - Supabase = somente as conferências do usuário são removidas
+// - demais usuários permanecem intactos
+// - histórico local remove somente o usuário atual
 // - fila offline = NÃO é apagada automaticamente
 //
 // A fila não deve ser destruída sem sincronização/decisão
@@ -1740,7 +1740,8 @@ async function limparConferenciasSupabase() {
     const confirmar =
         confirm(
             "⚠️ ATENÇÃO!\n\n" +
-            "Todas as conferências realizadas serão apagadas.\n\n" +
+            "Somente as suas conferências serão apagadas.\n\n" +
+            "As conferências dos demais usuários NÃO serão afetadas.\n\n" +
             "Os materiais do inventário NÃO serão apagados.\n\n" +
             "Deseja continuar?"
         );
@@ -1797,6 +1798,15 @@ async function limparConferenciasSupabase() {
             );
         }
 
+        const usuarioIdAtual =
+            Number(usuarioSessao.id);
+
+        if (Number.isNaN(usuarioIdAtual)) {
+            throw new Error(
+                "ID do usuário não está disponível."
+            );
+        }
+
         const { error } =
             await clienteSupabase.rpc(
                 "limpar_conferencias",
@@ -1819,9 +1829,6 @@ async function limparConferenciasSupabase() {
         // ====================================================
         // Limpar memória.
         // ====================================================
-
-        const usuarioIdAtual =
-            Number(usuarioSessao.id);
 
         conferencias =
             conferencias.filter(
@@ -1864,13 +1871,13 @@ async function limparConferenciasSupabase() {
         ) {
 
             resultado.innerHTML =
-                "<p>✅ Todas as conferências foram apagadas.</p>";
+                "<p>✅ Suas conferências foram apagadas. As dos demais usuários foram preservadas.</p>";
 
         }
 
 
         alert(
-            "✅ Conferências apagadas com sucesso!"
+            "✅ Suas conferências foram apagadas com sucesso!"
         );
 
 
