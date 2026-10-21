@@ -351,7 +351,7 @@ function prepararLinhasRastreioParaEnvio(inicio = 0, fim = null, coletarAvisos =
             data_envio: dataEnvio,
             turno,
             previsao_entrega: calcularPrevisaoRastreio(dataEnvio, turno),
-            linha_origem: (indice + deslocamentoLinha)
+            linha_origem: (indice + dadosImportacaoRastreio.deslocamentoLinha)
         };
 
         if (coletarAvisos) {
@@ -366,7 +366,7 @@ function prepararLinhasRastreioParaEnvio(inicio = 0, fim = null, coletarAvisos =
 
             for (const problema of problemas) {
                 if (erros.length < 100) {
-                    erros.push("Linha " + (indice + deslocamentoLinha) + ": " + problema);
+                    erros.push("Linha " + (indice + dadosImportacaoRastreio.deslocamentoLinha) + ": " + problema);
                 }
             }
         }
