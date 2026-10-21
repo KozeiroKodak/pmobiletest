@@ -1,0 +1,125 @@
+/* ============================================================
+   RESERVAS
+   ============================================================ */
+
+#reservas,
+#reservas .painel-reservas {
+    max-width: 1180px;
+}
+
+.painel-reservas {
+    padding: 0;
+    overflow: hidden;
+}
+
+.reservas-cabecalho,
+.reserva-item {
+    display: grid;
+    grid-template-columns: minmax(90px, .7fr) minmax(210px, 1.8fr) minmax(120px, 1fr) minmax(120px, 1fr) minmax(90px, .7fr) minmax(140px, 1fr);
+    align-items: center;
+    gap: 14px;
+}
+
+.reservas-cabecalho {
+    padding: 12px 16px;
+    border-bottom: 1px solid #303030;
+    background: #1a1a1a;
+    color: #777;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.reserva-item {
+    padding: 14px 16px;
+    border-bottom: 1px solid #292929;
+    background: #1b1b1b;
+    color: #e8e8e8;
+    font-size: 13px;
+}
+
+.reserva-item:last-child {
+    border-bottom: 0;
+}
+
+.reserva-item:hover {
+    background: #1f1f1f;
+}
+
+.reserva-id {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 600;
+}
+
+.reserva-quantidade {
+    font-weight: 700;
+}
+
+.reserva-solicitante {
+    color: #888;
+}
+
+.reservas-paginacao {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-top: 1px solid #292929;
+    background: #1a1a1a;
+    color: #888;
+    font-size: 12px;
+}
+
+.reservas-paginacao .botao-secundario {
+    min-width: 90px;
+}
+
+.reservas-carregando,
+.reservas-vazio {
+    padding: 44px 24px;
+    text-align: center;
+    color: #858585;
+}
+
+.reservas-vazio strong {
+    display: block;
+    margin-bottom: 5px;
+    color: #ededed;
+}
+
+.reservas-erro {
+    color: #d98b8b;
+}
+
+@media (max-width: 700px) {
+    .reservas-cabecalho {
+        display: none;
+    }
+
+    .reserva-item {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px 16px;
+        padding: 14px;
+    }
+
+    .reserva-celula::before {
+        display: block;
+        margin-bottom: 3px;
+        color: #777;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: .07em;
+        text-transform: uppercase;
+        content: attr(data-label);
+    }
+
+    .reserva-descricao {
+        grid-column: 1 / -1;
+    }
+
+    .reservas-paginacao {
+        flex-wrap: wrap;
+    }
+}
