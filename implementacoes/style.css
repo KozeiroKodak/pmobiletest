@@ -1331,3 +1331,41 @@ input {
 }
 
 
+
+/* ============================================================
+   LOCAIS — DERIVADOS
+   ============================================================ */
+
+.local-derivado-card {
+    display: grid;
+    grid-template-columns: minmax(110px, 1fr) minmax(130px, 1fr);
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 10px;
+    padding: 14px 16px;
+    border: 1px solid var(--borda, #e5e7eb);
+    border-radius: 12px;
+    background: var(--superficie, #fff);
+}
+
+.local-derivado-local {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.locais-resumo-derivados {
+    margin-bottom: 12px;
+    color: var(--texto-secundario, #6b7280);
+    font-size: .82rem;
+}
+
+.locais-resumo-derivados strong {
+    color: var(--texto, #111827);
+    font-size: 1rem;
+}
+
+@media (max-width: 700px) {
+    .local-derivado-card {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+}
