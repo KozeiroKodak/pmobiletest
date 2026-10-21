@@ -127,6 +127,22 @@ jobs:
           echo "Sintaxe JavaScript recursiva: OK"
 
           python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("rastreioimportacao.js")
+          if path.exists():
+              source = path.read_text()
+              if "deslocamentoLinha is not defined" in source:
+                  raise SystemExit("Mensagem de erro inválida encontrada no importador de rastreio.")
+              if "linha_origem: (indice + deslocamentoLinha)" in source:
+                  raise SystemExit("Importador de rastreio contém referência insegura a deslocamentoLinha.")
+              if '"Linha " + (indice + deslocamentoLinha)' in source:
+                  raise SystemExit("Importador de rastreio contém referência insegura no relatório de avisos.")
+              print("Smoke test rastreioimportacao.js: OK")
+
+          PY
+
+          python3 - <<'PY'
           import re
           from pathlib import Path
 
