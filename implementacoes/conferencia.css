@@ -1,0 +1,131 @@
+/* ============================================================
+   CONFERÊNCIA — padrão visual alinhado a RESERVAS
+   ============================================================ */
+
+#conferencia .painel {
+    max-width: 1180px;
+    padding: 0;
+    overflow: hidden;
+}
+
+#resultadoConferencia {
+    margin-top: 0;
+}
+
+#resultadoConferencia > p:first-child {
+    margin: 0;
+    padding: 12px 16px;
+    border-bottom: 1px solid #303030;
+    background: #1a1a1a;
+    color: #888;
+    font-size: 12px;
+}
+
+#resultadoConferencia > div {
+    padding: 14px 16px;
+    border-bottom: 1px solid #292929;
+    background: #1b1b1b;
+    color: #e8e8e8;
+    font-size: 13px;
+}
+
+#resultadoConferencia > div:last-child {
+    border-bottom: 0;
+}
+
+#resultadoConferencia > div:hover {
+    background: #1f1f1f;
+}
+
+#resultadoConferencia > div hr,
+#resultadoConferencia > hr {
+    display: none;
+}
+
+#resultadoConferencia > div h3,
+#resultadoConferencia > h3 {
+    margin: 0 0 12px;
+    color: #ededed;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+#resultadoConferencia > div p,
+#resultadoConferencia > h3 + p,
+#resultadoConferencia > h3 ~ p {
+    margin: 0;
+    padding: 5px 0;
+    color: #e8e8e8;
+    line-height: 1.45;
+}
+
+#resultadoConferencia > div p strong,
+#resultadoConferencia > h3 ~ p strong {
+    color: #bdbdbd;
+    font-weight: 600;
+}
+
+#resultadoConferencia > div button,
+#resultadoConferencia > button {
+    min-height: 38px;
+    margin-top: 10px;
+    padding: 8px 14px;
+    border: 1px solid #3a3a3a;
+    border-radius: 6px;
+    background: #202020;
+    color: #e8e8e8;
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background .12s ease, border-color .12s ease, color .12s ease;
+}
+
+#resultadoConferencia > div button:hover,
+#resultadoConferencia > button:hover {
+    background: #292929;
+    border-color: #4a4a4a;
+    color: #fff;
+}
+
+#resultadoConferencia > input {
+    width: min(100%, 360px);
+    margin: 14px 16px 0;
+}
+
+#resultadoConferencia > h3 {
+    padding: 14px 16px 0;
+}
+
+#resultadoConferencia > h3 + p {
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+#resultadoConferencia > h3 ~ p {
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+#resultadoConferencia > input + button,
+#resultadoConferencia > h3 ~ button {
+    margin-left: 16px;
+    margin-bottom: 16px;
+}
+
+#resultadoConferencia > input + button + hr,
+#resultadoConferencia > h3 ~ hr {
+    display: none;
+}
+
+@media (max-width: 700px) {
+    #conferencia .painel {
+        max-width: 100%;
+    }
+
+    #resultadoConferencia > div,
+    #resultadoConferencia > p:first-child {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+}
