@@ -1,0 +1,99 @@
+/* ============================================================
+   CONFERÊNCIAS REALIZADAS — padrão visual alinhado a RESERVAS
+   ============================================================ */
+
+#conferencias .painel {
+    max-width: 1180px;
+    padding: 0;
+    overflow: hidden;
+}
+
+#conferencias .botao-perigo {
+    margin: 16px;
+}
+
+#resultadoConferencias {
+    margin-top: 0;
+}
+
+#resultadoConferencias > p {
+    margin: 0;
+    padding: 7px 16px;
+    background: #1a1a1a;
+    color: #888;
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+#resultadoConferencias > p:first-child {
+    padding-top: 16px;
+}
+
+#resultadoConferencias > p:nth-child(3) {
+    padding-bottom: 14px;
+    border-bottom: 1px solid #303030;
+}
+
+#resultadoConferencias > hr {
+    display: none;
+}
+
+#resultadoConferencias .registro-conferencia {
+    padding: 14px 16px;
+    border-bottom: 1px solid #292929;
+    background: #1b1b1b;
+    color: #e8e8e8;
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+#resultadoConferencias .registro-conferencia:last-child {
+    border-bottom: 0;
+}
+
+#resultadoConferencias .registro-conferencia:hover {
+    background: #1f1f1f;
+}
+
+#resultadoConferencias .registro-conferencia h3 {
+    margin: 0 0 12px;
+    color: #ededed;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+#resultadoConferencias .registro-conferencia p {
+    margin: 0;
+    padding: 5px 0;
+    color: #e8e8e8;
+}
+
+#resultadoConferencias .registro-conferencia p strong {
+    color: #bdbdbd;
+    font-weight: 600;
+}
+
+#resultadoConferencias .registro-conferencia hr {
+    display: none;
+}
+
+#resultadoConferencias .registro-conferencia p:last-of-type {
+    padding-bottom: 0;
+}
+
+@media (max-width: 700px) {
+    #conferencias .painel {
+        max-width: 100%;
+    }
+
+    #conferencias .botao-perigo {
+        margin: 14px;
+    }
+
+    #resultadoConferencias > p,
+    #resultadoConferencias .registro-conferencia {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+}
