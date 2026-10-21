@@ -268,7 +268,14 @@ function mostrarTelaSistema(
 //
 // ============================================================
 
-function abrirSistema() {
+async function abrirSistema() {
+
+    const salvo = await obterLoginPmobileSalvo();
+
+    if (salvo) {
+        await tentarRestaurarLoginPmobile();
+        return;
+    }
 
     const inicio = document.getElementById("inicio");
     const login = document.getElementById("loginPmobile");
@@ -2433,13 +2440,20 @@ if (document.readyState === "loading") {
         "DOMContentLoaded",
         function() {
             configurarValidacaoCampoUsuarioPmobile();
-            tentarRestaurarLoginPmobile();
+            obterLoginPmobileSalvo().then(function(salvo) {
+                const checkbox = document.getElementById("loginManterLogin");
+                if (checkbox) checkbox.checked = !!salvo;
+            });
         }
     );
 
 } else {
 
-    tentarRestaurarLoginPmobile();
+    configurarValidacaoCampoUsuarioPmobile();
+    obterLoginPmobileSalvo().then(function(salvo) {
+        const checkbox = document.getElementById("loginManterLogin");
+        if (checkbox) checkbox.checked = !!salvo;
+    });
 
 }
 
