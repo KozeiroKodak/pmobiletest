@@ -269,7 +269,8 @@ function normalizarUrlPlanilhaOnlineNF(
     if (
         host === "1drv.ms" ||
         host === "onedrive.live.com" ||
-        host.endsWith(".onedrive.live.com")
+        host.endsWith(".onedrive.live.com") ||
+        host === "automotivacba-my.sharepoint.com"
     ) {
 
         url.searchParams.set(
