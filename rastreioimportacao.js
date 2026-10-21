@@ -42,11 +42,16 @@ async function prepararImportacaoRastreio() {
         mostrarStatusImportacaoRastreio("🟡 Lendo planilha de Rastreio...");
 
         const buffer = await arquivo.arrayBuffer();
-        // Primeiro lê somente a estrutura do arquivo para descobrir as abas.
-        // Depois o SheetJS processa apenas a aba operacional escolhida.
+        // Uma leitura curta descobre as abas e os cabeçalhos.
+        // Evita reler o ArrayBuffer uma vez para cada aba candidata.
         let workbook = window.XLSX.read(buffer, {
             type: "array",
-            bookSheets: true
+            sheetRows: 30,
+            cellDates: false,
+            cellHTML: false,
+            cellFormula: false,
+            cellStyles: false,
+            dense: true
         });
 
         if (!workbook.SheetNames?.length) {
@@ -64,26 +69,15 @@ async function prepararImportacaoRastreio() {
         let modelo = null;
 
         for (const candidata of ordemAbas) {
-            const descoberta = window.XLSX.read(buffer, {
-                type: "array",
-                sheets: candidata,
-                sheetRows: 30,
-                cellDates: false,
-                cellHTML: false,
-                cellFormula: false,
-                cellStyles: false,
-                dense: true
-            });
+            const sheet = workbook.Sheets[candidata];
+            if (!sheet) continue;
 
-            const matrizCandidata = window.XLSX.utils.sheet_to_json(
-                descoberta.Sheets[candidata],
-                {
-                    header: 1,
-                    defval: null,
-                    raw: false,
-                    blankrows: false
-                }
-            );
+            const matrizCandidata = window.XLSX.utils.sheet_to_json(sheet, {
+                header: 1,
+                defval: null,
+                raw: false,
+                blankrows: false
+            });
 
             for (let indice = 0; indice < Math.min(matrizCandidata.length, 30); indice++) {
                 const colunasCandidata = normalizarColunasRastreio(matrizCandidata[indice] || []);
@@ -99,9 +93,6 @@ async function prepararImportacaoRastreio() {
                 }
             }
 
-            // Libera a descoberta da aba antes de analisar a próxima.
-            delete descoberta.Sheets[candidata];
-
             if (nomeAba) break;
         }
 
@@ -112,7 +103,11 @@ async function prepararImportacaoRastreio() {
             );
         }
 
-        // Agora somente a aba escolhida é carregada integralmente.
+        // Descoberta concluída. Descarta a primeira representação antes da
+        // leitura completa para evitar manter duas cópias da planilha.
+        workbook = null;
+
+        // Agora apenas a aba operacional é carregada integralmente.
         workbook = window.XLSX.read(buffer, {
             type: "array",
             sheets: nomeAba,
@@ -135,23 +130,19 @@ async function prepararImportacaoRastreio() {
             modeloIndices[chave] = modelo[chave] ? colunas.indexOf(modelo[chave]) : -1;
         });
 
+        // Mantém somente os vetores de dados. Não cria um objeto "dados" por
+        // linha, evitando uma segunda grande estrutura em memória.
         const linhas = [];
         for (let i = indiceCabecalho + 1; i < matriz.length; i++) {
-            const valoresOriginais = Array.isArray(matriz[i]) ? matriz[i] : [];
-            if (valoresOriginais.every(v => v == null || String(v).trim() === "")) continue;
-
-            // Guarda somente o vetor de valores, evitando um objeto por célula.
-            linhas.push({
-                linha_numero: i + 1,
-                valores: valoresOriginais
-            });
+            const valores = Array.isArray(matriz[i]) ? matriz[i] : [];
+            if (valores.every(v => v == null || String(v).trim() === "")) continue;
+            linhas.push({ linha_numero: i + 1, valores });
         }
 
-        // Remove referências pesadas ao workbook/matriz antes de manter o estado da importação.
-        delete workbook.Sheets[nomeAba];
-        workbook = null;
-
         if (!linhas.length) throw new Error("A planilha possui cabeçalho, mas nenhuma linha de dados.");
+
+        // A matriz original já não é necessária depois da compactação.
+        workbook = null;
         const sha256 = await calcularSha256Rastreio(buffer);
         dadosImportacaoRastreio = {
             arquivo,
