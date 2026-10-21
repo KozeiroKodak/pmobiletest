@@ -52,6 +52,11 @@
         href="implementacoes/importacaonf.css?v=0.0.174"
     >
 
+    <link
+        rel="stylesheet"
+        href="implementacoes/arquivosteste.css?v=0.0.174"
+    >
+
 </head>
 
 <body>
@@ -1073,6 +1078,7 @@
                     <button class="botao-aba" onclick="abrirLocais()">📍 Locais</button>
                     <button class="botao-aba" onclick="abrirSolicitacoesResetToken()">🔑 Recuperação de tokens</button>
                     <button class="botao-perigo" onclick="abrirManutencaoBanco()">🛠️ Manutenção</button>
+                    <button class="botao-aba" onclick="abrirArquivosTeste()">📁 Arquivos de teste</button>
                 </div>
 
             </div>
@@ -1125,6 +1131,34 @@
                 <h2>🛠️ Manutenção</h2>
                 <p>Operações administrativas do banco de dados.</p>
                 <button class="botao-perigo" onclick="limparMateriaisSupabase()">🗑️ Materiais importados</button>
+            </div>
+
+            <div class="painel arquivos-teste-painel" id="painelArquivosTeste" style="display: none;">
+                <button type="button" class="botao-secundario arquivos-teste-voltar" onclick="fecharArquivosTeste()">‹ Voltar</button>
+
+                <h2>📁 Arquivos de teste</h2>
+                <p>Área administrativa para armazenar o arquivo original no Supabase, independentemente da extensão, para auditoria.</p>
+
+                <div class="arquivos-teste-acoes">
+                    <input
+                        type="file"
+                        id="arquivoTeste"
+                    >
+
+                    <button type="button" class="botao-aba" onclick="importarArquivoTeste()">
+                        Importar arquivo
+                    </button>
+
+                    <button type="button" class="botao-perigo" onclick="limparArquivosTeste()">
+                        🗑️ Limpar arquivos importados
+                    </button>
+                </div>
+
+                <p class="arquivos-teste-limite">
+                    Limite por arquivo: 20 MB. A extensão não é restringida.
+                </p>
+
+                <div id="statusArquivosTeste" aria-live="polite"></div>
             </div>
 
             <div class="painel" id="painelConfiguracoesUsuario" style="display: none;">
@@ -1268,6 +1302,8 @@
 <script src="importacao.js?v=0.0.174"></script>
 
 <script src="importacaonf.js?v=0.0.174"></script>
+
+<script src="arquivosteste.js?v=0.0.174"></script>
 
 
 <!-- =========================================================
