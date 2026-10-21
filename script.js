@@ -2328,6 +2328,15 @@ async function confirmarZeramento(
 
             }
 
+            // Detalhes de Locais Vazios -> retorna para Locais.
+            const detalhesLocaisVazios = document.getElementById("detalhesLocaisVazios");
+            if (detalhesLocaisVazios && detalhesLocaisVazios.style.display !== "none") {
+                if (typeof fecharDetalhesLocaisVazios === "function") {
+                    fecharDetalhesLocaisVazios();
+                }
+                return;
+            }
+
             // Pesquisa: como existe uma única tela de pesquisa,
             // o botão Voltar retorna diretamente para Home.
             const pesquisa =
