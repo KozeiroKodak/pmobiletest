@@ -219,8 +219,8 @@ function montarMapaMotoristasInicial(linhas, modelo, modeloIndices) {
     if (modelo.motorista) return mapa;
 
     const indiceRegiao = modeloIndices?.regiao ?? -1;
-    linhas.forEach(linha => {
-        const regiao = indiceRegiao >= 0 ? String(linha.valores?.[indiceRegiao] ?? "").trim() : "";
+    linhas.forEach(valores => {
+        const regiao = indiceRegiao >= 0 ? String(valores?.[indiceRegiao] ?? "").trim() : "";
         if (regiao && !(regiao in mapa)) mapa[regiao] = "";
     });
 
@@ -366,7 +366,7 @@ function prepararLinhasRastreioParaEnvio(inicio = 0, fim = null, coletarAvisos =
 
             for (const problema of problemas) {
                 if (erros.length < 100) {
-                    erros.push("Linha " + linha.linha_numero + ": " + problema);
+                    erros.push("Linha " + (indice + deslocamentoLinha) + ": " + problema);
                 }
             }
         }
