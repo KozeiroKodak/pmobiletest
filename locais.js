@@ -76,18 +76,11 @@ async function carregarLocaisDerivados() {
         const cliente = obterClienteSupabase();
         if (!cliente) throw new Error("Supabase indisponível.");
 
-        const registrosMateriais = await buscarTodosMateriaisLocais(cliente, "codigo,local");
-        const locaisPadrao = obterLocaisPadraoPmobile();
+        const { data, error } = await cliente.rpc("listar_locais_derivados");
 
-        const registros = (Array.isArray(registrosMateriais) ? registrosMateriais : [])
-            .filter(function(item) {
-                const local = normalizarLocalPmobile(item.local);
-                return local && !locaisPadrao.has(local);
-            })
-            .sort(function(a, b) {
-                return String(a.local || "").localeCompare(String(b.local || ""), "pt-BR", { numeric: true })
-                    || String(a.codigo || "").localeCompare(String(b.codigo || ""), "pt-BR", { numeric: true });
-            });
+        if (error) throw error;
+
+        const registros = Array.isArray(data) ? data : [];
 
         if (!registros.length) {
             area.innerHTML =
@@ -272,43 +265,17 @@ function carregarLocaisVazios() {
             const cliente = obterClienteSupabase();
             if (!cliente) throw new Error("Supabase indisponível.");
 
-            const [materiais, contagens] = await Promise.all([
-                buscarTodosMateriaisLocais(cliente, "id,local,quantidade"),
-                buscarTodasContagensManuaisLocais(cliente)
-            ]);
+            const { data, error } = await cliente.rpc("listar_locais_ocupados");
 
-            // O inventário é a base. A contagem manual mais recente de cada
-            // material substitui a posição do inventário para fins físicos.
-            const estadoMateriais = new Map();
+            if (error) throw error;
 
-            materiais.forEach(function(material) {
-                estadoMateriais.set(String(material.id), {
-                    local: normalizarLocalPmobile(material.local),
-                    quantidade: Number(material.quantidade || 0)
-                });
-            });
-
-            const jaProcessados = new Set();
-
-            contagens.forEach(function(contagem) {
-                const materialId = String(contagem.material_id || "");
-                if (!materialId || jaProcessados.has(materialId)) return;
-
-                jaProcessados.add(materialId);
-
-                estadoMateriais.set(materialId, {
-                    local: normalizarLocalPmobile(contagem.local_encontrado),
-                    quantidade: Number(contagem.quantidade_fisica || 0)
-                });
-            });
-
-            const ocupados = new Set();
-
-            estadoMateriais.forEach(function(estado) {
-                if (estado.local && Number.isFinite(estado.quantidade) && estado.quantidade > 0) {
-                    ocupados.add(estado.local);
-                }
-            });
+            const ocupados = new Set(
+                (Array.isArray(data) ? data : [])
+                    .map(function(item) {
+                        return normalizarLocalPmobile(item.local);
+                    })
+                    .filter(Boolean)
+            );
 
             window._pmobileLocaisVaziosOcupados = ocupados;
 
@@ -401,48 +368,6 @@ function gerarPosicoesAreaPmobile(estrutura) {
     return resultado;
 }
 
-async function buscarTodosMateriaisLocais(cliente, colunas) {
-    const pagina = 1000;
-    const registros = [];
-
-    for (let inicio = 0; ; inicio += pagina) {
-        const { data, error } = await cliente
-            .from("materiais")
-            .select(colunas)
-            .range(inicio, inicio + pagina - 1);
-
-        if (error) throw error;
-
-        const lote = Array.isArray(data) ? data : [];
-        registros.push.apply(registros, lote);
-
-        if (lote.length < pagina) break;
-    }
-
-    return registros;
-}
-
-async function buscarTodasContagensManuaisLocais(cliente) {
-    const pagina = 1000;
-    const registros = [];
-
-    for (let inicio = 0; ; inicio += pagina) {
-        const { data, error } = await cliente
-            .from("contagens_manuais")
-            .select("material_id,local_encontrado,quantidade_fisica,data_hora")
-            .order("data_hora", { ascending: false })
-            .range(inicio, inicio + pagina - 1);
-
-        if (error) throw error;
-
-        const lote = Array.isArray(data) ? data : [];
-        registros.push.apply(registros, lote);
-
-        if (lote.length < pagina) break;
-    }
-
-    return registros;
-}
 
 function obterLocaisPadraoPmobile() {
     const locais = new Set();
