@@ -85,38 +85,8 @@ async function carregarLocaisDerivados() {
         const cliente = obterClienteSupabase();
         if (!cliente) throw new Error("Supabase indisponível.");
 
-        const registros = [];
-        const LIMITE_RPC = 1000;
-        let offset = 0;
-
-        while (true) {
-            const { data, error } = await cliente.rpc("listar_locais_derivados", {
-                p_limit: LIMITE_RPC,
-                p_offset: offset
-            });
-
-            if (error) throw error;
-
-            const lote = Array.isArray(data) ? data : [];
-            registros.push(...lote);
-
-            if (lote.length < LIMITE_RPC) break;
-
-            offset += LIMITE_RPC;
-        }
-
-        if (!registros.length) {
-            area.innerHTML =
-                '<div class="locais-vazio">' +
-                    '<span>✓</span>' +
-                    '<strong>Nenhum material derivado</strong>' +
-                    '<p>Todos os materiais com local estão dentro dos setores padrão.</p>' +
-                '</div>';
-            return;
-        }
-
         paginaLocaisDerivadosAtual = 1;
-        renderizarPaginaLocaisDerivados(area, registros);
+        await buscarPaginaLocaisDerivados(area, paginaLocaisDerivadosAtual);
 
     } catch (erro) {
         console.error("Erro ao carregar materiais derivados:", erro);
@@ -128,10 +98,31 @@ async function carregarLocaisDerivados() {
     }
 }
 
-function renderizarPaginaLocaisDerivados(area, registros) {
+async function buscarPaginaLocaisDerivados(area, pagina) {
+    const cliente = obterClienteSupabase();
+    if (!cliente) throw new Error("Supabase indisponível.");
+
+    const offset = (pagina - 1) * ITENS_POR_PAGINA_LOCAIS_DERIVADOS;
+
+    const { data, error } = await cliente.rpc("listar_locais_derivados", {
+        p_limit: ITENS_POR_PAGINA_LOCAIS_DERIVADOS,
+        p_offset: offset
+    });
+
+    if (error) throw error;
+
+    const registros = Array.isArray(data) ? data : [];
+    const totalRegistros = registros.length
+        ? Number(registros[0].total_registros || 0)
+        : 0;
+
+    renderizarPaginaLocaisDerivados(area, registros, totalRegistros);
+}
+
+function renderizarPaginaLocaisDerivados(area, registros, totalRegistros) {
     const totalPaginas = Math.max(
         1,
-        Math.ceil(registros.length / ITENS_POR_PAGINA_LOCAIS_DERIVADOS)
+        Math.ceil(totalRegistros / ITENS_POR_PAGINA_LOCAIS_DERIVADOS)
     );
 
     paginaLocaisDerivadosAtual = Math.min(
@@ -139,17 +130,13 @@ function renderizarPaginaLocaisDerivados(area, registros) {
         totalPaginas
     );
 
-    const inicio = (paginaLocaisDerivadosAtual - 1) * ITENS_POR_PAGINA_LOCAIS_DERIVADOS;
-    const pagina = registros.slice(
-        inicio,
-        inicio + ITENS_POR_PAGINA_LOCAIS_DERIVADOS
-    );
+    area.dataset.totalRegistrosLocaisDerivados = String(totalRegistros);
 
     area.innerHTML =
         '<div class="locais-resumo-derivados">' +
-            '<strong>' + registros.length + '</strong> material(is) fora dos setores padrão' +
+            '<strong>' + totalRegistros + '</strong> material(is) fora dos setores padrão' +
         '</div>' +
-        pagina.map(function(item) {
+        registros.map(function(item) {
             return (
                 '<article class="local-derivado-card">' +
                     '<div>' +
@@ -172,33 +159,29 @@ function renderizarPaginaLocaisDerivados(area, registros) {
                 (paginaLocaisDerivadosAtual >= totalPaginas ? ' disabled' : '') +
                 '>Próxima</button>' +
         '</div>';
-
-    area.dataset.registrosLocaisDerivados = JSON.stringify(registros);
 }
 
-function mudarPaginaLocaisDerivados(direcao) {
+async function mudarPaginaLocaisDerivados(direcao) {
     const area = document.getElementById("listaLocaisDerivados");
     if (!area) return;
 
-    let registros;
-    try {
-        registros = JSON.parse(area.dataset.registrosLocaisDerivados || "[]");
-    } catch (erro) {
-        console.error("Erro ao recuperar materiais derivados para paginação:", erro);
-        return;
-    }
-
-    const totalPaginas = Math.max(
-        1,
-        Math.ceil(registros.length / ITENS_POR_PAGINA_LOCAIS_DERIVADOS)
-    );
+    const totalPaginasConhecidas = Math.max(1, Math.ceil(
+        Number(area.dataset.totalRegistrosLocaisDerivados || 0) /
+        ITENS_POR_PAGINA_LOCAIS_DERIVADOS
+    ));
 
     const novaPagina = paginaLocaisDerivadosAtual + Number(direcao || 0);
 
-    if (novaPagina < 1 || novaPagina > totalPaginas) return;
+    if (novaPagina < 1) return;
+    if (totalPaginasConhecidas > 1 && novaPagina > totalPaginasConhecidas) return;
 
     paginaLocaisDerivadosAtual = novaPagina;
-    renderizarPaginaLocaisDerivados(area, registros);
+
+    try {
+        await buscarPaginaLocaisDerivados(area, novaPagina);
+    } catch (erro) {
+        console.error("Erro ao paginar materiais derivados:", erro);
+    }
 }
 async function carregarLocaisAlterados() {
     const area = document.getElementById("listaLocaisAlterados");
