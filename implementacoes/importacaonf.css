@@ -1,0 +1,187 @@
+/* ============================================================
+   IMPORTAÇÃO NF
+   ============================================================ */
+
+#importacaoNF {
+    max-width: 1180px;
+}
+
+.painel-importacao-nf {
+    max-width: 1180px;
+}
+
+.importacao-nf-resumo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 16px;
+    padding: 14px 16px;
+    border-bottom: 1px solid #292929;
+}
+
+.importacao-nf-resumo strong {
+    color: #ededed;
+}
+
+.importacao-nf-resumo span {
+    color: #888;
+    font-size: 12px;
+}
+
+.importacao-nf-colunas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    padding: 14px 16px;
+    border-bottom: 1px solid #292929;
+}
+
+.importacao-nf-colunas span {
+    padding: 5px 8px;
+    border: 1px solid #333;
+    border-radius: 5px;
+    color: #bbb;
+    background: #1b1b1b;
+    font-size: 11px;
+}
+
+.importacao-nf-acoes-preparo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 14px 16px;
+}
+
+.importacao-nf-resultado {
+    margin-top: 12px;
+    color: #aaa;
+    font-size: 13px;
+}
+
+.importacao-nf-resultado.erro {
+    color: #d98b8b;
+}
+
+.importacao-nf-status {
+    min-height: 20px;
+    margin: 12px 0;
+    color: #999;
+    font-size: 12px;
+}
+
+.importacao-nf-historico {
+    margin-top: 18px;
+}
+
+.importacao-nf-historico h2,
+.importacao-nf-visualizacao h2 {
+    margin: 0 0 10px;
+    color: #ddd;
+    font-size: 15px;
+}
+
+.importacao-nf-item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 14px;
+    border-bottom: 1px solid #292929;
+    background: #1b1b1b;
+}
+
+.importacao-nf-item > div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.importacao-nf-item strong {
+    overflow: hidden;
+    color: #e8e8e8;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.importacao-nf-item span {
+    color: #888;
+    font-size: 11px;
+}
+
+.importacao-nf-carregando,
+.importacao-nf-vazio,
+.importacao-nf-erro {
+    padding: 30px 18px;
+    text-align: center;
+    color: #888;
+}
+
+.importacao-nf-vazio strong {
+    display: block;
+    margin-bottom: 5px;
+    color: #ddd;
+}
+
+.importacao-nf-erro {
+    color: #d98b8b;
+}
+
+.importacao-nf-visualizacao {
+    margin-top: 18px;
+    overflow: hidden;
+}
+
+.importacao-nf-tabela-cabecalho,
+.importacao-nf-tabela-linha {
+    display: grid;
+    grid-auto-columns: minmax(120px, max-content);
+    grid-auto-flow: column;
+    width: max-content;
+    min-width: 100%;
+}
+
+.importacao-nf-tabela-cabecalho {
+    border-bottom: 1px solid #303030;
+    background: #1a1a1a;
+}
+
+.importacao-nf-tabela-cabecalho span,
+.importacao-nf-tabela-linha span {
+    padding: 9px 12px;
+    border-right: 1px solid #292929;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.importacao-nf-tabela-cabecalho span {
+    color: #777;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+}
+
+.importacao-nf-tabela-linha {
+    border-bottom: 1px solid #292929;
+    background: #1b1b1b;
+    color: #ccc;
+    font-size: 12px;
+}
+
+.importacao-nf-tabela-linha:hover {
+    background: #1f1f1f;
+}
+
+@media (max-width: 700px) {
+    .importacao-nf-item {
+        grid-template-columns: 1fr;
+        gap: 9px;
+    }
+
+    .importacao-nf-tabela-cabecalho span,
+    .importacao-nf-tabela-linha span {
+        padding: 8px 10px;
+    }
+}
