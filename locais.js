@@ -136,29 +136,45 @@ function renderizarPaginaLocaisDerivados(area, registros, totalRegistros) {
         '<div class="locais-resumo-derivados">' +
             '<strong>' + totalRegistros + '</strong> material(is) fora dos setores padrão' +
         '</div>' +
-        registros.map(function(item) {
-            return (
-                '<article class="local-derivado-card">' +
-                    '<div>' +
-                        '<span class="local-alterado-legenda">Código</span>' +
-                        '<strong>' + escapeHtmlPmobile(item.codigo || "-") + '</strong>' +
-                    '</div>' +
-                    '<div>' +
-                        '<span class="local-alterado-legenda">Local atual</span>' +
-                        '<strong class="local-derivado-local">' + escapeHtmlPmobile(item.local || "-") + '</strong>' +
-                    '</div>' +
-                '</article>'
-            );
-        }).join("") +
+        '<div class="locais-derivados-cabecalho">' +
+            '<span>ID</span>' +
+            '<span>Descrição</span>' +
+            '<span>Referência</span>' +
+            '<span>Local</span>' +
+            '<span>Quantidade</span>' +
+        '</div>' +
+        registros.map(renderizarLocalDerivado).join("") +
         '<div class="locais-paginacao-derivados">' +
             '<button type="button" class="botao-secundario" onclick="mudarPaginaLocaisDerivados(-1)"' +
                 (paginaLocaisDerivadosAtual <= 1 ? ' disabled' : '') +
                 '>Anterior</button>' +
-            '<span>Página ' + paginaLocaisDerivadosAtual + '/' + totalPaginas + '</span>' +
+            '<span>Página ' + paginaLocaisDerivadosAtual + '/' + totalPaginas + ' · ' + totalRegistros + ' material(is)</span>' +
             '<button type="button" class="botao-secundario" onclick="mudarPaginaLocaisDerivados(1)"' +
                 (paginaLocaisDerivadosAtual >= totalPaginas ? ' disabled' : '') +
                 '>Próxima</button>' +
         '</div>';
+}
+
+function renderizarLocalDerivado(item) {
+    return (
+        '<article class="local-derivado-card">' +
+            '<div class="local-derivado-celula local-derivado-id" data-label="ID">' +
+                escapeHtmlPmobile(item.codigo || "-") +
+            '</div>' +
+            '<div class="local-derivado-celula local-derivado-descricao" data-label="Descrição">' +
+                escapeHtmlPmobile(item.descricao || "-") +
+            '</div>' +
+            '<div class="local-derivado-celula local-derivado-referencia" data-label="Referência">' +
+                escapeHtmlPmobile(item.referencia || "-") +
+            '</div>' +
+            '<div class="local-derivado-celula local-derivado-local" data-label="Local">' +
+                escapeHtmlPmobile(item.local || "-") +
+            '</div>' +
+            '<div class="local-derivado-celula local-derivado-quantidade" data-label="Quantidade">' +
+                escapeHtmlPmobile(formatarNumeroLocal(item.quantidade)) +
+            '</div>' +
+        '</article>'
+    );
 }
 
 async function mudarPaginaLocaisDerivados(direcao) {
