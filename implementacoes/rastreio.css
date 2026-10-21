@@ -1,0 +1,20 @@
+/* PMOBILE - Rastreio */
+.rastreio-painel { display: grid; gap: 16px; }
+.rastreio-filtros { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; }
+.rastreio-filtros input, .rastreio-filtros select { min-height: 44px; border: 1px solid var(--borda, #d8dde5); border-radius: 10px; padding: 0 12px; background: var(--fundo-painel, #fff); color: inherit; }
+.rastreio-status { font-size: .85rem; opacity: .72; }
+.rastreio-lista { display: grid; gap: 12px; }
+.rastreio-card { border: 1px solid var(--borda, #d8dde5); border-radius: 14px; padding: 16px; background: var(--fundo-painel, #fff); }
+.rastreio-card-topo { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.rastreio-card-topo strong { font-size: 1.05rem; }
+.rastreio-etiqueta { font-size: .72rem; font-weight: 700; letter-spacing: .03em; border: 1px solid currentColor; border-radius: 999px; padding: 5px 8px; }
+.rastreio-nfs { margin-top: 8px; font-weight: 600; }
+.rastreio-grade { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; margin-top: 14px; }
+.rastreio-grade span { min-width: 0; overflow-wrap: anywhere; }
+.rastreio-grade small { display: block; margin-bottom: 3px; opacity: .65; font-size: .72rem; text-transform: uppercase; }
+.rastreio-vazio, .rastreio-erro { display: grid; gap: 5px; text-align: center; padding: 28px 16px; opacity: .75; }
+.rastreio-erro { opacity: 1; }
+@media (max-width: 720px) {
+  .rastreio-filtros { grid-template-columns: 1fr; }
+  .rastreio-grade { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
