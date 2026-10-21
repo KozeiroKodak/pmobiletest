@@ -191,9 +191,9 @@ function renderizarLocalAlterado(item) {
         window.credencialPmobileAtual;
 
     const botaoConfirmar = status === "PENDENTE" && admin
-        ? '<button type="button" class="botao-local-confirmar" onclick="confirmarAlteracaoLocal(\\'' +
+        ? '<button type="button" class="botao-local-confirmar" onclick="confirmarAlteracaoLocal(\'' +
             escapeHtmlPmobile(item.id) +
-            '\\')">✓ Confirmar alteração</button>'
+            '\')">✓ Confirmar alteração</button>'
         : "";
 
     return (
