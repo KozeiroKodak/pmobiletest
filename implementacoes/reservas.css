@@ -60,6 +60,22 @@
     color: #888;
 }
 
+.reservas-paginacao {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-top: 1px solid #292929;
+    background: #1a1a1a;
+    color: #888;
+    font-size: 12px;
+}
+
+.reservas-paginacao .botao-secundario {
+    min-width: 90px;
+}
+
 .reservas-carregando,
 .reservas-vazio {
     padding: 44px 24px;
@@ -101,5 +117,9 @@
 
     .reserva-descricao {
         grid-column: 1 / -1;
+    }
+
+    .reservas-paginacao {
+        flex-wrap: wrap;
     }
 }

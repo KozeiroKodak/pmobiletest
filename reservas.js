@@ -2,14 +2,21 @@
 // RESERVAS — MATERIAIS COM QUANTIDADE RESERVADA
 // ============================================================
 
+const ITENS_POR_PAGINA_RESERVAS = 20;
+let paginaReservasAtual = 1;
+let totalReservas = 0;
+
 function abrirReservas() {
     mostrarTelaSistema("reservas", "menuReservas");
-    carregarReservas();
+    carregarReservas(1);
 }
 
-async function carregarReservas() {
+async function carregarReservas(pagina) {
     const area = document.getElementById("listaReservas");
     if (!area) return;
+
+    const paginaSolicitada = Number(pagina) || 1;
+    paginaReservasAtual = Math.max(1, paginaSolicitada);
 
     area.innerHTML = '<div class="reservas-carregando">Carregando reservas...</div>';
 
@@ -17,15 +24,37 @@ async function carregarReservas() {
         const cliente = obterClienteSupabase();
         if (!cliente) throw new Error("Supabase indisponível.");
 
-        const registros = await buscarTodosMateriaisReservas(cliente);
+        const offset = (paginaReservasAtual - 1) * ITENS_POR_PAGINA_RESERVAS;
 
-        if (!registros.length) {
+        const { data, error } = await cliente.rpc("listar_reservas", {
+            p_limit: ITENS_POR_PAGINA_RESERVAS,
+            p_offset: offset
+        });
+
+        if (error) throw error;
+
+        const registros = Array.isArray(data) ? data : [];
+        totalReservas = registros.length
+            ? Number(registros[0].total_registros || 0)
+            : (paginaReservasAtual === 1 ? 0 : totalReservas);
+
+        if (!registros.length && paginaReservasAtual === 1) {
             area.innerHTML =
                 '<div class="reservas-vazio">' +
                     '<strong>Nenhum item em reserva</strong>' +
                     '<span>Materiais com quantidade reservada maior que zero aparecerão aqui.</span>' +
                 '</div>';
             return;
+        }
+
+        const totalPaginas = Math.max(
+            1,
+            Math.ceil(totalReservas / ITENS_POR_PAGINA_RESERVAS)
+        );
+
+        if (paginaReservasAtual > totalPaginas) {
+            paginaReservasAtual = totalPaginas;
+            return carregarReservas(paginaReservasAtual);
         }
 
         area.innerHTML =
@@ -37,7 +66,16 @@ async function carregarReservas() {
                 '<span>Quantidade</span>' +
                 '<span>Solicitante</span>' +
             '</div>' +
-            registros.map(renderizarReserva).join("");
+            registros.map(renderizarReserva).join("") +
+            '<div class="reservas-paginacao">' +
+                '<button type="button" class="botao-secundario" onclick="mudarPaginaReservas(-1)"' +
+                    (paginaReservasAtual <= 1 ? ' disabled' : '') +
+                    '>Anterior</button>' +
+                '<span>Página ' + paginaReservasAtual + '/' + totalPaginas + ' · ' + totalReservas + ' reserva(s)</span>' +
+                '<button type="button" class="botao-secundario" onclick="mudarPaginaReservas(1)"' +
+                    (paginaReservasAtual >= totalPaginas ? ' disabled' : '') +
+                    '>Próxima</button>' +
+            '</div>';
 
     } catch (erro) {
         console.error("Erro ao carregar reservas:", erro);
@@ -49,25 +87,17 @@ async function carregarReservas() {
     }
 }
 
-async function buscarTodosMateriaisReservas(cliente) {
-    const { data, error } = await cliente
-        .rpc("listar_reservas");
+function mudarPaginaReservas(direcao) {
+    const totalPaginas = Math.max(
+        1,
+        Math.ceil(totalReservas / ITENS_POR_PAGINA_RESERVAS)
+    );
 
-    if (error) throw error;
+    const novaPagina = paginaReservasAtual + Number(direcao || 0);
 
-    const registros = Array.isArray(data) ? data : [];
+    if (novaPagina < 1 || novaPagina > totalPaginas) return;
 
-    return registros
-        .filter(function(item) {
-            return Number(item.quantidade_reservada || 0) > 0;
-        })
-        .sort(function(a, b) {
-            return String(a.codigo || "").localeCompare(
-                String(b.codigo || ""),
-                "pt-BR",
-                { numeric: true }
-            );
-        });
+    carregarReservas(novaPagina);
 }
 
 function renderizarReserva(item) {
