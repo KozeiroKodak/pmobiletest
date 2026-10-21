@@ -8,6 +8,17 @@ on:
       - '**/*.html'
       - '**/*.css'
       - '**/*.js'
+      - '**/*.json'
+      - '**/*.png'
+      - '**/*.jpg'
+      - '**/*.jpeg'
+      - '**/*.webp'
+      - '**/*.svg'
+      - '**/*.ico'
+      - '**/*.woff'
+      - '**/*.woff2'
+      - '**/*.ttf'
+      - '**/*.otf'
       - '.github/workflows/ota-publish.yml'
   workflow_dispatch:
 
@@ -245,10 +256,17 @@ jobs:
           mkdir -p build/ota
 
           find . -type f \
-            \( -name '*.html' -o -name '*.css' -o -name '*.js' \) \
+            ! -path './.git/*' \
             ! -path './.github/*' \
             ! -path './ota/*' \
             ! -path './build/*' \
+            ! -path './android/*' \
+            ! -path './node_modules/*' \
+            ! -path './gradle/*' \
+            ! -path './gradlew' \
+            ! -path './gradlew.bat' \
+            ! -name 'package-lock.json' \
+            ! -name 'package.json' \
             -exec sh -c 'mkdir -p "build/ota/$(dirname "$1")" && cp "$1" "build/ota/$1"' _ {} \;
 
           cd build/ota
