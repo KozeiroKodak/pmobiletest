@@ -99,26 +99,10 @@ function atualizarBarraProgresso(percentual, mensagem) {
         "<p><strong>" +
         (mensagem || "Importando inventário...") +
         "</strong></p>" +
-
-        "<div style=\"" +
-            "width:100%;" +
-            "height:22px;" +
-            "background:#e5e7eb;" +
-            "border-radius:11px;" +
-            "overflow:hidden;" +
-            "margin:10px 0;" +
-        "\">" +
-
-            "<div style=\"" +
-                "width:" + valor + "%;" +
-                "height:100%;" +
-                "background:#2563eb;" +
-                "transition:width 0.15s ease;" +
-            "\"></div>" +
-
+        "<div class=\"barra-progresso-container\">" +
+            "<div class=\"barra-progresso barra-progresso--dinamica\" style=\"--progresso-percentual:" + valor + "\"></div>" +
         "</div>" +
-
-        "<p style=\"text-align:center;\"><strong>" +
+        "<p class=\"progresso-percentual\"><strong>" +
             valor +
             "%" +
         "</strong></p>";
