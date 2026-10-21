@@ -139,14 +139,32 @@ async function exibirConferencias() {
 
         await carregarConferencias();
 
+        const usuarioAtual =
+            window.usuarioPmobileAtual;
+
+        const usuarioIdAtual =
+            Number(usuarioAtual?.id);
+
+        const conferenciasDoUsuario =
+            Number.isNaN(usuarioIdAtual)
+                ? []
+                : conferencias.filter(
+                    function(contagem) {
+                        return (
+                            Number(contagem?.usuarioId) ===
+                            usuarioIdAtual
+                        );
+                    }
+                );
+
 
         // ====================================================
         // VERIFICAR RESULTADO
         // ====================================================
 
         if (
-            !Array.isArray(conferencias) ||
-            conferencias.length === 0
+            !Array.isArray(conferenciasDoUsuario) ||
+            conferenciasDoUsuario.length === 0
         ) {
 
             areaResultado.innerHTML =
@@ -161,7 +179,7 @@ async function exibirConferencias() {
         // CONTADORES
         // ====================================================
 
-        let total = conferencias.length;
+        let total = conferenciasDoUsuario.length;
 
         let totalOk = 0;
 
@@ -172,7 +190,7 @@ async function exibirConferencias() {
         // ANALISAR CONFERÊNCIAS
         // ====================================================
 
-        conferencias.forEach(
+        conferenciasDoUsuario.forEach(
             function (contagem) {
 
                 const diferenca =
