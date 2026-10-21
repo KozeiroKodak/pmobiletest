@@ -2273,24 +2273,11 @@ async function importarExcel() {
             resultado.innerHTML =
                 "<p><strong>✅ Importação concluída!</strong></p>" +
 
-                "<div style=\"" +
-                    "width:100%;" +
-                    "height:22px;" +
-                    "background:#e5e7eb;" +
-                    "border-radius:11px;" +
-                    "overflow:hidden;" +
-                    "margin:10px 0;" +
-                "\">" +
-
-                    "<div style=\"" +
-                        "width:100%;" +
-                        "height:100%;" +
-                        "background:#16a34a;" +
-                    "\"></div>" +
-
+                "<div class=\"barra-progresso-container barra-progresso-container--sucesso\">" +
+                    "<progress class=\"barra-progresso barra-progresso--completo\" value=\"100\" max=\"100\"></progress>" +
                 "</div>" +
 
-                "<p style=\"text-align:center;\"><strong>100%</strong></p>" +
+                "<p class=\"progresso-percentual\"><strong>100%</strong></p>" +
 
                 "<p>📦 Materiais importados: " +
                 resultadoImportacao
