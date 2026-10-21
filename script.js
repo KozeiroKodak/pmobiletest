@@ -1557,6 +1557,19 @@ function voltarMenuConferencias() {
 
 function abrirDivergencias() {
 
+    if (
+        !window.usuarioPmobileAtual ||
+        window.usuarioPmobileAtual.nivel !== "ADMIN"
+    ) {
+
+        alert(
+            "Acesso administrativo negado."
+        );
+
+        return;
+
+    }
+
     mostrarTelaSistema(
         "divergencias",
         "menuDivergencias"
@@ -1729,7 +1742,7 @@ function atualizarVisibilidadeConfiguracoes() {
         menuConferencias: isAdmin,
         menuPesquisa: isAdmin || isNivel2,
         menuContagemManual: isAdmin || isNivel2,
-        menuDivergencias: isAdmin || isNivel2
+        menuDivergencias: isAdmin
     };
 
     Object.keys(regras).forEach(function(id) {
@@ -1859,7 +1872,7 @@ async function abrirGerenciamentoUsuarios() {
                         '</select>' +
                         '<button type="button" class="seletor-nivel-usuario" id="botaoNivelSolicitacao_' + solicitacao.id + '" onclick="alternarSeletorNivelUsuario(' + solicitacao.id + ')" aria-haspopup="listbox" aria-expanded="false">Nível 2</button>' +
                         '<div id="menuNivelSolicitacao_' + solicitacao.id + '" class="menu-nivel-usuario" role="listbox" style="display:none;">' +
-                            '<button type="button" onclick="selecionarNivelUsuario(' + solicitacao.id + ', \'NIVEL2\')">Nível 2 — Pesquisa, Contagem manual e Divergências</button>' +
+                            '<button type="button" onclick="selecionarNivelUsuario(' + solicitacao.id + ', \'NIVEL2\')">Nível 2 — Pesquisa e Contagem manual</button>' +
                             '<button type="button" onclick="selecionarNivelUsuario(' + solicitacao.id + ', \'ADMIN\')">Administrativo — acesso total</button>' +
                         '</div>' +
                     '</div>' +
