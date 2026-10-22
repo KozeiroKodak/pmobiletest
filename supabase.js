@@ -371,10 +371,21 @@ document.addEventListener(
         setInterval(
             function() {
                 verificarInternetPmobile(false);
-                avaliarSincronizacoesPmobile();
+
+                // A avaliação detalhada consulta IndexedDB e não precisa
+                // rodar enquanto o aplicativo está em segundo plano.
+                if (document.visibilityState !== "hidden") {
+                    avaliarSincronizacoesPmobile();
+                }
             },
             10000
         );
+
+        document.addEventListener("visibilitychange", function() {
+            if (document.visibilityState === "visible") {
+                avaliarSincronizacoesPmobile();
+            }
+        });
 
         avaliarSincronizacoesPmobile();
     }
