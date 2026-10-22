@@ -123,3 +123,6 @@
         flex-wrap: wrap;
     }
 }
+
+@media (max-width: 900px) { .reservas-cabecalho, .reserva-item { gap: 10px; } }
+@media (max-width: 700px) { .reservas-cabecalho { align-items: flex-start; flex-direction: column; } .reserva-item { grid-template-columns: 1fr; } .reservas-paginacao { flex-wrap: wrap; } }
