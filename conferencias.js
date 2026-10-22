@@ -1335,6 +1335,12 @@ async function sincronizarConferenciasAutomaticamente() {
             }
         }
 
+        // Em segundo plano, sincronizamos somente a fila pendente.
+        // A consulta do histórico e sua renderização ficam para o retorno ao app.
+        if (document.visibilityState === "hidden") {
+            return;
+        }
+
         const snapshot =
             await obterSnapshotConferenciasSupabase();
 
@@ -1423,6 +1429,12 @@ function iniciarVerificacaoAutomaticaConferencias() {
 // ============================================================
 // FUNÇÃO: pararVerificacaoAutomaticaConferencias()
 // ============================================================
+
+document.addEventListener("visibilitychange", function() {
+    if (document.visibilityState === "visible") {
+        sincronizarConferenciasAutomaticamente();
+    }
+});
 
 function pararVerificacaoAutomaticaConferencias() {
 
