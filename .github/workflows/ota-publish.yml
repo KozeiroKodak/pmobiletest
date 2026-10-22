@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "*.html"
+      - "*.css"
+      - "*.js"
+      - "implementacoes/**"
   schedule:
     - cron: '*/5 * * * *'
   workflow_dispatch:
@@ -37,6 +42,16 @@ jobs:
           if [[ "${GITHUB_ACTOR}" == "github-actions[bot]" ]]; then
             echo "publish=false" >> "$GITHUB_OUTPUT"
             echo "Execução originada pelo próprio pipeline: sem nova OTA."
+            exit 0
+          fi
+
+          current_main="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/main" --jq '.object.sha')"
+
+          if [[ "${current_main}" != "${GITHUB_SHA}" ]]; then
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            echo "Execução obsoleta: main já avançou."
+            echo "SHA da execução: ${GITHUB_SHA}"
+            echo "SHA atual da main: ${current_main}"
             exit 0
           fi
 
@@ -288,11 +303,20 @@ jobs:
           rm -rf build/ota "pmobile-web-${VERSION}.zip"
           mkdir -p build/ota
 
-          # Empacota somente arquivos rastreados pelo Git que pertencem ao
-          # web layer. Isso elimina lixo local e, principalmente, /www.
+          # Empacota somente extensões e diretórios explicitamente pertencentes
+          # ao web layer. Não basta excluir /www: SQL, scripts de teste e outros
+          # arquivos auxiliares também não devem entrar no OTA.
           while IFS= read -r -d '' file; do
             case "$file" in
-              www/*|android/*|.github/*|ota/*|build/*|node_modules/*|gradle/*|gradlew|gradlew.bat|package.json|package-lock.json)
+              *.html|*.css|*.js)
+                ;;
+              *)
+                continue
+                ;;
+            esac
+
+            case "$file" in
+              www/*|android/*|.github/*|ota/*|build/*|node_modules/*|gradle/*)
                 continue
                 ;;
             esac
@@ -300,6 +324,11 @@ jobs:
             mkdir -p "build/ota/$(dirname "$file")"
             cp "$file" "build/ota/$file"
           done < <(git ls-files -z)
+
+          if [[ ! -f build/ota/index.html || ! -f build/ota/script.js ]]; then
+            echo "ERRO: pacote OTA não contém os arquivos web essenciais."
+            exit 1
+          fi
 
           if [[ -e build/ota/www ]]; then
             echo "ERRO: /www entrou no pacote OTA."
