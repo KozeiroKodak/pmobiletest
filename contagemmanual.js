@@ -477,7 +477,9 @@ async function sincronizarContagensManuaisPendentes(limpezaEm = null) {
                 p_usuario: usuarioSessao.usuario,
                 p_credencial: credencialSessao,
                 p_id: item.id,
-                p_material_id: item.idSupabase || null,
+                // O ID local pode ficar obsoleto após uma nova importação do inventário.
+                // O código é a identidade funcional e permite ao RPC resolver o material atual.
+                p_material_id: null,
                 p_codigo_material: item.codigo || "",
                 p_descricao_material: item.descricao || "",
                 p_referencia_material: item.referencia || null,
