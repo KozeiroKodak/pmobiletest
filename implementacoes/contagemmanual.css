@@ -571,3 +571,84 @@
         transition: none;
     }
 }
+
+/* ============================================================
+   REWORK VISUAL CORRETIVO — CONTAGEM MANUAL MOBILE
+   ============================================================ */
+
+#contagemManual > .cabecalho-pagina + .painel {
+    max-width: 980px;
+    padding: 14px;
+    border-color: rgba(62, 207, 142, .18);
+    background:
+        linear-gradient(180deg, rgba(62, 207, 142, .045), transparent 62%),
+        var(--fundo-painel);
+}
+
+#contagemManual .linha-contagem-manual-busca {
+    display: grid;
+    grid-template-columns: 82px minmax(180px, 1fr) 96px 44px;
+    gap: 8px;
+    align-items: stretch;
+}
+
+#contagemManual .linha-contagem-manual-busca .acoes-contagem-manual-config {
+    width: 44px;
+    min-width: 44px;
+}
+
+#contagemManual .linha-contagem-manual-busca .botao-config-contagem-manual {
+    width: 44px;
+    min-width: 44px;
+    padding: 0;
+}
+
+#contagemManual #resultadoBuscaContagemManual {
+    margin-top: 10px;
+}
+
+@media (max-width: 700px) {
+    #contagemManual > .cabecalho-pagina + .painel {
+        padding: 10px;
+    }
+
+    #contagemManual .linha-contagem-manual-busca {
+        grid-template-columns: 76px minmax(0, 1fr) 44px;
+        gap: 7px;
+    }
+
+    #contagemManual .linha-contagem-manual-busca .seletor-contagem-manual,
+    #contagemManual .linha-contagem-manual-busca #campoContagemManual,
+    #contagemManual .linha-contagem-manual-busca .botao-config-contagem-manual {
+        min-height: 44px;
+    }
+
+    #contagemManual .linha-contagem-manual-busca .acoes-contagem-manual-config,
+    #contagemManual .linha-contagem-manual-busca .botao-config-contagem-manual {
+        width: 44px;
+        min-width: 44px;
+    }
+
+    #contagemManual .botao-buscar-contagem-manual {
+        grid-column: 1 / -1;
+        width: 100%;
+        min-height: 42px;
+    }
+
+    #contagemManual #resultadoBuscaContagemManual {
+        margin-top: 8px;
+    }
+}
+
+@media (max-width: 390px) {
+    #contagemManual .linha-contagem-manual-busca {
+        grid-template-columns: 70px minmax(0, 1fr) 42px;
+        gap: 6px;
+    }
+
+    #contagemManual .linha-contagem-manual-busca .acoes-contagem-manual-config,
+    #contagemManual .linha-contagem-manual-busca .botao-config-contagem-manual {
+        width: 42px;
+        min-width: 42px;
+    }
+}
