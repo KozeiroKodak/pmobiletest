@@ -256,12 +256,98 @@ function montarMapaMotoristasUI() {
             regioes.map(regiao =>
                 '<label>' +
                     '<span>' + escaparHtmlRastreio(regiao) + '</span>' +
-                    '<input type="text" data-regiao-motorista="' + escaparHtmlRastreio(regiao) + '"' +
+                    '<input type="text" readonly data-regiao-motorista="' + escaparHtmlRastreio(regiao) + '"' +
                         ' value="' + escaparHtmlRastreio(mapaMotoristasRastreio[regiao]) + '"' +
-                        ' placeholder="Nome do motorista">' +
+                        ' placeholder="Toque para informar o motorista"' +
+                        ' aria-label="Motorista da região ' + escaparHtmlRastreio(regiao) + '"' +
+                        ' onclick="abrirEditorMotoristaRastreio(this)">' +
                 '</label>'
             ).join("") +
         '</div>';
+}
+
+function fecharEditorMotoristaRastreio() {
+    const modal = document.getElementById("rastreioEditorMotorista");
+    if (!modal) return;
+    modal.classList.remove("aberto");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("rastreio-modal-aberto");
+}
+
+function salvarEditorMotoristaRastreio() {
+    const modal = document.getElementById("rastreioEditorMotorista");
+    const campo = document.getElementById("rastreioEditorMotoristaInput");
+    const alvo = modal?.dataset?.alvo ? document.querySelector('[data-regiao-motorista="' + CSS.escape(modal.dataset.alvo) + '"]') : null;
+    if (!modal || !campo || !alvo) return;
+
+    const nome = campo.value.trim();
+    mapaMotoristasRastreio[modal.dataset.alvo] = nome;
+    alvo.value = nome;
+    fecharEditorMotoristaRastreio();
+}
+
+function abrirEditorMotoristaRastreio(input) {
+    const regiao = input?.dataset?.regiaoMotorista;
+    if (!regiao) return;
+
+    let modal = document.getElementById("rastreioEditorMotorista");
+    if (!modal) {
+        modal = document.createElement("div");
+        modal.id = "rastreioEditorMotorista";
+        modal.className = "rastreio-editor-motorista";
+        modal.setAttribute("aria-hidden", "true");
+        modal.innerHTML =
+            '<div class="rastreio-editor-motorista-fundo" data-fechar-rastreio-editor></div>' +
+            '<div class="rastreio-editor-motorista-dialog" role="dialog" aria-modal="true" aria-labelledby="rastreioEditorMotoristaTitulo">' +
+                '<div class="rastreio-editor-motorista-cabecalho">' +
+                    '<div>' +
+                        '<span class="rastreio-editor-motorista-kicker">VÍNCULO OPERACIONAL</span>' +
+                        '<h3 id="rastreioEditorMotoristaTitulo">Motorista da região</h3>' +
+                        '<p id="rastreioEditorMotoristaRegiao"></p>' +
+                    '</div>' +
+                    '<button type="button" class="rastreio-editor-motorista-fechar" aria-label="Fechar">×</button>' +
+                '</div>' +
+                '<div class="rastreio-editor-motorista-campo">' +
+                    '<label for="rastreioEditorMotoristaInput">Nome do motorista</label>' +
+                    '<input id="rastreioEditorMotoristaInput" type="text" autocomplete="name" placeholder="Digite o nome completo">' +
+                    '<small>Esse nome será aplicado a todas as linhas desta região.</small>' +
+                '</div>' +
+                '<div class="rastreio-editor-motorista-acoes">' +
+                    '<button type="button" class="botao-secundario" data-cancelar-rastreio-editor>Cancelar</button>' +
+                    '<button type="button" class="botao-principal" data-salvar-rastreio-editor>Salvar motorista</button>' +
+                '</div>' +
+            '</div>';
+        document.body.appendChild(modal);
+
+        modal.addEventListener("click", evento => {
+            if (evento.target.matches("[data-fechar-rastreio-editor], [data-cancelar-rastreio-editor]")) {
+                fecharEditorMotoristaRastreio();
+            }
+        });
+        modal.querySelector(".rastreio-editor-motorista-fechar")
+            ?.addEventListener("click", fecharEditorMotoristaRastreio);
+        modal.querySelector("[data-salvar-rastreio-editor]")
+            ?.addEventListener("click", salvarEditorMotoristaRastreio);
+        modal.querySelector("#rastreioEditorMotoristaInput")
+            ?.addEventListener("keydown", evento => {
+                if (evento.key === "Enter") salvarEditorMotoristaRastreio();
+                if (evento.key === "Escape") fecharEditorMotoristaRastreio();
+            });
+    }
+
+    const campo = modal.querySelector("#rastreioEditorMotoristaInput");
+    const regiaoEl = modal.querySelector("#rastreioEditorMotoristaRegiao");
+    modal.dataset.alvo = regiao;
+    regiaoEl.textContent = regiao;
+    campo.value = mapaMotoristasRastreio[regiao] || "";
+    modal.classList.add("aberto");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.classList.add("rastreio-modal-aberto");
+
+    requestAnimationFrame(() => {
+        campo.focus();
+        campo.select();
+    });
 }
 
 function capturarMapaMotoristasUI() {
