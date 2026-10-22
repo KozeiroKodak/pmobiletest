@@ -343,8 +343,8 @@ function alternarSeletorPesquisaMaterial() {
 
     if (!menu || !botao) return;
 
-    const aberto = menu.style.display !== "none";
-    menu.style.display = aberto ? "none" : "block";
+    const aberto = menu.classList.contains("aberto");
+    menu.classList.toggle("aberto", !aberto);
     botao.setAttribute("aria-expanded", aberto ? "false" : "true");
 }
 
@@ -377,7 +377,7 @@ function selecionarTipoBuscaPesquisaMaterial(tipo) {
     botao.textContent = configuracao.nome;
     campo.placeholder = configuracao.placeholder;
 
-    menu.style.display = "none";
+    menu.classList.remove("aberto");
     botao.setAttribute("aria-expanded", "false");
     campo.focus();
 }
