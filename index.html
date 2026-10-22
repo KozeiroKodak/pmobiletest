@@ -489,6 +489,14 @@
                         Importar planilha
                     </button>
                 </div>
+                <label class="rastreio-importacao-sem-motorista">
+                    <input type="checkbox" id="rastreioImportarSemMotorista"
+                        onchange="alternarImportacaoSemMotoristaRastreio(this)">
+                    <span>
+                        <strong>Importar sem selecionar motorista</strong>
+                        <small>Não será necessário definir motorista por Nota Fiscal.</small>
+                    </span>
+                </label>
                 <div id="rastreioMapaMotoristas"></div>
                 <div id="rastreioImportacaoPrevia"></div>
                 <div id="statusImportacaoRastreio" class="rastreio-importacao-status" aria-live="polite"></div>
