@@ -307,3 +307,5 @@
         transition: none;
     }
 }
+
+@media (min-width:701px) and (max-width:1024px){.rastreio-grade{grid-template-columns:repeat(2,minmax(0,1fr))}.rastreio-grade span:nth-child(3n+1){padding-left:0}.rastreio-grade span:not(:nth-child(3n+1)){padding-left:12px}.rastreio-grade span:nth-child(2n+1){padding-left:0;border-left:0}.rastreio-grade span:nth-child(n+3){border-top:1px solid var(--borda)}}
