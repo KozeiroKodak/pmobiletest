@@ -1969,37 +1969,47 @@ function formatarDataSolicitacaoPmobile(valor) {
 }
 
 function alternarSeletorNivelUsuario(solicitacaoId) {
-    const menu = document.getElementById("menuNivelSolicitacao_" + solicitacaoId);
+    const seletor = document.getElementById("nivelSolicitacao_" + solicitacaoId);
     const botao = document.getElementById("botaoNivelSolicitacao_" + solicitacaoId);
-    if (!menu || !botao) return;
 
-    const aberto = menu.classList.contains("aberto");
-    menu.classList.toggle("aberto", !aberto);
-    botao.setAttribute("aria-expanded", aberto ? "false" : "true");
+    if (!seletor || !botao || typeof abrirPopupEscolha !== "function") return;
+
+    abrirPopupEscolha({
+        titulo: "Nível de acesso",
+        opcoes: [
+            {
+                value: "NIVEL2",
+                label: "Nível 2 — Pesquisa e Contagem manual",
+                selected: seletor.value === "NIVEL2"
+            },
+            {
+                value: "ADMIN",
+                label: "Administrativo",
+                selected: seletor.value === "ADMIN"
+            }
+        ],
+        aoEscolher: function(nivel) {
+            selecionarNivelUsuario(solicitacaoId, nivel);
+        }
+    });
+
+    botao.setAttribute("aria-expanded", "true");
 }
 
 function selecionarNivelUsuario(solicitacaoId, nivel) {
     const seletor = document.getElementById("nivelSolicitacao_" + solicitacaoId);
     const botao = document.getElementById("botaoNivelSolicitacao_" + solicitacaoId);
-    const menu = document.getElementById("menuNivelSolicitacao_" + solicitacaoId);
-    if (!seletor || !botao || !menu) return;
+
+    if (!seletor || !botao) return;
 
     seletor.value = nivel;
-    botao.textContent = nivel === "ADMIN" ? "Administrativo" : "Nível 2";
-    menu.classList.remove("aberto");
+    botao.textContent =
+        nivel === "ADMIN"
+            ? "Administrativo"
+            : "Nível 2";
+
     botao.setAttribute("aria-expanded", "false");
 }
-
-document.addEventListener("click", function(evento) {
-    document.querySelectorAll(".menu-nivel-usuario").forEach(function(menu) {
-        const wrapper = menu.closest(".seletor-nivel-usuario-wrapper");
-        if (wrapper && !wrapper.contains(evento.target)) {
-            menu.style.display = "none";
-            const botao = wrapper.querySelector(".seletor-nivel-usuario");
-            if (botao) botao.setAttribute("aria-expanded", "false");
-        }
-    });
-});
 
 async function aprovarCadastroUsuario(solicitacaoId) {
 
