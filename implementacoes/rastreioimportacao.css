@@ -707,3 +707,50 @@
         transition: none;
     }
 }
+
+
+/* Opção de importação sem vínculo de motorista */
+.rastreio-importacao-sem-motorista {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    width: fit-content;
+    max-width: 100%;
+    margin: 14px 0 4px;
+    padding: 11px 13px;
+    border: 1px solid var(--borda, rgba(127, 127, 127, .22));
+    border-radius: 12px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.rastreio-importacao-sem-motorista input {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    margin: 1px 0 0;
+    accent-color: var(--cor-principal, #2563eb);
+}
+
+.rastreio-importacao-sem-motorista span {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.rastreio-importacao-sem-motorista strong {
+    font-size: .92rem;
+}
+
+.rastreio-importacao-sem-motorista small {
+    font-size: .78rem;
+    opacity: .72;
+    line-height: 1.35;
+}
+
+@media (max-width: 700px) {
+    .rastreio-importacao-sem-motorista {
+        width: 100%;
+        box-sizing: border-box;
+    }
+}
