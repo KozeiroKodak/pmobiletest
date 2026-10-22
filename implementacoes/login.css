@@ -404,3 +404,5 @@
 
 
 @media (max-width: 700px) { .login-pmobile .login-pmobile-corpo { width: min(100%, 430px); padding-left: 14px; padding-right: 14px; } .login-pmobile .login-pmobile-form > input, .login-pmobile .login-senha-campo input { min-height: 44px; font-size: 16px; } }
+
+@media (max-width:700px){.login-pmobile .login-pmobile-corpo{width:min(100%,430px);padding-left:14px;padding-right:14px}.login-pmobile .login-pmobile-form>input,.login-pmobile .login-senha-campo input{min-height:44px;font-size:16px}}
