@@ -1,0 +1,21 @@
+/* PMOBILE — Importação */
+
+/* ============================================================
+   TESTE — IMPORTAR MATERIAIS
+   Configuração independente do botão.
+   ============================================================ */
+
+.botao-importar-materiais {
+    background: #ffffff;
+    color: #121212;
+}
+
+.botao-importar-materiais:hover {
+    background: #ffffff;
+    color: #121212;
+}
+
+.botao-importar-materiais:active {
+    background: #ededed;
+    color: #121212;
+}
