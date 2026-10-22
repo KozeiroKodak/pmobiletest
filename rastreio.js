@@ -82,3 +82,22 @@ function renderizarRastreio(item) {
 function escaparHtmlRastreio(valor) {
     return String(valor ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
 }
+
+
+function abrirPopupStatusRastreio() {
+    const seletor = document.getElementById("filtroStatusRastreio");
+    const botao = document.getElementById("botaoFiltroStatusRastreio");
+    if (!seletor || !botao || typeof abrirPopupEscolhaSelect !== "function") return;
+
+    abrirPopupEscolhaSelect({
+        idSelect: "filtroStatusRastreio",
+        titulo: "Filtrar por status",
+        aoEscolher: function(valor) {
+            const opcao = seletor.options[seletor.selectedIndex];
+            botao.textContent = opcao ? opcao.textContent : "Todos os status";
+            botao.setAttribute("aria-expanded", "false");
+            filtrarRastreios();
+        }
+    });
+    botao.setAttribute("aria-expanded", "true");
+}
