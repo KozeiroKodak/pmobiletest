@@ -292,7 +292,7 @@ function montarMapaMotoristasUI() {
                     '</span>' +
                     '<input type="text" readonly data-nf-motorista="' + escaparHtmlRastreio(chave) + '"' +
                         ' value="' + escaparHtmlRastreio(mapaMotoristasRastreio[chave]) + '"' +
-                        ' placeholder="Toque para informar o motorista"' +
+                        ' placeholder="Selecione o motorista"' +
                         ' aria-label="Motorista da Nota Fiscal ' + escaparHtmlRastreio(nota) + '"' +
                         ' onclick="abrirEditorMotoristaRastreio(this)">' +
                 '</label>';
