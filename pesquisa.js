@@ -21,37 +21,17 @@
 // =========================================
 
 
-// =========================================
-// VERIFICAÇÃO DO SUPABASE
-// =========================================
-
 function obterClienteSupabase() {
-
     if (!window.clienteSupabase) {
         throw new Error(
             "Cliente Supabase não foi inicializado."
         );
     }
-
     return window.clienteSupabase;
 }
 
 
-// =========================================
-// PROTEÇÃO PARA CONSULTA ILIKE
-// =========================================
-// Escapa caracteres especiais usados pelo ILIKE:
-//
-// % = qualquer sequência
-// _ = qualquer caractere
-// \ = caractere de escape
-//
-// Assim, uma pesquisa como "50%" procura
-// literalmente "50%" em vez de usar % como curinga.
-// =========================================
-
 function escaparBuscaILike(valor) {
-
     return String(valor)
         .replace(/\\/g, "\\\\")
         .replace(/%/g, "\\%")
@@ -59,123 +39,45 @@ function escaparBuscaILike(valor) {
 }
 
 
-// =========================================
-// LIMPAR ÁREA DE RESULTADO
-// =========================================
-
 function limparResultado(areaResultado) {
-
     if (!areaResultado) {
         return;
     }
-
     areaResultado.innerHTML = "";
 }
 
 
-// =========================================
-// VERIFICAR CONEXÃO
-// =========================================
-// navigator.onLine indica se o navegador
-// considera que existe conexão de rede.
-//
-// IMPORTANTE:
-// estar "online" não garante que o Supabase
-// esteja acessível.
-//
-// Por isso, no modo online tentamos primeiro
-// o Supabase. Se a consulta falhar, fazemos
-// fallback para o IndexedDB local.
-// =========================================
-
 function estaOnline() {
-
     return navigator.onLine === true;
-
 }
 
-
-// =========================================
-// PESQUISA LOCAL
-// =========================================
-// OBJETIVO:
-//
-// Pesquisar no IndexedDB utilizando os materiais
-// carregados pela camada dados.js.
-//
-// CAMPOS:
-//
-// - código
-// - descrição
-// - referência
-//
-// A pesquisa é feita sem diferenciar maiúsculas
-// e minúsculas.
-//
-// =========================================
 
 async function pesquisarLocalmente(
     campoPesquisa,
     buscaOriginal
 ) {
-
     try {
-
-        // =====================================
-        // GARANTIR QUE OS DADOS LOCAIS
-        // ESTEJAM CARREGADOS
-        // =====================================
-
-        if (
-            typeof carregarMateriais === "function"
-        ) {
-
+        if (typeof carregarMateriais === "function") {
             await carregarMateriais();
-
         }
 
-
-        // =====================================
-        // OBTER MATERIAIS LOCAIS
-        // =====================================
-
-        if (
-            typeof obterMateriaisLocais !== "function"
-        ) {
-
+        if (typeof obterMateriaisLocais !== "function") {
             throw new Error(
                 "Função obterMateriaisLocais() não encontrada."
             );
-
         }
-
 
         const materiaisLocais =
             await obterMateriaisLocais();
 
-
-        if (
-            !Array.isArray(materiaisLocais)
-        ) {
-
+        if (!Array.isArray(materiaisLocais)) {
             return [];
-
         }
-
-
-        // =====================================
-        // NORMALIZAR TEXTO DA PESQUISA
-        // =====================================
 
         const busca =
             String(buscaOriginal)
                 .trim()
                 .toLowerCase();
-
-
-        // =====================================
-        // FILTRAR RESULTADOS
-        // =====================================
 
         const resultados = [];
 
@@ -185,7 +87,6 @@ async function pesquisarLocalmente(
             resultados.length < 100;
             indice++
         ) {
-
             const material =
                 materiaisLocais[indice];
 
@@ -223,30 +124,20 @@ async function pesquisarLocalmente(
 
         return resultados;
 
-
     } catch (erro) {
-
         console.error(
             "Erro na pesquisa local:",
             erro
         );
-
         throw erro;
-
     }
-
 }
 
-
-// =========================================
-// EXIBIR RESULTADOS
-// =========================================
 
 function exibirResultadosPesquisa(
     resultados,
     areaResultado
 ) {
-
     if (!areaResultado) {
         return;
     }
@@ -283,7 +174,6 @@ function exibirResultadosPesquisa(
     fragmento.appendChild(cabecalho);
 
     resultados.forEach(function(material) {
-
         const bloco = document.createElement("article");
         bloco.className = "pesquisa-item";
 
@@ -333,9 +223,6 @@ function exibirResultadosPesquisa(
     areaResultado.appendChild(fragmento);
 }
 
-// =========================================
-// PESQUISA UNIFICADA
-// =========================================
 
 function alternarSeletorPesquisaMaterial() {
     const menu = document.getElementById("menuTipoBuscaPesquisaMaterial");
@@ -347,6 +234,7 @@ function alternarSeletorPesquisaMaterial() {
     menu.classList.toggle("aberto", !aberto);
     botao.setAttribute("aria-expanded", aberto ? "false" : "true");
 }
+
 
 function selecionarTipoBuscaPesquisaMaterial(tipo) {
     const seletor = document.getElementById("tipoBuscaPesquisaMaterial");
@@ -366,7 +254,7 @@ function selecionarTipoBuscaPesquisaMaterial(tipo) {
             placeholder: "Digite a referência"
         },
         descricao: {
-            nome: "DESC",
+            nome: "Descrição",
             placeholder: "Digite a descrição"
         }
     };
@@ -381,6 +269,7 @@ function selecionarTipoBuscaPesquisaMaterial(tipo) {
     botao.setAttribute("aria-expanded", "false");
     campo.focus();
 }
+
 
 async function pesquisarMaterialSelecionado() {
     const seletor = document.getElementById("tipoBuscaPesquisaMaterial");
@@ -456,16 +345,18 @@ async function pesquisarMaterialSelecionado() {
     }
 }
 
+
 document.addEventListener("click", function(evento) {
     const menu = document.getElementById("menuTipoBuscaPesquisaMaterial");
     const botao = document.getElementById("botaoTipoBuscaPesquisaMaterial");
     const wrapper = botao?.closest(".seletor-pesquisa-material-wrapper");
 
     if (menu && wrapper && !wrapper.contains(evento.target)) {
-        menu.style.display = "none";
+        menu.classList.remove("aberto");
         botao.setAttribute("aria-expanded", "false");
     }
 });
+
 
 // =========================================
 // FIM - PESQUISA
