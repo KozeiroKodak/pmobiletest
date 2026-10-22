@@ -778,3 +778,34 @@
         flex-wrap: wrap;
     }
 }
+
+
+/* ============================================================
+   LOCAIS — PAGINAÇÃO DE DERIVADOS
+   ============================================================ */
+
+.locais-paginacao-derivados {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid var(--borda);
+}
+
+.locais-paginacao-derivados span {
+    min-width: 90px;
+    color: var(--texto-secundario);
+    font-size: 12px;
+    text-align: center;
+}
+
+.locais-paginacao-derivados button {
+    min-width: 92px;
+}
+
+.locais-paginacao-derivados button:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+}
