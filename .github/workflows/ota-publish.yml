@@ -138,7 +138,7 @@ jobs:
 
           html = Path("index.html").read_text()
           refs = re.findall(
-              r'''(?:src|href)=["']((?!https?://|//)[^"']+.(?:js|css)(?:?v=[^"']*)?)["']''',
+              r'''(?:src|href)=["']((?!https?://|//)[^"']+\.(?:js|css)(?:\?v=[^"']*)?)["']''',
               html,
           )
 
