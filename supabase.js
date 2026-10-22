@@ -1647,6 +1647,75 @@ async function limparMateriaisSupabase() {
 
 }
 
+async function limparLocaisAlteradosSupabase() {
+    const confirmar = confirm(
+        "⚠️ ATENÇÃO!\n\n" +
+        "Os locais marcados como alterados serão limpos da aba Locais.\n\n" +
+        "As contagens manuais e os materiais do inventário NÃO serão apagados.\n\n" +
+        "Deseja continuar?"
+    );
+
+    if (!confirmar) return;
+
+    if (!navigator.onLine || typeof obterClienteSupabase !== "function") {
+        alert("❌ É necessário estar conectado ao Supabase para limpar os locais alterados.");
+        return;
+    }
+
+    try {
+        const cliente = obterClienteSupabase();
+        const usuarioSessao =
+            (typeof usuarioPmobileAtual !== "undefined" && usuarioPmobileAtual?.usuario)
+                ? usuarioPmobileAtual
+                : window.usuarioPmobileAtual;
+        const credencialSessao =
+            (typeof credencialPmobileAtual !== "undefined" && credencialPmobileAtual)
+                ? credencialPmobileAtual
+                : window.credencialPmobileAtual;
+
+        if (!usuarioSessao?.usuario || !credencialSessao) {
+            throw new Error("Sessão administrativa sem credencial disponível.");
+        }
+
+        const { data, error } = await cliente.rpc("limpar_locais_alterados", {
+            p_usuario: usuarioSessao.usuario,
+            p_credencial: credencialSessao
+        });
+
+        if (error) throw error;
+
+        const limpos = Number(data?.limpos || 0);
+
+        if (typeof atualizarContagensManuais === "function") {
+            await atualizarContagensManuais();
+        }
+
+        if (typeof carregarLocaisAlterados === "function") {
+            await carregarLocaisAlterados();
+        }
+
+        alert(
+            "✅ Locais alterados limpos com sucesso!\n\n" +
+            limpos.toLocaleString("pt-BR") +
+            " registro(s) retirado(s) da aba Locais."
+        );
+    } catch (erro) {
+        console.error("Erro ao limpar locais alterados:", erro);
+
+        const detalhe =
+            erro?.message ||
+            erro?.details ||
+            erro?.hint ||
+            String(erro);
+
+        alert(
+            "❌ Não foi possível limpar os locais alterados.\n\n" +
+            detalhe
+        );
+    }
+}
+
+
 async function limparRastreioSupabase() {
     const confirmar = confirm(
         "⚠️ ATENÇÃO!\n\n" +
