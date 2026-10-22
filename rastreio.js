@@ -75,7 +75,7 @@ function renderizarRastreio(item) {
         '<button type="button" class="rastreio-nfs rastreio-nfs-detalhes" onclick="abrirDetalhesRastreio(\'' + escaparAtributoRastreio(item.id) + '\')" aria-haspopup="dialog">' +
             '<span>NF: ' + escaparHtmlRastreio(item.notas_fiscais) + '</span><small>Ver detalhes</small>' +
         '</button>' +
-        '<div class="rastreio-grade">
+        '<div class="rastreio-grade">' +
           '<span><small>Transportadora</small>' + escaparHtmlRastreio(item.transportadora) + '</span>' +
           '<span><small>Motorista</small>' + escaparHtmlRastreio(item.motorista || "-") + '</span>' +
           '<span><small>Destino</small>' + escaparHtmlRastreio(item.regiao || "-") + '</span>' +
