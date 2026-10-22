@@ -116,3 +116,144 @@
     color: #ffffff;
 }
 
+
+
+/* Responsividade própria da Contagem manual */
+.linha-contagem-manual-busca {
+
+        flex-direction:
+            row;
+
+        align-items:
+            center;
+
+        flex-wrap:
+            nowrap;
+
+    }
+
+.linha-contagem-manual-busca .seletor-contagem-manual {
+        flex: 0 0 auto;
+    }
+
+.linha-contagem-manual-busca #campoContagemManual {
+        min-width: 0;
+        flex: 1 1 auto;
+    }
+
+.linha-contagem-manual-busca .botao-buscar-contagem-manual,
+    .linha-contagem-manual-busca .acoes-contagem-manual-config {
+        flex: 0 0 80px;
+    }
+
+.linha-contagem-manual-busca .acoes-contagem-manual-config .botao-config-contagem-manual {
+        width: 80px;
+    }
+
+/* ========================================================
+       MENU INTERNO DA PESQUISA - CELULAR
+       ========================================================
+
+       Mantemos o mesmo padrão compacto utilizado no desktop.
+
+       Diferente da versão anterior, os botões NÃO aumentam
+       para 58px no celular.
+
+       Isso mantém Código, Descrição e Referência visualmente
+       coerentes com os itens da sidebar.
+
+       ======================================================== */
+
+    .menu-pesquisa {
+
+        max-width:
+            none;
+
+        gap:
+            2px;
+
+    }
+
+.opcao-pesquisa {
+
+        min-height:
+            40px;
+
+        gap:
+            10px;
+
+        margin:
+            2px 0;
+
+        padding:
+            8px 10px;
+
+        font-size:
+            13px;
+
+    }
+
+.opcao-pesquisa-icone {
+
+        width:
+            22px;
+
+        font-size:
+            16px;
+
+    }
+
+.opcao-pesquisa-conteudo strong {
+
+        font-size:
+            13px;
+
+    }
+
+/* ========================================================
+       DESCRIÇÕES E SETAS NO CELULAR
+       ========================================================
+
+       Permanecem ocultas assim como no desktop.
+
+       ======================================================== */
+
+    .opcao-pesquisa-conteudo small,
+    .opcao-pesquisa-seta {
+
+        display:
+            none;
+
+    }
+
+/* ========================================================
+       CABEÇALHO DAS SUBTELAS - CELULAR
+       ======================================================== */
+
+    .cabecalho-subtela {
+
+        gap:
+            8px;
+
+    }
+
+.botao-voltar-pesquisa {
+
+        width:
+            34px;
+
+        height:
+            34px;
+
+        font-size:
+            20px;
+
+    }
+
+.subtela-pesquisa .painel {
+
+        max-width:
+            none;
+
+    }
+
