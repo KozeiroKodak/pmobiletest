@@ -259,13 +259,21 @@ function montarMapaMotoristasUI() {
 
     const indiceNotaFiscal = dadosImportacaoRastreio.modeloIndices?.notaFiscal ?? -1;
 
+    const indiceCliente = dadosImportacaoRastreio.modeloIndices?.cliente ?? -1;
     const nomesNotas = new Map();
+    const clientesNotas = new Map();
     dadosImportacaoRastreio.linhas.forEach(valores => {
         const nota = indiceNotaFiscal >= 0
             ? String(valores?.[indiceNotaFiscal] ?? "").trim()
             : "";
+        const cliente = indiceCliente >= 0
+            ? String(valores?.[indiceCliente] ?? "").trim()
+            : "";
         const chave = chaveNotaFiscalRastreio(nota);
-        if (chave && !nomesNotas.has(chave)) nomesNotas.set(chave, nota);
+        if (chave && !nomesNotas.has(chave)) {
+            nomesNotas.set(chave, nota);
+            clientesNotas.set(chave, cliente);
+        }
     });
 
     area.innerHTML =
@@ -276,8 +284,12 @@ function montarMapaMotoristasUI() {
         '<div class="rastreio-importacao-motoristas-lista">' +
             notasFiscais.map(chave => {
                 const nota = nomesNotas.get(chave) || chave;
+                const cliente = clientesNotas.get(chave) || "Cliente não informado";
                 return '<label>' +
-                    '<span>NF ' + escaparHtmlRastreio(nota) + '</span>' +
+                    '<span class="rastreio-importacao-nf-cliente">' +
+                        '<strong>' + escaparHtmlRastreio(nota) + '</strong>' +
+                        '<em> - ' + escaparHtmlRastreio(cliente) + '</em>' +
+                    '</span>' +
                     '<input type="text" readonly data-nf-motorista="' + escaparHtmlRastreio(chave) + '"' +
                         ' value="' + escaparHtmlRastreio(mapaMotoristasRastreio[chave]) + '"' +
                         ' placeholder="Toque para informar o motorista"' +
