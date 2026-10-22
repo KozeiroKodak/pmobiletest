@@ -341,3 +341,6 @@
     .solicitacao-facebook-nivel,
     .solicitacao-facebook-acoes { margin-left: 0; }
 }
+
+@media (max-width: 900px) { .solicitacoes-topo { flex-wrap: wrap; } .solicitacoes-filtros { overflow-x: auto; scrollbar-width: thin; } }
+@media (max-width: 700px) { .solicitacoes-topo { align-items: stretch; flex-direction: column; } .solicitacoes-voltar { align-self: flex-start; } .solicitacoes-filtros { display: grid; grid-template-columns: 1fr; } .solicitacao-facebook-card { grid-template-columns: 1fr; } .solicitacao-dados { min-width: 0; } }
