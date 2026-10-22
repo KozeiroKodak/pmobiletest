@@ -476,3 +476,69 @@
 }
 
 @media (min-width:701px) and (max-width:1024px){.rastreio-importacao-resumo{grid-template-columns:1.4fr repeat(3,minmax(70px,.6fr))}.rastreio-importacao-motoristas-lista{grid-template-columns:1fr}}
+
+/* ============================================================
+   TABELA — ADAPTAÇÃO REAL PARA TELAS ESTREITAS
+   No celular a tabela deixa de impor 680px de largura.
+   As seis colunas continuam presentes, mas passam a dividir
+   proporcionalmente o viewport e permitem quebra de texto.
+   ============================================================ */
+
+@media (max-width: 650px) {
+    .rastreio-importacao-tabela {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    .rastreio-importacao-tabela .cab,
+    .rastreio-importacao-tabela .linha {
+        width: 100%;
+        min-width: 0;
+        grid-template-columns:
+            minmax(32px, .38fr)
+            minmax(0, 1.35fr)
+            minmax(0, .95fr)
+            minmax(0, 1.05fr)
+            minmax(0, .8fr)
+            minmax(0, 1.05fr);
+    }
+
+    .rastreio-importacao-tabela .cab span,
+    .rastreio-importacao-tabela .linha span {
+        min-width: 0;
+        padding: 7px 5px;
+        overflow: visible;
+        text-overflow: clip;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .rastreio-importacao-tabela .cab span {
+        font-size: 8px;
+        line-height: 1.15;
+    }
+
+    .rastreio-importacao-tabela .linha {
+        font-size: 10px;
+        line-height: 1.25;
+    }
+}
+
+@media (max-width: 390px) {
+    .rastreio-importacao-tabela .cab span,
+    .rastreio-importacao-tabela .linha span {
+        padding-left: 4px;
+        padding-right: 4px;
+    }
+
+    .rastreio-importacao-tabela .cab span {
+        font-size: 7px;
+    }
+
+    .rastreio-importacao-tabela .linha {
+        font-size: 9px;
+    }
+}
+\n
