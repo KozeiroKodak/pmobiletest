@@ -1646,3 +1646,70 @@ async function limparMateriaisSupabase() {
     }
 
 }
+
+async function limparRastreioSupabase() {
+    const confirmar = confirm(
+        "⚠️ ATENÇÃO!\n\n" +
+        "Isso irá apagar TODOS os rastreios, o histórico do Rastreio " +
+        "e os registros de importação do Rastreio no Supabase.\n\n" +
+        "Esta ação não pode ser desfeita.\n\n" +
+        "Deseja continuar?"
+    );
+
+    if (!confirmar) return;
+
+    const usuarioSessao =
+        (typeof usuarioPmobileAtual !== "undefined" && usuarioPmobileAtual?.usuario)
+            ? usuarioPmobileAtual
+            : window.usuarioPmobileAtual;
+
+    const credencialSessao =
+        (typeof credencialPmobileAtual !== "undefined" && credencialPmobileAtual)
+            ? credencialPmobileAtual
+            : window.credencialPmobileAtual;
+
+    if (!usuarioSessao?.usuario || !credencialSessao) {
+        alert("❌ Sessão administrativa sem credencial disponível.");
+        return;
+    }
+
+    mostrarStatusSupabase("🟡 Limpando banco de Rastreio...");
+
+    try {
+        const { data, error } = await window.clienteSupabase.rpc(
+            "limpar_rastreio",
+            {
+                p_usuario: usuarioSessao.usuario,
+                p_credencial: credencialSessao
+            }
+        );
+
+        if (error) {
+            console.error("❌ Erro ao limpar Rastreio:", error);
+            mostrarStatusSupabase("🔴 Erro ao limpar o banco de Rastreio.");
+            alert("❌ Não foi possível limpar o banco de Rastreio.\n\n" + error.message);
+            return;
+        }
+
+        const resumo = Array.isArray(data) ? data[0] : data;
+        const totalRastreios = Number(resumo?.rastreios || 0);
+        const totalHistorico = Number(resumo?.historico || 0);
+        const totalImportacoes = Number(resumo?.importacoes || 0);
+
+        mostrarStatusSupabase("🟢 Banco de Rastreio limpo.");
+        alert(
+            "✅ Banco de Rastreio limpo com sucesso!\n\n" +
+            "Rastreios removidos: " + totalRastreios.toLocaleString("pt-BR") + "\n" +
+            "Histórico removido: " + totalHistorico.toLocaleString("pt-BR") + "\n" +
+            "Importações removidas: " + totalImportacoes.toLocaleString("pt-BR")
+        );
+
+        if (typeof carregarRastreios === "function") {
+            await carregarRastreios();
+        }
+    } catch (erro) {
+        console.error("❌ Erro inesperado ao limpar Rastreio:", erro);
+        mostrarStatusSupabase("🔴 Erro inesperado na limpeza do Rastreio.");
+        alert("❌ Ocorreu um erro inesperado ao limpar o banco de Rastreio.");
+    }
+}
