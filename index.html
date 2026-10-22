@@ -217,238 +217,9 @@
          SIDEBAR
          ===================================================== -->
 
-    <aside id="sistema">
+    
+    <aside id="sistema" aria-hidden="true"></aside>
 
-
-        <!-- =================================================
-             IDENTIFICAÇÃO
-             ================================================= -->
-
-        <div class="sidebar-topo">
-
-            <div class="sidebar-logo">
-                P
-            </div>
-
-            <div class="sidebar-titulo">
-
-                <strong>
-                    PMOBILE
-                </strong>
-
-                <span>
-                    Estoque
-                </span>
-
-            </div>
-
-        </div>
-
-
-        <!-- =================================================
-             NAVEGAÇÃO PRINCIPAL
-             ================================================= -->
-
-        <nav class="sidebar-menu">
-
-
-            <!-- PESQUISA -->
-
-            <button
-                id="menuPesquisa"
-                class="sidebar-item"
-                onclick="abrirPesquisa()"
-                title="Pesquisar material"
-            >
-
-                <span class="sidebar-icone">
-                    🔎
-                </span>
-
-                <span class="sidebar-texto">
-                    Pesquisar material
-                </span>
-
-            </button>
-
-
-            <!-- IMPORTAÇÃO -->
-
-            <button
-                id="menuImportacao"
-                class="sidebar-item"
-                onclick="abrirImportacao()"
-                title="Importar inventário"
-            >
-
-                <span class="sidebar-icone">
-                    📦
-                </span>
-
-                <span class="sidebar-texto">
-                    Importar inventário
-                </span>
-
-            </button>
-
-
-            <!-- IMPORTAÇÃO NF -->
-
-            <button
-                id="menuImportacaoNF"
-                class="sidebar-item"
-                onclick="abrirImportacaoNF()"
-                title="Importação NF"
-            >
-
-                <span class="sidebar-icone">
-                    🧾
-                </span>
-
-                <span class="sidebar-texto">
-                    Importação NF
-                </span>
-
-            </button>
-
-
-            <!-- RASTREIO -->
-
-            <button id="menuRastreio" class="sidebar-item" onclick="abrirRastreio()" title="Rastreio">
-                <span class="sidebar-icone">🚚</span>
-                <span class="sidebar-texto">Rastreio</span>
-            </button>
-
-
-            <!-- CONTAGEM MANUAL -->
-
-            <button
-                id="menuContagemManual"
-                class="sidebar-item"
-                onclick="abrirContagemManual()"
-                title="Contagem manual"
-            >
-                <span class="sidebar-icone">✍️</span>
-                <span class="sidebar-texto">Contagem manual</span>
-            </button>
-
-
-            <!-- CONFERÊNCIA -->
-
-            <button
-                id="menuConferencia"
-                class="sidebar-item"
-                onclick="abrirConferencia()"
-                title="Conferência"
-            >
-
-                <span class="sidebar-icone">
-                    📋
-                </span>
-
-                <span class="sidebar-texto">
-                    Conferência
-                </span>
-
-            </button>
-
-
-            <!-- CONFERÊNCIAS -->
-
-            <button
-                id="menuConferencias"
-                class="sidebar-item"
-                onclick="abrirConferencias()"
-                title="Conferências realizadas"
-            >
-
-                <span class="sidebar-icone">
-                    🗂️
-                </span>
-
-                <span class="sidebar-texto">
-                    Conferências
-                </span>
-
-            </button>
-            <!-- RESERVAS -->
-
-            <button
-                id="menuReservas"
-                class="sidebar-item"
-                onclick="abrirReservas()"
-                title="Reservas"
-            >
-                <span class="sidebar-icone">📦</span>
-                <span class="sidebar-texto">Reservas</span>
-            </button>
-
-
-            <!-- DIVERGÊNCIAS -->
-
-            <button
-                id="menuDivergencias"
-                class="sidebar-item"
-                onclick="abrirDivergencias()"
-                title="Divergências"
-            >
-
-                <span class="sidebar-icone">
-                    ⚠️
-                </span>
-
-                <span class="sidebar-texto">
-                    Divergências
-                </span>
-
-            </button>
-
-
-        </nav>
-
-
-        <!-- =================================================
-             PARTE INFERIOR DA SIDEBAR
-             ================================================= -->
-
-        <div class="sidebar-rodape">
-
-            <button
-                id="menuSair"
-                class="sidebar-item sidebar-item-sair"
-                onclick="sairPmobile()"
-                title="Sair"
-            >
-                <span class="sidebar-icone">
-                    🚪
-                </span>
-
-                <span class="sidebar-texto">
-                    Sair
-                </span>
-            </button>
-
-            <button
-                id="menuConfiguracoes"
-                class="sidebar-item"
-                onclick="abrirConfiguracoes()"
-                title="Configurações"
-            >
-
-                <span class="sidebar-icone">
-                    ⚙️
-                </span>
-
-                <span class="sidebar-texto">
-                    Configurações
-                </span>
-
-            </button>
-
-        </div>
-
-
-    </aside>
 
 
     <!-- =====================================================
@@ -467,19 +238,109 @@
             class="tela-sistema"
         >
 
-            <div class="cabecalho-pagina">
+            <div class="home-apps">
 
-                <p class="cabecalho-caminho">
-                    PMOBILE
-                </p>
+                <div class="home-apps-cabecalho">
+                    <div>
+                        <p class="home-apps-kicker">PMOBILE</p>
+                        <h1>Estoque</h1>
+                        <p>Selecione uma aplicação para continuar.</p>
+                    </div>
+                </div>
 
-                <h1>
-                    Estoque
-                </h1>
+                <div class="home-apps-grade" aria-label="Aplicações do PMOBILE">
 
-                <p>
-                    Selecione uma opção no menu lateral.
-                </p>
+                    <button id="menuPesquisa" class="home-app-card" onclick="abrirPesquisa()" title="Pesquisar material">
+                        <span class="home-app-icone" aria-hidden="true">🔎</span>
+                        <span class="home-app-conteudo">
+                            <strong>Pesquisa</strong>
+                            <small>Encontre materiais no estoque</small>
+                        </span>
+                        <span class="home-app-seta" aria-hidden="true">›</span>
+                    </button>
+
+                    <button id="menuContagemManual" class="home-app-card" onclick="abrirContagemManual()" title="Contagem manual">
+                        <span class="home-app-icone" aria-hidden="true">✍️</span>
+                        <span class="home-app-conteudo">
+                            <strong>Contagem manual</strong>
+                            <small>Registre contagens e alterações</small>
+                        </span>
+                        <span class="home-app-seta" aria-hidden="true">›</span>
+                    </button>
+
+                    <button id="menuRastreio" class="home-app-card" onclick="abrirRastreio()" title="Rastreio">
+                        <span class="home-app-icone" aria-hidden="true">🚚</span>
+                        <span class="home-app-conteudo">
+                            <strong>Rastreio</strong>
+                            <small>Acompanhe registros operacionais</small>
+                        </span>
+                        <span class="home-app-seta" aria-hidden="true">›</span>
+                    </button>
+
+                    <button id="menuImportacao" class="home-app-card" onclick="abrirImportacao()" title="Importar inventário">
+                        <span class="home-app-icone" aria-hidden="true">📦</span>
+                        <span class="home-app-conteudo">
+                            <strong>Importar estoque</strong>
+                            <small>Atualize a relação de materiais</small>
+                        </span>
+                        <span class="home-app-seta" aria-hidden="true">›</span>
+                    </button>
+
+                    <button id="menuImportacaoNF" class="home-app-card" onclick="abrirImportacaoNF()" title="Importação NF">
+                        <span class="home-app-icone" aria-hidden="true">🧾</span>
+                        <span class="home-app-conteudo">
+                            <strong>Importação NF</strong>
+                            <small>Importe documentos para análise</small>
+                        </span>
+                        <span class="home-app-seta" aria-hidden="true">›</span>
+                    </button>
+
+                    <button id="menuConferencia" class="home-app-card" onclick="abrirConferencia()" title="Conferência">
+                        <span class="home-app-icone" aria-hidden="true">📋</span>
+                        <span class="home-app-conteudo">
+                            <strong>Conferência</strong>
+                            <small>Faça a conferência do estoque</small>
+                        </span>
+                        <span class="home-app-seta" aria-hidden="true">›</span>
+                    </button>
+
+                    <button id="menuConferencias" class="home-app-card" onclick="abrirConferencias()" title="Conferências realizadas">
+                        <span class="home-app-icone" aria-hidden="true">🗂️</span>
+                        <span class="home-app-conteudo">
+                            <strong>Conferências</strong>
+                            <small>Consulte conferências realizadas</small>
+                        </span>
+                        <span class="home-app-seta" aria-hidden="true">›</span>
+                    </button>
+
+                    <button id="menuReservas" class="home-app-card" onclick="abrirReservas()" title="Reservas">
+                        <span class="home-app-icone" aria-hidden="true">📦</span>
+                        <span class="home-app-conteudo">
+                            <strong>Reservas</strong>
+                            <small>Consulte e acompanhe reservas</small>
+                        </span>
+                        <span class="home-app-seta" aria-hidden="true">›</span>
+                    </button>
+
+                    <button id="menuConfiguracoes" class="home-app-card home-app-card-config" onclick="abrirConfiguracoes()" title="Configurações">
+                        <span class="home-app-icone" aria-hidden="true">⚙️</span>
+                        <span class="home-app-conteudo">
+                            <strong>Configurações</strong>
+                            <small>Administração e ferramentas do sistema</small>
+                        </span>
+                        <span class="home-app-seta" aria-hidden="true">›</span>
+                    </button>
+
+                    <button id="menuSair" class="home-app-card home-app-card-sair" onclick="sairPmobile()" title="Sair">
+                        <span class="home-app-icone" aria-hidden="true">🚪</span>
+                        <span class="home-app-conteudo">
+                            <strong>Sair</strong>
+                            <small>Encerrar a sessão atual</small>
+                        </span>
+                        <span class="home-app-seta" aria-hidden="true">›</span>
+                    </button>
+
+                </div>
 
             </div>
 
