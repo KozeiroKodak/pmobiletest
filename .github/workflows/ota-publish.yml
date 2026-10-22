@@ -34,6 +34,12 @@ jobs:
         run: |
           set -euo pipefail
 
+          if [[ "${GITHUB_ACTOR}" == "github-actions[bot]" ]]; then
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            echo "Execução originada pelo próprio pipeline: sem nova OTA."
+            exit 0
+          fi
+
           if [[ "${GITHUB_EVENT_NAME}" != "schedule" ]]; then
             echo "publish=true" >> "$GITHUB_OUTPUT"
             echo "Evento ${GITHUB_EVENT_NAME}: publicação autorizada."
