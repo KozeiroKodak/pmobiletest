@@ -11,13 +11,65 @@
 .rastreio-importacao-colunas { display: flex; flex-wrap: wrap; gap: 6px; padding-bottom: 12px; }
 .rastreio-importacao-colunas span { padding: 4px 7px; border: 1px solid #333; border-radius: 5px; background: #1b1b1b; color: #aaa; font-size: 10px; }
 .rastreio-importacao-aviso { padding: 10px 12px; border: 1px solid #303030; border-radius: 8px; background: #191919; color: #aaa; font-size: 12px; }
-.rastreio-importacao-motoristas-titulo { display: grid; gap: 3px; margin: 4px 0 8px; }
-.rastreio-importacao-motoristas-titulo strong { color: #ddd; font-size: 13px; }
-.rastreio-importacao-motoristas-titulo span { color: #777; font-size: 11px; }
-.rastreio-importacao-motoristas-lista { display: grid; gap: 7px; }
-.rastreio-importacao-motoristas-lista label { display: grid; grid-template-columns: minmax(110px, .7fr) minmax(180px, 1.3fr); align-items: center; gap: 10px; }
-.rastreio-importacao-motoristas-lista label > span { color: #bbb; font-size: 12px; }
-.rastreio-importacao-motoristas-lista input { min-height: 38px; box-sizing: border-box; }
+.rastreio-importacao-motoristas-titulo {
+    display: grid;
+    gap: 4px;
+    margin: 8px 0 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #292929;
+}
+.rastreio-importacao-motoristas-titulo strong {
+    color: #e5e5e5;
+    font-size: 14px;
+    font-weight: 600;
+}
+.rastreio-importacao-motoristas-titulo span {
+    color: #777;
+    font-size: 11px;
+    line-height: 1.45;
+}
+.rastreio-importacao-motoristas-lista {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+.rastreio-importacao-motoristas-lista label {
+    display: grid;
+    grid-template-columns: minmax(90px, .65fr) minmax(150px, 1.35fr);
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    padding: 9px 10px;
+    border: 1px solid #292929;
+    border-radius: 8px;
+    background: #191919;
+}
+.rastreio-importacao-motoristas-lista label > span {
+    min-width: 0;
+    color: #bbb;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+.rastreio-importacao-motoristas-lista input {
+    width: 100%;
+    min-height: 38px;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 7px 10px;
+    border: 1px solid #353535;
+    border-radius: 7px;
+    background: #141414;
+    color: #eee;
+    font-size: 13px;
+}
+.rastreio-importacao-motoristas-lista input::placeholder { color: #666; }
+.rastreio-importacao-motoristas-lista input:focus {
+    outline: none;
+    border-color: var(--verde, #3ecf8e);
+    box-shadow: 0 0 0 2px rgba(62, 207, 142, .10);
+}
 .rastreio-importacao-previa-titulo { margin-top: 4px; color: #888; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
 .rastreio-importacao-tabela { overflow-x: auto; border: 1px solid #292929; border-radius: 8px; }
 .rastreio-importacao-tabela .cab,
@@ -28,7 +80,45 @@
 .rastreio-importacao-tabela .linha span { padding: 8px 10px; border-right: 1px solid #292929; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rastreio-importacao-tabela .linha { background: #1b1b1b; color: #ccc; font-size: 11px; border-bottom: 1px solid #292929; }
 .rastreio-importacao-tabela .linha:last-child { border-bottom: 0; }
+
+@media (max-width: 800px) {
+    .rastreio-importacao-motoristas-lista { grid-template-columns: 1fr; }
+}
+
 @media (max-width: 650px) {
-  .rastreio-importacao-motoristas-lista label { grid-template-columns: 1fr; gap: 5px; }
-  .rastreio-importacao-cabecalho { align-items: flex-start; flex-direction: column; }
+    .rastreio-importacao-cabecalho { align-items: flex-start; flex-direction: column; }
+
+    .rastreio-importacao-motoristas-titulo {
+        margin-top: 4px;
+        padding-bottom: 9px;
+    }
+
+    .rastreio-importacao-motoristas-lista { gap: 7px; }
+
+    .rastreio-importacao-motoristas-lista label {
+        grid-template-columns: 78px minmax(0, 1fr);
+        gap: 9px;
+        padding: 8px;
+    }
+
+    .rastreio-importacao-motoristas-lista label > span {
+        font-size: 10px;
+    }
+
+    .rastreio-importacao-motoristas-lista input {
+        min-height: 40px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 390px) {
+    .rastreio-importacao-motoristas-lista label {
+        grid-template-columns: 1fr;
+        gap: 5px;
+        padding: 9px;
+    }
+
+    .rastreio-importacao-motoristas-lista label > span {
+        font-size: 11px;
+    }
 }
