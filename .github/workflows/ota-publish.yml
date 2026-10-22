@@ -8,7 +8,7 @@ on:
       - "*.html"
       - "*.css"
       - "*.js"
-      - "implementacoes/**"
+      - "implementacoes/*.css"
   schedule:
     - cron: '*/5 * * * *'
   workflow_dispatch:
@@ -66,13 +66,25 @@ jobs:
           echo "HEAD avaliado pela execução: ${GITHUB_SHA}"
           echo "Último release OTA aponta para: ${latest_target:-<nenhum>}"
 
-          if [[ -z "${latest_target}" || "${latest_target}" != "${GITHUB_SHA}" ]]; then
-            echo "OTA pendente: publicação autorizada."
-            echo "publish=true" >> "$GITHUB_OUTPUT"
-          else
+          if [[ -z "${latest_target}" || "${latest_target}" == "${GITHUB_SHA}" ]]; then
             echo "Main já está publicada no último OTA."
             echo "publish=false" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
+
+          changed_files="$(gh api "repos/${GITHUB_REPOSITORY}/compare/${latest_target}...${GITHUB_SHA}" --jq '.files[]?.filename')"
+          web_changes="$(printf '%s\n' "${changed_files}" | grep -E '(^[^/]+\.(html|css|js)$|^implementacoes/[^/]+\.css$)' || true)"
+
+          if [[ -z "${web_changes}" ]]; then
+            echo "Nenhuma alteração do web layer desde o último OTA."
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Alterações web pendentes:"
+          printf '%s\n' "${web_changes}"
+          echo "OTA pendente: publicação autorizada."
+          echo "publish=true" >> "$GITHUB_OUTPUT"
 
   publish-ota:
     needs: ota-gate
