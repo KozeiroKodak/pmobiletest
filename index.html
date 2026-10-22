@@ -54,6 +54,7 @@
         <link rel="stylesheet" href="implementacoes/inicio.css?v=0.0.221">
     <link rel="stylesheet" href="implementacoes/home.css?v=0.0.221">
     <link rel="stylesheet" href="implementacoes/status.css?v=0.0.221">
+<link rel="stylesheet" href="implementacoes/popupescolha.css?v=0.0.221">
     <link rel="stylesheet" href="implementacoes/login.css?v=0.0.221">
     <link rel="stylesheet" href="implementacoes/contagemmanual.css?v=0.0.221">
     <link rel="stylesheet" href="implementacoes/configuracoes.css?v=0.0.221">
@@ -635,7 +636,7 @@
             <div class="painel rastreio-painel">
                 <div class="rastreio-filtros">
                     <input type="search" id="buscaRastreio" placeholder="Cliente, NF, motorista..." oninput="filtrarRastreios()">
-                    <select id="filtroStatusRastreio" onchange="filtrarRastreios()">
+                    <select id="filtroStatusRastreio" onchange="filtrarRastreios()" aria-hidden="true" tabindex="-1">
                         <option value="">Todos os status</option>
                         <option value="PENDENTE">Pendente</option>
                         <option value="EM_TRANSPORTE">Em transporte</option>
@@ -643,6 +644,7 @@
                         <option value="ATRASADO">Atrasado</option>
                         <option value="CANCELADO">Cancelado</option>
                     </select>
+                    <button type="button" id="botaoFiltroStatusRastreio" class="popup-escolha-trigger" onclick="abrirPopupStatusRastreio()" aria-haspopup="dialog" aria-expanded="false">Todos os status</button>
                 </div>
                 <div id="statusRastreio" class="rastreio-status" aria-live="polite"></div>
                 <div id="listaRastreios" class="rastreio-lista"></div>
@@ -694,22 +696,12 @@
 
                         <button
                             type="button"
-                            class="seletor-contagem-manual"
+                            class="seletor-contagem-manual popup-escolha-trigger"
                             id="botaoTipoBuscaPesquisaMaterial"
-                            onclick="alternarSeletorPesquisaMaterial()"
-                            aria-haspopup="listbox"
+                            onclick="abrirPopupPesquisaMaterial()"
+                            aria-haspopup="dialog"
                             aria-expanded="false"
                         >CÓD</button>
-
-                        <div
-                            id="menuTipoBuscaPesquisaMaterial"
-                            class="menu-tipo-busca-contagem-manual"
-                            role="listbox"
-                        >
-                            <button type="button" onclick="selecionarTipoBuscaPesquisaMaterial('codigo')">Código</button>
-                            <button type="button" onclick="selecionarTipoBuscaPesquisaMaterial('referencia')">Referência</button>
-                            <button type="button" onclick="selecionarTipoBuscaPesquisaMaterial('descricao')">Descrição</button>
-                        </div>
 
                     </div>
 
@@ -1363,6 +1355,7 @@
      ========================================================= -->
 
 <script src="dados.js?v=0.0.221"></script>
+<script src="popupescolha.js?v=0.0.221"></script>
 
 
 <!-- =========================================================
