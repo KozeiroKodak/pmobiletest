@@ -117,3 +117,5 @@
         grid-template-columns: minmax(105px, auto) minmax(0, 1fr);
     }
 }
+
+@media (max-width: 700px) { #resultadoConferencias .registro-conferencia { overflow-wrap: anywhere; } #conferencias .botao-perigo { width: 100%; } }
