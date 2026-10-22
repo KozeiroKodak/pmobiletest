@@ -628,7 +628,9 @@ function iniciarMonitoramentoContagensManuais() {
     }
 
     intervaloSincronizacaoContagensManuais = setInterval(function() {
-        atualizarContagensManuais();
+        if (document.visibilityState !== "hidden") {
+            atualizarContagensManuais();
+        }
     }, 10000);
 }
 
