@@ -162,7 +162,7 @@
 .rastreio-importacao-tabela .linha {
     display: grid;
     grid-template-columns: 56px minmax(150px, 1.4fr) minmax(100px, 1fr) minmax(100px, 1fr) 80px minmax(120px, 1fr);
-    min-width: 680px;
+    min-width: 0;
 }
 
 .rastreio-importacao-tabela .cab { background: #181818; border-bottom: 1px solid #292929; }
@@ -184,7 +184,7 @@
     .rastreio-importacao-resumo { grid-template-columns: 1fr 1fr; }
 }
 
-@media (max-width: 650px) {
+@media (max-width: 700px) {
     .rastreio-importacao-painel { gap: 12px; }
     .rastreio-importacao-cabecalho { align-items: stretch; flex-direction: column; gap: 10px; }
     .rastreio-importacao-cabecalho .botao-principal { width: 100%; }
@@ -197,7 +197,6 @@
 
     .rastreio-importacao-resumo strong { grid-column: 1 / -1; }
 
-    .rastreio-importacao-colunas { max-height: 64px; }
 
     .rastreio-importacao-motoristas-titulo {
         margin-top: 0;
@@ -449,7 +448,7 @@
     min-height: 0;
 }
 
-@media (max-width: 650px) {
+@media (max-width: 700px) {
     .rastreio-importacao-cabecalho .botao-principal { min-width: 0; }
 }
 
@@ -466,7 +465,7 @@
    proporcionalmente o viewport e permitem quebra de texto.
    ============================================================ */
 
-@media (max-width: 650px) {
+@media (max-width: 700px) {
     .rastreio-importacao-tabela {
         width: 100%;
         max-width: 100%;
@@ -524,3 +523,10 @@
     }
 }
 \n
+
+@media (min-width: 701px) {
+    .rastreio-importacao-tabela .cab,
+    .rastreio-importacao-tabela .linha {
+        min-width: 680px;
+    }
+}
