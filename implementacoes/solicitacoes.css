@@ -1,0 +1,337 @@
+/* PMOBILE — Solicitações */
+
+/* ============================================================
+   TELA DE SOLICITAÇÕES
+   Referência de fluxo: cartões de solicitações do Facebook.
+   Identidade visual continua sendo a do PMOBILE.
+   ============================================================ */
+
+.painel-solicitacoes {
+    padding: 0;
+    overflow: hidden;
+}
+
+.solicitacoes-topo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--borda-painel, #343434);
+}
+
+.solicitacoes-voltar {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: inherit;
+    font-size: 30px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.solicitacoes-voltar:hover {
+    background: var(--fundo-hover);
+}
+
+.solicitacoes-titulo {
+    min-width: 0;
+}
+
+.solicitacoes-titulo .cabecalho-caminho {
+    margin: 0 0 2px;
+    font-size: 11px;
+    opacity: .6;
+}
+
+.solicitacoes-titulo h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.solicitacoes-filtros {
+    display: flex;
+    gap: 4px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--borda-painel, #343434);
+    overflow-x: auto;
+}
+
+.solicitacao-filtro {
+    min-height: 38px;
+    padding: 7px 13px;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--texto-secundario);
+    font: inherit;
+    font-size: 13px;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.solicitacao-filtro:hover {
+    background: var(--fundo-hover);
+    color: #fff;
+}
+
+.solicitacao-filtro.ativo {
+    background: var(--fundo-ativo);
+    color: #fff;
+    font-weight: 600;
+}
+
+.solicitacao-filtro span {
+    display: inline-flex;
+    min-width: 20px;
+    height: 20px;
+    align-items: center;
+    justify-content: center;
+    margin-left: 5px;
+    padding: 0 5px;
+    border-radius: 10px;
+    background: rgba(255,255,255,.12);
+    font-size: 11px;
+}
+
+.lista-solicitacoes {
+    padding: 6px 0;
+}
+
+.solicitacao-facebook-card {
+    padding: 16px;
+    border-bottom: 1px solid var(--borda-painel, #343434);
+    transition: background .12s ease;
+}
+
+.solicitacao-facebook-card:hover {
+    background: rgba(255,255,255,.025);
+}
+
+.solicitacao-facebook-corpo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.solicitacao-avatar {
+    width: 48px;
+    height: 48px;
+    flex: 0 0 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #3a3a3a;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.solicitacao-dados {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.solicitacao-dados strong {
+    color: var(--texto-principal, #fff);
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.solicitacao-dados span {
+    color: var(--texto-secundario);
+    font-size: 13px;
+}
+
+.solicitacao-dados small {
+    margin-top: 2px;
+    color: var(--texto-secundario);
+    font-size: 11px;
+}
+
+.solicitacao-facebook-nivel {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 14px 0 0 60px;
+}
+
+.solicitacao-facebook-nivel label {
+    color: var(--texto-secundario);
+    font-size: 11px;
+}
+
+.solicitacao-facebook-nivel .seletor-nivel-usuario {
+    box-sizing: border-box;
+    min-height: 42px;
+    border: 1px solid var(--borda-painel, #444);
+    background: var(--fundo-painel, #222);
+    color: var(--texto-principal, #fff);
+    font-size: 13px;
+}
+
+.solicitacao-facebook-acoes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin: 12px 0 0 60px;
+}
+
+.solicitacao-facebook-acoes button {
+    min-height: 42px;
+    border-radius: 6px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.botao-aprovar-solicitacao {
+    border: 1px solid #1877f2;
+    background: #1877f2;
+    color: #fff;
+}
+
+.botao-aprovar-solicitacao:hover {
+    background: #166fe5;
+}
+
+.botao-recusar-solicitacao {
+    border: 1px solid #4b4b4b;
+    background: transparent;
+    color: var(--texto-principal, #fff);
+}
+
+.botao-recusar-solicitacao:hover {
+    background: var(--fundo-hover);
+}
+
+.solicitacao-vazia,
+.solicitacao-carregando {
+    padding: 42px 24px;
+    text-align: center;
+    color: var(--texto-secundario);
+}
+
+.solicitacao-vazia-icone {
+    width: 46px;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+    border-radius: 50%;
+    background: var(--fundo-hover);
+    color: var(--texto-principal, #fff);
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.solicitacao-vazia strong {
+    display: block;
+    color: var(--texto-principal, #fff);
+    font-size: 14px;
+}
+
+.solicitacao-vazia p {
+    margin: 7px 0 0;
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.solicitacao-vazia-erro .solicitacao-vazia-icone {
+    color: #ff8a8a;
+}
+
+@media (max-width: 600px) {
+    .solicitacao-facebook-nivel,
+    .solicitacao-facebook-acoes {
+        margin-left: 0;
+    }
+
+    .solicitacao-facebook-card {
+        padding: 14px 12px;
+    }
+}
+
+/* ============================================================
+   GERENCIAMENTO DE USUÁRIOS — SELETOR DE NÍVEL INTEGRADO
+   Mesmo padrão visual do seletor da Contagem manual.
+   ============================================================ */
+
+.seletor-nivel-usuario-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.seletor-nivel-usuario-nativo {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.solicitacao-facebook-nivel .seletor-nivel-usuario {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 40px;
+    padding: 8px 10px;
+    border: 0;
+    border-radius: 6px;
+    outline: none;
+    background: transparent;
+    color: var(--texto-secundario);
+    font-family: inherit;
+    font-size: 13px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.solicitacao-facebook-nivel .seletor-nivel-usuario:hover {
+    background: var(--fundo-hover);
+    color: #ffffff;
+}
+
+.menu-nivel-usuario {
+    position: absolute;
+    z-index: 100;
+    top: calc(100% + 4px);
+    left: 0;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 4px;
+    border-radius: 6px;
+    background: var(--fundo-painel);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+}
+
+.menu-nivel-usuario button {
+    display: block;
+    width: 100%;
+    padding: 8px 10px;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--texto-secundario);
+    text-align: left;
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.menu-nivel-usuario button:hover {
+    background: var(--fundo-hover);
+    color: #ffffff;
+}
+
