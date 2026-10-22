@@ -249,6 +249,8 @@ function detectarModeloRastreio(colunas) {
         volume: achar("Volume", "Volumes"),
         peso: achar("Peso"),
         valorNF: achar("Valor NF", "Valor"),
+        valorFreteEmbutido: achar("Valor Frete Embutido", "Frete Embutido", "Frete Imbutido", "Valor Frete Imbutido"),
+        valorFrete: achar("Valor Frete", "Frete"),
         dataEnvio: achar("Data Envio", "Data de Envio"),
         turno: achar("Turno Envio", "Turno")
     };
@@ -716,6 +718,8 @@ function prepararLinhasRastreioParaEnvio(inicio = 0, fim = null, coletarAvisos =
             volume: normalizarNumeroRastreio(valor("volume")),
             peso: normalizarNumeroRastreio(valor("peso")),
             valor_nf: normalizarNumeroRastreio(valor("valorNF")),
+            valor_frete_embutido: normalizarNumeroRastreio(valor("valorFreteEmbutido")),
+            valor_frete: normalizarNumeroRastreio(valor("valorFrete")),
             data_envio: dataEnvio,
             turno,
             previsao_entrega: calcularPrevisaoRastreio(dataEnvio, turno),
