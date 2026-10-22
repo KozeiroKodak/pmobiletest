@@ -320,6 +320,33 @@ function calcularPrevisaoRastreio(dataISO, turno) {
     return dataISO + (turno === "MANHA" ? "T12:00:00-03:00" : "T18:00:00-03:00");
 }
 
+function linhaPossuiDadosRastreio(valores) {
+    if (!Array.isArray(valores)) return false;
+
+    const { modeloIndices } = dadosImportacaoRastreio || {};
+    if (!modeloIndices) return false;
+
+    const chavesOperacionais = [
+        "cliente",
+        "notaFiscal",
+        "transportadora",
+        "motorista",
+        "regiao",
+        "volume",
+        "peso",
+        "valorNF",
+        "dataEnvio",
+        "turno"
+    ];
+
+    return chavesOperacionais.some(chave => {
+        const indice = modeloIndices[chave];
+        if (indice == null || indice < 0) return false;
+        const valor = valores[indice];
+        return valor != null && String(valor).trim() !== "";
+    });
+}
+
 function validarLinhasObrigatoriasRastreio() {
     if (!dadosImportacaoRastreio) {
         return {
@@ -336,6 +363,11 @@ function validarLinhasObrigatoriasRastreio() {
 
     for (let indice = 0; indice < linhas.length; indice++) {
         const d = linhas[indice];
+
+        // Planilhas exportadas podem conter linhas estruturais, fórmulas
+        // vazias ou resíduos fora das colunas operacionais. Elas não são
+        // rastreios e não devem ser tratadas como registros inválidos.
+        if (!linhaPossuiDadosRastreio(d)) continue;
 
         const valor = chave => {
             const indiceColuna = modeloIndices[chave];
@@ -383,6 +415,10 @@ function prepararLinhasRastreioParaEnvio(inicio = 0, fim = null, coletarAvisos =
 
     for (let indice = inicio; indice < limite; indice++) {
         const d = linhas[indice];
+
+        // Ignora linhas sem qualquer dado nas colunas reconhecidas do Rastreio.
+        if (!linhaPossuiDadosRastreio(d)) continue;
+
         const valor = chave => {
             const indice = modeloIndices[chave];
             return indice >= 0 ? d[indice] : null;
