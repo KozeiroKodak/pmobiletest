@@ -250,7 +250,7 @@ public class OtaManager {
         if (activeVersion == null || activeVersion.trim().isEmpty()
                 || activeVersion.contains("/") || activeVersion.contains("\\")
                 || activeVersion.equals(".") || activeVersion.equals("..")
-                || !activeVersion.equals(getCandidateVersion()) || !isCandidateHealthy()) {
+                || !isCandidateHealthy()) {
             return null;
         }
 
