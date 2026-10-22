@@ -754,3 +754,87 @@
         box-sizing: border-box;
     }
 }
+
+
+/* ============================================================
+   PLANILHA COMPARTILHADA ONLINE
+   ============================================================ */
+
+.rastreio-importacao-divisor {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 2px 0 0;
+    color: var(--texto-secundario);
+    font-size: .78rem;
+}
+
+.rastreio-importacao-divisor::before,
+.rastreio-importacao-divisor::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--borda, rgba(127, 127, 127, .2));
+}
+
+.rastreio-importacao-online {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin: 0;
+}
+
+.rastreio-importacao-online > label {
+    font-size: .88rem;
+    font-weight: 700;
+}
+
+.rastreio-importacao-online-linha {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    align-items: stretch;
+}
+
+.rastreio-importacao-online-linha input {
+    min-width: 0;
+    min-height: 44px;
+    padding: 10px 12px;
+    border: 1px solid var(--borda, rgba(127, 127, 127, .22));
+    border-radius: 10px;
+    background: var(--fundo-input, transparent);
+    color: inherit;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+.rastreio-importacao-online-linha input:focus {
+    outline: none;
+    border-color: var(--cor-principal, #2563eb);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--cor-principal, #2563eb) 14%, transparent);
+}
+
+.rastreio-importacao-online-linha .botao-aba {
+    min-height: 44px;
+    white-space: nowrap;
+}
+
+.rastreio-importacao-online > small {
+    color: var(--texto-secundario);
+    font-size: .76rem;
+    line-height: 1.4;
+}
+
+@media (max-width: 700px) {
+    .rastreio-importacao-online-linha {
+        grid-template-columns: 1fr;
+    }
+
+    .rastreio-importacao-online-linha .botao-aba {
+        width: 100%;
+    }
+
+    .rastreio-importacao-online > small {
+        font-size: .72rem;
+    }
+}
