@@ -167,3 +167,5 @@
 }
 
 @media (max-width: 700px) { #conferencia .painel { overflow: hidden; } #resultadoConferencia > div { overflow-wrap: anywhere; } #resultadoConferencia > input, #resultadoConferencia > input + button { width: 100%; max-width: none; } }
+
+@media (max-width:700px){#conferencia .painel{overflow:hidden}#resultadoConferencia>div{overflow-wrap:anywhere}#resultadoConferencia>input,#resultadoConferencia>input+button{width:100%;max-width:none}}
