@@ -1414,6 +1414,11 @@ async function enviarSolicitacaoCadastro(event) {
 
 function abrirPesquisa() {
 
+    if (!window.usuarioPmobileAtual || !["ADMIN", "NIVEL2"].includes(window.usuarioPmobileAtual.nivel)) {
+        alert("Acesso negado.");
+        return;
+    }
+
     mostrarTelaSistema(
         "pesquisa",
         "menuPesquisa"
@@ -1455,6 +1460,11 @@ function voltarMenu() {
 
 function abrirContagemManual() {
 
+    if (!window.usuarioPmobileAtual || !["ADMIN", "NIVEL2"].includes(window.usuarioPmobileAtual.nivel)) {
+        alert("Acesso negado.");
+        return;
+    }
+
     mostrarTelaSistema(
         "contagemManual",
         "menuContagemManual"
@@ -1485,6 +1495,11 @@ function abrirContagemManual() {
 // ============================================================
 
 function abrirConferencia() {
+
+    if (!window.usuarioPmobileAtual || window.usuarioPmobileAtual.nivel !== "ADMIN") {
+        alert("Acesso administrativo negado.");
+        return;
+    }
 
     mostrarTelaSistema(
         "conferencia",
@@ -1523,6 +1538,11 @@ function voltarMenuConferencia() {
 // ============================================================
 
 function abrirConferencias() {
+
+    if (!window.usuarioPmobileAtual || window.usuarioPmobileAtual.nivel !== "ADMIN") {
+        alert("Acesso administrativo negado.");
+        return;
+    }
 
     mostrarTelaSistema(
         "conferencias",
@@ -1637,6 +1657,11 @@ function voltarMenuDivergencias() {
 // ============================================================
 
 function abrirImportacao() {
+
+    if (!window.usuarioPmobileAtual || window.usuarioPmobileAtual.nivel !== "ADMIN") {
+        alert("Acesso administrativo negado.");
+        return;
+    }
 
     mostrarTelaSistema(
         "importacao",
