@@ -1782,6 +1782,7 @@ function atualizarVisibilidadeConfiguracoes() {
         menuRastreio: isAdmin || isNivel2,
         menuConferencia: isAdmin,
         menuConferencias: isAdmin,
+        menuReservas: isAdmin || isNivel2,
         menuPesquisa: isAdmin || isNivel2,
         menuContagemManual: isAdmin || isNivel2,
         menuDivergencias: isAdmin
