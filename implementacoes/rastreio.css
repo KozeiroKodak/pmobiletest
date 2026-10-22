@@ -1,38 +1,54 @@
-/* PMOBILE - Rastreio */
+/* PMOBILE — Rastreio */
+
+/* ============================================================
+   LISTAGEM E FILTROS
+   ============================================================ */
+
 .rastreio-painel {
     display: grid;
-    gap: 14px;
+    gap: 16px;
 }
 
 .rastreio-filtros {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(170px, 220px);
+    grid-template-columns: minmax(0, 1fr) minmax(180px, 230px);
     gap: 10px;
 }
 
 .rastreio-filtros input,
 .rastreio-filtros select {
     width: 100%;
+    min-width: 0;
     min-height: 42px;
     box-sizing: border-box;
-    border: 1px solid var(--borda, #d8dde5);
+    border: 1px solid var(--borda);
     border-radius: 8px;
     padding: 0 12px;
-    background: var(--fundo-painel, #fff);
-    color: inherit;
-    transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease;
+    background: var(--fundo);
+    color: var(--texto);
+    font: inherit;
+    transition: border-color .16s ease, box-shadow .16s ease, background-color .16s ease;
+}
+
+.rastreio-filtros input::placeholder {
+    color: var(--texto-fraco);
+}
+
+.rastreio-filtros input:hover,
+.rastreio-filtros select:hover {
+    border-color: var(--borda-clara);
 }
 
 .rastreio-filtros input:focus,
 .rastreio-filtros select:focus {
     outline: none;
-    border-color: var(--cor-primaria, #2563eb);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--cor-primaria, #2563eb) 14%, transparent);
+    border-color: var(--verde);
+    box-shadow: 0 0 0 3px rgba(62, 207, 142, .10);
 }
 
 .rastreio-status {
     min-height: 18px;
-    color: var(--texto-secundario, #888);
+    color: var(--texto-secundario);
     font-size: 12px;
     line-height: 1.4;
 }
@@ -42,54 +58,87 @@
     gap: 10px;
 }
 
+/* ============================================================
+   CARD DE RASTREIO
+   ============================================================ */
+
 .rastreio-card {
     min-width: 0;
     box-sizing: border-box;
-    border: 1px solid var(--borda, #d8dde5);
+    overflow: hidden;
+    border: 1px solid var(--borda);
     border-radius: 10px;
-    padding: 14px;
-    background: var(--fundo-painel, #fff);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, .04);
-    transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+    padding: 14px 15px;
+    background: var(--fundo-painel);
+    transition: border-color .16s ease, background-color .16s ease, box-shadow .16s ease;
 }
 
 .rastreio-card:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 5px 16px rgba(0, 0, 0, .07);
+    border-color: var(--borda-clara);
+    background: #1b1b1b;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, .18);
+}
+
+.rastreio-card[data-status="ENTREGUE"] {
+    border-left: 3px solid var(--verde);
+}
+
+.rastreio-card[data-status="ATRASADO"] {
+    border-left: 3px solid #e6a23c;
+}
+
+.rastreio-card[data-status="CANCELADO"] {
+    border-left: 3px solid #e05d5d;
+}
+
+.rastreio-card[data-status="EM_TRANSPORTE"] {
+    border-left: 3px solid #5ea7ff;
 }
 
 .rastreio-card-topo {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 10px;
-    padding-bottom: 9px;
-    border-bottom: 1px solid color-mix(in srgb, var(--borda, #d8dde5) 70%, transparent);
+    gap: 12px;
+    min-width: 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--borda);
 }
 
 .rastreio-card-topo strong {
     min-width: 0;
-    font-size: 1rem;
-    line-height: 1.3;
+    color: var(--texto);
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.35;
     overflow-wrap: anywhere;
 }
 
 .rastreio-etiqueta {
     flex: 0 0 auto;
-    max-width: 45%;
-    font-size: 10px;
-    font-weight: 700;
-    line-height: 1.2;
-    letter-spacing: .03em;
-    text-align: center;
+    max-width: 48%;
+    padding: 4px 8px;
     border: 1px solid currentColor;
     border-radius: 999px;
-    padding: 5px 8px;
+    color: var(--texto-secundario);
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: .05em;
+    text-align: center;
+    text-transform: uppercase;
     overflow-wrap: anywhere;
 }
 
+.rastreio-card[data-status="ENTREGUE"] .rastreio-etiqueta { color: var(--verde); }
+.rastreio-card[data-status="ATRASADO"] .rastreio-etiqueta { color: #e6a23c; }
+.rastreio-card[data-status="CANCELADO"] .rastreio-etiqueta { color: #e05d5d; }
+.rastreio-card[data-status="EM_TRANSPORTE"] .rastreio-etiqueta { color: #5ea7ff; }
+
 .rastreio-nfs {
-    margin-top: 9px;
+    margin-top: 10px;
+    color: var(--texto);
+    font-size: 13px;
     font-weight: 600;
     line-height: 1.4;
     overflow-wrap: anywhere;
@@ -98,39 +147,67 @@
 .rastreio-grade {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px 14px;
+    gap: 0;
     margin-top: 13px;
 }
 
 .rastreio-grade span {
     min-width: 0;
-    overflow-wrap: anywhere;
+    padding: 8px 14px 8px 0;
+    color: var(--texto);
     line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.rastreio-grade span:not(:nth-child(3n + 1)) {
+    padding-left: 14px;
+    border-left: 1px solid var(--borda);
 }
 
 .rastreio-grade small {
     display: block;
-    margin-bottom: 3px;
-    color: var(--texto-secundario, #888);
-    opacity: .72;
-    font-size: 10px;
+    margin-bottom: 4px;
+    color: var(--texto-fraco);
+    font-size: 9px;
+    font-weight: 700;
     line-height: 1.2;
+    letter-spacing: .06em;
     text-transform: uppercase;
-    letter-spacing: .04em;
 }
+
+/* ============================================================
+   ESTADOS
+   ============================================================ */
 
 .rastreio-vazio,
 .rastreio-erro {
     display: grid;
+    place-items: center;
     gap: 5px;
+    min-height: 92px;
+    padding: 20px 16px;
+    border: 1px dashed var(--borda-clara);
+    border-radius: 9px;
+    color: var(--texto-secundario);
     text-align: center;
-    padding: 28px 16px;
-    color: var(--texto-secundario, #888);
+}
+
+.rastreio-vazio strong {
+    color: var(--texto);
+    font-size: 13px;
+}
+
+.rastreio-vazio span {
+    font-size: 11px;
 }
 
 .rastreio-erro {
-    color: inherit;
+    border-style: solid;
 }
+
+/* ============================================================
+   RESPONSIVIDADE
+   ============================================================ */
 
 @media (max-width: 720px) {
     .rastreio-filtros {
@@ -139,6 +216,23 @@
 
     .rastreio-grade {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .rastreio-grade span:nth-child(3n + 1) {
+        padding-left: 0;
+    }
+
+    .rastreio-grade span:not(:nth-child(3n + 1)) {
+        padding-left: 12px;
+    }
+
+    .rastreio-grade span:nth-child(2n + 1) {
+        padding-left: 0;
+        border-left: 0;
+    }
+
+    .rastreio-grade span:nth-child(n + 3) {
+        border-top: 1px solid var(--borda);
     }
 }
 
@@ -153,8 +247,7 @@
 
     .rastreio-filtros input,
     .rastreio-filtros select {
-        min-height: 40px;
-        border-radius: 7px;
+        min-height: 42px;
     }
 
     .rastreio-card {
@@ -164,37 +257,42 @@
 
     .rastreio-card-topo {
         flex-direction: column;
-        gap: 7px;
+        gap: 8px;
+    }
+
+    .rastreio-card-topo strong {
+        font-size: 14px;
     }
 
     .rastreio-etiqueta {
         max-width: 100%;
         align-self: flex-start;
-        padding: 4px 7px;
     }
 
     .rastreio-nfs {
-        font-size: 13px;
+        margin-top: 9px;
+        font-size: 12px;
     }
 
     .rastreio-grade {
         grid-template-columns: 1fr;
-        gap: 9px;
-        margin-top: 12px;
+        margin-top: 10px;
     }
 
-    .rastreio-grade span {
+    .rastreio-grade span,
+    .rastreio-grade span:not(:nth-child(3n + 1)),
+    .rastreio-grade span:nth-child(2n + 1) {
         display: grid;
-        grid-template-columns: 82px minmax(0, 1fr);
+        grid-template-columns: 86px minmax(0, 1fr);
         gap: 8px;
         align-items: baseline;
-        padding-bottom: 7px;
-        border-bottom: 1px solid color-mix(in srgb, var(--borda, #d8dde5) 45%, transparent);
+        padding: 8px 0;
+        border-left: 0;
+        border-top: 1px solid var(--borda);
     }
 
-    .rastreio-grade span:last-child {
-        padding-bottom: 0;
-        border-bottom: 0;
+    .rastreio-grade span:first-child {
+        border-top: 0;
     }
 
     .rastreio-grade small {
@@ -207,9 +305,5 @@
     .rastreio-filtros select,
     .rastreio-card {
         transition: none;
-    }
-
-    .rastreio-card:hover {
-        transform: none;
     }
 }
