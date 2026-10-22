@@ -14,38 +14,55 @@
 
     <link
         rel="stylesheet"
-        href="style.css?v=0.0.153"
+        href="style.css?v=0.0.210"
+    >
+<link
+        rel="stylesheet"
+        href="implementacoes/locais.css?v=0.0.210"
     >
 
     <link
         rel="stylesheet"
-        href="implementacoes/style.css?v=0.0.153"
+        href="implementacoes/reservas.css?v=0.0.210"
     >
 
     <link
         rel="stylesheet"
-        href="implementacoes/locais.css?v=0.0.153"
+        href="implementacoes/pesquisa.css?v=0.0.210"
     >
 
     <link
         rel="stylesheet"
-        href="implementacoes/reservas.css?v=0.0.153"
+        href="implementacoes/conferencia.css?v=0.0.210"
     >
 
     <link
         rel="stylesheet"
-        href="implementacoes/pesquisa.css?v=0.0.153"
+        href="implementacoes/conferenciasrealizadas.css?v=0.0.210"
     >
 
     <link
         rel="stylesheet"
-        href="implementacoes/conferencia.css?v=0.0.153"
+        href="implementacoes/importacaonf.css?v=0.0.210"
     >
 
     <link
         rel="stylesheet"
-        href="implementacoes/conferenciasrealizadas.css?v=0.0.153"
+        href="implementacoes/arquivosteste.css?v=0.0.210"
     >
+
+        <link rel="stylesheet" href="implementacoes/inicio.css?v=0.0.210">
+    <link rel="stylesheet" href="implementacoes/home.css?v=0.0.210">
+    <link rel="stylesheet" href="implementacoes/status.css?v=0.0.210">
+    <link rel="stylesheet" href="implementacoes/login.css?v=0.0.210">
+    <link rel="stylesheet" href="implementacoes/contagemmanual.css?v=0.0.210">
+    <link rel="stylesheet" href="implementacoes/configuracoes.css?v=0.0.210">
+    <link rel="stylesheet" href="implementacoes/solicitacoes.css?v=0.0.210">
+    <link rel="stylesheet" href="implementacoes/importacao.css?v=0.0.210">
+
+    <link rel="stylesheet" href="implementacoes/rastreio.css?v=0.0.210">
+
+    <link rel="stylesheet" href="implementacoes/rastreioimportacao.css?v=0.0.210">
 
 </head>
 
@@ -274,6 +291,34 @@
             </button>
 
 
+            <!-- IMPORTAÇÃO NF -->
+
+            <button
+                id="menuImportacaoNF"
+                class="sidebar-item"
+                onclick="abrirImportacaoNF()"
+                title="Importação NF"
+            >
+
+                <span class="sidebar-icone">
+                    🧾
+                </span>
+
+                <span class="sidebar-texto">
+                    Importação NF
+                </span>
+
+            </button>
+
+
+            <!-- RASTREIO -->
+
+            <button id="menuRastreio" class="sidebar-item" onclick="abrirRastreio()" title="Rastreio">
+                <span class="sidebar-icone">🚚</span>
+                <span class="sidebar-texto">Rastreio</span>
+            </button>
+
+
             <!-- CONTAGEM MANUAL -->
 
             <button
@@ -439,6 +484,170 @@
 
         </section>
 
+
+
+        <!-- =================================================
+             IMPORTAÇÃO NF
+             ================================================= -->
+
+        <section
+            id="importacaoNF"
+            class="tela-sistema"
+            style="display: none;"
+        >
+
+            <div class="cabecalho-pagina">
+
+                <p class="cabecalho-caminho">
+                    PMOBILE / Importação NF
+                </p>
+
+                <h1>
+                    Importação NF
+                </h1>
+
+                <p>
+                    Importe a planilha original para uma área isolada do Supabase. Os dados serão preservados para análise antes da definição do Rastreio.
+                </p>
+
+            </div>
+
+            <div class="painel painel-importacao-nf">
+
+                <input
+                    type="file"
+                    id="arquivoImportacaoNF"
+                    class="arquivo-importacao"
+                    accept=".xlsx, .xls, .xlsm, .csv"
+                    onchange="prepararImportacaoNF()"
+                >
+
+                <div class="acoes-importacao">
+
+                    <button
+                        type="button"
+                        class="botao-aba"
+                        onclick="prepararImportacaoNF()"
+                    >
+                        Analisar arquivo
+                    </button>
+
+                </div>
+
+                <div class="importacao-nf-divisor">
+                    <span>ou</span>
+                </div>
+
+                <div class="importacao-nf-online">
+                    <label for="linkImportacaoNF">
+                        Planilha compartilhada online
+                    </label>
+
+                    <div class="importacao-nf-online-linha">
+                        <input
+                            type="url"
+                            id="linkImportacaoNF"
+                            placeholder="Insira o link aqui"
+                            autocomplete="off"
+                            inputmode="url"
+                            onkeydown="if (event.key === 'Enter') { event.preventDefault(); prepararImportacaoNFOnline(); }"
+                        >
+
+                        <button
+                            type="button"
+                            class="botao-aba"
+                            onclick="prepararImportacaoNFOnline()"
+                        >
+                            Ler link
+                        </button>
+                    </div>
+
+                    <small>
+                        Use um link público com permissão para visualizar ou baixar a planilha.
+                        Links do Google Sheets são convertidos automaticamente.
+                    </small>
+                </div>
+
+                <div
+                    id="resultadoImportacaoNF"
+                    class="importacao-nf-resultado"
+                ></div>
+
+                <div
+                    id="statusImportacaoNF"
+                    class="importacao-nf-status"
+                    aria-live="polite"
+                ></div>
+
+            </div>
+
+            <div class="painel painel-importacao-nf importacao-nf-historico">
+
+                <h2>Importações realizadas</h2>
+
+                <div id="listaImportacoesNF"></div>
+
+            </div>
+
+            <div class="painel painel-importacao-nf importacao-nf-visualizacao">
+
+                <h2>Visualização</h2>
+
+                <div id="visualizacaoImportacaoNF"></div>
+
+            </div>
+
+        </section>
+
+        <!-- =================================================
+             RASTREIO
+             ================================================= -->
+
+        <section id="rastreio" class="tela-sistema" style="display: none;">
+            <div class="cabecalho-pagina">
+                <p class="cabecalho-caminho">PMOBILE / Rastreio</p>
+                <h1>Rastreio</h1>
+                <p>Cada registro representa uma linha operacional da planilha.</p>
+            </div>
+
+            <div class="painel rastreio-importacao-painel">
+                <div class="rastreio-importacao-cabecalho">
+                    <div>
+                        <h2>Importação manual</h2>
+                        <p>Use a planilha operacional. Cada linha vira um rastreio independente.</p>
+                    </div>
+                    <input
+                        type="file"
+                        id="arquivoRastreio"
+                        accept=".xlsx,.xls,.xlsm,.csv"
+                        hidden
+                        onchange="prepararImportacaoRastreio()"
+                    >
+                    <button type="button" class="botao-principal" onclick="abrirArquivoRastreio()">
+                        Importar planilha
+                    </button>
+                </div>
+                <div id="rastreioMapaMotoristas"></div>
+                <div id="rastreioImportacaoPrevia"></div>
+                <div id="statusImportacaoRastreio" class="rastreio-importacao-status" aria-live="polite"></div>
+            </div>
+
+            <div class="painel rastreio-painel">
+                <div class="rastreio-filtros">
+                    <input type="search" id="buscaRastreio" placeholder="Cliente, NF, motorista..." oninput="filtrarRastreios()">
+                    <select id="filtroStatusRastreio" onchange="filtrarRastreios()">
+                        <option value="">Todos os status</option>
+                        <option value="PENDENTE">Pendente</option>
+                        <option value="EM_TRANSPORTE">Em transporte</option>
+                        <option value="ENTREGUE">Entregue</option>
+                        <option value="ATRASADO">Atrasado</option>
+                        <option value="CANCELADO">Cancelado</option>
+                    </select>
+                </div>
+                <div id="statusRastreio" class="rastreio-status" aria-live="polite"></div>
+                <div id="listaRastreios" class="rastreio-lista"></div>
+            </div>
+        </section>
 
         <!-- =================================================
              PESQUISA UNIFICADA
@@ -923,6 +1132,14 @@
             </div>
 
 
+            <div class="painel configuracoes-painel-sistema">
+                <h2>⚙️ Sistema</h2>
+                <p>Verifique manualmente se existe uma nova atualização do PMOBILE.</p>
+                <div class="configuracoes-acoes">
+                    <button class="botao-aba" type="button" onclick="procurarAtualizacoesOta()">🔄 Procurar atualizações</button>
+                </div>
+            </div>
+
             <div class="painel configuracoes-painel-admin" id="painelConfiguracoesAdmin" style="display: none;">
 
                 <h2>👑 Administração</h2>
@@ -934,6 +1151,7 @@
                     <button class="botao-aba" onclick="abrirLocais()">📍 Locais</button>
                     <button class="botao-aba" onclick="abrirSolicitacoesResetToken()">🔑 Recuperação de tokens</button>
                     <button class="botao-perigo" onclick="abrirManutencaoBanco()">🛠️ Manutenção</button>
+                    <button class="botao-aba" onclick="abrirArquivosTeste()">📁 Arquivos de teste</button>
                 </div>
 
             </div>
@@ -986,6 +1204,34 @@
                 <h2>🛠️ Manutenção</h2>
                 <p>Operações administrativas do banco de dados.</p>
                 <button class="botao-perigo" onclick="limparMateriaisSupabase()">🗑️ Materiais importados</button>
+            </div>
+
+            <div class="painel arquivos-teste-painel" id="painelArquivosTeste" style="display: none;">
+                <button type="button" class="botao-secundario arquivos-teste-voltar" onclick="fecharArquivosTeste()">‹ Voltar</button>
+
+                <h2>📁 Arquivos de teste</h2>
+                <p>Área administrativa para armazenar o arquivo original no Supabase, independentemente da extensão, para auditoria.</p>
+
+                <div class="arquivos-teste-acoes">
+                    <input
+                        type="file"
+                        id="arquivoTeste"
+                    >
+
+                    <button type="button" class="botao-aba" onclick="importarArquivoTeste()">
+                        Importar arquivo
+                    </button>
+
+                    <button type="button" class="botao-perigo" onclick="limparArquivosTeste()">
+                        🗑️ Limpar arquivos importados
+                    </button>
+                </div>
+
+                <p class="arquivos-teste-limite">
+                    Limite por arquivo: 20 MB. A extensão não é restringida.
+                </p>
+
+                <div id="statusArquivosTeste" aria-live="polite"></div>
             </div>
 
             <div class="painel" id="painelConfiguracoesUsuario" style="display: none;">
@@ -1110,65 +1356,73 @@
      CONFIGURAÇÕES DO SISTEMA
      ========================================================= -->
 
-<script src="supabase.js?v=0.0.153"></script>
+<script src="supabase.js?v=0.0.210"></script>
 
 
 <!-- =========================================================
      NÚCLEO / DADOS
      ========================================================= -->
 
-<script src="dados.js?v=0.0.153"></script>
+<script src="dados.js?v=0.0.210"></script>
 
 
 <!-- =========================================================
      IMPORTAÇÃO
      ========================================================= -->
 
-<script src="bancoimportacao.js?v=0.0.153"></script>
+<script src="bancoimportacao.js?v=0.0.210"></script>
 
-<script src="importacao.js?v=0.0.153"></script>
+<script src="importacao.js?v=0.0.210"></script>
+
+<script src="importacaonf.js?v=0.0.210"></script>
+
+<script src="arquivosteste.js?v=0.0.210"></script>
+
+<script src="rastreio.js?v=0.0.210"></script>
+
+<script src="rastreioimportacao.js?v=0.0.210"></script>
 
 
 <!-- =========================================================
      PESQUISA
      ========================================================= -->
 
-<script src="pesquisa.js?v=0.0.153"></script>
+<script src="pesquisa.js?v=0.0.210"></script>
 
 
 <!-- =========================================================
      CONTAGEM MANUAL
      ========================================================= -->
 
-<script src="contagemmanual.js?v=0.0.153"></script>
+<script src="contagemmanual.js?v=0.0.210"></script>
 
-<script src="locais.js?v=0.0.153"></script>
-<script src="reservas.js?v=0.0.153"></script>
+<script src="locais.js?v=0.0.210"></script>
+<script src="reservas.js?v=0.0.210"></script>
 
 
 <!-- =========================================================
      CONFERÊNCIA
      ========================================================= -->
 
-<script src="conferencia.js?v=0.0.153"></script>
+<script src="conferencia.js?v=0.0.210"></script>
 
-<script src="conferencias.js?v=0.0.153"></script>
+<script src="conferencias.js?v=0.0.210"></script>
 
-<script src="conferenciasrealizadas.js?v=0.0.153"></script>
+<script src="conferenciasrealizadas.js?v=0.0.210"></script>
 
 
 <!-- =========================================================
      DIVERGÊNCIAS
      ========================================================= -->
 
-<script src="divergencias.js?v=0.0.153"></script>
+<script src="divergencias.js?v=0.0.210"></script>
 
 
 <!-- =========================================================
      CONTROLE GERAL
      ========================================================= -->
 
-<script src="script.js?v=0.0.153"></script>        <!-- =================================================
+<script src="script.js?v=0.0.210"></script>        <!-- =================================================
 
 </body>
 

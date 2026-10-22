@@ -1,0 +1,117 @@
+/* PMOBILE — Tela principal */
+/* ============================================================
+   TELA PRINCIPAL — POLIMENTO VISUAL
+   ============================================================ */
+
+#homeSistema {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    padding-top: 42px;
+}
+
+#homeSistema .cabecalho-pagina {
+    position: relative;
+    width: min(100%, 980px);
+    margin: 0;
+    padding: 34px 38px 36px;
+    overflow: hidden;
+    border: 1px solid var(--borda);
+    border-radius: 10px;
+    background:
+        radial-gradient(circle at 92% 18%, rgba(62, 207, 142, .10), transparent 28%),
+        linear-gradient(135deg, #1b1b1b 0%, var(--fundo-painel) 58%, #161616 100%);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, .16);
+}
+
+#homeSistema .cabecalho-pagina::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--verde);
+}
+
+#homeSistema .cabecalho-pagina::after {
+    content: "Painel principal";
+    position: absolute;
+    top: 22px;
+    right: 28px;
+    padding: 5px 9px;
+    border: 1px solid rgba(62, 207, 142, .22);
+    border-radius: 999px;
+    background: rgba(62, 207, 142, .06);
+    color: #8de2bb;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+#homeSistema .cabecalho-caminho {
+    margin-bottom: 10px;
+    color: #6f6f6f;
+    font-size: 11px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+#homeSistema .cabecalho-pagina h1 {
+    margin: 0;
+    color: #ffffff;
+    font-size: clamp(28px, 4vw, 34px);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -.025em;
+}
+
+#homeSistema .cabecalho-pagina > p:not(.cabecalho-caminho) {
+    max-width: 520px;
+    margin-top: 12px;
+    color: #9b9b9b;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+#homeSistema .cabecalho-pagina h1::after {
+    content: "";
+    display: block;
+    width: 42px;
+    height: 2px;
+    margin-top: 18px;
+    border-radius: 2px;
+    background: var(--verde);
+    opacity: .8;
+}
+
+@media (max-width: 700px) {
+    #homeSistema {
+        padding-top: 24px;
+    }
+
+    #homeSistema .cabecalho-pagina {
+        width: 100%;
+        padding: 26px 24px 28px;
+        border-radius: 8px;
+    }
+
+    #homeSistema .cabecalho-pagina::after {
+        top: 18px;
+        right: 18px;
+        font-size: 9px;
+    }
+
+    #homeSistema .cabecalho-pagina h1 {
+        font-size: 27px;
+        padding-right: 90px;
+    }
+
+    #homeSistema .cabecalho-pagina > p:not(.cabecalho-caminho) {
+        font-size: 13px;
+    }
+}
+
+
+@media (max-width:700px){#homeSistema .cabecalho-pagina h1{font-size:20px}}

@@ -1,0 +1,27 @@
+{
+  "name": "pmobile-android",
+  "version": "1.0.0",
+  "description": "//.///",
+  "main": "bancoimportacao.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KozeiroKodak/pmobiletest.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/KozeiroKodak/pmobiletest/issues"
+  },
+  "homepage": "https://github.com/KozeiroKodak/pmobiletest#readme",
+  "dependencies": {
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/app": "8.1.2",
+    "@capacitor/cli": "^8.5.3",
+    "@capacitor/core": "^8.5.3"
+  }
+}

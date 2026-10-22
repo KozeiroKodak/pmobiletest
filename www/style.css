@@ -192,110 +192,10 @@ body {
 
 
 /* ============================================================
-   TELA INICIAL
-   ============================================================ */
-
-#inicio {
-
-    min-height:
-        100vh;
-
-    display:
-        flex;
-
-    flex-direction:
-        column;
-
-    align-items:
-        center;
-
-    justify-content:
-        center;
-
-    padding:
-        24px;
-
-    text-align:
-        center;
-
-    background:
-        var(--fundo);
-
-}
-
-
-#inicio h1 {
-
-    margin:
-        0 0 8px;
-
-    font-size:
-        26px;
-
-    font-weight:
-        600;
-
-}
-
-
-#inicio p {
-
-    margin:
-        0;
-
-    color:
-        var(--texto-secundario);
-
-}
-
-
-/* ============================================================
-   BOTÃO INICIAR
-   ============================================================ */
-
-#inicio button {
-
-    margin-top:
-        22px;
-
-    padding:
-        10px 22px;
-
-    border:
-        1px solid
-        var(--borda-clara);
-
-    border-radius:
-        6px;
-
-    background:
-        var(--fundo-painel);
-
-    color:
-        var(--texto);
-
-    font-family:
-        inherit;
-
-    font-size:
-        14px;
-
-    cursor:
-        pointer;
-
-}
-
-
-#inicio button:hover {
-
-    background:
-        var(--fundo-hover);
-
-}
-
-
-/* ============================================================
    APLICAÇÃO PRINCIPAL
+   ============================================================ */
+
+
    ============================================================ */
 
 #aplicacao {
@@ -974,452 +874,6 @@ BOTÕES PADRÃO
 
 
 /* ============================================================
-   MENU INTERNO DA PESQUISA
-   ============================================================
-
-   Tela inicial do módulo "Pesquisar material".
-
-   Apresenta três opções:
-
-   - Pesquisar por código
-   - Pesquisar por descrição
-   - Pesquisar por referência
-
-   NOVO PADRÃO:
-
-   Os botões deste menu utilizam as mesmas medidas,
-   espaçamentos, tipografia, cores e comportamento visual
-   dos itens existentes na sidebar.
-
-   ============================================================ */
-
-.menu-pesquisa {
-
-    width:
-        100%;
-
-    max-width:
-        760px;
-
-    display:
-        flex;
-
-    flex-direction:
-        column;
-
-    gap:
-        2px;
-
-}
-
-
-/* ============================================================
-   BOTÃO DE OPÇÃO DA PESQUISA
-   ============================================================
-
-   Este componente reproduz o padrão visual de:
-
-       .sidebar-item
-
-   Mantemos uma classe separada porque estes botões pertencem
-   ao conteúdo da página, e não à navegação principal.
-
-   ============================================================ */
-
-.opcao-pesquisa {
-
-    width:
-        100%;
-
-    min-height:
-        40px;
-
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    gap:
-        10px;
-
-    margin:
-        2px 0;
-
-    padding:
-        8px 10px;
-
-    border:
-        0;
-
-    border-radius:
-        6px;
-
-    background:
-        transparent;
-
-    color:
-        var(--texto-secundario);
-
-    font-family:
-        inherit;
-
-    font-size:
-        13px;
-
-    text-align:
-        left;
-
-    cursor:
-        pointer;
-
-    transition:
-        background 0.12s ease,
-        color 0.12s ease;
-
-}
-
-
-/* ============================================================
-   OPÇÃO DE PESQUISA - HOVER
-   ============================================================
-
-   Mesmo efeito utilizado nos itens da sidebar.
-
-   ============================================================ */
-
-.opcao-pesquisa:hover {
-
-    background:
-        var(--fundo-hover);
-
-    color:
-        #ffffff;
-
-}
-
-
-/* ============================================================
-   OPÇÃO DE PESQUISA - CLIQUE
-   ============================================================
-
-   Durante o clique utilizamos o mesmo fundo do item ativo
-   da sidebar.
-
-   ============================================================ */
-
-.opcao-pesquisa:active {
-
-    background:
-        var(--fundo-ativo);
-
-}
-
-
-/* ============================================================
-   ÍCONE DA OPÇÃO DE PESQUISA
-   ============================================================
-
-   Utiliza:
-
-   - largura de 22px;
-   - fonte de 16px;
-
-   As mesmas medidas do .sidebar-icone.
-
-   ============================================================ */
-
-.opcao-pesquisa-icone {
-
-    width:
-        22px;
-
-    flex-shrink:
-        0;
-
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    justify-content:
-        center;
-
-    font-size:
-        16px;
-
-}
-
-
-/* ============================================================
-   CONTEÚDO DA OPÇÃO DE PESQUISA
-   ============================================================
-
-   Ocupa todo o espaço disponível depois do ícone.
-
-   ============================================================ */
-
-.opcao-pesquisa-conteudo {
-
-    flex:
-        1;
-
-    min-width:
-        0;
-
-    display:
-        flex;
-
-    align-items:
-        center;
-
-}
-
-
-/* ============================================================
-   TEXTO PRINCIPAL DA OPÇÃO
-   ============================================================
-
-   Segue o padrão da sidebar:
-
-   - 13px;
-   - peso normal;
-   - cor herdada do botão;
-   - reticências se faltar espaço.
-
-   ============================================================ */
-
-.opcao-pesquisa-conteudo strong {
-
-    color:
-        inherit;
-
-    font-size:
-        13px;
-
-    font-weight:
-        400;
-
-    white-space:
-        nowrap;
-
-    overflow:
-        hidden;
-
-    text-overflow:
-        ellipsis;
-
-}
-
-
-/* ============================================================
-   DESCRIÇÃO SECUNDÁRIA DA OPÇÃO
-   ============================================================
-
-   As descrições continuam presentes no index.html para
-   preservar a estrutura atual.
-
-   Porém ficam escondidas visualmente para que os botões
-   tenham exatamente a aparência compacta da sidebar.
-
-   ============================================================ */
-
-.opcao-pesquisa-conteudo small {
-
-    display:
-        none;
-
-}
-
-
-/* ============================================================
-   SETA DA OPÇÃO DE PESQUISA
-   ============================================================
-
-   A seta também continua disponível no HTML.
-
-   Ela é escondida no CSS porque os itens da sidebar não
-   possuem seta lateral.
-
-   Isso mantém os dois menus visualmente consistentes.
-
-   ============================================================ */
-
-.opcao-pesquisa-seta {
-
-    display:
-        none;
-
-}
-
-
-/* ============================================================
-   SUBTELAS DA PESQUISA
-   ============================================================
-
-   Código, Descrição e Referência continuam dentro
-   da tela principal #pesquisa.
-
-   ============================================================ */
-
-.subtela-pesquisa {
-
-    width:
-        100%;
-
-}
-
-
-.subtela-pesquisa .painel {
-
-    max-width:
-        960px;
-
-}
-
-
-/* ============================================================
-   CABEÇALHO DAS SUBTELAS
-   ============================================================
-
-   Posiciona o botão Voltar ao lado do título.
-
-   ============================================================ */
-
-.cabecalho-subtela {
-
-    display:
-        flex;
-
-    align-items:
-        flex-start;
-
-    gap:
-        12px;
-
-}
-
-
-.cabecalho-subtela > div {
-
-    flex:
-        1;
-
-    min-width:
-        0;
-
-}
-
-
-.cabecalho-subtela h1 {
-
-    margin:
-        0;
-
-}
-
-
-.cabecalho-subtela p {
-
-    margin:
-        7px 0 0;
-
-    color:
-        var(--texto-secundario);
-
-    font-size:
-        13px;
-
-}
-
-
-/* ============================================================
-   BOTÃO VOLTAR DA PESQUISA
-   ============================================================
-
-   Retorna de Código, Descrição ou Referência para
-   o menu interno da Pesquisa.
-
-   ============================================================ */
-
-.botao-voltar-pesquisa {
-
-    width:
-        36px;
-
-    height:
-        36px;
-
-    flex-shrink:
-        0;
-
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    justify-content:
-        center;
-
-    margin:
-        0;
-
-    padding:
-        0;
-
-    border:
-        0;
-
-    border-radius:
-        6px;
-
-    background:
-        transparent;
-
-    color:
-        var(--texto-secundario);
-
-    font-family:
-        inherit;
-
-    font-size:
-        21px;
-
-    line-height:
-        1;
-
-    cursor:
-        pointer;
-
-    transition:
-        background 0.12s ease,
-        color 0.12s ease;
-
-}
-
-
-.botao-voltar-pesquisa:hover {
-
-    background:
-        var(--fundo-hover);
-
-    color:
-        #ffffff;
-
-}
-
-
-.botao-voltar-pesquisa:active {
-
-    background:
-        var(--fundo-ativo);
-
-}
-
-
-/* ============================================================
    MODAL
    ============================================================ */
 
@@ -1523,556 +977,6 @@ BOTÕES PADRÃO
 }
 
 /* ============================================================
-   BARRA FIXA DE STATUS DO PMOBILE
-   ============================================================
-
-   OBJETIVO:
-
-   Exibir os estados de conexão e sincronização do PMOBILE
-   permanentemente na parte inferior da tela.
-
-   EXEMPLOS DE INFORMAÇÕES EXIBIDAS:
-
-   - conexão com Supabase;
-   - inventário offline disponível;
-   - sincronização de materiais;
-   - progresso da sincronização;
-   - sincronização de conferências;
-   - perda de conexão;
-   - retorno da internet;
-   - falhas de sincronização.
-
-   ALTERAÇÃO DESTA VERSÃO:
-
-   Anteriormente #statusSupabase era apresentado visualmente
-   como um popup flutuante:
-
-   - afastado das laterais;
-   - afastado da parte inferior;
-   - fundo transparente;
-   - efeito blur;
-   - cantos arredondados;
-   - sombra ao redor.
-
-   Agora ele passa a funcionar visualmente como um componente
-   estrutural da interface:
-
-   - fixado no rodapé;
-   - encostado nas laterais;
-   - encostado na parte inferior;
-   - sem cantos arredondados;
-   - fundo sólido;
-   - borda somente na parte superior.
-
-   IMPORTANTE:
-
-   O ID continua sendo #statusSupabase.
-
-   Portanto dados.js, conferencia.js e supabase.js continuam
-   utilizando exatamente o mesmo elemento.
-
-   Nenhuma alteração de lógica é necessária nesta etapa.
-
-   ============================================================ */
-
-#statusSupabase {
-
-    /* ========================================================
-       POSICIONAMENTO
-       ========================================================
-
-       Mantém a barra presa ao rodapé da janela.
-
-       ======================================================== */
-
-    position:
-        fixed;
-
-    left:
-        0;
-
-    right:
-        0;
-
-    bottom:
-        0;
-
-
-    /* ========================================================
-       DIMENSÕES
-       ========================================================
-
-       A barra ocupa toda a largura disponível.
-
-       ======================================================== */
-
-    width:
-        100%;
-
-    min-height:
-        var(--status-altura);
-
-
-    /* ========================================================
-       ORGANIZAÇÃO INTERNA
-       ========================================================
-
-       A mensagem ocupa o espaço disponível à esquerda.
-
-       O botão X permanece na extremidade direita.
-
-       ======================================================== */
-
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    justify-content:
-        space-between;
-
-    gap:
-        12px;
-
-
-    /* ========================================================
-       ESPAÇAMENTO INTERNO
-       ======================================================== */
-
-    padding:
-        6px 10px
-        6px 14px;
-
-
-    /* ========================================================
-       FUNDO
-       ========================================================
-
-       Utiliza o mesmo fundo estrutural da sidebar.
-
-       O efeito transparente/blur do antigo popup foi removido.
-
-       ======================================================== */
-
-    background:
-        var(--fundo-sidebar);
-
-
-    /* ========================================================
-       BORDA
-       ========================================================
-
-       Como a barra encosta nas extremidades da janela, apenas
-       a borda superior é necessária para separar visualmente
-       o status do restante da aplicação.
-
-       ======================================================== */
-
-    border:
-        0;
-
-    border-top:
-        1px solid
-        var(--borda-clara);
-
-
-    /* ========================================================
-       FORMATO
-       ========================================================
-
-       O rodapé não utiliza cantos arredondados.
-
-       ======================================================== */
-
-    border-radius:
-        0;
-
-
-    /* ========================================================
-       TEXTO
-       ======================================================== */
-
-    color:
-        var(--texto);
-
-    font-size:
-        13px;
-
-    font-weight:
-        500;
-
-    line-height:
-        1.4;
-
-    text-align:
-        left;
-
-
-    /* ========================================================
-       SOMBRA
-       ========================================================
-
-       A sombra é projetada discretamente para cima.
-
-       Isso ajuda a separar o rodapé do conteúdo principal sem
-       devolver a aparência de popup ao componente.
-
-       ======================================================== */
-
-    box-shadow:
-        0 -4px 14px
-        rgba(
-            0,
-            0,
-            0,
-            0.22
-        );
-
-
-    /* ========================================================
-       CAMADA
-       ========================================================
-
-       Mantém a barra acima do conteúdo normal da aplicação.
-
-       ======================================================== */
-
-    z-index:
-        9999;
-
-}
-
-
-/* ============================================================
-   TEXTO DA BARRA DE STATUS
-   ============================================================
-
-   OBJETIVO:
-
-   Permitir que a mensagem utilize todo o espaço disponível.
-
-   min-width: 0 também evita que textos grandes empurrem o
-   botão X para fora da largura da tela.
-
-   ============================================================ */
-
-#statusSupabase > span {
-
-    flex:
-        1;
-
-    min-width:
-        0;
-
-}
-
-
-/* ============================================================
-   BOTÃO X DA BARRA DE STATUS
-   ============================================================
-
-   OBJETIVO:
-
-   Manter o botão já utilizado pelo supabase.js para fechar
-   manualmente a mensagem atual.
-
-   IMPORTANTE:
-
-   Nesta etapa o comportamento JavaScript não foi alterado.
-
-   Apenas adaptamos a aparência do botão para combinar com a
-   nova barra fixa.
-
-   ============================================================ */
-
-#statusSupabase > button {
-
-    width:
-        32px;
-
-    height:
-        32px;
-
-    flex-shrink:
-        0;
-
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    justify-content:
-        center;
-
-    margin:
-        0;
-
-    padding:
-        0;
-
-    border:
-        1px solid
-        var(--borda);
-
-    border-radius:
-        5px;
-
-    background:
-        transparent;
-
-    color:
-        #bdbdbd;
-
-    font-family:
-        inherit;
-
-    font-size:
-        17px;
-
-    line-height:
-        1;
-
-    cursor:
-        pointer;
-
-}
-
-
-/* ============================================================
-   BOTÃO X DA BARRA DE STATUS - HOVER
-   ============================================================ */
-
-#statusSupabase > button:hover {
-
-    background:
-        var(--fundo-hover);
-
-    color:
-        #ffffff;
-
-}
-
-
-/* ============================================================
-   PAINEL DE PROBLEMAS DO SUPABASE
-   ============================================================ */
-
-#resultadoVerificacaoSupabase {
-
-    position:
-        fixed;
-
-    top:
-        70px;
-
-    left:
-        12px;
-
-    right:
-        12px;
-
-    max-height:
-        calc(
-            100vh - 150px
-        );
-
-    overflow-y:
-        auto;
-
-    padding:
-        18px;
-
-    background:
-        var(--aviso-fundo);
-
-    backdrop-filter:
-        blur(14px);
-
-    -webkit-backdrop-filter:
-        blur(14px);
-
-    border:
-        1px solid
-        var(--aviso-borda);
-
-    border-radius:
-        8px;
-
-    color:
-        var(--texto);
-
-    font-size:
-        14px;
-
-    line-height:
-        1.5;
-
-    box-shadow:
-        0 12px 40px
-        rgba(
-            0,
-            0,
-            0,
-            0.35
-        );
-
-    z-index:
-        9998;
-
-}
-
-
-#resultadoVerificacaoSupabase h3 {
-
-    margin:
-        0 0 18px;
-
-    color:
-        #ffffff;
-
-    font-size:
-        18px;
-
-    font-weight:
-        600;
-
-}
-
-
-#resultadoVerificacaoSupabase p {
-
-    color:
-        var(--texto);
-
-}
-
-
-#resultadoVerificacaoSupabase strong {
-
-    color:
-        #ffffff;
-
-}
-
-
-#resultadoVerificacaoSupabase ul {
-
-    padding-left:
-        24px;
-
-    color:
-        var(--texto-secundario);
-
-}
-
-
-#resultadoVerificacaoSupabase li {
-
-    margin-bottom:
-        5px;
-
-    color:
-        var(--texto-secundario);
-
-}
-
-
-#resultadoVerificacaoSupabase hr {
-
-    margin:
-        18px 0;
-
-    border:
-        0;
-
-    border-top:
-        1px solid
-        var(--aviso-borda);
-
-}
-
-
-/* ============================================================
-   BOTÃO FECHAR DO PAINEL DO SUPABASE
-   ============================================================ */
-
-#resultadoVerificacaoSupabase button {
-
-    min-height:
-        34px;
-
-    padding:
-        6px 14px;
-
-    border:
-        1px solid
-        var(--aviso-borda);
-
-    border-radius:
-        5px;
-
-    background:
-        var(--aviso-botao);
-
-    color:
-        var(--texto);
-
-    font-family:
-        inherit;
-
-    font-size:
-        13px;
-
-    cursor:
-        pointer;
-
-}
-
-
-#resultadoVerificacaoSupabase button:hover {
-
-    background:
-        var(--aviso-botao-hover);
-
-    color:
-        #ffffff;
-
-}
-
-
-/* ============================================================
-   LOCAIS — PAGINAÇÃO DE DERIVADOS
-   ============================================================ */
-
-.locais-paginacao-derivados {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    margin-top: 18px;
-    padding-top: 14px;
-    border-top: 1px solid var(--borda);
-}
-
-.locais-paginacao-derivados span {
-    min-width: 90px;
-    color: var(--texto-secundario);
-    font-size: 12px;
-    text-align: center;
-}
-
-.locais-paginacao-derivados button {
-    min-width: 92px;
-}
-
-.locais-paginacao-derivados button:disabled {
-    opacity: .4;
-    cursor: not-allowed;
-}
-
-/* ============================================================
    RESPONSIVIDADE
    ============================================================
 
@@ -2084,10 +988,7 @@ BOTÕES PADRÃO
 
    ============================================================ */
 
-@media (max-width: 700px) {
-
-
-    /* ========================================================
+@media (max-width: 700px) {/* ========================================================
        SIDEBAR COMPACTA
        ======================================================== */
 
@@ -2098,8 +999,7 @@ BOTÕES PADRÃO
 
     }
 
-
-    .sidebar-topo {
+.sidebar-topo {
 
         justify-content:
             center;
@@ -2112,8 +1012,7 @@ BOTÕES PADRÃO
 
     }
 
-
-    .sidebar-logo {
+.sidebar-logo {
 
         width:
             34px;
@@ -2123,27 +1022,14 @@ BOTÕES PADRÃO
 
     }
 
-
-    .sidebar-titulo {
+.sidebar-titulo {
 
         display:
             none;
 
     }
 
-
-    .sidebar-menu {
-
-        padding-left:
-            6px;
-
-        padding-right:
-            6px;
-
-    }
-
-
-    .sidebar-rodape {
+.sidebar-menu {
 
         padding-left:
             6px;
@@ -2153,8 +1039,17 @@ BOTÕES PADRÃO
 
     }
 
+.sidebar-rodape {
 
-    .sidebar-item {
+        padding-left:
+            6px;
+
+        padding-right:
+            6px;
+
+    }
+
+.sidebar-item {
 
         justify-content:
             center;
@@ -2167,24 +1062,21 @@ BOTÕES PADRÃO
 
     }
 
-
-    .sidebar-icone {
+.sidebar-icone {
 
         width:
             24px;
 
     }
 
-
-    .sidebar-texto {
+.sidebar-texto {
 
         display:
             none;
 
     }
 
-
-    /* ========================================================
+/* ========================================================
        CONTEÚDO PRINCIPAL
        ======================================================== */
 
@@ -2195,16 +1087,14 @@ BOTÕES PADRÃO
 
     }
 
-
-    .tela-sistema {
+.tela-sistema {
 
         padding:
             20px 14px;
 
     }
 
-
-    /* ========================================================
+/* ========================================================
        FORMULÁRIOS
        ======================================================== */
 
@@ -2218,178 +1108,28 @@ BOTÕES PADRÃO
 
     }
 
-    .linha-contagem-manual-busca {
-
-        flex-direction:
-            row;
-
-        align-items:
-            center;
-
-        flex-wrap:
-            nowrap;
-
-    }
-
-    .linha-contagem-manual-busca .seletor-contagem-manual {
-        flex: 0 0 auto;
-    }
-
-    .linha-contagem-manual-busca #campoContagemManual {
-        min-width: 0;
-        flex: 1 1 auto;
-    }
-
-    .linha-contagem-manual-busca .botao-buscar-contagem-manual,
-    .linha-contagem-manual-busca .acoes-contagem-manual-config {
-        flex: 0 0 80px;
-    }
-
-    .linha-contagem-manual-busca .acoes-contagem-manual-config .botao-config-contagem-manual {
-        width: 80px;
-    }
-
-
-    input {
+input {
 
         max-width:
             none;
 
     }
 
-
-    .linha-formulario .botao-principal {
+.linha-formulario .botao-principal {
 
         width:
             100%;
 
     }
 
-
-    .painel {
+.painel {
 
         padding:
             15px;
 
     }
 
-
-    /* ========================================================
-       MENU INTERNO DA PESQUISA - CELULAR
-       ========================================================
-
-       Mantemos o mesmo padrão compacto utilizado no desktop.
-
-       Diferente da versão anterior, os botões NÃO aumentam
-       para 58px no celular.
-
-       Isso mantém Código, Descrição e Referência visualmente
-       coerentes com os itens da sidebar.
-
-       ======================================================== */
-
-    .menu-pesquisa {
-
-        max-width:
-            none;
-
-        gap:
-            2px;
-
-    }
-
-
-    .opcao-pesquisa {
-
-        min-height:
-            40px;
-
-        gap:
-            10px;
-
-        margin:
-            2px 0;
-
-        padding:
-            8px 10px;
-
-        font-size:
-            13px;
-
-    }
-
-
-    .opcao-pesquisa-icone {
-
-        width:
-            22px;
-
-        font-size:
-            16px;
-
-    }
-
-
-    .opcao-pesquisa-conteudo strong {
-
-        font-size:
-            13px;
-
-    }
-
-
-    /* ========================================================
-       DESCRIÇÕES E SETAS NO CELULAR
-       ========================================================
-
-       Permanecem ocultas assim como no desktop.
-
-       ======================================================== */
-
-    .opcao-pesquisa-conteudo small,
-    .opcao-pesquisa-seta {
-
-        display:
-            none;
-
-    }
-
-
-    /* ========================================================
-       CABEÇALHO DAS SUBTELAS - CELULAR
-       ======================================================== */
-
-    .cabecalho-subtela {
-
-        gap:
-            8px;
-
-    }
-
-
-    .botao-voltar-pesquisa {
-
-        width:
-            34px;
-
-        height:
-            34px;
-
-        font-size:
-            20px;
-
-    }
-
-
-    .subtela-pesquisa .painel {
-
-        max-width:
-            none;
-
-    }
-
-
-    /* ========================================================
+/* ========================================================
        BARRA DE STATUS NO CELULAR
        ========================================================
 
@@ -2427,8 +1167,7 @@ BOTÕES PADRÃO
 
     }
 
-
-    /* ========================================================
+/* ========================================================
        PAINEL DE PROBLEMAS NO CELULAR
        ======================================================== */
 
@@ -2457,298 +1196,6 @@ BOTÕES PADRÃO
 /* OTA automation test */
 
 /* OTA 0.0.10 - teste de automacao */
-
-
-/* ============================================================
-   STATUS SUPABASE — FAIXA VERTICAL
-   ============================================================ */
-
-#statusSupabase {
-    overflow: hidden;
-    position: fixed;
-}
-
-#statusSupabase .statusSupabase-faixa {
-    position: absolute;
-    top: 0;
-    right: 46px;
-    bottom: 0;
-    left: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 0;
-    padding: 0;
-    text-align: center;
-    animation: statusSupabaseSubir 18s linear infinite;
-}
-
-#statusSupabase .statusSupabase-faixa span {
-    display: block;
-    flex: 0 0 auto;
-    min-width: 0;
-    white-space: nowrap;
-}
-
-@keyframes statusSupabaseSubir {
-    from {
-        transform: translateY(100%);
-    }
-    to {
-        transform: translateY(-100%);
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    #statusSupabase .statusSupabase-faixa {
-        animation: none;
-        transform: none;
-    }
-}
-
-
-/* ============================================================
-   CONFIGURAÇÕES — POLIMENTO VISUAL
-   Interface operacional com blocos bem definidos.
-   ============================================================ */
-
-#configuracoes {
-    max-width: 1100px;
-}
-
-#configuracoes .cabecalho-pagina {
-    position: relative;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--borda);
-}
-
-#configuracoes .cabecalho-pagina h1 {
-    margin-top: 6px;
-    font-size: 24px;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-}
-
-#configuracoes .painel {
-    position: relative;
-    overflow: hidden;
-    padding: 20px;
-    border: 1px solid var(--borda);
-    border-radius: 8px;
-    background: var(--fundo-painel);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, .12);
-}
-
-#configuracoes .painel > h2 {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 0 0 6px;
-    font-size: 16px;
-    font-weight: 600;
-    line-height: 1.35;
-}
-
-#configuracoes .painel > p {
-    margin: 0;
-    color: var(--texto-secundario);
-    font-size: 12px;
-    line-height: 1.5;
-}
-
-#painelConfiguracoesAdmin {
-    border-left: 3px solid var(--verde);
-}
-
-#painelConfiguracoesAdmin .configuracoes-acoes {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px;
-    margin-top: 18px;
-}
-
-#painelConfiguracoesAdmin .configuracoes-acoes button {
-    min-height: 54px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 14px;
-    border: 1px solid var(--borda);
-    border-radius: 7px;
-    background: var(--fundo-hover);
-    color: var(--texto-principal);
-    font-size: 12px;
-    font-weight: 500;
-    transition: transform .12s ease, background .12s ease, border-color .12s ease;
-}
-
-#painelConfiguracoesAdmin .configuracoes-acoes button:hover {
-    transform: translateY(-1px);
-    background: var(--fundo-ativo);
-    border-color: #555;
-}
-
-#painelConfiguracoesAdmin .configuracoes-acoes .botao-perigo {
-    border-color: rgba(220, 80, 80, .35);
-    color: #ff9a9a;
-}
-
-#painelConfiguracoesAdmin .configuracoes-acoes .botao-perigo:hover {
-    border-color: rgba(220, 80, 80, .55);
-}
-
-#painelConfiguracoesManutencao {
-    border-left: 3px solid #c96b6b;
-}
-
-#painelConfiguracoesManutencao > button {
-    margin-top: 18px;
-    min-height: 44px;
-}
-
-#painelConfiguracoesUsuario {
-    border-left: 3px solid #888;
-}
-
-#resumoContaPmobile {
-    margin-top: 18px;
-    padding: 14px 16px;
-    border: 1px solid var(--borda);
-    border-radius: 7px;
-    background: rgba(255, 255, 255, .025);
-}
-
-@media (max-width: 700px) {
-    #configuracoes .painel {
-        padding: 16px;
-    }
-
-    #painelConfiguracoesAdmin .configuracoes-acoes {
-        grid-template-columns: 1fr;
-        gap: 8px;
-    }
-
-    #painelConfiguracoesAdmin .configuracoes-acoes button {
-        min-height: 48px;
-        justify-content: flex-start;
-        padding-left: 14px;
-    }
-}
-
-
-/* ============================================================
-   TELA PRINCIPAL — POLIMENTO VISUAL
-   ============================================================ */
-
-#homeSistema {
-    position: relative;
-    display: flex;
-    align-items: flex-start;
-    padding-top: 42px;
-}
-
-#homeSistema .cabecalho-pagina {
-    position: relative;
-    width: min(100%, 980px);
-    margin: 0;
-    padding: 34px 38px 36px;
-    overflow: hidden;
-    border: 1px solid var(--borda);
-    border-radius: 10px;
-    background:
-        radial-gradient(circle at 92% 18%, rgba(62, 207, 142, .10), transparent 28%),
-        linear-gradient(135deg, #1b1b1b 0%, var(--fundo-painel) 58%, #161616 100%);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, .16);
-}
-
-#homeSistema .cabecalho-pagina::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 100%;
-    background: var(--verde);
-}
-
-#homeSistema .cabecalho-pagina::after {
-    content: "Painel principal";
-    position: absolute;
-    top: 22px;
-    right: 28px;
-    padding: 5px 9px;
-    border: 1px solid rgba(62, 207, 142, .22);
-    border-radius: 999px;
-    background: rgba(62, 207, 142, .06);
-    color: #8de2bb;
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: .04em;
-    text-transform: uppercase;
-}
-
-#homeSistema .cabecalho-caminho {
-    margin-bottom: 10px;
-    color: #6f6f6f;
-    font-size: 11px;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-}
-
-#homeSistema .cabecalho-pagina h1 {
-    margin: 0;
-    color: #ffffff;
-    font-size: clamp(28px, 4vw, 34px);
-    font-weight: 600;
-    line-height: 1.15;
-    letter-spacing: -.025em;
-}
-
-#homeSistema .cabecalho-pagina > p:not(.cabecalho-caminho) {
-    max-width: 520px;
-    margin-top: 12px;
-    color: #9b9b9b;
-    font-size: 14px;
-    line-height: 1.6;
-}
-
-#homeSistema .cabecalho-pagina h1::after {
-    content: "";
-    display: block;
-    width: 42px;
-    height: 2px;
-    margin-top: 18px;
-    border-radius: 2px;
-    background: var(--verde);
-    opacity: .8;
-}
-
-@media (max-width: 700px) {
-    #homeSistema {
-        padding-top: 24px;
-    }
-
-    #homeSistema .cabecalho-pagina {
-        width: 100%;
-        padding: 26px 24px 28px;
-        border-radius: 8px;
-    }
-
-    #homeSistema .cabecalho-pagina::after {
-        top: 18px;
-        right: 18px;
-        font-size: 9px;
-    }
-
-    #homeSistema .cabecalho-pagina h1 {
-        font-size: 27px;
-        padding-right: 90px;
-    }
-
-    #homeSistema .cabecalho-pagina > p:not(.cabecalho-caminho) {
-        font-size: 13px;
-    }
-}
 
 
 /* ============================================================
@@ -2808,3 +1255,498 @@ BOTÕES PADRÃO
     transform: none;
     box-shadow: none;
 }
+
+
+/* ============================================================
+   PENTE FINO VISUAL — ESPAÇAMENTO / ALINHAMENTO
+   Escala base: 4 / 8 / 12 / 16 / 24 / 32 px.
+   ============================================================ */
+
+:root {
+    --espaco-1: 4px;
+    --espaco-2: 8px;
+    --espaco-3: 12px;
+    --espaco-4: 16px;
+    --espaco-6: 24px;
+    --espaco-8: 32px;
+}
+
+/* Estrutura de conteúdo */
+.tela-sistema {
+    padding: var(--espaco-6) var(--espaco-8);
+}
+
+.cabecalho-pagina {
+    margin-bottom: var(--espaco-6);
+}
+
+.cabecalho-caminho {
+    margin-bottom: var(--espaco-2);
+}
+
+.painel {
+    margin-bottom: var(--espaco-4);
+}
+
+.painel > h2,
+.painel > h3 {
+    margin-bottom: var(--espaco-4);
+}
+
+.painel > p {
+    margin-top: 0;
+    margin-bottom: var(--espaco-4);
+    line-height: 1.5;
+}
+
+/* Formulários e controles */
+.linha-formulario {
+    gap: var(--espaco-2);
+}
+
+input,
+.botao-principal,
+.botao-secundario,
+.botao-perigo,
+.botao-aba {
+    min-height: 40px;
+}
+
+input {
+    padding-top: var(--espaco-2);
+    padding-bottom: var(--espaco-2);
+}
+
+.acoes-importacao {
+    gap: var(--espaco-2);
+    margin-top: var(--espaco-4);
+}
+
+/* Resultados: distância uniforme do formulário */
+#resultadoConferencia,
+#resultadoConferencias,
+#resultadoDivergencias,
+#resultadoImportacao,
+#resultadoBuscaContagemManual,
+#statusContagemManual,
+#listaContagensManuais {
+    margin-top: var(--espaco-4);
+}
+
+/* Sidebar */
+.sidebar-menu {
+    padding: var(--espaco-2);
+}
+
+.sidebar-item {
+    gap: var(--espaco-2);
+    margin: var(--espaco-1) 0;
+    padding: var(--espaco-2) var(--espaco-3);
+}
+
+.sidebar-rodape {
+    padding: var(--espaco-2);
+}
+
+/* Pesquisa */
+/* Login — alinhar a régua sem alterar a identidade */
+/* Modais / administração */
+/* Solicitações */
+@media (max-width: 700px) {
+    .tela-sistema {
+        padding: var(--espaco-4) var(--espaco-3);
+    }
+
+    .cabecalho-pagina {
+        margin-bottom: var(--espaco-4);
+    }
+
+    .painel {
+        margin-bottom: var(--espaco-3);
+    }
+
+    .painel > h2,
+    .painel > h3 {
+        margin-bottom: var(--espaco-3);
+    }
+
+}
+
+
+
+
+/* ============================================================
+   SISTEMA RESPONSIVO ADAPTATIVO — BASE GLOBAL
+   ============================================================ */
+
+:root {
+    --largura-conteudo-max: 1440px;
+    --espaco-tela: clamp(14px, 2.2vw, 32px);
+    --espaco-painel: clamp(14px, 1.6vw, 20px);
+    --gap-padrao: clamp(8px, 1.1vw, 16px);
+}
+
+/* Desktop amplo */
+@media (min-width: 1201px) {
+    .tela-sistema {
+        padding-left: clamp(28px, 3vw, 48px);
+        padding-right: clamp(28px, 3vw, 48px);
+    }
+}
+
+/* Tablet / notebook estreito */
+@media (max-width: 1024px) {
+    .tela-sistema {
+        padding: 22px var(--espaco-tela);
+    }
+
+    .painel {
+        padding: var(--espaco-painel);
+        margin-bottom: 14px;
+    }
+
+    .cabecalho-pagina {
+        margin-bottom: 18px;
+    }
+
+    .linha-formulario {
+        flex-wrap: wrap;
+    }
+
+    .linha-formulario > input,
+    .linha-formulario > select {
+        flex: 1 1 220px;
+        min-width: min(220px, 100%);
+    }
+
+    .modal {
+        padding: clamp(12px, 3vw, 20px);
+    }
+}
+
+/* Tablet compacto */
+@media (min-width: 701px) and (max-width: 900px) {
+    .cabecalho-pagina h1 {
+        font-size: clamp(20px, 3vw, 23px);
+    }
+
+    .painel {
+        border-radius: 9px;
+    }
+
+    .botao-principal,
+    .botao-secundario,
+    .botao-perigo {
+        min-height: 40px;
+    }
+}
+
+/* Celular */
+@media (max-width: 700px) {
+    body {
+        padding-bottom: 48px;
+    }
+
+    .tela-sistema {
+        width: 100%;
+        padding: 16px 12px;
+    }
+
+    .cabecalho-pagina {
+        margin-bottom: 14px;
+    }
+
+    .cabecalho-pagina h1 {
+        font-size: 20px;
+        line-height: 1.25;
+    }
+
+    .cabecalho-pagina > p:not(.cabecalho-caminho) {
+        line-height: 1.45;
+    }
+
+    .painel {
+        padding: 14px;
+        margin-bottom: 12px;
+        border-radius: 9px;
+    }
+
+    .linha-formulario {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .linha-formulario > *,
+    .linha-formulario > input,
+    .linha-formulario > select,
+    .linha-formulario > button {
+        width: 100%;
+        max-width: none;
+        min-width: 0;
+    }
+
+    input,
+    select,
+    textarea {
+        font-size: 16px;
+    }
+
+    .botao-principal,
+    .botao-secundario,
+    .botao-perigo {
+        min-height: 42px;
+    }
+}
+
+/* Celular pequeno */
+@media (max-width: 420px) {
+    .tela-sistema {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .painel {
+        padding: 12px;
+    }
+
+    .modal-conteudo {
+        padding: 16px;
+    }
+
+    .modal-acoes {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .modal-acoes > button {
+        width: 100%;
+    }
+}
+
+@media (min-width:701px) and (max-width:1024px){
+    :root{--sidebar-largura:210px}
+    #sistema{width:var(--sidebar-largura)}
+    #conteudoPrincipal{margin-left:var(--sidebar-largura)}
+    .sidebar-item{padding-left:12px;padding-right:12px}
+    .sidebar-texto{font-size:13px}
+}
+
+/* ============================================================
+   PENTE FINO — CONTROLES NATIVOS
+   Botões, seletores, campos de texto e caixas de seleção.
+   Regra: comportamento no JS; apresentação exclusivamente no CSS.
+   ============================================================ */
+
+/* Régua comum de todos os controles */
+button,
+input,
+select,
+textarea {
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+/* Botões nativos que não usam uma classe específica */
+button {
+    min-height: 40px;
+    border: 1px solid var(--borda-clara);
+    border-radius: 7px;
+    background: #202020;
+    color: var(--texto);
+    font: inherit;
+    font-size: 13px;
+    line-height: 1.2;
+    cursor: pointer;
+    transition:
+        background-color .14s ease,
+        border-color .14s ease,
+        color .14s ease,
+        box-shadow .14s ease,
+        transform .08s ease;
+}
+
+button:hover:not(:disabled) {
+    border-color: #505050;
+    background: #292929;
+}
+
+button:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+button:focus-visible {
+    outline: 2px solid var(--verde);
+    outline-offset: 2px;
+}
+
+button:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+}
+
+/* Campos de texto */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+select,
+textarea {
+    width: 100%;
+    min-height: 40px;
+    border: 1px solid var(--borda-clara);
+    border-radius: 7px;
+    background: #101010;
+    color: var(--texto);
+    font-size: 14px;
+    line-height: 1.35;
+    transition:
+        border-color .14s ease,
+        background-color .14s ease,
+        box-shadow .14s ease;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+select {
+    padding: 8px 11px;
+}
+
+textarea {
+    min-height: 96px;
+    padding: 9px 11px;
+    resize: vertical;
+}
+
+select {
+    color-scheme: dark;
+}
+
+select option {
+    background: #181818;
+    color: var(--texto);
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"])::placeholder,
+textarea::placeholder {
+    color: #666;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):hover,
+select:hover,
+textarea:hover {
+    border-color: var(--borda-clara);
+    background: #131313;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--verde);
+    background: #141414;
+    box-shadow: 0 0 0 3px rgba(62, 207, 142, .10);
+}
+
+input:not([type="checkbox"]):not([type="radio"]):disabled,
+select:disabled,
+textarea:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+}
+
+/* Checkbox e radio: compactos, alinhados e sem herdar a caixa dos inputs de texto */
+input[type="checkbox"],
+input[type="radio"] {
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    min-height: 16px;
+    margin: 0;
+    padding: 0;
+    accent-color: var(--verde);
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+input[type="checkbox"]:focus-visible,
+input[type="radio"]:focus-visible {
+    outline: 2px solid var(--verde);
+    outline-offset: 2px;
+}
+
+/* Upload de arquivo: mesma régua visual sem transformar o botão nativo em campo de texto */
+input[type="file"] {
+    width: 100%;
+    min-height: 40px;
+    padding: 5px;
+    border: 1px solid var(--borda-clara);
+    border-radius: 7px;
+    background: #101010;
+    color: var(--texto-secundario);
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+input[type="file"]::file-selector-button {
+    min-height: 30px;
+    margin-right: 9px;
+    padding: 5px 10px;
+    border: 1px solid var(--borda-clara);
+    border-radius: 5px;
+    background: #202020;
+    color: var(--texto);
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+input[type="file"]:hover {
+    border-color: #505050;
+}
+
+input[type="file"]:focus-visible {
+    outline: 2px solid var(--verde);
+    outline-offset: 2px;
+}
+
+/* Campos de senha permanecem com o mesmo tratamento dos campos de texto */
+input[type="password"] {
+    letter-spacing: .01em;
+}
+
+/* Espaçamento previsível quando controles são empilhados */
+label {
+    line-height: 1.35;
+}
+
+@media (max-width: 700px) {
+    button {
+        min-height: 42px;
+    }
+
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+    select,
+    textarea {
+        font-size: 16px;
+    }
+
+    input[type="checkbox"],
+    input[type="radio"] {
+        width: 17px;
+        height: 17px;
+        min-width: 17px;
+        min-height: 17px;
+    }
+
+    input[type="file"] {
+        min-height: 42px;
+        font-size: 14px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    button,
+    input,
+    select,
+    textarea {
+        transition: none;
+    }
+}
+\n

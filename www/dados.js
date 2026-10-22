@@ -102,6 +102,9 @@ const tamanhoPaginaSincronizacao =
 const chaveUltimaSincronizacao =
     "ultima_sincronizacao_materiais";
 
+const chaveVersaoInventarioLocal =
+    "versao_inventario_materiais";
+
 
 // ============================================================
 // CONTROLE DE INVENTÁRIO ZERADO
@@ -1064,538 +1067,163 @@ function obterClienteSupabaseParaDados() {
 //
 // ============================================================
 
-async function sincronizarMateriaisLocaisComSupabase(
-    forcar = false
-) {
+async function obterSessaoInventarioPmobile() {
+    const usuario =
+        (typeof usuarioPmobileAtual !== "undefined" && usuarioPmobileAtual?.usuario)
+            ? usuarioPmobileAtual
+            : window.usuarioPmobileAtual;
+    const credencial =
+        (typeof credencialPmobileAtual !== "undefined" && credencialPmobileAtual)
+            ? credencialPmobileAtual
+            : window.credencialPmobileAtual;
+    if (!usuario || !credencial) throw new Error("Sessão do PMOBILE indisponível para sincronização.");
+    return { usuario, credencial };
+}
 
-    // ========================================================
-    // EVITAR DUPLICIDADE
-    // ========================================================
+async function obterVersaoInventarioRemota() {
+    const cliente = obterClienteSupabaseParaDados();
+    const sessao = await obterSessaoInventarioPmobile();
+    const { data, error } = await cliente.rpc("pmobile_materiais_obter_versao", {
+        p_usuario: sessao.usuario,
+        p_credencial: sessao.credencial
+    });
+    if (error) throw error;
+    const registro = Array.isArray(data) ? data[0] : data;
+    if (!registro?.versao) throw new Error("O PostgreSQL não retornou a versão do inventário.");
+    return { versao: String(registro.versao), total: Number(registro.total_materiais || 0) };
+}
 
-    if (
-        sincronizacaoEmAndamento
-    ) {
-
-        console.warn(
-            "Já existe uma sincronização de materiais em andamento."
-        );
-
-
-        return {
-            sucesso:
-                false,
-
-            ignorada:
-                true,
-
-            motivo:
-                "sincronizacao_em_andamento"
+async function salvarPaginaInventarioLocal(pagina, versao) {
+    const banco = await abrirBanco();
+    return await new Promise(function(resolve, reject) {
+        const transacao = banco.transaction(nomeTabela, "readwrite");
+        const tabela = transacao.objectStore(nomeTabela);
+        for (const registro of pagina) {
+            const material = normalizarMaterialLocal(registro);
+            if (!material) continue;
+            material._pmobileSyncVersion = versao;
+            tabela.put(material);
+        }
+        transacao.oncomplete = function() { banco.close(); resolve(); };
+        transacao.onerror = function(evento) { banco.close(); reject(evento.target.error); };
+        transacao.onabort = function(evento) {
+            banco.close();
+            reject(evento.target.error || new Error("Transação de sincronização abortada."));
         };
+    });
+}
 
-    }
-
-
-    // ========================================================
-    // VERIFICAR INTERNET
-    // ========================================================
-
-    if (
-        navigator.onLine !== true
-    ) {
-
-        console.log(
-            "📴 Dispositivo offline. Sincronização não executada."
-        );
-
-
-        mostrarStatusSincronizacaoOffline(
-            "🔴 Offline indisponível — este dispositivo ainda não possui inventário local."
-        );
-
-
-        return {
-            sucesso:
-                false,
-
-            offline:
-                true
+async function limparVersoesAntigasDoInventario(versaoAtual) {
+    const banco = await abrirBanco();
+    return await new Promise(function(resolve, reject) {
+        const transacao = banco.transaction(nomeTabela, "readwrite");
+        const tabela = transacao.objectStore(nomeTabela);
+        const cursor = tabela.openCursor();
+        cursor.onsuccess = function(evento) {
+            const atual = evento.target.result;
+            if (!atual) return;
+            if (atual.value?._pmobileSyncVersion !== versaoAtual) atual.delete();
+            atual.continue();
         };
+        transacao.oncomplete = function() { banco.close(); resolve(); };
+        transacao.onerror = function(evento) { banco.close(); reject(evento.target.error); };
+        transacao.onabort = function(evento) {
+            banco.close();
+            reject(evento.target.error || new Error("Limpeza de versões antigas abortada."));
+        };
+    });
+}
 
+async function sincronizarMateriaisLocaisComSupabase(forcar = false) {
+    if (sincronizacaoEmAndamento) {
+        return { sucesso: false, ignorada: true, motivo: "sincronizacao_em_andamento" };
     }
+    if (navigator.onLine !== true) {
+        mostrarStatusSincronizacaoOffline("🔴 Offline indisponível — este dispositivo ainda não possui inventário local.");
+        return { sucesso: false, offline: true };
+    }
+    sincronizacaoEmAndamento = true;
+    try {
+        const remoto = await obterVersaoInventarioRemota();
+        const localVersao = await obterConfiguracaoLocal(chaveVersaoInventarioLocal);
+        const quantidadeLocal = await contarMateriaisLocais();
 
-
-    // ========================================================
-    // VERIFICAR SE PRECISA SINCRONIZAR
-    // ========================================================
-
-    if (
-        !forcar
-    ) {
-
-        const quantidadeLocal =
-            await contarMateriaisLocais();
-
-
-        if (
-            quantidadeLocal > 0
-        ) {
-
-            console.log(
-                "📦 Já existe inventário local com " +
-                quantidadeLocal.toLocaleString("pt-BR") +
-                " materiais."
-            );
-
-
-            mostrarStatusSincronizacaoOffline(
-                "🟢 Offline OK — " +
-                quantidadeLocal.toLocaleString("pt-BR") +
-                " materiais disponíveis."
-            );
-
-
-            return {
-                sucesso:
-                    true,
-
-                sincronizada:
-                    false,
-
-                existente:
-                    true,
-
-                quantidade:
-                    quantidadeLocal
-            };
-
+        if (!forcar && quantidadeLocal > 0 && localVersao && String(localVersao) === remoto.versao) {
+            mostrarStatusSincronizacaoOffline("🟢 Offline OK — " + quantidadeLocal.toLocaleString("pt-BR") + " materiais disponíveis.");
+            return { sucesso: true, sincronizada: false, atualizada: false, existente: true, quantidade: quantidadeLocal, versao: remoto.versao };
         }
 
-    }
+        if (remoto.total === 0) throw new Error("O PostgreSQL informou que o inventário oficial está vazio.");
 
-
-    sincronizacaoEmAndamento =
-        true;
-
-
-    mostrarStatusSincronizacaoOffline(
-        "🟡 Sincronizando inventário offline..."
-    );
-
-
-    console.log(
-        "🟡 Iniciando sincronização completa do inventário..."
-    );
-
-
-    try {
-
-        const clienteSupabase =
-            obterClienteSupabaseParaDados();
-
-
-        const inventarioCompleto =
-            [];
-
-
-        let inicio =
-            0;
-
-
-        // ====================================================
-        // PAGINAÇÃO
-        // ====================================================
-        //
-        // Cada requisição busca uma página de registros.
-        //
-        // Exemplo:
-        //
-        // 0    → 999
-        // 1000 → 1999
-        // 2000 → 2999
-        //
-        // até o final da tabela.
-        //
-        // ====================================================
+        mostrarStatusSincronizacaoOffline("🟡 Sincronizando inventário do PostgreSQL...");
+        const cliente = obterClienteSupabaseParaDados();
+        const sessao = await obterSessaoInventarioPmobile();
+        let ultimoId = 0;
+        let totalRecebido = 0;
 
         while (true) {
+            const { data, error } = await cliente.rpc("pmobile_materiais_listar_pagina", {
+                p_usuario: sessao.usuario,
+                p_credencial: sessao.credencial,
+                p_ultimo_id: ultimoId,
+                p_limite: tamanhoPaginaSincronizacao
+            });
+            if (error) throw error;
+            const pagina = Array.isArray(data) ? data : [];
+            if (!pagina.length) break;
 
-            const fim =
-                inicio +
-                tamanhoPaginaSincronizacao -
-                1;
-
-
-            console.log(
-                "🔄 Baixando materiais " +
-                (inicio + 1).toLocaleString("pt-BR") +
-                " até " +
-                (fim + 1).toLocaleString("pt-BR") +
-                "..."
-            );
-
-
-            const {
-                data,
-                error
-            } =
-                await clienteSupabase
-                    .from(
-                        "materiais"
-                    )
-                    .select(
-                        "id,codigo,descricao,referencia,marca,local,quantidade,quantidade_reservada,disponivel,ultima_entrada"
-                    )
-                    .order(
-                        "id",
-                        {
-                            ascending:
-                                true
-                        }
-                    )
-                    .range(
-                        inicio,
-                        fim
-                    );
-
-
-            // ================================================
-            // ERRO
-            // ================================================
-
-            if (
-                error
-            ) {
-
-                throw error;
-
-            }
-
-
-            // ================================================
-            // GARANTIR ARRAY
-            // ================================================
-
-            const pagina =
-                Array.isArray(data)
-                    ? data
-                    : [];
-
-
-            // ================================================
-            // ADICIONAR AO INVENTÁRIO COMPLETO
-            // ================================================
-
-            inventarioCompleto.push(
-                ...pagina
-            );
-
-
-            console.log(
-                "📦 Materiais recebidos até agora: " +
-                inventarioCompleto.length.toLocaleString("pt-BR")
-            );
-
+            await salvarPaginaInventarioLocal(pagina, remoto.versao);
+            totalRecebido += pagina.length;
+            ultimoId = Number(pagina[pagina.length - 1].id);
 
             mostrarStatusSincronizacaoOffline(
-                "🟡 Sincronizando inventário offline... " +
-                inventarioCompleto.length.toLocaleString("pt-BR") +
-                " materiais"
+                "🟡 Sincronizando inventário do PostgreSQL... " +
+                totalRecebido.toLocaleString("pt-BR") + " / " +
+                remoto.total.toLocaleString("pt-BR")
             );
 
-
-            // ================================================
-            // FINAL DA TABELA
-            // ================================================
-            //
-            // Se retornou menos que o tamanho da página,
-            // chegamos ao final.
-            //
-            // ================================================
-
-            if (
-                pagina.length <
-                tamanhoPaginaSincronizacao
-            ) {
-
-                break;
-
-            }
-
-
-            inicio +=
-                tamanhoPaginaSincronizacao;
-
+            if (pagina.length < tamanhoPaginaSincronizacao) break;
+            await new Promise(function(resolve) { setTimeout(resolve, 0); });
         }
 
-
-        // ====================================================
-        // VALIDAR INVENTÁRIO RECEBIDO
-        // ====================================================
-
-        if (
-            inventarioCompleto.length === 0
-        ) {
-
-            throw new Error(
-                "O Supabase respondeu, mas nenhum material foi encontrado."
-            );
-
+        if (totalRecebido !== remoto.total) {
+            throw new Error("Quantidade sincronizada (" + totalRecebido + ") diferente da quantidade oficial (" + remoto.total + ").");
         }
 
+        await limparVersoesAntigasDoInventario(remoto.versao);
+        const dataSincronizacao = await registrarSincronizacao();
+        await salvarConfiguracaoLocal(chaveVersaoInventarioLocal, remoto.versao);
+        materiais = [];
 
-        // ====================================================
-        // GRAVAR CÓPIA LOCAL
-        // ====================================================
-
-        console.log(
-            "💾 Gravando " +
-            inventarioCompleto.length.toLocaleString("pt-BR") +
-            " materiais no IndexedDB..."
-        );
-
-
-        mostrarStatusSincronizacaoOffline(
-            "🟡 Gravando inventário offline... " +
-            inventarioCompleto.length.toLocaleString("pt-BR") +
-            " materiais"
-        );
-
-
-        await salvarCopiaLocalDoSupabase(
-            inventarioCompleto
-        );
-
-
-        // ====================================================
-        // REGISTRAR DATA
-        // ====================================================
-
-        const dataSincronizacao =
-            await registrarSincronizacao();
-
-
-        // ====================================================
-        // RESULTADO
-        // ====================================================
-
-        console.log(
-            "🟢 Sincronização do inventário concluída."
-        );
-
-
-        console.log(
-            "📦 Materiais armazenados localmente: " +
-            inventarioCompleto.length.toLocaleString("pt-BR")
-        );
-
-
-        console.log(
-            "🕒 Última sincronização: " +
-            dataSincronizacao
-        );
-
-
-        mostrarStatusSincronizacaoOffline(
-            "🟢 Offline OK — " +
-            inventarioCompleto.length.toLocaleString("pt-BR") +
-            " materiais sincronizados."
-        );
-
-
-        return {
-
-            sucesso:
-                true,
-
-            sincronizada:
-                true,
-
-            quantidade:
-                inventarioCompleto.length,
-
-            data:
-                dataSincronizacao
-
-        };
-
-
+        mostrarStatusSincronizacaoOffline("🟢 Offline OK — " + totalRecebido.toLocaleString("pt-BR") + " materiais sincronizados.");
+        return { sucesso: true, sincronizada: true, atualizada: true, quantidade: totalRecebido, data: dataSincronizacao, versao: remoto.versao };
     } catch (erro) {
-
-        console.error(
-            "❌ Erro ao sincronizar materiais:",
-            erro
-        );
-
-
-        mostrarStatusSincronizacaoOffline(
-            "🔴 Falha ao sincronizar o inventário offline."
-        );
-
-
-        return {
-
-            sucesso:
-                false,
-
-            erro:
-                erro
-
-        };
-
-
+        console.error("❌ Erro ao sincronizar materiais:", erro);
+        mostrarStatusSincronizacaoOffline("🔴 Falha ao sincronizar o inventário offline.");
+        return { sucesso: false, erro };
     } finally {
-
-        sincronizacaoEmAndamento =
-            false;
-
+        sincronizacaoEmAndamento = false;
     }
-
 }
-
-
-// ============================================================
-// FUNÇÃO: garantirInventarioLocal()
-// ============================================================
-//
-// OBJETIVO:
-//
-// Garantir que o dispositivo possua uma cópia local.
-//
-// COMPORTAMENTO:
-//
-// Se existir inventário local:
-//
-//     não baixa novamente.
-//
-// Se não existir:
-//
-//     estando online → sincroniza.
-//
-// Se estiver offline:
-//
-//     mantém o banco local vazio.
-//
-// ============================================================
 
 async function garantirInventarioLocal() {
-
     try {
-
-        const quantidadeLocal =
-            await contarMateriaisLocais();
-
-
-        // ====================================================
-        // JÁ EXISTE CÓPIA LOCAL
-        // ====================================================
-
-        if (
-            quantidadeLocal > 0
-        ) {
-
-            console.log(
-                "✅ Cópia local disponível: " +
-                quantidadeLocal.toLocaleString("pt-BR") +
-                " materiais."
-            );
-
-
-            mostrarStatusSincronizacaoOffline(
-                "🟢 Offline OK — " +
-                quantidadeLocal.toLocaleString("pt-BR") +
-                " materiais disponíveis."
-            );
-
-
-            return {
-
-                disponivel:
-                    true,
-
-                quantidade:
-                    quantidadeLocal
-
-            };
-
+        if (navigator.onLine !== true) {
+            const quantidadeLocal = await contarMateriaisLocais();
+            if (quantidadeLocal > 0) {
+                mostrarStatusSincronizacaoOffline("🟢 Offline OK — " + quantidadeLocal.toLocaleString("pt-BR") + " materiais disponíveis.");
+                return { disponivel: true, quantidade: quantidadeLocal, offline: true };
+            }
+            mostrarStatusSincronizacaoOffline("🔴 Offline indisponível — este dispositivo ainda não possui inventário local.");
+            return { disponivel: false, quantidade: 0, offline: true };
         }
-
-
-        // ====================================================
-        // NÃO EXISTE CÓPIA
-        // ====================================================
-
-        if (
-            navigator.onLine !== true
-        ) {
-
-            console.warn(
-                "📴 Sem inventário local e sem internet."
-            );
-
-
-            mostrarStatusSincronizacaoOffline(
-                "🔴 Offline indisponível — este dispositivo ainda não possui inventário local."
-            );
-
-
-            return {
-
-                disponivel:
-                    false,
-
-                quantidade:
-                    0,
-
-                offline:
-                    true
-
-            };
-
-        }
-
-
-        // ====================================================
-        // PRIMEIRA SINCRONIZAÇÃO
-        // ====================================================
-
-        console.log(
-            "🟡 Nenhum inventário local encontrado."
-        );
-
-
-        console.log(
-            "🟡 Iniciando primeira sincronização com o Supabase..."
-        );
-
-
-        return await sincronizarMateriaisLocaisComSupabase(
-            false
-        );
-
+        return await sincronizarMateriaisLocaisComSupabase(false);
     } catch (erro) {
-
-        console.error(
-            "Erro ao garantir inventário local:",
-            erro
-        );
-
-
-        return {
-
-            disponivel:
-                false,
-
-            quantidade:
-                0,
-
-            erro:
-                erro
-
-        };
-
+        console.error("Erro ao garantir inventário local:", erro);
+        return { disponivel: false, quantidade: 0, erro };
     }
-
 }
+
 // ============================================================
 // FUNÇÃO: limparMateriais()
 // ============================================================
@@ -1785,12 +1413,22 @@ async function carregarMateriais() {
         // EXISTE INVENTÁRIO LOCAL
         // ====================================================
 
+        const versaoLocal =
+            await obterConfiguracaoLocal(chaveVersaoInventarioLocal);
+
+        const dadosValidos =
+            versaoLocal
+                ? dados.filter(function(item) {
+                    return item?._pmobileSyncVersion === String(versaoLocal);
+                })
+                : dados;
+
         if (
-            dados.length > 0
+            dadosValidos.length > 0
         ) {
 
             materiais =
-                dados
+                dadosValidos
                     .map(
                         normalizarMaterialLocal
                     )
@@ -1856,9 +1494,7 @@ async function carregarMateriais() {
         ) {
 
             const resultado =
-                await sincronizarMateriaisLocaisComSupabase(
-                    false
-                );
+                await garantirInventarioLocal();
 
 
             if (
@@ -2368,3 +2004,32 @@ window.addEventListener(
 // ============================================================
 
 carregarMateriais();
+
+
+// ============================================================
+// INICIALIZAÇÃO AUTOMÁTICA DO INVENTÁRIO LOCAL
+// ============================================================
+
+let inicializacaoInventarioLocalEmAndamento = false;
+
+async function iniciarInventarioLocalPmobile() {
+    if (inicializacaoInventarioLocalEmAndamento) return;
+
+    inicializacaoInventarioLocalEmAndamento = true;
+
+    try {
+        await garantirInventarioLocal();
+    } catch (erro) {
+        console.error("❌ Falha ao inicializar inventário local:", erro);
+    } finally {
+        inicializacaoInventarioLocalEmAndamento = false;
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    setTimeout(iniciarInventarioLocalPmobile, 800);
+});
+
+window.addEventListener("online", function() {
+    setTimeout(iniciarInventarioLocalPmobile, 500);
+});

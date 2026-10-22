@@ -1,0 +1,544 @@
+/* PMOBILE - Importação manual de Rastreio */
+.rastreio-importacao-painel {
+    display: grid;
+    gap: 16px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.rastreio-importacao-cabecalho {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-width: 0;
+}
+
+.rastreio-importacao-cabecalho > div {
+    min-width: 0;
+}
+
+.rastreio-importacao-cabecalho h2 {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.3;
+}
+
+.rastreio-importacao-cabecalho p {
+    max-width: 620px;
+    margin: 5px 0 0;
+    color: #888;
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.rastreio-importacao-acoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.rastreio-importacao-status {
+    min-height: 20px;
+    color: #999;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.rastreio-importacao-resumo {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(80px, .55fr));
+    gap: 8px;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #292929;
+}
+
+.rastreio-importacao-resumo strong,
+.rastreio-importacao-resumo span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.rastreio-importacao-resumo strong { color: #e8e8e8; font-size: 12px; }
+.rastreio-importacao-resumo span { color: #888; font-size: 11px; }
+
+.rastreio-importacao-colunas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    max-height: 72px;
+    overflow: auto;
+    padding: 2px 0;
+}
+
+.rastreio-importacao-colunas span {
+    padding: 4px 7px;
+    border: 1px solid #333;
+    border-radius: 5px;
+    background: #1b1b1b;
+    color: var(--texto-secundario);
+    font-size: 10px;
+    line-height: 1.2;
+}
+
+.rastreio-importacao-aviso {
+    padding: 10px 12px;
+    border: 1px solid var(--borda);
+    border-radius: 8px;
+    background: #191919;
+    color: var(--texto-secundario);
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.rastreio-importacao-motoristas-titulo {
+    display: grid;
+    gap: 4px;
+    margin: 2px 0 8px;
+    padding-bottom: 9px;
+    border-bottom: 1px solid #292929;
+}
+
+.rastreio-importacao-motoristas-titulo strong {
+    color: #e5e5e5;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.rastreio-importacao-motoristas-titulo span {
+    color: #777;
+    font-size: 11px;
+    line-height: 1.45;
+}
+
+.rastreio-importacao-motoristas-lista {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.rastreio-importacao-motoristas-lista label {
+    display: grid;
+    grid-template-columns: minmax(90px, .65fr) minmax(150px, 1.35fr);
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    padding: 9px 10px;
+    border: 1px solid #292929;
+    border-radius: 8px;
+    background: #191919;
+}
+
+.rastreio-importacao-motoristas-lista label > span {
+    min-width: 0;
+    color: var(--texto-secundario);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+.rastreio-importacao-motoristas-lista input {
+    width: 100%;
+    min-height: 38px;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 7px 10px;
+    border: 1px solid #353535;
+    border-radius: 7px;
+    background: #141414;
+    color: var(--texto);
+    font-size: 13px;
+}
+
+.rastreio-importacao-motoristas-lista input::placeholder { color: #666; }
+
+.rastreio-importacao-motoristas-lista input:focus {
+    outline: none;
+    border-color: var(--verde, #3ecf8e);
+    box-shadow: 0 0 0 2px rgba(62, 207, 142, .10);
+}
+
+.rastreio-importacao-previa-titulo {
+    margin-top: 2px;
+    color: #888;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.rastreio-importacao-tabela {
+    max-width: 100%;
+    overflow-x: auto;
+    border: 1px solid #292929;
+    border-radius: 8px;
+}
+
+.rastreio-importacao-tabela .cab,
+.rastreio-importacao-tabela .linha {
+    display: grid;
+    grid-template-columns: 56px minmax(150px, 1.4fr) minmax(100px, 1fr) minmax(100px, 1fr) 80px minmax(120px, 1fr);
+    min-width: 680px;
+}
+
+.rastreio-importacao-tabela .cab { background: #181818; border-bottom: 1px solid #292929; }
+.rastreio-importacao-tabela .cab span,
+.rastreio-importacao-tabela .linha span {
+    min-width: 0;
+    padding: 8px 9px;
+    border-right: 1px solid #292929;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.rastreio-importacao-tabela .cab span { color: #777; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+.rastreio-importacao-tabela .linha { background: #1b1b1b; color: #ccc; font-size: 11px; border-bottom: 1px solid #292929; }
+.rastreio-importacao-tabela .linha:last-child { border-bottom: 0; }
+
+@media (max-width: 800px) {
+    .rastreio-importacao-motoristas-lista { grid-template-columns: 1fr; }
+    .rastreio-importacao-resumo { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 650px) {
+    .rastreio-importacao-painel { gap: 12px; }
+    .rastreio-importacao-cabecalho { align-items: stretch; flex-direction: column; gap: 10px; }
+    .rastreio-importacao-cabecalho .botao-principal { width: 100%; }
+
+    .rastreio-importacao-resumo {
+        grid-template-columns: 1fr 1fr;
+        gap: 6px 10px;
+        padding: 8px 0;
+    }
+
+    .rastreio-importacao-resumo strong { grid-column: 1 / -1; }
+
+    .rastreio-importacao-colunas { max-height: 64px; }
+
+    .rastreio-importacao-motoristas-titulo {
+        margin-top: 0;
+        padding-bottom: 8px;
+    }
+
+    .rastreio-importacao-motoristas-lista { gap: 7px; }
+
+    .rastreio-importacao-motoristas-lista label {
+        grid-template-columns: 78px minmax(0, 1fr);
+        gap: 9px;
+        padding: 8px;
+    }
+
+    .rastreio-importacao-motoristas-lista input {
+        min-height: 40px;
+        font-size: 13px;
+    }
+
+    .rastreio-importacao-acoes {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .rastreio-importacao-acoes button { width: 100%; }
+}
+
+@media (max-width: 390px) {
+    .rastreio-importacao-resumo { grid-template-columns: 1fr; }
+    .rastreio-importacao-resumo strong { grid-column: auto; }
+
+    .rastreio-importacao-motoristas-lista label {
+        grid-template-columns: 1fr;
+        gap: 5px;
+        padding: 9px;
+    }
+}
+/* Editor de motorista — popup */
+.rastreio-modal-aberto { overflow: hidden; }
+
+.rastreio-editor-motorista {
+    position: fixed;
+    inset: 0;
+    z-index: 10050;
+    display: grid;
+    place-items: center;
+    padding: 18px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .18s ease, visibility .18s ease;
+}
+
+.rastreio-editor-motorista.aberto {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.rastreio-editor-motorista-fundo {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, .62);
+    backdrop-filter: blur(5px);
+}
+
+.rastreio-editor-motorista-dialog {
+    position: relative;
+    width: min(100%, 430px);
+    box-sizing: border-box;
+    padding: 20px;
+    border: 1px solid #333;
+    border-radius: 14px;
+    background: #171717;
+    color: var(--texto);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .45);
+    transform: translateY(8px) scale(.98);
+    transition: transform .18s ease;
+}
+
+.rastreio-editor-motorista.aberto .rastreio-editor-motorista-dialog {
+    transform: translateY(0) scale(1);
+}
+
+.rastreio-editor-motorista-cabecalho {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.rastreio-editor-motorista-kicker {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--verde, #3ecf8e);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .1em;
+}
+
+.rastreio-editor-motorista-cabecalho h3 {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.25;
+}
+
+.rastreio-editor-motorista-cabecalho p {
+    margin: 5px 0 0;
+    color: #999;
+    font-size: 12px;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.rastreio-editor-motorista-fechar {
+    flex: 0 0 auto;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 1px solid #333;
+    border-radius: 8px;
+    background: var(--fundo-hover);
+    color: var(--texto-secundario);
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.rastreio-editor-motorista-fechar:hover {
+    background: var(--fundo-ativo);
+    color: #fff;
+}
+
+.rastreio-editor-motorista-campo {
+    display: grid;
+    gap: 7px;
+    margin-top: 22px;
+}
+
+.rastreio-editor-motorista-campo label {
+    color: #ccc;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+}
+
+.rastreio-editor-motorista-campo input {
+    width: 100%;
+    min-height: 46px;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    border: 1px solid #3b3b3b;
+    border-radius: 9px;
+    background: #101010;
+    color: var(--texto);
+    font-size: 15px;
+}
+
+.rastreio-editor-motorista-campo input:focus {
+    outline: none;
+    border-color: var(--verde, #3ecf8e);
+    box-shadow: 0 0 0 3px rgba(62, 207, 142, .12);
+}
+
+.rastreio-editor-motorista-campo small {
+    color: #777;
+    font-size: 10px;
+    line-height: 1.4;
+}
+
+.rastreio-editor-motorista-acoes {
+    display: grid;
+    grid-template-columns: 1fr 1.35fr;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.rastreio-editor-motorista-acoes button {
+    min-height: 42px;
+}
+
+@media (max-width: 520px) {
+    .rastreio-editor-motorista {
+        align-items: end;
+        padding: 10px;
+    }
+
+    .rastreio-editor-motorista-dialog {
+        width: 100%;
+        padding: 18px;
+        border-radius: 15px;
+        transform: translateY(18px);
+    }
+
+    .rastreio-editor-motorista.aberto .rastreio-editor-motorista-dialog {
+        transform: translateY(0);
+    }
+
+    .rastreio-editor-motorista-cabecalho h3 {
+        font-size: 17px;
+    }
+
+    .rastreio-editor-motorista-campo {
+        margin-top: 18px;
+    }
+
+    .rastreio-editor-motorista-campo input {
+        min-height: 48px;
+        font-size: 16px;
+    }
+
+    .rastreio-editor-motorista-acoes {
+        grid-template-columns: 1fr;
+    }
+
+    .rastreio-editor-motorista-acoes .botao-principal {
+        order: -1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rastreio-editor-motorista,
+    .rastreio-editor-motorista-dialog {
+        transition: none;
+    }
+}
+
+
+.rastreio-importacao-cabecalho .botao-principal {
+    flex: 0 0 auto;
+    min-width: 150px;
+}
+
+.rastreio-importacao-tabela .linha {
+    transition: background-color .14s ease;
+}
+
+.rastreio-importacao-tabela .linha:hover {
+    background: var(--fundo-hover);
+}
+
+.rastreio-importacao-tabela .cab span:last-child,
+.rastreio-importacao-tabela .linha span:last-child {
+    border-right: 0;
+}
+
+.rastreio-importacao-status:empty {
+    min-height: 0;
+}
+
+@media (max-width: 650px) {
+    .rastreio-importacao-cabecalho .botao-principal { min-width: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rastreio-importacao-tabela .linha { transition: none; }
+}
+
+@media (min-width:701px) and (max-width:1024px){.rastreio-importacao-resumo{grid-template-columns:1.4fr repeat(3,minmax(70px,.6fr))}.rastreio-importacao-motoristas-lista{grid-template-columns:1fr}}
+
+/* ============================================================
+   TABELA — ADAPTAÇÃO REAL PARA TELAS ESTREITAS
+   No celular a tabela deixa de impor 680px de largura.
+   As seis colunas continuam presentes, mas passam a dividir
+   proporcionalmente o viewport e permitem quebra de texto.
+   ============================================================ */
+
+@media (max-width: 650px) {
+    .rastreio-importacao-tabela {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    .rastreio-importacao-tabela .cab,
+    .rastreio-importacao-tabela .linha {
+        width: 100%;
+        min-width: 0;
+        grid-template-columns:
+            minmax(32px, .38fr)
+            minmax(0, 1.35fr)
+            minmax(0, .95fr)
+            minmax(0, 1.05fr)
+            minmax(0, .8fr)
+            minmax(0, 1.05fr);
+    }
+
+    .rastreio-importacao-tabela .cab span,
+    .rastreio-importacao-tabela .linha span {
+        min-width: 0;
+        padding: 7px 5px;
+        overflow: visible;
+        text-overflow: clip;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .rastreio-importacao-tabela .cab span {
+        font-size: 8px;
+        line-height: 1.15;
+    }
+
+    .rastreio-importacao-tabela .linha {
+        font-size: 10px;
+        line-height: 1.25;
+    }
+}
+
+@media (max-width: 390px) {
+    .rastreio-importacao-tabela .cab span,
+    .rastreio-importacao-tabela .linha span {
+        padding-left: 4px;
+        padding-right: 4px;
+    }
+
+    .rastreio-importacao-tabela .cab span {
+        font-size: 7px;
+    }
+
+    .rastreio-importacao-tabela .linha {
+        font-size: 9px;
+    }
+}
+\n

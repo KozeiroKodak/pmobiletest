@@ -2488,4 +2488,28 @@ if (document.readyState === "loading") {
 }
 
 
+
+// ============================================================
+// ATUALIZAÇÃO OTA MANUAL
+// ============================================================
+
+function procurarAtualizacoesOta() {
+    const ota =
+        window.PMOBILE_OTA;
+
+    if (
+        ota &&
+        typeof ota.procurarAtualizacoes === "function"
+    ) {
+        ota.procurarAtualizacoes();
+        return;
+    }
+
+    if (typeof alert === "function") {
+        alert(
+            "A verificação manual de atualizações está disponível no aplicativo Android."
+        );
+    }
+}
+
 window.PMOBILE_OK = true;

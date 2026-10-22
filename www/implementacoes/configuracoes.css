@@ -1,0 +1,55 @@
+/* PMOBILE — Configurações */
+/* ============================================================
+   CONFIGURAÇÕES / PAINEL ADMINISTRATIVO
+   ============================================================ */
+
+.configuracoes-acoes {
+    display: grid;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.configuracoes-acoes button {
+    width: 100%;
+}
+
+.configuracoes-painel-admin {
+    border-left: 4px solid currentColor;
+}
+
+/* ============================================================
+   GERENCIAMENTO DE USUÁRIOS
+   ============================================================ */
+
+.solicitacao-usuario-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px;
+    margin-top: 12px;
+    border: 1px solid currentColor;
+    border-radius: 10px;
+}
+
+.solicitacao-usuario-card small {
+    opacity: 0.7;
+}
+
+.seletor-nivel-usuario {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.solicitacao-usuario-acoes {
+    display: flex;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.solicitacao-usuario-acoes button {
+    flex: 1;
+}
+
+
+@media (max-width:700px){.configuracoes-acoes{display:grid;grid-template-columns:1fr}.configuracoes-acoes button{width:100%}.solicitacao-usuario-acoes{display:grid;grid-template-columns:1fr}.solicitacao-usuario-acoes button{width:100%}}

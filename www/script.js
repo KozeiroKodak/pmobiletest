@@ -50,6 +50,8 @@ const telasSistema = [
 
     "pesquisa",
 
+    "rastreio",
+
     "contagemManual",
 
     "conferencia",
@@ -83,6 +85,10 @@ const itensMenuSistema = [
     "menuPesquisa",
 
     "menuImportacao",
+
+    "menuImportacaoNF",
+
+    "menuRastreio",
 
     "menuContagemManual",
 
@@ -668,6 +674,10 @@ function restaurarSessaoPmobile(dadosUsuario, senha) {
 
     mostrarTelaSistema("homeSistema", null);
 
+    if (typeof iniciarInventarioLocalPmobile === "function") {
+        setTimeout(iniciarInventarioLocalPmobile, 0);
+    }
+
 }
 
 
@@ -1220,6 +1230,10 @@ async function entrarInterface(event) {
             null
         );
 
+        if (typeof iniciarInventarioLocalPmobile === "function") {
+            setTimeout(iniciarInventarioLocalPmobile, 0);
+        }
+
     } catch (erro) {
 
         console.error(
@@ -1738,6 +1752,8 @@ function atualizarVisibilidadeConfiguracoes() {
         menuSair: !!usuario,
         menuConfiguracoes: isAdmin,
         menuImportacao: isAdmin,
+        menuImportacaoNF: isAdmin,
+        menuRastreio: isAdmin || isNivel2,
         menuConferencia: isAdmin,
         menuConferencias: isAdmin,
         menuPesquisa: isAdmin || isNivel2,
@@ -1765,6 +1781,7 @@ function abrirConfiguracoes() {
     const usuarios = document.getElementById("painelGerenciamentoUsuarios");
     const reset = document.getElementById("painelGerenciamentoReset");
     const conta = document.getElementById("painelConfiguracoesUsuario");
+    const arquivos = document.getElementById("painelArquivosTeste");
     const resumo = document.getElementById("resumoContaPmobile");
     const usuario = window.usuarioPmobileAtual;
     const isAdmin = usuario && usuario.nivel === "ADMIN";
@@ -1774,6 +1791,7 @@ function abrirConfiguracoes() {
     if (usuarios) usuarios.style.display = "none";
     if (reset) reset.style.display = "none";
     if (conta) conta.style.display = "block";
+    if (arquivos) arquivos.style.display = "none";
 
     if (resumo) {
         resumo.innerHTML = usuario
@@ -1792,6 +1810,8 @@ function abrirManutencaoBanco() {
     }
 
     const manutencao = document.getElementById("painelConfiguracoesManutencao");
+    const arquivos = document.getElementById("painelArquivosTeste");
+    if (arquivos) arquivos.style.display = "none";
     if (manutencao) manutencao.style.display = "block";
 
 }
@@ -2467,5 +2487,29 @@ if (document.readyState === "loading") {
 
 }
 
+
+
+// ============================================================
+// ATUALIZAÇÃO OTA MANUAL
+// ============================================================
+
+function procurarAtualizacoesOta() {
+    const ota =
+        window.PMOBILE_OTA;
+
+    if (
+        ota &&
+        typeof ota.procurarAtualizacoes === "function"
+    ) {
+        ota.procurarAtualizacoes();
+        return;
+    }
+
+    if (typeof alert === "function") {
+        alert(
+            "A verificação manual de atualizações está disponível no aplicativo Android."
+        );
+    }
+}
 
 window.PMOBILE_OK = true;

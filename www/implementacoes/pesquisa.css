@@ -113,3 +113,12 @@
         white-space: normal;
     }
 }
+
+
+/* Responsividade própria da Pesquisa */
+
+@media (max-width: 900px) { .pesquisa-item { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+@media (max-width: 700px) { .pesquisa-item { grid-template-columns: 1fr; } .pesquisa-celula { padding-left: 0; padding-right: 0; border-left: 0; border-top: 1px solid var(--borda); } .pesquisa-item .pesquisa-celula:first-child { border-top: 0; } }
+
+@media (max-width:900px){.pesquisa-item{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+@media (max-width:700px){.pesquisa-item{grid-template-columns:1fr}.pesquisa-celula{padding-left:0;padding-right:0;border-left:0;border-top:1px solid var(--borda)}.pesquisa-item .pesquisa-celula:first-child{border-top:0}}

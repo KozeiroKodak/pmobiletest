@@ -778,3 +778,43 @@
         flex-wrap: wrap;
     }
 }
+
+
+/* ============================================================
+   LOCAIS — PAGINAÇÃO DE DERIVADOS
+   ============================================================ */
+
+.locais-paginacao-derivados {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid var(--borda);
+}
+
+.locais-paginacao-derivados span {
+    min-width: 90px;
+    color: var(--texto-secundario);
+    font-size: 12px;
+    text-align: center;
+}
+
+.locais-paginacao-derivados button {
+    min-width: 92px;
+}
+
+.locais-paginacao-derivados button:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+}
+
+@media (max-width: 1024px) {
+    .abas-locais { overflow-x: auto; scrollbar-width: thin; }
+    .local-alterado-card, .local-vazio-area-card { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 700px) { .abas-locais { display: flex; gap: 6px; } .aba-locais { flex: 0 0 auto; } }
+
+@media (max-width:1024px){.abas-locais{overflow-x:auto;scrollbar-width:thin}.local-alterado-card,.local-vazio-area-card{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:700px){.abas-locais{display:flex;gap:6px}.aba-locais{flex:0 0 auto}}

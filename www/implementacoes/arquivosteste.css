@@ -1,0 +1,77 @@
+/* ============================================================
+   PMOBILE — ARQUIVOS DE TESTE
+   ============================================================ */
+
+.arquivos-teste-painel {
+    display: block;
+}
+
+.arquivos-teste-acoes {
+    display: grid;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.arquivos-teste-acoes input[type="file"] {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px;
+    border: 1px solid var(--borda);
+    border-radius: 6px;
+    background: var(--fundo);
+    color: var(--texto);
+}
+
+.arquivos-teste-acoes button {
+    width: 100%;
+}
+
+.arquivos-teste-limite {
+    margin: 12px 0 0;
+    color: var(--texto-secundario);
+    font-size: 12px;
+}
+
+#statusArquivosTeste {
+    min-height: 20px;
+    margin-top: 12px;
+    color: var(--texto-secundario);
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.lista-arquivos-teste {
+    display: grid;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.arquivo-teste-card {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 14px;
+    border: 1px solid var(--borda);
+    border-radius: 8px;
+    background: var(--fundo-painel);
+}
+
+.arquivo-teste-card strong {
+    color: var(--texto);
+    overflow-wrap: anywhere;
+}
+
+.arquivo-teste-card small {
+    color: var(--texto-secundario);
+}
+
+.arquivo-teste-card code {
+    margin-top: 4px;
+    color: var(--texto-fraco);
+    font-size: 11px;
+    overflow-wrap: anywhere;
+}
+
+.arquivos-teste-voltar {
+    margin-bottom: 14px;
+}
