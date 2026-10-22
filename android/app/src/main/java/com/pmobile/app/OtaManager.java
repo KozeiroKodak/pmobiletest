@@ -368,7 +368,7 @@ public class OtaManager {
      */
     private synchronized void cleanupObsoleteOtaData(String activeVersion) throws IOException {
         if (activeVersion == null || activeVersion.trim().isEmpty()
-                || activeVersion.contains("/") || activeVersion.contains("\")
+                || activeVersion.contains("/") || activeVersion.contains("\\")
                 || activeVersion.equals(".") || activeVersion.equals("..")) {
             throw new IOException("Active OTA version is invalid for cleanup");
         }
