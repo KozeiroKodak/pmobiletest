@@ -77,26 +77,8 @@ function atualizarBarraProgresso(percentual, mensagem) {
         "<p><strong>" +
         (mensagem || "Importando inventário...") +
         "</strong></p>" +
-
-        "<div style=\"" +
-            "width:100%;" +
-            "height:22px;" +
-            "background:#e5e7eb;" +
-            "border-radius:11px;" +
-            "overflow:hidden;" +
-            "margin:10px 0;" +
-        "\">" +
-
-            "<div style=\"" +
-                "width:" + valor + "%;" +
-                "height:100%;" +
-                "background:#2563eb;" +
-                "transition:width 0.15s ease;" +
-            "\"></div>" +
-
-        "</div>" +
-
-        "<p style=\"text-align:center;\"><strong>" +
+        '<progress class="importacao-progresso" max="100" value="' + valor + '">' + valor + '%</progress>' +
+        '<p class="importacao-progresso-percentual"><strong>' +
             valor +
             "%" +
         "</strong></p>";
@@ -2597,24 +2579,8 @@ async function importarExcel() {
             resultado.innerHTML =
                 "<p><strong>Importação concluída!</strong></p>" +
 
-                "<div style=\"" +
-                    "width:100%;" +
-                    "height:22px;" +
-                    "background:#e5e7eb;" +
-                    "border-radius:11px;" +
-                    "overflow:hidden;" +
-                    "margin:10px 0;" +
-                "\">" +
-
-                    "<div style=\"" +
-                        "width:100%;" +
-                        "height:100%;" +
-                        "background:#16a34a;" +
-                    "\"></div>" +
-
-                "</div>" +
-
-                "<p style=\"text-align:center;\"><strong>100%</strong></p>" +
+                '<progress class="importacao-progresso importacao-progresso-concluido" max="100" value="100">100%</progress>' +
+                '<p class="importacao-progresso-percentual"><strong>100%</strong></p>' +
 
                 "<p>📦 Materiais importados: " +
                 inventarioComIds
