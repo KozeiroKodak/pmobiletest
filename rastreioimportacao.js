@@ -639,12 +639,6 @@ function renderizarPreviaImportacaoRastreio() {
     const modelo = dadosImportacaoRastreio.modelo;
 
     area.innerHTML =
-        '<label class="rastreio-importacao-sem-motorista">' +
-            '<input type="checkbox" id="rastreioImportarSemMotorista" ' +
-                (importarSemMotoristaRastreio ? 'checked' : '') +
-                ' onchange="alternarImportacaoSemMotoristaRastreio(this)">' +
-            '<span><strong>Importar sem selecionar motorista</strong><small>Não será necessário definir motorista por Nota Fiscal.</small></span>' +
-        '</label>' +
         '<div class="rastreio-importacao-resumo">' +
             '<strong>' + escaparHtmlRastreio(dadosImportacaoRastreio.arquivo.name) + '</strong>' +
             '<span>' + dadosImportacaoRastreio.linhas.length.toLocaleString("pt-BR") + ' linhas</span>' +
