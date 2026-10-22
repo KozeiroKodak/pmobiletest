@@ -63,24 +63,6 @@
 .rastreio-importacao-resumo strong { color: #e8e8e8; font-size: 12px; }
 .rastreio-importacao-resumo span { color: #888; font-size: 11px; }
 
-.rastreio-importacao-colunas {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    max-height: 72px;
-    overflow: auto;
-    padding: 2px 0;
-}
-
-.rastreio-importacao-colunas span {
-    padding: 4px 7px;
-    border: 1px solid #333;
-    border-radius: 5px;
-    background: #1b1b1b;
-    color: var(--texto-secundario);
-    font-size: 10px;
-    line-height: 1.2;
-}
 
 .rastreio-importacao-aviso {
     padding: 10px 12px;
