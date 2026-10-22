@@ -257,3 +257,6 @@
 
     }
 
+
+@media (max-width: 900px) { .linha-contagem-manual-busca { flex-wrap: wrap; } .linha-contagem-manual-busca > * { min-width: 0; } }
+@media (max-width: 700px) { .linha-contagem-manual-busca { display: grid; grid-template-columns: 1fr; } .linha-contagem-manual-busca .seletor-contagem-manual, .linha-contagem-manual-busca #campoContagemManual, .linha-contagem-manual-busca .botao-buscar-contagem-manual, .linha-contagem-manual-busca .acoes-contagem-manual-config { width: 100%; max-width: none; } .menu-config-contagem-manual, .menu-tipo-busca-contagem-manual { max-width: calc(100vw - 28px); } }
