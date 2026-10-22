@@ -815,3 +815,6 @@
     .local-alterado-card, .local-vazio-area-card { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 700px) { .abas-locais { display: flex; gap: 6px; } .aba-locais { flex: 0 0 auto; } }
+
+@media (max-width:1024px){.abas-locais{overflow-x:auto;scrollbar-width:thin}.local-alterado-card,.local-vazio-area-card{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:700px){.abas-locais{display:flex;gap:6px}.aba-locais{flex:0 0 auto}}
