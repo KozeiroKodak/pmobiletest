@@ -351,7 +351,77 @@ public class OtaManager {
         if (!preferences.edit().putBoolean(KEY_CANDIDATE_HEALTHY, true).commit()) {
             throw new IOException("Unable to persist healthy OTA candidate state");
         }
+
+        // Only after the candidate is proven healthy do we remove obsolete OTA
+        // bundles and staging leftovers. User data, WebView data and APK assets
+        // live outside these directories and are never touched here.
+        cleanupObsoleteOtaData(candidateVersion);
+
         return true;
+    }
+
+    /**
+     * Removes only obsolete OTA bundles and temporary staging artifacts after
+     * the active candidate has passed its health check. The active bundle is
+     * always preserved; the previous version is removed only after the new
+     * version is confirmed healthy.
+     */
+    private synchronized void cleanupObsoleteOtaData(String activeVersion) throws IOException {
+        if (activeVersion == null || activeVersion.trim().isEmpty()
+                || activeVersion.contains("/") || activeVersion.contains("\")
+                || activeVersion.equals(".") || activeVersion.equals("..")) {
+            throw new IOException("Active OTA version is invalid for cleanup");
+        }
+
+        File activeBundle = new File(versionsDir, activeVersion);
+        if (!isWithinDirectory(versionsDir, activeBundle) || !activeBundle.isDirectory()) {
+            throw new IOException("Active OTA bundle is invalid for cleanup");
+        }
+
+        File[] versionBundles = versionsDir.listFiles(File::isDirectory);
+        if (versionBundles != null) {
+            for (File bundle : versionBundles) {
+                if (!bundle.equals(activeBundle)) {
+                    deleteRecursively(bundle, versionsDir);
+                }
+            }
+        }
+
+        File[] stagingEntries = stagingDir.listFiles();
+        if (stagingEntries != null) {
+            for (File entry : stagingEntries) {
+                deleteRecursively(entry, stagingDir);
+            }
+        }
+
+        if (!preferences.edit()
+                .remove(KEY_PREVIOUS_VERSION)
+                .remove(KEY_CANDIDATE_VERSION)
+                .putString(KEY_ACTIVE_VERSION, activeVersion)
+                .putBoolean(KEY_CANDIDATE_HEALTHY, true)
+                .commit()) {
+            throw new IOException("Unable to finalize OTA cleanup state");
+        }
+    }
+
+    private static void deleteRecursively(File target, File allowedRoot) throws IOException {
+        if (!isWithinDirectory(allowedRoot, target)) {
+            throw new IOException("Refusing to delete OTA path outside allowed directory");
+        }
+
+        if (target.isDirectory()) {
+            File[] children = target.listFiles();
+            if (children == null) {
+                throw new IOException("Unable to inspect OTA directory: " + target.getName());
+            }
+            for (File child : children) {
+                deleteRecursively(child, allowedRoot);
+            }
+        }
+
+        if (!target.delete() && target.exists()) {
+            throw new IOException("Unable to remove OTA path: " + target.getAbsolutePath());
+        }
     }
 
     /**
