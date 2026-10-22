@@ -568,9 +568,6 @@ function renderizarPreviaImportacaoRastreio() {
             '<span>' + dadosImportacaoRastreio.colunas.length + ' colunas</span>' +
             '<span>Aba: ' + escaparHtmlRastreio(dadosImportacaoRastreio.nomeAba) + '</span>' +
         '</div>' +
-        '<div class="rastreio-importacao-colunas">' +
-            dadosImportacaoRastreio.colunas.map(c => '<span>' + escaparHtmlRastreio(c) + '</span>').join("") +
-        '</div>' +
         '<div class="rastreio-importacao-previa-titulo">Amostra das primeiras linhas</div>' +
         '<div class="rastreio-importacao-tabela">' +
             '<div class="cab">' +
