@@ -209,13 +209,24 @@ async function carregarLocaisAlterados() {
         const cliente = obterClienteSupabase();
         if (!cliente) throw new Error("Supabase indisponível.");
 
-        const { data, error } = await cliente
-            .from("contagens_manuais")
-            .select(
-                "id,codigo_material,local_encontrado,quantidade_fisica,data_hora,usuario_nome,alteracao_status,alteracao_confirmada_por_nome,alteracao_confirmada_em"
-            )
-            .eq("local_alterado", true)
-            .order("data_hora", { ascending: false });
+        const usuarioSessao =
+            (typeof usuarioPmobileAtual !== "undefined" && usuarioPmobileAtual?.usuario)
+                ? usuarioPmobileAtual
+                : window.usuarioPmobileAtual;
+        const credencialSessao =
+            (typeof credencialPmobileAtual !== "undefined" && credencialPmobileAtual)
+                ? credencialPmobileAtual
+                : window.credencialPmobileAtual;
+
+        if (!usuarioSessao?.usuario || !credencialSessao) {
+            throw new Error("Sessão do usuário não disponível para consultar locais alterados.");
+        }
+
+        const { data, error } = await cliente.rpc("pmobile_contagens_manuais_listar", {
+            p_usuario: usuarioSessao.usuario,
+            p_credencial: credencialSessao,
+            p_somente_alterados: true
+        });
 
         if (error) throw error;
 
