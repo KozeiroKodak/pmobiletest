@@ -230,7 +230,7 @@ public class MainActivity extends BridgeActivity {
             updateOtaProgress("Ativando atualização...", 100);
             otaStage = "ativação";
             java.io.File activePackage =
-                otaManager.activateSoleCandidate(manifest.getWebVersion());
+                otaManager.activateSoleCandidate(manifest.getWebVersion(), candidatePackage);
 
             Log.i(TAG, "OTA candidate persisted as active bundle: "
                 + activePackage.getName());
