@@ -320,6 +320,58 @@ function calcularPrevisaoRastreio(dataISO, turno) {
     return dataISO + (turno === "MANHA" ? "T12:00:00-03:00" : "T18:00:00-03:00");
 }
 
+function validarLinhasObrigatoriasRastreio() {
+    if (!dadosImportacaoRastreio) {
+        return {
+            totalErros: 1,
+            erros: ["Nenhuma planilha de Rastreio foi preparada."]
+        };
+    }
+
+    const { modelo, modeloIndices, linhas } = dadosImportacaoRastreio;
+    const deslocamentoLinha =
+        Number(dadosImportacaoRastreio.deslocamentoLinha) || 2;
+    const erros = [];
+    let totalErros = 0;
+
+    for (let indice = 0; indice < linhas.length; indice++) {
+        const d = linhas[indice];
+
+        const valor = chave => {
+            const indiceColuna = modeloIndices[chave];
+            return indiceColuna >= 0 ? d?.[indiceColuna] : null;
+        };
+
+        const cliente = String(valor("cliente") ?? "").trim();
+        const notasFiscais = String(valor("notaFiscal") ?? "").trim();
+        const dataEnvio = normalizarDataRastreio(valor("dataEnvio"));
+        const turno = normalizarTurnoRastreio(valor("turno"));
+
+        const problemas = [];
+
+        if (!cliente) problemas.push("Cliente vazio");
+        if (!notasFiscais) problemas.push("Nota Fiscal vazia");
+        if (!dataEnvio) problemas.push("Data Envio inválida");
+        if (!turno) problemas.push("Turno deve ser MANHÃ ou TARDE");
+
+        if (problemas.length) {
+            totalErros += problemas.length;
+
+            if (erros.length < 100) {
+                erros.push(
+                    "Linha " +
+                    (deslocamentoLinha + indice) +
+                    ": " +
+                    problemas.join(", ") +
+                    "."
+                );
+            }
+        }
+    }
+
+    return { totalErros, erros };
+}
+
 function prepararLinhasRastreioParaEnvio(inicio = 0, fim = null, coletarAvisos = false) {
     const { modelo, modeloIndices, linhas } = dadosImportacaoRastreio;
     const deslocamentoLinha =
@@ -433,6 +485,21 @@ async function enviarImportacaoRastreio() {
 
     try {
         const sessao = obterSessaoRastreioImportacao();
+
+        // O banco exige Cliente, NF, Data Envio e Turno. Valida toda a
+        // planilha antes de criar a importação para impedir que um lote
+        // parcialmente inválido chegue ao PostgreSQL.
+        const validacao = validarLinhasObrigatoriasRastreio();
+
+        if (validacao.totalErros > 0) {
+            const detalhes = validacao.erros.join("\n");
+            throw new Error(
+                "A planilha possui " +
+                validacao.totalErros.toLocaleString("pt-BR") +
+                " campo(s) obrigatório(s) inválido(s)." +
+                (detalhes ? "\n\n" + detalhes : "")
+            );
+        }
 
         const criacao = await window.clienteSupabase.rpc("pmobile_rastreio_criar_importacao", {
             p_usuario: sessao.usuario,
