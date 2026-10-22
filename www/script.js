@@ -1891,7 +1891,7 @@ async function abrirGerenciamentoUsuarios() {
                             '<option value="ADMIN">Administrativo</option>' +
                         '</select>' +
                         '<button type="button" class="seletor-nivel-usuario" id="botaoNivelSolicitacao_' + solicitacao.id + '" onclick="alternarSeletorNivelUsuario(' + solicitacao.id + ')" aria-haspopup="listbox" aria-expanded="false">Nível 2</button>' +
-                        '<div id="menuNivelSolicitacao_' + solicitacao.id + '" class="menu-nivel-usuario" role="listbox" style="display:none;">' +
+                        '<div id="menuNivelSolicitacao_' + solicitacao.id + '" class="menu-nivel-usuario" role="listbox">' +
                             '<button type="button" onclick="selecionarNivelUsuario(' + solicitacao.id + ', \'NIVEL2\')">Nível 2 — Pesquisa e Contagem manual</button>' +
                             '<button type="button" onclick="selecionarNivelUsuario(' + solicitacao.id + ', \'ADMIN\')">Administrativo — acesso total</button>' +
                         '</div>' +
@@ -1973,8 +1973,8 @@ function alternarSeletorNivelUsuario(solicitacaoId) {
     const botao = document.getElementById("botaoNivelSolicitacao_" + solicitacaoId);
     if (!menu || !botao) return;
 
-    const aberto = menu.style.display !== "none";
-    menu.style.display = aberto ? "none" : "block";
+    const aberto = menu.classList.contains("aberto");
+    menu.classList.toggle("aberto", !aberto);
     botao.setAttribute("aria-expanded", aberto ? "false" : "true");
 }
 
@@ -1986,7 +1986,7 @@ function selecionarNivelUsuario(solicitacaoId, nivel) {
 
     seletor.value = nivel;
     botao.textContent = nivel === "ADMIN" ? "Administrativo" : "Nível 2";
-    menu.style.display = "none";
+    menu.classList.remove("aberto");
     botao.setAttribute("aria-expanded", "false");
 }
 
