@@ -489,6 +489,18 @@
                         Importar planilha
                     </button>
                 </div>
+                <div class="rastreio-importacao-divisor"><span>ou</span></div>
+
+                <div class="rastreio-importacao-online">
+                    <label for="linkImportacaoRastreio">Planilha compartilhada online</label>
+                    <div class="rastreio-importacao-online-linha">
+                        <input type="url" id="linkImportacaoRastreio" placeholder="Insira o link aqui" autocomplete="off" inputmode="url"
+                            onkeydown="if (event.key === 'Enter') { event.preventDefault(); prepararImportacaoRastreioOnline(); }">
+                        <button type="button" class="botao-aba" onclick="prepararImportacaoRastreioOnline()">Ler link</button>
+                    </div>
+                    <small>Use um link público com permissão para visualizar ou baixar a planilha. Links do Google Sheets são convertidos automaticamente.</small>
+                </div>
+
                 <label class="rastreio-importacao-sem-motorista">
                     <input type="checkbox" id="rastreioImportarSemMotorista"
                         onchange="alternarImportacaoSemMotoristaRastreio(this)">
