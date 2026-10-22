@@ -224,25 +224,31 @@ function exibirResultadosPesquisa(
 }
 
 
-function alternarSeletorPesquisaMaterial() {
-    const menu = document.getElementById("menuTipoBuscaPesquisaMaterial");
+function abrirPopupPesquisaMaterial() {
+    const seletor = document.getElementById("tipoBuscaPesquisaMaterial");
     const botao = document.getElementById("botaoTipoBuscaPesquisaMaterial");
+    if (!seletor || !botao || typeof abrirPopupEscolha !== "function") return;
 
-    if (!menu || !botao) return;
-
-    const aberto = menu.classList.contains("aberto");
-    menu.classList.toggle("aberto", !aberto);
-    botao.setAttribute("aria-expanded", aberto ? "false" : "true");
+    abrirPopupEscolha({
+        titulo: "Pesquisar por",
+        opcoes: [
+            { value: "codigo", label: "Código", selected: seletor.value === "codigo" },
+            { value: "referencia", label: "Referência", selected: seletor.value === "referencia" },
+            { value: "descricao", label: "Descrição", selected: seletor.value === "descricao" }
+        ],
+        aoEscolher: function(tipo) {
+            selecionarTipoBuscaPesquisaMaterial(tipo);
+        }
+    });
+    botao.setAttribute("aria-expanded", "true");
 }
-
 
 function selecionarTipoBuscaPesquisaMaterial(tipo) {
     const seletor = document.getElementById("tipoBuscaPesquisaMaterial");
     const botao = document.getElementById("botaoTipoBuscaPesquisaMaterial");
-    const menu = document.getElementById("menuTipoBuscaPesquisaMaterial");
     const campo = document.getElementById("campoPesquisaMaterial");
 
-    if (!seletor || !botao || !menu || !campo) return;
+    if (!seletor || !botao || !campo) return;
 
     const configuracoes = {
         codigo: {
@@ -264,12 +270,9 @@ function selecionarTipoBuscaPesquisaMaterial(tipo) {
     seletor.value = tipo;
     botao.textContent = configuracao.nome;
     campo.placeholder = configuracao.placeholder;
-
-    menu.classList.remove("aberto");
     botao.setAttribute("aria-expanded", "false");
     campo.focus();
 }
-
 
 async function pesquisarMaterialSelecionado() {
     const seletor = document.getElementById("tipoBuscaPesquisaMaterial");
@@ -346,18 +349,4 @@ async function pesquisarMaterialSelecionado() {
 }
 
 
-document.addEventListener("click", function(evento) {
-    const menu = document.getElementById("menuTipoBuscaPesquisaMaterial");
-    const botao = document.getElementById("botaoTipoBuscaPesquisaMaterial");
-    const wrapper = botao?.closest(".seletor-pesquisa-material-wrapper");
-
-    if (menu && wrapper && !wrapper.contains(evento.target)) {
-        menu.classList.remove("aberto");
-        botao.setAttribute("aria-expanded", "false");
-    }
-});
-
-
-// =========================================
-// FIM - PESQUISA
-// =========================================
+// O popup padrão controla abertura, fechamento e clique externo.
