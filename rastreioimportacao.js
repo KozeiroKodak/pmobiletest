@@ -143,8 +143,18 @@ async function prepararImportacaoRastreio() {
         matriz = null;
 
         const sha256 = await calcularSha256Rastreio(buffer);
+
+        const metadadosArquivo = {
+            name: arquivo.name,
+            size: arquivo.size
+        };
+
+        // Após calcular o SHA, o File/ArrayBuffer não precisa mais permanecer vivo.
+        workbook = null;
+        buffer = null;
+
         dadosImportacaoRastreio = {
-            arquivo,
+            arquivo: metadadosArquivo,
             nomeAba,
             colunas,
             linhas,
