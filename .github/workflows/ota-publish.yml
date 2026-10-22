@@ -229,8 +229,8 @@ jobs:
 
           pattern = re.compile(
               r'''(?P<prefix>(?:src|href)=["'])'''
-              r'''(?P<file>(?!https?://|//)[^"']+.(?:js|css))'''
-              r'''(?:?v=[^"']*)?'''
+              r'''(?P<file>(?!https?://|//)[^"']+\.(?:js|css))'''
+              r'''(?:\?v=[^"']*)?'''
               r'''(?P<suffix>["'])'''
           )
 
@@ -262,7 +262,7 @@ jobs:
 
           html = Path("index.html").read_text()
           assets = re.findall(
-              r'''(?:src|href)=["']((?!https?://|//)[^"']+.(?:js|css)?v=[^"']+)["']''',
+              r'''(?:src|href)=["']((?!https?://|//)[^"']+\.(?:js|css)\?v=[^"']+)["']''',
               html,
           )
 
