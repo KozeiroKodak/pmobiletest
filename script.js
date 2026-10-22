@@ -80,6 +80,55 @@ const telasSistema = [
 //
 // ============================================================
 
+// ============================================================
+// HISTÓRICO DE NAVEGAÇÃO DAS ABAS
+// ============================================================
+//
+// Mantém a última aba principal para permitir retorno pelo:
+// - tecla ESC do computador;
+// - botão/gesto Voltar do Android.
+//
+// ============================================================
+
+const historicoTelasSistema = [];
+
+function obterTelaSistemaAtual() {
+
+    const telas =
+        document.querySelectorAll(".tela-sistema");
+
+    for (const tela of telas) {
+
+        if (tela.style.display !== "none") {
+            return tela.id;
+        }
+
+    }
+
+    return null;
+
+}
+
+function voltarTelaAnteriorPmobile() {
+
+    const anterior =
+        historicoTelasSistema.pop();
+
+    if (!anterior) {
+        return false;
+    }
+
+    mostrarTelaSistema(
+        anterior,
+        null,
+        true
+    );
+
+    return true;
+
+}
+
+
 const itensMenuSistema = [
 
     "menuPesquisa",
@@ -204,8 +253,27 @@ function limparMenuAtivo() {
 
 function mostrarTelaSistema(
     idTela,
-    idMenu
+    idMenu,
+    restaurandoHistorico = false
 ) {
+
+    const atual = obterTelaSistemaAtual();
+
+    if (
+        !restaurandoHistorico &&
+        atual &&
+        atual !== idTela &&
+        atual !== "homeSistema"
+    ) {
+
+        historicoTelasSistema.push(atual);
+
+        // Evita crescimento indefinido em navegações repetidas.
+        if (historicoTelasSistema.length > 30) {
+            historicoTelasSistema.shift();
+        }
+
+    }
 
     esconderTelasSistema();
 
@@ -2412,24 +2480,14 @@ async function confirmarZeramento(
                 return;
             }
 
-            // Pesquisa: como existe uma única tela de pesquisa,
-            // o botão Voltar retorna diretamente para Home.
-            const pesquisa =
-                document.getElementById(
-                    "pesquisa"
-                );
-
-            if (
-                pesquisa &&
-                pesquisa.style.display !== "none"
-            ) {
-
-                voltarMenu();
+            // Primeiro tenta retornar para a aba principal anterior.
+            // Isso mantém o mesmo comportamento esperado da tecla ESC
+            // no computador.
+            if (voltarTelaAnteriorPmobile()) {
                 return;
-
             }
 
-            // Qualquer módulo principal retorna para Home.
+            // Sem histórico, qualquer módulo principal retorna para Home.
             const home =
                 document.getElementById(
                     "homeSistema"
@@ -2550,3 +2608,53 @@ function procurarAtualizacoesOta() {
 }
 
 window.PMOBILE_OK = true;
+
+// ============================================================
+// TECLA ESC — RETORNO ENTRE ABAS
+// ============================================================
+//
+// No computador, ESC funciona como o botão Voltar:
+// ao abrir uma aba, ESC retorna para a aba anterior.
+//
+// ============================================================
+
+document.addEventListener(
+    "keydown",
+    function(evento) {
+
+        if (evento.key !== "Escape") {
+            return;
+        }
+
+        const aplicacao =
+            document.getElementById("aplicacao");
+
+        if (
+            !aplicacao ||
+            aplicacao.style.display === "none"
+        ) {
+            return;
+        }
+
+        // Não interfere em diálogos/modais que tenham
+        // tratamento próprio de ESC.
+        const modalAberto =
+            document.querySelector(
+                ".modal[style*=\"display: flex\"], " +
+                ".modal[style*=\"display:block\"], " +
+                "[role=\"dialog\"][style*=\"display: flex\"]"
+            );
+
+        if (modalAberto) {
+            return;
+        }
+
+        if (voltarTelaAnteriorPmobile()) {
+            evento.preventDefault();
+            evento.stopPropagation();
+        }
+
+    },
+    true
+);
+
