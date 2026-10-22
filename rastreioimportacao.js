@@ -226,8 +226,23 @@ function detectarModeloRastreio(colunas) {
     };
 
     return {
-        cliente: achar("Cliente", "Destinatário"),
-        notaFiscal: achar("Nota Fiscal", "NF", "Notas Fiscais"),
+        cliente: achar(
+            "Cliente",
+            "Destinatário",
+            "Cliente / Destinatário",
+            "Cliente Destinatário"
+        ),
+        notaFiscal: achar(
+            "Nota Fiscal",
+            "NF",
+            "Notas Fiscais",
+            "Nº NF",
+            "N° NF",
+            "Numero NF",
+            "Número NF",
+            "Nº Nota Fiscal",
+            "N° Nota Fiscal"
+        ),
         transportadora: achar("Transportadora", "Transportador"),
         motorista: achar("Motorista"),
         regiao: achar("Região", "Regiao", "Cidade", "Destino"),
@@ -458,14 +473,30 @@ function normalizarDataRastreio(valor) {
     if (valor == null || String(valor).trim() === "") return null;
 
     const texto = String(valor).trim();
+
+    const montarDataValida = (ano, mes, dia) => {
+        const data = new Date(Number(ano), Number(mes) - 1, Number(dia));
+        if (
+            data.getFullYear() !== Number(ano) ||
+            data.getMonth() !== Number(mes) - 1 ||
+            data.getDate() !== Number(dia)
+        ) {
+            return null;
+        }
+
+        return String(ano) + "-" +
+            String(mes).padStart(2, "0") + "-" +
+            String(dia).padStart(2, "0");
+    };
+
     const br = texto.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/);
     if (br) {
-        return br[3] + "-" + br[2].padStart(2, "0") + "-" + br[1].padStart(2, "0");
+        return montarDataValida(br[3], br[2], br[1]);
     }
 
     const iso = texto.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
     if (iso) {
-        return iso[1] + "-" + iso[2].padStart(2, "0") + "-" + iso[3].padStart(2, "0");
+        return montarDataValida(iso[1], iso[2], iso[3]);
     }
 
     const data = new Date(valor);
@@ -508,11 +539,59 @@ function linhaPossuiDadosRastreio(valores) {
     });
 }
 
+function linhaEstruturalRastreio(valores) {
+    if (!Array.isArray(valores)) return false;
+
+    const { modeloIndices } = dadosImportacaoRastreio || {};
+    if (!modeloIndices) return false;
+
+    const obter = chave => {
+        const indice = modeloIndices[chave];
+        return indice >= 0 ? String(valores[indice] ?? "").trim() : "";
+    };
+
+    const cliente = obter("cliente");
+    const notaFiscal = obter("notaFiscal");
+    const dataEnvio = obter("dataEnvio");
+    const turno = obter("turno");
+    const transportadora = normalizarChaveRastreio(obter("transportadora"));
+    const motorista = obter("motorista");
+    const regiao = obter("regiao");
+    const volume = obter("volume");
+    const peso = obter("peso");
+    const valorNF = obter("valorNF");
+
+    // Resíduos comuns de exportações: TOTAL, SOMA, cabeçalhos repetidos
+    // ou linhas de fechamento. Não são rastreios e não devem gerar falso erro.
+    const semCamposObrigatorios =
+        !cliente && !notaFiscal && !dataEnvio && !turno;
+
+    const marcadorEstrutural =
+        transportadora === "TOTAL" ||
+        transportadora === "TOTALGERAL" ||
+        transportadora === "SOMA" ||
+        transportadora === "FRETE";
+
+    const semQualquerOutroDado =
+        !motorista && !regiao && !volume && !peso && !valorNF;
+
+    return semCamposObrigatorios && marcadorEstrutural && semQualquerOutroDado;
+}
+
+function classificarLinhaRastreio(valores) {
+    if (!linhaPossuiDadosRastreio(valores)) return "VAZIA";
+    if (linhaEstruturalRastreio(valores)) return "ESTRUTURAL";
+    return "OPERACIONAL";
+}
+
 function validarLinhasObrigatoriasRastreio() {
     if (!dadosImportacaoRastreio) {
         return {
             totalErros: 1,
-            erros: ["Nenhuma planilha de Rastreio foi preparada."]
+            erros: ["Nenhuma planilha de Rastreio foi preparada."],
+            totalOperacionais: 0,
+            totalEstruturais: 0,
+            totalVazias: 0
         };
     }
 
@@ -521,14 +600,25 @@ function validarLinhasObrigatoriasRastreio() {
         Number(dadosImportacaoRastreio.deslocamentoLinha) || 2;
     const erros = [];
     let totalErros = 0;
+    let totalOperacionais = 0;
+    let totalEstruturais = 0;
+    let totalVazias = 0;
 
     for (let indice = 0; indice < linhas.length; indice++) {
         const d = linhas[indice];
+        const classificacao = classificarLinhaRastreio(d);
 
-        // Planilhas exportadas podem conter linhas estruturais, fórmulas
-        // vazias ou resíduos fora das colunas operacionais. Elas não são
-        // rastreios e não devem ser tratadas como registros inválidos.
-        if (!linhaPossuiDadosRastreio(d)) continue;
+        if (classificacao === "VAZIA") {
+            totalVazias++;
+            continue;
+        }
+
+        if (classificacao === "ESTRUTURAL") {
+            totalEstruturais++;
+            continue;
+        }
+
+        totalOperacionais++;
 
         const valor = chave => {
             const indiceColuna = modeloIndices[chave];
@@ -547,6 +637,17 @@ function validarLinhasObrigatoriasRastreio() {
         if (!dataEnvio) problemas.push("Data Envio inválida");
         if (!turno) problemas.push("Turno deve ser MANHÃ ou TARDE");
 
+        for (const chaveNumerica of ["volume", "peso", "valorNF"]) {
+            const bruto = valor(chaveNumerica);
+            if (bruto != null && String(bruto).trim() !== "" &&
+                normalizarNumeroRastreio(bruto) == null) {
+                const rotulo = chaveNumerica === "valorNF"
+                    ? "Valor NF"
+                    : chaveNumerica.charAt(0).toUpperCase() + chaveNumerica.slice(1);
+                problemas.push(rotulo + " inválido");
+            }
+        }
+
         if (problemas.length) {
             totalErros += problemas.length;
 
@@ -562,7 +663,13 @@ function validarLinhasObrigatoriasRastreio() {
         }
     }
 
-    return { totalErros, erros };
+    return {
+        totalErros,
+        erros,
+        totalOperacionais,
+        totalEstruturais,
+        totalVazias
+    };
 }
 
 function prepararLinhasRastreioParaEnvio(inicio = 0, fim = null, coletarAvisos = false) {
@@ -577,8 +684,8 @@ function prepararLinhasRastreioParaEnvio(inicio = 0, fim = null, coletarAvisos =
     for (let indice = inicio; indice < limite; indice++) {
         const d = linhas[indice];
 
-        // Ignora linhas sem qualquer dado nas colunas reconhecidas do Rastreio.
-        if (!linhaPossuiDadosRastreio(d)) continue;
+        // Ignora linhas vazias e resíduos estruturais detectados na validação.
+        if (classificarLinhaRastreio(d) !== "OPERACIONAL") continue;
 
         const valor = chave => {
             const indice = modeloIndices[chave];
@@ -693,10 +800,19 @@ async function enviarImportacaoRastreio() {
 
         if (validacao.totalErros > 0) {
             const detalhes = validacao.erros.join("\n");
-            throw new Error(
-                "A planilha possui " +
+            const resumo =
+                "Foram encontradas " +
                 validacao.totalErros.toLocaleString("pt-BR") +
-                " campo(s) obrigatório(s) inválido(s)." +
+                " inconsistência(s) em " +
+                validacao.totalOperacionais.toLocaleString("pt-BR") +
+                " linha(s) operacional(is)." +
+                (validacao.totalEstruturais
+                    ? "\nLinhas estruturais ignoradas: " +
+                      validacao.totalEstruturais.toLocaleString("pt-BR") + "."
+                    : "");
+
+            throw new Error(
+                resumo +
                 (detalhes ? "\n\n" + detalhes : "")
             );
         }
