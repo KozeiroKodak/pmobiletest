@@ -40,8 +40,8 @@ function alternarSeletorContagemManual() {
     const botao = document.getElementById("botaoTipoBuscaContagemManual");
     if (!menu || !botao) return;
 
-    const aberto = menu.style.display !== "none";
-    menu.style.display = aberto ? "none" : "block";
+    const aberto = menu.classList.contains("aberto");
+    menu.classList.toggle("aberto", !aberto);
     botao.setAttribute("aria-expanded", aberto ? "false" : "true");
 }
 
@@ -59,7 +59,7 @@ function selecionarTipoBuscaContagemManual(tipo) {
 
     seletor.value = tipo;
     botao.textContent = nomesCurtos[tipo] || "CÓD";
-    menu.style.display = "none";
+    menu.classList.remove("aberto");
     botao.setAttribute("aria-expanded", "false");
 }
 
