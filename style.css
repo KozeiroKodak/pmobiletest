@@ -1373,3 +1373,152 @@ input {
 }
 
 
+
+
+/* ============================================================
+   SISTEMA RESPONSIVO ADAPTATIVO — BASE GLOBAL
+   ============================================================ */
+
+:root {
+    --largura-conteudo-max: 1440px;
+    --espaco-tela: clamp(14px, 2.2vw, 32px);
+    --espaco-painel: clamp(14px, 1.6vw, 20px);
+    --gap-padrao: clamp(8px, 1.1vw, 16px);
+}
+
+/* Desktop amplo */
+@media (min-width: 1201px) {
+    .tela-sistema {
+        padding-left: clamp(28px, 3vw, 48px);
+        padding-right: clamp(28px, 3vw, 48px);
+    }
+}
+
+/* Tablet / notebook estreito */
+@media (max-width: 1024px) {
+    .tela-sistema {
+        padding: 22px var(--espaco-tela);
+    }
+
+    .painel {
+        padding: var(--espaco-painel);
+        margin-bottom: 14px;
+    }
+
+    .cabecalho-pagina {
+        margin-bottom: 18px;
+    }
+
+    .linha-formulario {
+        flex-wrap: wrap;
+    }
+
+    .linha-formulario > input,
+    .linha-formulario > select {
+        flex: 1 1 220px;
+        min-width: min(220px, 100%);
+    }
+
+    .modal {
+        padding: clamp(12px, 3vw, 20px);
+    }
+}
+
+/* Tablet compacto */
+@media (min-width: 701px) and (max-width: 900px) {
+    .cabecalho-pagina h1 {
+        font-size: clamp(20px, 3vw, 23px);
+    }
+
+    .painel {
+        border-radius: 9px;
+    }
+
+    .botao-principal,
+    .botao-secundario,
+    .botao-perigo {
+        min-height: 40px;
+    }
+}
+
+/* Celular */
+@media (max-width: 700px) {
+    body {
+        padding-bottom: 48px;
+    }
+
+    .tela-sistema {
+        width: 100%;
+        padding: 16px 12px;
+    }
+
+    .cabecalho-pagina {
+        margin-bottom: 14px;
+    }
+
+    .cabecalho-pagina h1 {
+        font-size: 20px;
+        line-height: 1.25;
+    }
+
+    .cabecalho-pagina > p:not(.cabecalho-caminho) {
+        line-height: 1.45;
+    }
+
+    .painel {
+        padding: 14px;
+        margin-bottom: 12px;
+        border-radius: 9px;
+    }
+
+    .linha-formulario {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .linha-formulario > *,
+    .linha-formulario > input,
+    .linha-formulario > select,
+    .linha-formulario > button {
+        width: 100%;
+        max-width: none;
+        min-width: 0;
+    }
+
+    input,
+    select,
+    textarea {
+        font-size: 16px;
+    }
+
+    .botao-principal,
+    .botao-secundario,
+    .botao-perigo {
+        min-height: 42px;
+    }
+}
+
+/* Celular pequeno */
+@media (max-width: 420px) {
+    .tela-sistema {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .painel {
+        padding: 12px;
+    }
+
+    .modal-conteudo {
+        padding: 16px;
+    }
+
+    .modal-acoes {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .modal-acoes > button {
+        width: 100%;
+    }
+}
