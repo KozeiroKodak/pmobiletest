@@ -119,3 +119,5 @@
 }
 
 @media (max-width: 700px) { #resultadoConferencias .registro-conferencia { overflow-wrap: anywhere; } #conferencias .botao-perigo { width: 100%; } }
+
+@media (max-width:700px){#resultadoConferencias .registro-conferencia{overflow-wrap:anywhere}#conferencias .botao-perigo{width:100%}}
