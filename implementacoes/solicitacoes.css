@@ -334,3 +334,10 @@
     color: #ffffff;
 }
 
+
+
+@media (max-width: 700px) {
+    .solicitacao-facebook-card { padding: var(--espaco-3); }
+    .solicitacao-facebook-nivel,
+    .solicitacao-facebook-acoes { margin-left: 0; }
+}
