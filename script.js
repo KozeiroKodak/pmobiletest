@@ -2657,12 +2657,23 @@ document.addEventListener(
             return;
         }
 
+        // Se algum controle local já consumiu o ESC, não navega.
+        if (evento.defaultPrevented) {
+            return;
+        }
+
         if (voltarTelaAnteriorPmobile()) {
             evento.preventDefault();
             evento.stopPropagation();
+            return;
         }
 
-    },
-    true
+        // Fallback: se a tela foi aberta por uma rotina que não
+        // registrou histórico, ESC ainda deve retornar para a Home.
+        voltarMenu();
+        evento.preventDefault();
+        evento.stopPropagation();
+
+    }
 );
 
