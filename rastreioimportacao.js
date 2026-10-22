@@ -672,4 +672,350 @@ async function calcularSha256Rastreio(buffer) {
     return Array.from(new Uint8Array(digest))
         .map(byte => byte.toString(16).padStart(2, "0"))
         .join("");
+}function linhaPossuiDadosRastreio(valores) {
+    if (!Array.isArray(valores)) return false;
+
+    const { modeloIndices } = dadosImportacaoRastreio || {};
+    if (!modeloIndices) return false;
+
+    // Uma linha só é considerada um lançamento de Rastreio quando
+    // existe algum conteúdo em um dos quatro campos que identificam
+    // o registro operacional. Valores isolados em colunas auxiliares
+    // (ex.: fórmulas, resíduos ou campos opcionais) não tornam a linha
+    // um registro e não devem disparar erro de validação.
+    const camposObrigatorios = ["cliente", "notaFiscal", "dataEnvio", "turno"];
+
+    return camposObrigatorios.some(chave => {
+        const indice = modeloIndices[chave];
+        if (indice == null || indice < 0) return false;
+        const valor = valores[indice];
+        return valor != null && String(valor).trim() !== "";
+    });
+}
+
+function validarLinhasObrigatoriasRastreio() {
+    if (!dadosImportacaoRastreio) {
+        return {
+            totalErros: 1,
+            erros: ["Nenhuma planilha de Rastreio foi preparada."]
+        };
+    }
+
+    const { modelo, modeloIndices, linhas } = dadosImportacaoRastreio;
+    const deslocamentoLinha =
+        Number(dadosImportacaoRastreio.deslocamentoLinha) || 2;
+    const erros = [];
+    let totalErros = 0;
+
+    for (let indice = 0; indice < linhas.length; indice++) {
+        const d = linhas[indice];
+
+        // Planilhas exportadas podem conter linhas estruturais, fórmulas
+        // vazias ou resíduos fora das colunas operacionais. Elas não são
+        // rastreios e não devem ser tratadas como registros inválidos.
+        if (!linhaPossuiDadosRastreio(d)) continue;
+
+        const valor = chave => {
+            const indiceColuna = modeloIndices[chave];
+            return indiceColuna >= 0 ? d?.[indiceColuna] : null;
+        };
+
+        const cliente = String(valor("cliente") ?? "").trim();
+        const notasFiscais = String(valor("notaFiscal") ?? "").trim();
+        const dataEnvio = normalizarDataRastreio(valor("dataEnvio"));
+        const turno = normalizarTurnoRastreio(valor("turno"));
+
+        const problemas = [];
+
+        if (!cliente) problemas.push("Cliente vazio");
+        if (!notasFiscais) problemas.push("Nota Fiscal vazia");
+        if (!dataEnvio) problemas.push("Data Envio inválida");
+        if (!turno) problemas.push("Turno deve ser MANHÃ ou TARDE");
+
+        if (problemas.length) {
+            totalErros += problemas.length;
+
+            if (erros.length < 100) {
+                erros.push(
+                    "Linha " +
+                    (deslocamentoLinha + indice) +
+                    ": " +
+                    problemas.join(", ") +
+                    "."
+                );
+            }
+        }
+    }
+
+    return { totalErros, erros };
+}
+
+function prepararLinhasRastreioParaEnvio(inicio = 0, fim = null, coletarAvisos = false) {
+    const { modelo, modeloIndices, linhas } = dadosImportacaoRastreio;
+    const deslocamentoLinha =
+        Number(dadosImportacaoRastreio.deslocamentoLinha) || 2;
+    const limite = fim == null ? linhas.length : Math.min(fim, linhas.length);
+    const resultado = [];
+    const erros = coletarAvisos ? [] : [];
+    let totalErros = 0;
+
+    for (let indice = inicio; indice < limite; indice++) {
+        const d = linhas[indice];
+
+        // Ignora linhas sem qualquer dado nas colunas reconhecidas do Rastreio.
+        if (!linhaPossuiDadosRastreio(d)) continue;
+
+        const valor = chave => {
+            const indice = modeloIndices[chave];
+            return indice >= 0 ? d[indice] : null;
+        };
+        const turno = normalizarTurnoRastreio(valor("turno"));
+        const dataEnvio = normalizarDataRastreio(valor("dataEnvio"));
+        const regiao = String(valor("regiao") ?? "").trim();
+        const motoristaPlanilha = String(valor("motorista") ?? "").trim();
+        const motorista = motoristaPlanilha || mapaMotoristasRastreio[regiao] || "";
+
+        const item = {
+            cliente: String(valor("cliente") ?? "").trim(),
+            notas_fiscais: String(valor("notaFiscal") ?? ""),
+            transportadora: String(valor("transportadora") ?? "").trim(),
+            motorista,
+            regiao,
+            volume: normalizarNumeroRastreio(valor("volume")),
+            peso: normalizarNumeroRastreio(valor("peso")),
+            valor_nf: normalizarNumeroRastreio(valor("valorNF")),
+            data_envio: dataEnvio,
+            turno,
+            previsao_entrega: calcularPrevisaoRastreio(dataEnvio, turno),
+            linha_origem: deslocamentoLinha + indice
+        };
+
+        if (coletarAvisos) {
+            const problemas = [];
+            if (!item.cliente) problemas.push("Cliente vazio.");
+            if (!item.notas_fiscais.trim()) problemas.push("Nota Fiscal vazia.");
+            if (!item.motorista) problemas.push("Motorista não definido.");
+            if (!item.data_envio) problemas.push("Data Envio inválida.");
+            if (!item.turno) problemas.push("Turno deve ser MANHÃ ou TARDE.");
+
+            totalErros += problemas.length;
+
+            for (const problema of problemas) {
+                if (erros.length < 100) {
+                    erros.push("Linha " + (deslocamentoLinha + indice) + ": " + problema);
+                }
+            }
+        }
+
+        resultado.push(item);
+    }
+
+    return { resultado, erros, totalErros };
+}
+function renderizarPreviaImportacaoRastreio() {
+    const area = document.getElementById("rastreioImportacaoPrevia");
+    if (!area || !dadosImportacaoRastreio) return;
+
+    montarMapaMotoristasUI();
+
+    const amostra = dadosImportacaoRastreio.linhas.slice(0, 8);
+    const modelo = dadosImportacaoRastreio.modelo;
+
+    area.innerHTML =
+        '<div class="rastreio-importacao-resumo">' +
+            '<strong>' + escaparHtmlRastreio(dadosImportacaoRastreio.arquivo.name) + '</strong>' +
+            '<span>' + dadosImportacaoRastreio.linhas.length.toLocaleString("pt-BR") + ' linhas</span>' +
+            '<span>' + dadosImportacaoRastreio.colunas.length + ' colunas</span>' +
+            '<span>Aba: ' + escaparHtmlRastreio(dadosImportacaoRastreio.nomeAba) + '</span>' +
+        '</div>' +
+        '<div class="rastreio-importacao-colunas">' +
+            dadosImportacaoRastreio.colunas.map(c => '<span>' + escaparHtmlRastreio(c) + '</span>').join("") +
+        '</div>' +
+        '<div class="rastreio-importacao-previa-titulo">Amostra das primeiras linhas</div>' +
+        '<div class="rastreio-importacao-tabela">' +
+            '<div class="cab">' +
+                '<span>Linha</span><span>Cliente</span><span>NF</span><span>Região</span><span>Turno</span><span>Motorista</span>' +
+            '</div>' +
+            amostra.map((linha, indiceAmostra) => {
+                const d = linha;
+                const indices = dadosImportacaoRastreio.modeloIndices;
+                const regiao = indices.regiao >= 0 ? String(d[indices.regiao] ?? "").trim() : "";
+                const motorista = indices.motorista >= 0 ? String(d[indices.motorista] ?? "").trim() : (mapaMotoristasRastreio[regiao] || "—");
+                return '<div class="linha">' +
+                    '<span>' + (dadosImportacaoRastreio.deslocamentoLinha + indiceAmostra) + '</span>' +
+                    '<span>' + escaparHtmlRastreio(d[indices.cliente]) + '</span>' +
+                    '<span>' + escaparHtmlRastreio(d[indices.notaFiscal]) + '</span>' +
+                    '<span>' + escaparHtmlRastreio(regiao || "—") + '</span>' +
+                    '<span>' + escaparHtmlRastreio(d[indices.turno]) + '</span>' +
+                    '<span>' + escaparHtmlRastreio(motorista) + '</span>' +
+                '</div>';
+            }).join("") +
+        '</div>' +
+        '<div class="rastreio-importacao-acoes">' +
+            '<button type="button" class="botao-principal" onclick="enviarImportacaoRastreio()">Importar rastreios</button>' +
+            '<button type="button" class="botao-secundario" onclick="cancelarImportacaoRastreio()">Cancelar</button>' +
+        '</div>';
+
+    montarMapaMotoristasUI();
+}
+
+async function enviarImportacaoRastreio() {
+    if (importacaoRastreioEmAndamento || !dadosImportacaoRastreio) return;
+
+    importacaoRastreioEmAndamento = true;
+    let importacaoId = null;
+
+    try {
+        const sessao = obterSessaoRastreioImportacao();
+
+        // O banco exige Cliente, NF, Data Envio e Turno. Valida toda a
+        // planilha antes de criar a importação para impedir que um lote
+        // parcialmente inválido chegue ao PostgreSQL.
+        const validacao = validarLinhasObrigatoriasRastreio();
+
+        if (validacao.totalErros > 0) {
+            const detalhes = validacao.erros.join("\n");
+            throw new Error(
+                "A planilha possui " +
+                validacao.totalErros.toLocaleString("pt-BR") +
+                " campo(s) obrigatório(s) inválido(s)." +
+                (detalhes ? "\n\n" + detalhes : "")
+            );
+        }
+
+        const criacao = await window.clienteSupabase.rpc("pmobile_rastreio_criar_importacao", {
+            p_usuario: sessao.usuario,
+            p_credencial: sessao.credencial,
+            p_arquivo_nome: dadosImportacaoRastreio.arquivo.name,
+            p_colunas: dadosImportacaoRastreio.colunas,
+            p_sha256: dadosImportacaoRastreio.sha256,
+            p_tamanho_bytes: dadosImportacaoRastreio.tamanhoBytes
+        });
+
+        if (criacao.error) throw criacao.error;
+
+        importacaoId = Array.isArray(criacao.data) ? criacao.data[0] : criacao.data;
+        if (importacaoId && typeof importacaoId === "object") {
+            importacaoId = importacaoId.pmobile_rastreio_criar_importacao || importacaoId.id;
+        }
+        if (!importacaoId) throw new Error("O Supabase não retornou o ID da importação.");
+
+        capturarMapaMotoristasUI();
+
+        let enviadas = 0;
+        let totalAvisos = 0;
+        const avisosAmostra = [];
+        const totalLinhas = dadosImportacaoRastreio.linhas.length;
+
+        for (let inicio = 0; inicio < totalLinhas; inicio += TAMANHO_LOTE_RASTREIO) {
+            const lotePreparado = prepararLinhasRastreioParaEnvio(
+                inicio,
+                inicio + TAMANHO_LOTE_RASTREIO,
+                true
+            );
+
+            totalAvisos += lotePreparado.totalErros || 0;
+            if (avisosAmostra.length < 100) {
+                avisosAmostra.push(...lotePreparado.erros.slice(0, 100 - avisosAmostra.length));
+            }
+            const lote = lotePreparado.resultado;
+
+            const resposta = await window.clienteSupabase.rpc("pmobile_rastreio_inserir_lote", {
+                p_usuario: sessao.usuario,
+                p_credencial: sessao.credencial,
+                p_importacao_id: importacaoId,
+                p_linhas: lote
+            });
+
+            if (resposta.error) throw resposta.error;
+
+            enviadas += lote.length;
+            mostrarStatusImportacaoRastreio(
+                "🟡 Importando Rastreio... " +
+                Math.round((enviadas / totalLinhas) * 100) +
+                "% (" + enviadas.toLocaleString("pt-BR") + "/" +
+                totalLinhas.toLocaleString("pt-BR") + ")"
+            );
+
+            // Libera a referência do lote antes de seguir para o próximo.
+            lotePreparado.resultado.length = 0;
+            await new Promise(resolve => setTimeout(resolve, 0));
+        }
+
+        if (totalAvisos > 0) {
+            console.warn("Importação de Rastreio com avisos:", {
+                total: totalAvisos,
+                amostra: avisosAmostra
+            });
+        }
+
+        const finalizacao = await window.clienteSupabase.rpc("pmobile_rastreio_finalizar_importacao", {
+            p_usuario: sessao.usuario,
+            p_credencial: sessao.credencial,
+            p_importacao_id: importacaoId,
+            p_status: "CONCLUIDA"
+        });
+
+        if (finalizacao.error) throw finalizacao.error;
+
+        mostrarStatusImportacaoRastreio(
+            "🟢 Rastreio importado: " + enviadas.toLocaleString("pt-BR") + " linhas."
+        );
+
+        cancelarImportacaoRastreio(false);
+        await carregarRastreios();
+    } catch (erro) {
+        console.error("Erro ao importar Rastreio:", erro);
+
+        if (importacaoId) {
+            try {
+                const sessao = obterSessaoRastreioImportacao();
+                await window.clienteSupabase.rpc("pmobile_rastreio_finalizar_importacao", {
+                    p_usuario: sessao.usuario,
+                    p_credencial: sessao.credencial,
+                    p_importacao_id: importacaoId,
+                    p_status: "ERRO"
+                });
+            } catch (erroFinalizacao) {
+                console.error("Erro ao finalizar importação:", erroFinalizacao);
+            }
+        }
+
+        mostrarStatusImportacaoRastreio(
+            "🔴 Falha na importação: " + (erro.message || "erro desconhecido")
+        );
+    } finally {
+        importacaoRastreioEmAndamento = false;
+    }
+}
+
+function cancelarImportacaoRastreio(limparStatus = true) {
+    dadosImportacaoRastreio = null;
+    mapaMotoristasRastreio = {};
+
+    const arquivo = document.getElementById("arquivoRastreio");
+    if (arquivo) arquivo.value = "";
+
+    const previa = document.getElementById("rastreioImportacaoPrevia");
+    if (previa) previa.innerHTML = "";
+
+    const mapa = document.getElementById("rastreioMapaMotoristas");
+    if (mapa) mapa.innerHTML = "";
+
+    if (limparStatus) mostrarStatusImportacaoRastreio("");
+}
+
+function mostrarStatusImportacaoRastreio(mensagem) {
+    const area = document.getElementById("statusImportacaoRastreio");
+    if (area) area.textContent = mensagem;
+}
+
+async function calcularSha256Rastreio(buffer) {
+    if (!window.crypto?.subtle) return null;
+
+    const digest = await window.crypto.subtle.digest("SHA-256", buffer);
+
+    return Array.from(new Uint8Array(digest))
+        .map(byte => byte.toString(16).padStart(2, "0"))
+        .join("");
 }
