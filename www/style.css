@@ -759,7 +759,8 @@ input:focus {
 
 
 
-BOTÕES PADRÃO
+/* ============================================================
+   BOTÕES PADRÃO
    ============================================================ */
 
 .botao-principal,
@@ -767,13 +768,13 @@ BOTÕES PADRÃO
 .botao-perigo {
 
     min-height:
-        38px;
+        40px;
 
     padding:
-        8px 14px;
+        9px 15px;
 
     border-radius:
-        6px;
+        7px;
 
     font-family:
         inherit;
@@ -781,8 +782,21 @@ BOTÕES PADRÃO
     font-size:
         13px;
 
+    font-weight:
+        500;
+
+    line-height:
+        1.2;
+
     cursor:
         pointer;
+
+    transition:
+        background-color 0.14s ease,
+        border-color 0.14s ease,
+        color 0.14s ease,
+        transform 0.08s ease,
+        box-shadow 0.14s ease;
 
 }
 
@@ -859,7 +873,8 @@ BOTÕES PADRÃO
 }
 
 
-ÁREAS DE RESULTADOS
+/* ============================================================
+   ÁREAS DE RESULTADOS
    ============================================================ */
 
 #resultadoConferencia,
@@ -1198,55 +1213,26 @@ input {
 /* OTA 0.0.10 - teste de automacao */
 
 
-/* ============================================================
-   PADRÃO GLOBAL DE BOTÕES — REFINAMENTO OTA
-   ============================================================ */
-
-/*
-   Ajuste visual controlado para validar a cadeia:
-   main → Actions → OTA → manifest → aplicativo.
-*/
-
-.botao-principal,
-.botao-secundario,
-.botao-perigo {
-    min-height: 40px;
-    padding: 9px 15px;
-    border-radius: 7px;
-    font-weight: 500;
-    line-height: 1.2;
-    transition:
-        background-color 0.14s ease,
-        border-color 0.14s ease,
-        color 0.14s ease,
-        transform 0.08s ease,
-        box-shadow 0.14s ease;
-}
-
+/* Refinamentos de interação dos botões permanecem junto ao bloco base. */
 .botao-principal {
-    font-weight: 600;
     box-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
 }
-
 .botao-principal:hover,
 .botao-secundario:hover,
 .botao-perigo:hover {
     transform: translateY(-1px);
 }
-
 .botao-principal:active,
 .botao-secundario:active,
 .botao-perigo:active {
     transform: translateY(0);
 }
-
 .botao-principal:focus-visible,
 .botao-secundario:focus-visible,
 .botao-perigo:focus-visible {
     outline: 2px solid var(--verde);
     outline-offset: 2px;
 }
-
 .botao-principal:disabled,
 .botao-secundario:disabled,
 .botao-perigo:disabled {
@@ -1255,7 +1241,6 @@ input {
     transform: none;
     box-shadow: none;
 }
-
 
 /* ============================================================
    PENTE FINO VISUAL — ESPAÇAMENTO / ALINHAMENTO
