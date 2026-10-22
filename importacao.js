@@ -77,9 +77,7 @@ function atualizarBarraProgresso(percentual, mensagem) {
         "<p><strong>" +
         (mensagem || "Importando inventário...") +
         "</strong></p>" +
-        '<div class="importacao-progresso">' +
-            '<div class="importacao-progresso-barra" style="width:' + valor + '%"></div>' +
-        '</div>' +
+        '<progress class="importacao-progresso" max="100" value="' + valor + '">' + valor + '%</progress>' +
         '<p class="importacao-progresso-percentual"><strong>' +
             valor +
             "%" +
@@ -2581,9 +2579,7 @@ async function importarExcel() {
             resultado.innerHTML =
                 "<p><strong>Importação concluída!</strong></p>" +
 
-                '<div class="importacao-progresso importacao-progresso-concluido">' +
-                    '<div class="importacao-progresso-barra" style="width:100%"></div>' +
-                '</div>' +
+                '<progress class="importacao-progresso importacao-progresso-concluido" max="100" value="100">100%</progress>' +
                 '<p class="importacao-progresso-percentual"><strong>100%</strong></p>' +
 
                 "<p>📦 Materiais importados: " +
