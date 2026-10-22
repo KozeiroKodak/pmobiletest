@@ -44,6 +44,8 @@ function abrirPopupEscolha(config) {
 
     function teclaEscape(evento) {
         if (evento.key === "Escape") {
+            evento.preventDefault();
+            evento.stopPropagation();
             fecharPopup();
         }
     }
