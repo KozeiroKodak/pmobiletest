@@ -19,3 +19,43 @@
     background: #ededed;
     color: #121212;
 }
+
+
+/* Barra de progresso da importação — apresentação exclusivamente no CSS */
+.importacao-progresso {
+    display: block;
+    width: 100%;
+    height: 22px;
+    margin: 10px 0;
+    border: 0;
+    border-radius: 11px;
+    overflow: hidden;
+}
+
+.importacao-progresso::-webkit-progress-bar {
+    background: #e5e7eb;
+    border-radius: 11px;
+}
+
+.importacao-progresso::-webkit-progress-value {
+    background: #2563eb;
+    border-radius: 11px;
+    transition: width 0.15s ease;
+}
+
+.importacao-progresso::-moz-progress-bar {
+    background: #2563eb;
+    border-radius: 11px;
+}
+
+.importacao-progresso-percentual {
+    text-align: center;
+}
+
+.importacao-progresso-concluido::-webkit-progress-value {
+    background: #16a34a;
+}
+
+.importacao-progresso-concluido::-moz-progress-bar {
+    background: #16a34a;
+}
