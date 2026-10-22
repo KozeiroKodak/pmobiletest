@@ -1735,3 +1735,176 @@ label {
     }
 }
 \n
+
+/* ============================================================
+   HOME — LANÇADOR DE APLICAÇÕES
+   Substitui visualmente a navegação lateral após o login.
+   ============================================================ */
+
+#sistema {
+    display: none !important;
+}
+
+#conteudoPrincipal {
+    margin-left: 0 !important;
+    width: 100%;
+    min-height: 100vh;
+}
+
+#homeSistema {
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: clamp(28px, 6vw, 64px) clamp(18px, 5vw, 72px);
+    box-sizing: border-box;
+}
+
+.home-apps {
+    width: min(100%, 980px);
+    margin: 0 auto;
+}
+
+.home-apps-cabecalho {
+    margin-bottom: clamp(22px, 4vw, 34px);
+}
+
+.home-apps-kicker {
+    margin: 0 0 7px;
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.58;
+}
+
+.home-apps-cabecalho h1 {
+    margin: 0;
+    font-size: clamp(1.85rem, 5vw, 2.65rem);
+    line-height: 1.05;
+}
+
+.home-apps-cabecalho p:last-child {
+    margin: 9px 0 0;
+    opacity: 0.68;
+    font-size: 0.96rem;
+}
+
+.home-apps-grade {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.home-app-card {
+    position: relative;
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr) 18px;
+    align-items: center;
+    gap: 13px;
+    width: 100%;
+    min-height: 104px;
+    padding: 17px 16px;
+    border: 1px solid rgba(127, 127, 127, 0.18);
+    border-radius: 18px;
+    background: var(--fundo-card, #fff);
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    box-sizing: border-box;
+    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.055);
+    transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.home-app-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 9px 24px rgba(0, 0, 0, 0.09);
+    border-color: rgba(127, 127, 127, 0.3);
+}
+
+.home-app-card:active {
+    transform: translateY(0);
+}
+
+.home-app-card:focus-visible {
+    outline: 3px solid rgba(0, 120, 255, 0.22);
+    outline-offset: 2px;
+}
+
+.home-app-icone {
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    border-radius: 14px;
+    background: rgba(127, 127, 127, 0.10);
+    font-size: 1.45rem;
+}
+
+.home-app-conteudo {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.home-app-conteudo strong {
+    font-size: 1rem;
+    line-height: 1.15;
+}
+
+.home-app-conteudo small {
+    font-size: 0.79rem;
+    line-height: 1.35;
+    opacity: 0.62;
+}
+
+.home-app-seta {
+    font-size: 1.55rem;
+    line-height: 1;
+    opacity: 0.38;
+}
+
+.home-app-card-config {
+    border-style: dashed;
+}
+
+.home-app-card-sair {
+    opacity: 0.78;
+}
+
+@media (max-width: 680px) {
+    #homeSistema {
+        padding: 24px 16px 32px;
+    }
+
+    .home-apps-grade {
+        grid-template-columns: 1fr;
+        gap: 11px;
+    }
+
+    .home-app-card {
+        min-height: 88px;
+        border-radius: 16px;
+        padding: 14px;
+    }
+
+    .home-app-icone {
+        width: 44px;
+        height: 44px;
+        border-radius: 13px;
+    }
+}
+
+@media (min-width: 681px) {
+    .home-app-card-sair {
+        grid-column: 1 / -1;
+        min-height: 82px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .home-app-card {
+        transition: none;
+    }
+}
