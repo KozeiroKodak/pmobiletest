@@ -414,8 +414,16 @@ function abrirEditorMotoristaRastreio(input) {
             ?.addEventListener("click", salvarEditorMotoristaRastreio);
         modal.querySelector("#rastreioEditorMotoristaInput")
             ?.addEventListener("keydown", evento => {
-                if (evento.key === "Enter") salvarEditorMotoristaRastreio();
-                if (evento.key === "Escape") fecharEditorMotoristaRastreio();
+                if (evento.key === "Enter") {
+                    evento.preventDefault();
+                    salvarEditorMotoristaRastreio();
+                    return;
+                }
+                if (evento.key === "Escape") {
+                    evento.preventDefault();
+                    evento.stopPropagation();
+                    fecharEditorMotoristaRastreio();
+                }
             });
     }
 
