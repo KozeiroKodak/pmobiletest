@@ -1514,9 +1514,12 @@ function abrirPesquisa() {
 
 function voltarMenu() {
 
+    historicoTelasSistema.length = 0;
+
     mostrarTelaSistema(
         "homeSistema",
-        null
+        null,
+        true
     );
 
 }
@@ -2633,6 +2636,11 @@ document.addEventListener(
             !aplicacao ||
             aplicacao.style.display === "none"
         ) {
+            return;
+        }
+
+        // Na Home não há aba anterior para retornar.
+        if (obterTelaSistemaAtual() === "homeSistema") {
             return;
         }
 
