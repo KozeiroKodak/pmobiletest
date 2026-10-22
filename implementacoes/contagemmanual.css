@@ -267,10 +267,12 @@
 
 .menu-tipo-busca-contagem-manual {
     display: none;
+    pointer-events: none;
 }
 
 .menu-tipo-busca-contagem-manual.aberto {
     display: block;
+    pointer-events: auto;
 }
 
 .menu-config-contagem-manual {
@@ -302,6 +304,16 @@
     background:
         linear-gradient(180deg, rgba(62, 207, 142, 0.045), transparent 52%),
         var(--fundo-painel);
+}
+
+#contagemManual > .cabecalho-pagina + .painel {
+    overflow: visible;
+}
+
+#contagemManual .linha-contagem-manual-busca,
+#contagemManual .seletor-contagem-manual-wrapper {
+    position: relative;
+    overflow: visible;
 }
 
 #contagemManual .linha-contagem-manual-busca {
