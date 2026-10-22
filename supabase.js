@@ -222,8 +222,9 @@ async function avaliarSincronizacoesPmobile() {
         }
 
         if (typeof lerContagensManuais === "function") {
-            const contagens = lerContagensManuais();
+            const contagens = await lerContagensManuais();
             estadoSincronizacaoPmobile.contagemManual =
+                Array.isArray(contagens) &&
                 contagens.every(item => item.sincronizado === true);
         }
 
