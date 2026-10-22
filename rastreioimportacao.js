@@ -214,14 +214,24 @@ function detectarModeloRastreio(colunas) {
     };
 }
 
+function chaveNotaFiscalRastreio(valor) {
+    return String(valor ?? "")
+        .trim()
+        .replace(/\\s+/g, " ")
+        .toUpperCase();
+}
+
 function montarMapaMotoristasInicial(linhas, modelo, modeloIndices) {
     const mapa = {};
     if (modelo.motorista) return mapa;
 
-    const indiceRegiao = modeloIndices?.regiao ?? -1;
+    const indiceNotaFiscal = modeloIndices?.notaFiscal ?? -1;
     linhas.forEach(valores => {
-        const regiao = indiceRegiao >= 0 ? String(valores?.[indiceRegiao] ?? "").trim() : "";
-        if (regiao && !(regiao in mapa)) mapa[regiao] = "";
+        const notaFiscal = indiceNotaFiscal >= 0
+            ? String(valores?.[indiceNotaFiscal] ?? "").trim()
+            : "";
+        const chave = chaveNotaFiscalRastreio(notaFiscal);
+        if (chave && !(chave in mapa)) mapa[chave] = "";
     });
 
     return mapa;
@@ -239,30 +249,42 @@ function montarMapaMotoristasUI() {
         return;
     }
 
-    const regioes = Object.keys(mapaMotoristasRastreio);
+    const notasFiscais = Object.keys(mapaMotoristasRastreio);
 
-    if (!regioes.length) {
+    if (!notasFiscais.length) {
         area.innerHTML =
-            '<div class="rastreio-importacao-aviso">Não foi encontrada uma região/destino para montar o vínculo de motorista.</div>';
+            '<div class="rastreio-importacao-aviso">Não foi encontrada nenhuma Nota Fiscal válida para montar o vínculo de motorista.</div>';
         return;
     }
 
+    const indiceNotaFiscal = dadosImportacaoRastreio.modeloIndices?.notaFiscal ?? -1;
+
+    const nomesNotas = new Map();
+    dadosImportacaoRastreio.linhas.forEach(valores => {
+        const nota = indiceNotaFiscal >= 0
+            ? String(valores?.[indiceNotaFiscal] ?? "").trim()
+            : "";
+        const chave = chaveNotaFiscalRastreio(nota);
+        if (chave && !nomesNotas.has(chave)) nomesNotas.set(chave, nota);
+    });
+
     area.innerHTML =
         '<div class="rastreio-importacao-motoristas-titulo">' +
-            '<strong>Motorista por região</strong>' +
-            '<span>Preencha uma vez. O PMOBILE aplicará ao conjunto de linhas daquela região.</span>' +
+            '<strong>Motorista por Nota Fiscal</strong>' +
+            '<span>Defina o motorista uma vez. O PMOBILE aplicará o vínculo a todas as linhas da mesma NF.</span>' +
         '</div>' +
         '<div class="rastreio-importacao-motoristas-lista">' +
-            regioes.map(regiao =>
-                '<label>' +
-                    '<span>' + escaparHtmlRastreio(regiao) + '</span>' +
-                    '<input type="text" readonly data-regiao-motorista="' + escaparHtmlRastreio(regiao) + '"' +
-                        ' value="' + escaparHtmlRastreio(mapaMotoristasRastreio[regiao]) + '"' +
+            notasFiscais.map(chave => {
+                const nota = nomesNotas.get(chave) || chave;
+                return '<label>' +
+                    '<span>NF ' + escaparHtmlRastreio(nota) + '</span>' +
+                    '<input type="text" readonly data-nf-motorista="' + escaparHtmlRastreio(chave) + '"' +
+                        ' value="' + escaparHtmlRastreio(mapaMotoristasRastreio[chave]) + '"' +
                         ' placeholder="Toque para informar o motorista"' +
-                        ' aria-label="Motorista da região ' + escaparHtmlRastreio(regiao) + '"' +
+                        ' aria-label="Motorista da Nota Fiscal ' + escaparHtmlRastreio(nota) + '"' +
                         ' onclick="abrirEditorMotoristaRastreio(this)">' +
-                '</label>'
-            ).join("") +
+                '</label>';
+            }).join("") +
         '</div>';
 }
 
@@ -277,18 +299,23 @@ function fecharEditorMotoristaRastreio() {
 function salvarEditorMotoristaRastreio() {
     const modal = document.getElementById("rastreioEditorMotorista");
     const campo = document.getElementById("rastreioEditorMotoristaInput");
-    const alvo = modal?.dataset?.alvo ? document.querySelector('[data-regiao-motorista="' + CSS.escape(modal.dataset.alvo) + '"]') : null;
+    const chave = modal?.dataset?.alvo || "";
+    const alvo = chave
+        ? document.querySelector('[data-nf-motorista="' + CSS.escape(chave) + '"]')
+        : null;
+
     if (!modal || !campo || !alvo) return;
 
     const nome = campo.value.trim();
-    mapaMotoristasRastreio[modal.dataset.alvo] = nome;
+    mapaMotoristasRastreio[chave] = nome;
     alvo.value = nome;
     fecharEditorMotoristaRastreio();
+    renderizarPreviaImportacaoRastreio();
 }
 
 function abrirEditorMotoristaRastreio(input) {
-    const regiao = input?.dataset?.regiaoMotorista;
-    if (!regiao) return;
+    const chave = input?.dataset?.nfMotorista;
+    if (!chave) return;
 
     let modal = document.getElementById("rastreioEditorMotorista");
     if (!modal) {
@@ -302,7 +329,7 @@ function abrirEditorMotoristaRastreio(input) {
                 '<div class="rastreio-editor-motorista-cabecalho">' +
                     '<div>' +
                         '<span class="rastreio-editor-motorista-kicker">VÍNCULO OPERACIONAL</span>' +
-                        '<h3 id="rastreioEditorMotoristaTitulo">Motorista da região</h3>' +
+                        '<h3 id="rastreioEditorMotoristaTitulo">Motorista da Nota Fiscal</h3>' +
                         '<p id="rastreioEditorMotoristaRegiao"></p>' +
                     '</div>' +
                     '<button type="button" class="rastreio-editor-motorista-fechar" aria-label="Fechar">×</button>' +
@@ -310,7 +337,7 @@ function abrirEditorMotoristaRastreio(input) {
                 '<div class="rastreio-editor-motorista-campo">' +
                     '<label for="rastreioEditorMotoristaInput">Nome do motorista</label>' +
                     '<input id="rastreioEditorMotoristaInput" type="text" autocomplete="name" placeholder="Digite o nome completo">' +
-                    '<small>Esse nome será aplicado a todas as linhas desta região.</small>' +
+                    '<small>Esse nome será aplicado a todas as linhas desta Nota Fiscal.</small>' +
                 '</div>' +
                 '<div class="rastreio-editor-motorista-acoes">' +
                     '<button type="button" class="botao-secundario" data-cancelar-rastreio-editor>Cancelar</button>' +
@@ -336,10 +363,16 @@ function abrirEditorMotoristaRastreio(input) {
     }
 
     const campo = modal.querySelector("#rastreioEditorMotoristaInput");
-    const regiaoEl = modal.querySelector("#rastreioEditorMotoristaRegiao");
-    modal.dataset.alvo = regiao;
-    regiaoEl.textContent = regiao;
-    campo.value = mapaMotoristasRastreio[regiao] || "";
+    const identificacao = modal.querySelector("#rastreioEditorMotoristaRegiao");
+    modal.dataset.alvo = chave;
+
+    const indiceNotaFiscal = dadosImportacaoRastreio.modeloIndices?.notaFiscal ?? -1;
+    const notaFiscal = dadosImportacaoRastreio.linhas
+        .map(linha => indiceNotaFiscal >= 0 ? String(linha?.[indiceNotaFiscal] ?? "").trim() : "")
+        .find(nota => chaveNotaFiscalRastreio(nota) === chave) || chave;
+
+    identificacao.textContent = "NF " + notaFiscal;
+    campo.value = mapaMotoristasRastreio[chave] || "";
     modal.classList.add("aberto");
     modal.setAttribute("aria-hidden", "false");
     document.body.classList.add("rastreio-modal-aberto");
@@ -351,8 +384,8 @@ function abrirEditorMotoristaRastreio(input) {
 }
 
 function capturarMapaMotoristasUI() {
-    document.querySelectorAll("[data-regiao-motorista]").forEach(input => {
-        mapaMotoristasRastreio[input.dataset.regiaoMotorista] = input.value.trim();
+    document.querySelectorAll("[data-nf-motorista]").forEach(input => {
+        mapaMotoristasRastreio[input.dataset.nfMotorista] = input.value.trim();
     });
 }
 
@@ -512,8 +545,10 @@ function prepararLinhasRastreioParaEnvio(inicio = 0, fim = null, coletarAvisos =
         const turno = normalizarTurnoRastreio(valor("turno"));
         const dataEnvio = normalizarDataRastreio(valor("dataEnvio"));
         const regiao = String(valor("regiao") ?? "").trim();
+        const notaFiscal = String(valor("notaFiscal") ?? "").trim();
+        const chaveNotaFiscal = chaveNotaFiscalRastreio(notaFiscal);
         const motoristaPlanilha = String(valor("motorista") ?? "").trim();
-        const motorista = motoristaPlanilha || mapaMotoristasRastreio[regiao] || "";
+        const motorista = motoristaPlanilha || mapaMotoristasRastreio[chaveNotaFiscal] || "";
 
         const item = {
             cliente: String(valor("cliente") ?? "").trim(),
@@ -576,7 +611,10 @@ function renderizarPreviaImportacaoRastreio() {
                 const d = linha;
                 const indices = dadosImportacaoRastreio.modeloIndices;
                 const regiao = indices.regiao >= 0 ? String(d[indices.regiao] ?? "").trim() : "";
-                const motorista = indices.motorista >= 0 ? String(d[indices.motorista] ?? "").trim() : (mapaMotoristasRastreio[regiao] || "—");
+                const notaFiscal = indices.notaFiscal >= 0 ? String(d[indices.notaFiscal] ?? "").trim() : "";
+                const motorista = indices.motorista >= 0
+                    ? String(d[indices.motorista] ?? "").trim()
+                    : (mapaMotoristasRastreio[chaveNotaFiscalRastreio(notaFiscal)] || "—");
                 return '<div class="linha">' +
                     '<span>' + (dadosImportacaoRastreio.deslocamentoLinha + indiceAmostra) + '</span>' +
                     '<span>' + escaparHtmlRastreio(d[indices.cliente]) + '</span>' +
