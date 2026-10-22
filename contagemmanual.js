@@ -59,6 +59,20 @@ function selecionarTipoBuscaContagemManual(tipo) {
 
     seletor.value = tipo;
     botao.textContent = nomesCurtos[tipo] || "CÓD";
+
+    const campo = document.getElementById("campoContagemManual");
+    const placeholders = {
+        codigo: "Digite o código",
+        referencia: "Digite a referência",
+        descricao: "Digite a descrição"
+    };
+
+    if (campo) {
+        campo.value = "";
+        campo.placeholder = placeholders[tipo] || "Digite para buscar";
+        campo.focus();
+    }
+
     menu.classList.remove("aberto");
     botao.setAttribute("aria-expanded", "false");
 }
@@ -69,7 +83,7 @@ document.addEventListener("click", function(evento) {
     const wrapper = botao?.closest(".seletor-contagem-manual-wrapper");
 
     if (menu && wrapper && !wrapper.contains(evento.target)) {
-        menu.style.display = "none";
+        menu.classList.remove("aberto");
         botao.setAttribute("aria-expanded", "false");
     }
 });
@@ -707,6 +721,18 @@ async function exibirContagensManuais() {
         area.appendChild(bloco);
     });
 }
+
+document.addEventListener("keydown", function(evento) {
+    if (evento.key !== "Escape") return;
+
+    const menu = document.getElementById("menuTipoBuscaContagemManual");
+    const botao = document.getElementById("botaoTipoBuscaContagemManual");
+
+    if (menu?.classList.contains("aberto")) {
+        menu.classList.remove("aberto");
+        botao?.setAttribute("aria-expanded", "false");
+    }
+});
 
 document.addEventListener("DOMContentLoaded", function() {
     const campo = document.getElementById("campoContagemManual");
