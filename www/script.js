@@ -1179,6 +1179,7 @@ async function entrarInterface(event) {
         usuarioPmobileAtual = usuarioAutenticado;
         window.usuarioPmobileAtual = usuarioAutenticado;
         credencialPmobileAtual = senha;
+        window.credencialPmobileAtual = senha;
 
         const manterLogin =
             document.getElementById("loginManterLogin");
