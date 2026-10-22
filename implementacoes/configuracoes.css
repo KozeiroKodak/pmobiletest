@@ -51,3 +51,5 @@
     flex: 1;
 }
 
+
+@media (max-width:700px){.configuracoes-acoes{display:grid;grid-template-columns:1fr}.configuracoes-acoes button{width:100%}.solicitacao-usuario-acoes{display:grid;grid-template-columns:1fr}.solicitacao-usuario-acoes button{width:100%}}
