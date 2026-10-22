@@ -42,8 +42,8 @@ function alternarImportacaoSemMotoristaRastreio(checkbox) {
     }
 }
 
-async function prepararImportacaoRastreio() {
-    const arquivo = document.getElementById("arquivoRastreio")?.files?.[0];
+async function prepararImportacaoRastreio(arquivoExterno = null) {
+    const arquivo = arquivoExterno || document.getElementById("arquivoRastreio")?.files?.[0];
     if (!arquivo) return;
 
     if (!window.XLSX) {
@@ -188,6 +188,254 @@ async function prepararImportacaoRastreio() {
         dadosImportacaoRastreio = null;
         mostrarStatusImportacaoRastreio("🔴 " + (erro.message || "Não foi possível ler a planilha."));
     }
+}
+
+
+// ============================================================
+// LER PLANILHA COMPARTILHADA ONLINE
+// Reaproveita a mesma leitura da Importação NF:
+// Google Sheets/Drive são convertidos para download XLSX;
+// Microsoft 365/SharePoint usa o proxy já existente no Supabase.
+// ============================================================
+
+async function prepararImportacaoRastreioOnline() {
+    const campo = document.getElementById("linkImportacaoRastreio");
+    const urlInformada = campo?.value?.trim();
+
+    if (!urlInformada) {
+        mostrarStatusImportacaoRastreio("🔴 Insira o link público da planilha.");
+        return;
+    }
+
+    if (!window.XLSX) {
+        mostrarStatusImportacaoRastreio("🔴 A biblioteca Excel ainda não foi carregada.");
+        return;
+    }
+
+    try {
+        mostrarStatusImportacaoRastreio("🟡 Lendo planilha compartilhada online...");
+
+        const urlDownload = normalizarUrlPlanilhaOnlineRastreio(urlInformada);
+        const hostOnline = new URL(urlDownload).hostname.toLowerCase();
+
+        const microsoft365 =
+            hostOnline === "1drv.ms" ||
+            hostOnline === "onedrive.live.com" ||
+            hostOnline.endsWith(".onedrive.live.com") ||
+            hostOnline === "automotivacba-my.sharepoint.com";
+
+        if (microsoft365) {
+            const respostaProxy = await window.clienteSupabase.functions.invoke(
+                "pmobile-nf-download",
+                { body: { url: urlInformada } }
+            );
+
+            if (respostaProxy.error) {
+                throw new Error(
+                    respostaProxy.error.message ||
+                    "Não foi possível ler a planilha pelo Microsoft 365."
+                );
+            }
+
+            const dadosProxy = respostaProxy.data;
+
+            if (
+                !dadosProxy ||
+                !Array.isArray(dadosProxy.colunas) ||
+                !Array.isArray(dadosProxy.linhas)
+            ) {
+                throw new Error(
+                    dadosProxy?.error ||
+                    "O Supabase não retornou os dados da planilha."
+                );
+            }
+
+            const colunas = normalizarColunasRastreio(dadosProxy.colunas);
+            const modelo = detectarModeloRastreio(colunas);
+
+            if (!modelo.cliente || !modelo.notaFiscal || !modelo.dataEnvio || !modelo.turno) {
+                throw new Error(
+                    "A planilha online não possui os campos obrigatórios de Rastreio: Cliente, Nota Fiscal, Data Envio e Turno."
+                );
+            }
+
+            const mapaColunas = {};
+            dadosProxy.colunas.forEach((coluna, indice) => {
+                mapaColunas[coluna] = indice;
+            });
+
+            const linhas = dadosProxy.linhas.map((linha) => {
+                const dados = linha?.dados && typeof linha.dados === "object"
+                    ? linha.dados
+                    : linha;
+                return colunas.map((colunaOriginal, indice) => {
+                    const chaveOriginal = dadosProxy.colunas[indice];
+                    return dados?.[chaveOriginal] ?? dados?.[colunaOriginal] ?? null;
+                });
+            }).filter(linha => linha.some(valor => String(valor ?? "").trim() !== ""));
+
+            if (!linhas.length) {
+                throw new Error("A planilha online possui cabeçalho, mas nenhuma linha de dados.");
+            }
+
+            const modeloIndices = {};
+            Object.keys(modelo).forEach(chave => {
+                modeloIndices[chave] = modelo[chave] ? colunas.indexOf(modelo[chave]) : -1;
+            });
+
+            dadosImportacaoRastreio = {
+                arquivo: {
+                    name: dadosProxy.nome_arquivo || "planilha-compartilhada.xlsx",
+                    size: Number(dadosProxy.tamanho_bytes || 0)
+                },
+                nomeAba: dadosProxy.nome_aba || "Planilha",
+                colunas,
+                linhas,
+                deslocamentoLinha: 2,
+                sha256: dadosProxy.sha256 || null,
+                tamanhoBytes: Number(dadosProxy.tamanho_bytes || 0),
+                modelo,
+                modeloIndices
+            };
+
+            mapaMotoristasRastreio = montarMapaMotoristasInicial(
+                linhas,
+                modelo,
+                modeloIndices
+            );
+
+            renderizarPreviaImportacaoRastreio();
+            mostrarStatusImportacaoRastreio(
+                importarSemMotoristaRastreio
+                    ? "🟢 Planilha online analisada. A importação será feita sem selecionar motorista."
+                    : "🟢 Planilha online analisada. Revise os motoristas antes de enviar."
+            );
+            return;
+        }
+
+        const resposta = await fetch(urlDownload, {
+            method: "GET",
+            redirect: "follow"
+        });
+
+        if (!resposta.ok) {
+            throw new Error("O link respondeu HTTP " + resposta.status + ".");
+        }
+
+        const buffer = await resposta.arrayBuffer();
+
+        if (!buffer.byteLength) {
+            throw new Error("O link não retornou nenhum arquivo.");
+        }
+
+        const nomeArquivo = obterNomeArquivoOnlineRastreio(
+            resposta,
+            urlDownload
+        );
+
+        const tipo = resposta.headers.get("content-type") || "application/octet-stream";
+
+        const arquivo = new File(
+            [buffer],
+            nomeArquivo,
+            { type: tipo }
+        );
+
+        await prepararImportacaoRastreio(arquivo);
+
+    } catch (erro) {
+        console.error("❌ Erro ao ler planilha online de Rastreio:", erro);
+        mostrarStatusImportacaoRastreio(
+            "🔴 Não foi possível ler o link. " +
+            (erro.message || "Verifique se a planilha é pública e permite download.")
+        );
+    }
+}
+
+function normalizarUrlPlanilhaOnlineRastreio(urlInformada) {
+    let url;
+
+    try {
+        url = new URL(urlInformada);
+    } catch {
+        throw new Error("O link informado não é uma URL válida.");
+    }
+
+    if (url.protocol !== "https:" && url.protocol !== "http:") {
+        throw new Error("O link deve começar com http:// ou https://.");
+    }
+
+    const host = url.hostname.toLowerCase();
+
+    const matchGoogle = url.pathname.match(/^\/spreadsheets\/d\/([^/]+)/);
+
+    if (
+        (host === "docs.google.com" || host === "sheets.google.com") &&
+        matchGoogle
+    ) {
+        return (
+            "https://docs.google.com/spreadsheets/d/" +
+            encodeURIComponent(matchGoogle[1]) +
+            "/export?format=xlsx"
+        );
+    }
+
+    const matchDrive = url.pathname.match(/^\/file\/d\/([^/]+)/);
+
+    if (host === "drive.google.com" && matchDrive) {
+        return (
+            "https://drive.google.com/uc?export=download&id=" +
+            encodeURIComponent(matchDrive[1])
+        );
+    }
+
+    if (
+        host === "1drv.ms" ||
+        host === "onedrive.live.com" ||
+        host.endsWith(".onedrive.live.com") ||
+        host === "automotivacba-my.sharepoint.com"
+    ) {
+        if (url.pathname.startsWith("/:x:/g/")) {
+            url.search = "?download=1";
+            return url.toString();
+        }
+
+        url.searchParams.set("download", "1");
+        return url.toString();
+    }
+
+    return url.toString();
+}
+
+function obterNomeArquivoOnlineRastreio(resposta, url) {
+    const disposicao = resposta.headers.get("content-disposition");
+
+    const nomeHeader = disposicao?.match(
+        /filename\*?=(?:UTF-8''|")?([^";]+)/
+    )?.[1];
+
+    if (nomeHeader) {
+        try {
+            return decodeURIComponent(nomeHeader).trim();
+        } catch {
+            return nomeHeader.trim();
+        }
+    }
+
+    try {
+        const pathname = new URL(url).pathname;
+        const nome = decodeURIComponent(
+            pathname.split("/").pop() || ""
+        ).trim();
+
+        if (nome && /\.(xlsx?|xlsm|csv)$/i.test(nome)) {
+            return nome;
+        }
+    } catch {
+        // usa o nome padrão
+    }
+
+    return "planilha-online.xlsx";
 }
 
 function normalizarChaveRastreio(valor) {
