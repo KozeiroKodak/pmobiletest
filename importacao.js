@@ -1845,6 +1845,10 @@ async function processarArquivoHTML(
             material
         );
 
+        // Libera a linha original assim que ela foi convertida.
+        // Evita manter ~94 mil objetos de entrada junto do inventário novo.
+        linhas[i] = null;
+
 
         // ----------------------------------------------------
         // Liberar processamento periodicamente
@@ -1935,11 +1939,11 @@ async function processarArquivoExcel(
     }
 
 
-    const arrayBuffer =
+    let arrayBuffer =
         await arquivo.arrayBuffer();
 
 
-    const workbook =
+    let workbook =
         XLSX.read(
             arrayBuffer,
             {
@@ -1970,7 +1974,7 @@ async function processarArquivoExcel(
         ];
 
 
-    const linhas =
+    let linhas =
         XLSX.utils.sheet_to_json(
             planilha,
             {
@@ -2078,6 +2082,11 @@ async function processarArquivoExcel(
 
     }
 
+
+    // A partir daqui somente novoInventario é necessário.
+    linhas = null;
+    workbook = null;
+    arrayBuffer = null;
 
     atualizarBarraProgresso(
         50,
@@ -2265,6 +2274,9 @@ async function importarParaSupabase(
             }
 
             enviados += lote.length;
+
+            // Libera a referência do lote imediatamente após o envio.
+            lote.length = 0;
 
             const percentual =
                 50 +
