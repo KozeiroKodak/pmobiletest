@@ -4,9 +4,9 @@
    ============================================================ */
 
 #inicio {
-
-    min-height:
-        100vh;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: calc(100dvh - var(--status-altura));
 
     display:
         flex;
