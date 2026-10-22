@@ -1,117 +1,387 @@
-/* PMOBILE — Tela principal */
+/* PMOBILE — Tela principal pós-login */
 /* ============================================================
-   TELA PRINCIPAL — POLIMENTO VISUAL
+   LANÇADOR PRINCIPAL
+   Toda a apresentação desta tela permanece neste CSS dedicado.
    ============================================================ */
+
+#sistema {
+    display: none !important;
+}
+
+#conteudoPrincipal {
+    width: 100%;
+    min-height: 100vh;
+    margin-left: 0 !important;
+}
 
 #homeSistema {
     position: relative;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: calc(100dvh - var(--status-altura));
     display: flex;
     align-items: flex-start;
-    padding-top: 42px;
-}
-
-#homeSistema .cabecalho-pagina {
-    position: relative;
-    width: min(100%, 980px);
-    margin: 0;
-    padding: 34px 38px 36px;
+    justify-content: center;
+    padding: clamp(28px, 5vw, 58px) clamp(16px, 4vw, 56px) 72px;
     overflow: hidden;
-    border: 1px solid var(--borda);
-    border-radius: 10px;
     background:
-        radial-gradient(circle at 92% 18%, rgba(62, 207, 142, .10), transparent 28%),
-        linear-gradient(135deg, #1b1b1b 0%, var(--fundo-painel) 58%, #161616 100%);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, .16);
+        radial-gradient(circle at 86% 8%, rgba(62, 207, 142, .075), transparent 25%),
+        linear-gradient(180deg, #111 0%, var(--fundo) 38%, var(--fundo) 100%);
 }
 
-#homeSistema .cabecalho-pagina::before {
+#homeSistema::before {
     content: "";
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 100%;
-    background: var(--verde);
+    top: -180px;
+    right: -150px;
+    width: 420px;
+    height: 420px;
+    border: 1px solid rgba(62, 207, 142, .07);
+    border-radius: 50%;
+    pointer-events: none;
 }
 
-#homeSistema .cabecalho-pagina::after {
-    content: "Painel principal";
+#homeSistema::after {
+    content: "";
     position: absolute;
     top: 22px;
-    right: 28px;
-    padding: 5px 9px;
-    border: 1px solid rgba(62, 207, 142, .22);
-    border-radius: 999px;
-    background: rgba(62, 207, 142, .06);
-    color: #8de2bb;
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: .04em;
-    text-transform: uppercase;
+    left: 50%;
+    width: min(900px, 72vw);
+    height: 1px;
+    transform: translateX(-50%);
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.08), transparent);
+    pointer-events: none;
 }
 
-#homeSistema .cabecalho-caminho {
-    margin-bottom: 10px;
-    color: #6f6f6f;
-    font-size: 11px;
-    letter-spacing: .08em;
-    text-transform: uppercase;
+.home-apps {
+    position: relative;
+    z-index: 1;
+    width: min(100%, 1040px);
+    margin: 0 auto;
 }
 
-#homeSistema .cabecalho-pagina h1 {
-    margin: 0;
-    color: #ffffff;
-    font-size: clamp(28px, 4vw, 34px);
-    font-weight: 600;
-    line-height: 1.15;
-    letter-spacing: -.025em;
+.home-apps-cabecalho {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 26px;
+    padding: 0 2px 22px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
 }
 
-#homeSistema .cabecalho-pagina > p:not(.cabecalho-caminho) {
-    max-width: 520px;
-    margin-top: 12px;
-    color: #9b9b9b;
-    font-size: 14px;
-    line-height: 1.6;
-}
-
-#homeSistema .cabecalho-pagina h1::after {
+.home-apps-cabecalho::after {
     content: "";
-    display: block;
-    width: 42px;
+    position: absolute;
+    left: 2px;
+    bottom: -1px;
+    width: 58px;
     height: 2px;
-    margin-top: 18px;
-    border-radius: 2px;
+    border-radius: 99px;
     background: var(--verde);
-    opacity: .8;
+    box-shadow: 0 0 14px rgba(62,207,142,.20);
+}
+
+.home-apps-kicker {
+    margin: 0 0 8px;
+    color: var(--verde);
+    font-size: .68rem;
+    font-weight: 800;
+    letter-spacing: .18em;
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+.home-apps-cabecalho h1 {
+    margin: 0;
+    color: var(--texto);
+    font-size: clamp(2rem, 4vw, 2.85rem);
+    font-weight: 650;
+    line-height: 1;
+    letter-spacing: -.035em;
+}
+
+.home-apps-cabecalho p:last-child {
+    margin: 10px 0 0;
+    color: var(--texto-secundario);
+    font-size: clamp(.82rem, 1.5vw, .94rem);
+    line-height: 1.5;
+}
+
+.home-apps-grade {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.home-app-card {
+    position: relative;
+    display: grid;
+    grid-template-columns: 46px minmax(0, 1fr) 20px;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    min-height: 96px;
+    padding: 15px 16px;
+    box-sizing: border-box;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.085);
+    border-radius: 14px;
+    background:
+        linear-gradient(145deg, rgba(255,255,255,.035), transparent 58%),
+        var(--fundo-painel);
+    color: var(--texto);
+    text-align: left;
+    cursor: pointer;
+    box-shadow: 0 8px 22px rgba(0,0,0,.14);
+    transition:
+        transform .16s ease,
+        border-color .16s ease,
+        background-color .16s ease,
+        box-shadow .16s ease;
+}
+
+.home-app-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-left: 2px solid transparent;
+    border-radius: inherit;
+    pointer-events: none;
+    transition: border-color .16s ease;
+}
+
+.home-app-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(62,207,142,.22);
+    background:
+        linear-gradient(145deg, rgba(62,207,142,.045), transparent 62%),
+        var(--fundo-painel);
+    box-shadow: 0 12px 28px rgba(0,0,0,.20);
+}
+
+.home-app-card:hover::before {
+    border-left-color: var(--verde);
+}
+
+.home-app-card:active {
+    transform: translateY(0);
+}
+
+.home-app-card:focus-visible {
+    outline: 2px solid rgba(62,207,142,.55);
+    outline-offset: 3px;
+}
+
+.home-app-icone {
+    width: 46px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    box-sizing: border-box;
+    border: 1px solid rgba(255,255,255,.075);
+    border-radius: 12px;
+    background: rgba(255,255,255,.045);
+    font-size: 1.3rem;
+    filter: saturate(.82);
+    transition:
+        background-color .16s ease,
+        border-color .16s ease,
+        transform .16s ease;
+}
+
+.home-app-card:hover .home-app-icone {
+    border-color: rgba(62,207,142,.18);
+    background: rgba(62,207,142,.075);
+    transform: scale(1.035);
+}
+
+.home-app-conteudo {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.home-app-conteudo strong {
+    overflow: hidden;
+    color: var(--texto);
+    font-size: .92rem;
+    font-weight: 650;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.home-app-conteudo small {
+    overflow: hidden;
+    color: var(--texto-secundario);
+    font-size: .76rem;
+    line-height: 1.35;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.home-app-seta {
+    color: var(--texto-secundario);
+    font-size: 1.35rem;
+    font-weight: 300;
+    line-height: 1;
+    opacity: .42;
+    transform: translateX(-1px);
+    transition:
+        color .16s ease,
+        opacity .16s ease,
+        transform .16s ease;
+}
+
+.home-app-card:hover .home-app-seta {
+    color: var(--verde);
+    opacity: .9;
+    transform: translateX(2px);
+}
+
+.home-app-card-config {
+    border-color: rgba(255,255,255,.12);
+    background:
+        linear-gradient(145deg, rgba(255,255,255,.04), transparent 62%),
+        #171717;
+}
+
+.home-app-card-config .home-app-icone {
+    background: rgba(255,255,255,.055);
+}
+
+.home-app-card-sair {
+    grid-column: 1 / -1;
+    min-height: 68px;
+    opacity: .78;
+}
+
+.home-app-card-sair .home-app-icone {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    font-size: 1.1rem;
+}
+
+.home-app-card-sair:hover {
+    opacity: 1;
+    border-color: rgba(220,90,90,.28);
+    background:
+        linear-gradient(145deg, rgba(220,90,90,.035), transparent 62%),
+        var(--fundo-painel);
+}
+
+.home-app-card-sair:hover::before {
+    border-left-color: #c96b6b;
+}
+
+@media (min-width: 1100px) {
+    .home-apps-grade {
+        gap: 14px;
+    }
+
+    .home-app-card {
+        min-height: 102px;
+        padding: 16px 18px;
+    }
+
+    .home-app-card-sair {
+        min-height: 72px;
+    }
 }
 
 @media (max-width: 700px) {
     #homeSistema {
-        padding-top: 24px;
+        min-height: calc(100dvh - var(--status-altura));
+        padding: 24px 12px 62px;
     }
 
-    #homeSistema .cabecalho-pagina {
-        width: 100%;
-        padding: 26px 24px 28px;
-        border-radius: 8px;
+    #homeSistema::after {
+        top: 14px;
+        width: 78vw;
     }
 
-    #homeSistema .cabecalho-pagina::after {
-        top: 18px;
-        right: 18px;
-        font-size: 9px;
+    .home-apps-cabecalho {
+        align-items: flex-start;
+        margin-bottom: 18px;
+        padding: 0 2px 17px;
     }
 
-    #homeSistema .cabecalho-pagina h1 {
-        font-size: 27px;
-        padding-right: 90px;
+    .home-apps-cabecalho h1 {
+        font-size: clamp(1.85rem, 9vw, 2.25rem);
     }
 
-    #homeSistema .cabecalho-pagina > p:not(.cabecalho-caminho) {
-        font-size: 13px;
+    .home-apps-cabecalho p:last-child {
+        max-width: 300px;
+        margin-top: 8px;
+    }
+
+    .home-apps-grade {
+        grid-template-columns: 1fr;
+        gap: 9px;
+    }
+
+    .home-app-card,
+    .home-app-card-sair {
+        grid-column: auto;
+        min-height: 76px;
+        padding: 12px 13px;
+        border-radius: 12px;
+    }
+
+    .home-app-card {
+        grid-template-columns: 42px minmax(0, 1fr) 18px;
+        gap: 12px;
+    }
+
+    .home-app-icone {
+        width: 42px;
+        height: 42px;
+        border-radius: 11px;
+        font-size: 1.2rem;
+    }
+
+    .home-app-conteudo strong {
+        font-size: .9rem;
+    }
+
+    .home-app-conteudo small {
+        font-size: .74rem;
+    }
+
+    .home-app-card-sair .home-app-icone {
+        width: 36px;
+        height: 36px;
     }
 }
 
+@media (max-width: 380px) {
+    #homeSistema {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
 
-@media (max-width:700px){#homeSistema .cabecalho-pagina h1{font-size:20px}}
+    .home-apps-cabecalho {
+        margin-bottom: 15px;
+    }
+
+    .home-app-card,
+    .home-app-card-sair {
+        min-height: 72px;
+    }
+
+    .home-app-conteudo small {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .home-app-card,
+    .home-app-icone,
+    .home-app-seta {
+        transition: none;
+    }
+}
