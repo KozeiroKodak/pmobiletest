@@ -793,27 +793,22 @@ async function enviarImportacaoRastreio() {
     try {
         const sessao = obterSessaoRastreioImportacao();
 
-        // O banco exige Cliente, NF, Data Envio e Turno. Valida toda a
-        // planilha antes de criar a importação para impedir que um lote
-        // parcialmente inválido chegue ao PostgreSQL.
+        // A importação é tolerante: campos ausentes, inválidos ou não
+        // normalizáveis não bloqueiam o lote. A validação continua sendo
+        // executada para registrar os avisos, enquanto o banco preserva
+        // esses campos como NULL.
         const validacao = validarLinhasObrigatoriasRastreio();
 
         if (validacao.totalErros > 0) {
-            const detalhes = validacao.erros.join("\n");
-            const resumo =
-                "Foram encontradas " +
-                validacao.totalErros.toLocaleString("pt-BR") +
-                " inconsistência(s) em " +
-                validacao.totalOperacionais.toLocaleString("pt-BR") +
-                " linha(s) operacional(is)." +
-                (validacao.totalEstruturais
-                    ? "\nLinhas estruturais ignoradas: " +
-                      validacao.totalEstruturais.toLocaleString("pt-BR") + "."
-                    : "");
+            console.warn("Importação de Rastreio com inconsistências toleradas:", {
+                total: validacao.totalErros,
+                amostra: validacao.erros
+            });
 
-            throw new Error(
-                resumo +
-                (detalhes ? "\n\n" + detalhes : "")
+            mostrarStatusImportacaoRastreio(
+                "🟡 Importação tolerante: " +
+                validacao.totalErros.toLocaleString("pt-BR") +
+                " inconsistência(s) serão preservadas como campo vazio."
             );
         }
 
