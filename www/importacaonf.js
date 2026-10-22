@@ -48,6 +48,11 @@ function obterSessaoImportacaoNF() {
 
 async function abrirImportacaoNF() {
 
+    if (!window.usuarioPmobileAtual || window.usuarioPmobileAtual.nivel !== "ADMIN") {
+        alert("Acesso administrativo negado.");
+        return;
+    }
+
     mostrarTelaSistema(
         "importacaoNF",
         "menuImportacaoNF"
