@@ -41,7 +41,7 @@ async function prepararImportacaoRastreio() {
     try {
         mostrarStatusImportacaoRastreio("🟡 Lendo planilha de Rastreio...");
 
-        const buffer = await arquivo.arrayBuffer();
+        let buffer = await arquivo.arrayBuffer();
         // Uma leitura curta descobre as abas e os cabeçalhos.
         // Evita reler o ArrayBuffer uma vez para cada aba candidata.
         let workbook = window.XLSX.read(buffer, {
