@@ -1522,3 +1522,11 @@ input {
         width: 100%;
     }
 }
+
+@media (min-width:701px) and (max-width:1024px){
+    :root{--sidebar-largura:210px}
+    #sistema{width:var(--sidebar-largura)}
+    #conteudoPrincipal{margin-left:var(--sidebar-largura)}
+    .sidebar-item{padding-left:12px;padding-right:12px}
+    .sidebar-texto{font-size:13px}
+}
