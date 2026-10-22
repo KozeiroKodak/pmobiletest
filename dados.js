@@ -1355,6 +1355,12 @@ async function limparMateriais() {
 
 async function carregarMateriais() {
 
+    // Mantém uma única cópia do inventário em memória.
+    // Pesquisa, Conferência e Contagem Manual reutilizam esta referência.
+    if (Array.isArray(materiais) && materiais.length > 0) {
+        return materiais;
+    }
+
     try {
 
         const banco =
