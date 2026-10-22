@@ -565,7 +565,6 @@ function renderizarPreviaImportacaoRastreio() {
         '<div class="rastreio-importacao-resumo">' +
             '<strong>' + escaparHtmlRastreio(dadosImportacaoRastreio.arquivo.name) + '</strong>' +
             '<span>' + dadosImportacaoRastreio.linhas.length.toLocaleString("pt-BR") + ' linhas</span>' +
-            '<span>' + dadosImportacaoRastreio.colunas.length + ' colunas</span>' +
             '<span>Aba: ' + escaparHtmlRastreio(dadosImportacaoRastreio.nomeAba) + '</span>' +
         '</div>' +
         '<div class="rastreio-importacao-previa-titulo">Amostra das primeiras linhas</div>' +
