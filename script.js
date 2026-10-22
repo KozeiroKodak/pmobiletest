@@ -144,7 +144,6 @@ const itensMenuSistema = [
     "menuConferencia",
 
     "menuConferencias",
-"menuDivergencias",
 
     "menuConfiguracoes"
 
@@ -1678,7 +1677,7 @@ function abrirDivergencias() {
 
     mostrarTelaSistema(
         "divergencias",
-        "menuDivergencias"
+        null
     );
 
 
