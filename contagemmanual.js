@@ -446,27 +446,34 @@ async function sincronizarContagensManuaisPendentes(limpezaEm = null) {
 
     for (const item of pendentes) {
         try {
-            const payload = {
-                id: item.id,
-                material_id: item.idSupabase || null,
-                codigo_material: item.codigo || "",
-                descricao_material: item.descricao || "",
-                referencia_material: item.referencia || null,
-                marca_material: item.marca || null,
-                local_original: item.localOriginal || null,
-                local_encontrado: item.localEncontrado,
-                quantidade_esperada: Number(item.quantidadeEsperada || 0),
-                quantidade_fisica: Number(item.quantidadeFisica || 0),
-                local_alterado: Boolean(item.localAlterado),
-                zerado: Boolean(item.zerado),
-                data_hora: item.dataHora,
-                usuario_id: item.usuarioId ?? window.usuarioPmobileAtual?.id ?? null,
-                usuario_nome: item.usuarioNome ?? window.usuarioPmobileAtual?.nome ?? window.usuarioPmobileAtual?.usuario ?? "Usuário não identificado"
-            };
+            const usuarioSessao =
+                (typeof usuarioPmobileAtual !== "undefined" && usuarioPmobileAtual?.usuario)
+                    ? usuarioPmobileAtual
+                    : window.usuarioPmobileAtual;
+            const credencialSessao =
+                (typeof credencialPmobileAtual !== "undefined" && credencialPmobileAtual)
+                    ? credencialPmobileAtual
+                    : window.credencialPmobileAtual;
 
-            const { error } = await cliente
-                .from(TABELA_CONTAGENS_MANUAIS_SUPABASE)
-                .insert(payload);
+            if (!usuarioSessao?.usuario || !credencialSessao) {
+                throw new Error("Sessão do usuário não disponível para sincronizar a contagem.");
+            }
+
+            const { error } = await cliente.rpc("pmobile_contagem_manual_inserir", {
+                p_usuario: usuarioSessao.usuario,
+                p_credencial: credencialSessao,
+                p_id: item.id,
+                p_material_id: item.idSupabase || null,
+                p_codigo_material: item.codigo || "",
+                p_descricao_material: item.descricao || "",
+                p_referencia_material: item.referencia || null,
+                p_marca_material: item.marca || null,
+                p_local_original: item.localOriginal || null,
+                p_local_encontrado: item.localEncontrado,
+                p_quantidade_esperada: Number(item.quantidadeEsperada || 0),
+                p_quantidade_fisica: Number(item.quantidadeFisica || 0),
+                p_data_hora: item.dataHora
+            });
 
             if (error) throw error;
 
@@ -520,9 +527,25 @@ async function baixarContagensManuaisSupabase(limpezaEm = null) {
         while (true) {
             const fim = inicio + tamanhoPagina - 1;
 
+            const usuarioSessao =
+                (typeof usuarioPmobileAtual !== "undefined" && usuarioPmobileAtual?.usuario)
+                    ? usuarioPmobileAtual
+                    : window.usuarioPmobileAtual;
+            const credencialSessao =
+                (typeof credencialPmobileAtual !== "undefined" && credencialPmobileAtual)
+                    ? credencialPmobileAtual
+                    : window.credencialPmobileAtual;
+
+            if (!usuarioSessao?.usuario || !credencialSessao) {
+                return false;
+            }
+
             const { data, error } = await cliente
-                .from(TABELA_CONTAGENS_MANUAIS_SUPABASE)
-                .select("*")
+                .rpc("pmobile_contagens_manuais_listar", {
+                    p_usuario: usuarioSessao.usuario,
+                    p_credencial: credencialSessao,
+                    p_somente_alterados: false
+                })
                 .order("data_hora", { ascending: false })
                 .range(inicio, fim);
 
