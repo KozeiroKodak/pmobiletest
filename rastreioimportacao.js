@@ -6,6 +6,7 @@ const TAMANHO_LOTE_RASTREIO = 250;
 let importacaoRastreioEmAndamento = false;
 let dadosImportacaoRastreio = null;
 let mapaMotoristasRastreio = {};
+let importarSemMotoristaRastreio = false;
 
 function obterSessaoRastreioImportacao() {
     const usuario =
@@ -27,6 +28,18 @@ function obterSessaoRastreioImportacao() {
 
 function abrirArquivoRastreio() {
     document.getElementById("arquivoRastreio")?.click();
+}
+
+function alternarImportacaoSemMotoristaRastreio(checkbox) {
+    importarSemMotoristaRastreio = Boolean(checkbox?.checked);
+    if (importarSemMotoristaRastreio) {
+        mapaMotoristasRastreio = {};
+    }
+    if (dadosImportacaoRastreio) {
+        renderizarPreviaImportacaoRastreio();
+    } else {
+        montarMapaMotoristasUI();
+    }
 }
 
 async function prepararImportacaoRastreio() {
@@ -167,7 +180,9 @@ async function prepararImportacaoRastreio() {
 
         mapaMotoristasRastreio = montarMapaMotoristasInicial(linhas, modelo, modeloIndices);
         renderizarPreviaImportacaoRastreio();
-        mostrarStatusImportacaoRastreio("🟢 Planilha analisada. Revise os motoristas antes de enviar.");
+        mostrarStatusImportacaoRastreio(importarSemMotoristaRastreio
+            ? "🟢 Planilha analisada. A importação será feita sem selecionar motorista."
+            : "🟢 Planilha analisada. Revise os motoristas antes de enviar.");
     } catch (erro) {
         console.error("Erro ao preparar Rastreio:", erro);
         dadosImportacaoRastreio = null;
@@ -252,6 +267,11 @@ function montarMapaMotoristasUI() {
     if (!area || !dadosImportacaoRastreio) return;
 
     const modelo = dadosImportacaoRastreio.modelo;
+
+    if (importarSemMotoristaRastreio) {
+        area.innerHTML = '<div class="rastreio-importacao-aviso">✓ Opção ativa: os rastreios serão importados sem selecionar motorista.</div>';
+        return;
+    }
 
     if (modelo.motorista) {
         area.innerHTML =
@@ -570,7 +590,7 @@ function prepararLinhasRastreioParaEnvio(inicio = 0, fim = null, coletarAvisos =
         const notaFiscal = String(valor("notaFiscal") ?? "").trim();
         const chaveNotaFiscal = chaveNotaFiscalRastreio(notaFiscal);
         const motoristaPlanilha = String(valor("motorista") ?? "").trim();
-        const motorista = motoristaPlanilha || mapaMotoristasRastreio[chaveNotaFiscal] || "";
+        const motorista = importarSemMotoristaRastreio ? "" : (motoristaPlanilha || mapaMotoristasRastreio[chaveNotaFiscal] || "");
 
         const item = {
             cliente: String(valor("cliente") ?? "").trim(),
@@ -619,6 +639,12 @@ function renderizarPreviaImportacaoRastreio() {
     const modelo = dadosImportacaoRastreio.modelo;
 
     area.innerHTML =
+        '<label class="rastreio-importacao-sem-motorista">' +
+            '<input type="checkbox" id="rastreioImportarSemMotorista" ' +
+                (importarSemMotoristaRastreio ? 'checked' : '') +
+                ' onchange="alternarImportacaoSemMotoristaRastreio(this)">' +
+            '<span><strong>Importar sem selecionar motorista</strong><small>Não será necessário definir motorista por Nota Fiscal.</small></span>' +
+        '</label>' +
         '<div class="rastreio-importacao-resumo">' +
             '<strong>' + escaparHtmlRastreio(dadosImportacaoRastreio.arquivo.name) + '</strong>' +
             '<span>' + dadosImportacaoRastreio.linhas.length.toLocaleString("pt-BR") + ' linhas</span>' +
@@ -634,9 +660,11 @@ function renderizarPreviaImportacaoRastreio() {
                 const indices = dadosImportacaoRastreio.modeloIndices;
                 const regiao = indices.regiao >= 0 ? String(d[indices.regiao] ?? "").trim() : "";
                 const notaFiscal = indices.notaFiscal >= 0 ? String(d[indices.notaFiscal] ?? "").trim() : "";
-                const motorista = indices.motorista >= 0
-                    ? String(d[indices.motorista] ?? "").trim()
-                    : (mapaMotoristasRastreio[chaveNotaFiscalRastreio(notaFiscal)] || "—");
+                const motorista = importarSemMotoristaRastreio
+                    ? "—"
+                    : (indices.motorista >= 0
+                        ? String(d[indices.motorista] ?? "").trim()
+                        : (mapaMotoristasRastreio[chaveNotaFiscalRastreio(notaFiscal)] || "—"));
                 return '<div class="linha">' +
                     '<span>' + (dadosImportacaoRastreio.deslocamentoLinha + indiceAmostra) + '</span>' +
                     '<span>' + escaparHtmlRastreio(d[indices.cliente]) + '</span>' +
