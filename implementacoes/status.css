@@ -1,3 +1,520 @@
 /* PMOBILE — Status */
+/* ============================================================
+   BARRA FIXA DE STATUS DO PMOBILE
+   ============================================================
 
+   OBJETIVO:
+
+   Exibir os estados de conexão e sincronização do PMOBILE
+   permanentemente na parte inferior da tela.
+
+   EXEMPLOS DE INFORMAÇÕES EXIBIDAS:
+
+   - conexão com Supabase;
+   - inventário offline disponível;
+   - sincronização de materiais;
+   - progresso da sincronização;
+   - sincronização de conferências;
+   - perda de conexão;
+   - retorno da internet;
+   - falhas de sincronização.
+
+   ALTERAÇÃO DESTA VERSÃO:
+
+   Anteriormente #statusSupabase era apresentado visualmente
+   como um popup flutuante:
+
+   - afastado das laterais;
+   - afastado da parte inferior;
+   - fundo transparente;
+   - efeito blur;
+   - cantos arredondados;
+   - sombra ao redor.
+
+   Agora ele passa a funcionar visualmente como um componente
+   estrutural da interface:
+
+   - fixado no rodapé;
+   - encostado nas laterais;
+   - encostado na parte inferior;
+   - sem cantos arredondados;
+   - fundo sólido;
+   - borda somente na parte superior.
+
+   IMPORTANTE:
+
+   O ID continua sendo #statusSupabase.
+
+   Portanto dados.js, conferencia.js e supabase.js continuam
+   utilizando exatamente o mesmo elemento.
+
+   Nenhuma alteração de lógica é necessária nesta etapa.
+
+   ============================================================ */
+
+#statusSupabase {
+
+    /* ========================================================
+       POSICIONAMENTO
+       ========================================================
+
+       Mantém a barra presa ao rodapé da janela.
+
+       ======================================================== */
+
+    position:
+        fixed;
+
+    left:
+        0;
+
+    right:
+        0;
+
+    bottom:
+        0;
+
+
+    /* ========================================================
+       DIMENSÕES
+       ========================================================
+
+       A barra ocupa toda a largura disponível.
+
+       ======================================================== */
+
+    width:
+        100%;
+
+    min-height:
+        var(--status-altura);
+
+
+    /* ========================================================
+       ORGANIZAÇÃO INTERNA
+       ========================================================
+
+       A mensagem ocupa o espaço disponível à esquerda.
+
+       O botão X permanece na extremidade direita.
+
+       ======================================================== */
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        12px;
+
+
+    /* ========================================================
+       ESPAÇAMENTO INTERNO
+       ======================================================== */
+
+    padding:
+        6px 10px
+        6px 14px;
+
+
+    /* ========================================================
+       FUNDO
+       ========================================================
+
+       Utiliza o mesmo fundo estrutural da sidebar.
+
+       O efeito transparente/blur do antigo popup foi removido.
+
+       ======================================================== */
+
+    background:
+        var(--fundo-sidebar);
+
+
+    /* ========================================================
+       BORDA
+       ========================================================
+
+       Como a barra encosta nas extremidades da janela, apenas
+       a borda superior é necessária para separar visualmente
+       o status do restante da aplicação.
+
+       ======================================================== */
+
+    border:
+        0;
+
+    border-top:
+        1px solid
+        var(--borda-clara);
+
+
+    /* ========================================================
+       FORMATO
+       ========================================================
+
+       O rodapé não utiliza cantos arredondados.
+
+       ======================================================== */
+
+    border-radius:
+        0;
+
+
+    /* ========================================================
+       TEXTO
+       ======================================================== */
+
+    color:
+        var(--texto);
+
+    font-size:
+        13px;
+
+    font-weight:
+        500;
+
+    line-height:
+        1.4;
+
+    text-align:
+        left;
+
+
+    /* ========================================================
+       SOMBRA
+       ========================================================
+
+       A sombra é projetada discretamente para cima.
+
+       Isso ajuda a separar o rodapé do conteúdo principal sem
+       devolver a aparência de popup ao componente.
+
+       ======================================================== */
+
+    box-shadow:
+        0 -4px 14px
+        rgba(
+            0,
+            0,
+            0,
+            0.22
+        );
+
+
+    /* ========================================================
+       CAMADA
+       ========================================================
+
+       Mantém a barra acima do conteúdo normal da aplicação.
+
+       ======================================================== */
+
+    z-index:
+        9999;
+
+}
+
+
+/* ============================================================
+   TEXTO DA BARRA DE STATUS
+   ============================================================
+
+   OBJETIVO:
+
+   Permitir que a mensagem utilize todo o espaço disponível.
+
+   min-width: 0 também evita que textos grandes empurrem o
+   botão X para fora da largura da tela.
+
+   ============================================================ */
+
+#statusSupabase > span {
+
+    flex:
+        1;
+
+    min-width:
+        0;
+
+}
+
+
+/* ============================================================
+   BOTÃO X DA BARRA DE STATUS
+   ============================================================
+
+   OBJETIVO:
+
+   Manter o botão já utilizado pelo supabase.js para fechar
+   manualmente a mensagem atual.
+
+   IMPORTANTE:
+
+   Nesta etapa o comportamento JavaScript não foi alterado.
+
+   Apenas adaptamos a aparência do botão para combinar com a
+   nova barra fixa.
+
+   ============================================================ */
+
+#statusSupabase > button {
+
+    width:
+        32px;
+
+    height:
+        32px;
+
+    flex-shrink:
+        0;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    margin:
+        0;
+
+    padding:
+        0;
+
+    border:
+        1px solid
+        var(--borda);
+
+    border-radius:
+        5px;
+
+    background:
+        transparent;
+
+    color:
+        #bdbdbd;
+
+    font-family:
+        inherit;
+
+    font-size:
+        17px;
+
+    line-height:
+        1;
+
+    cursor:
+        pointer;
+
+}
+
+
+/* ============================================================
+   BOTÃO X DA BARRA DE STATUS - HOVER
+   ============================================================ */
+
+#statusSupabase > button:hover {
+
+    background:
+        var(--fundo-hover);
+
+    color:
+        #ffffff;
+
+}
+
+
+/* ============================================================
+   PAINEL DE PROBLEMAS DO SUPABASE
+   ============================================================ */
+
+#resultadoVerificacaoSupabase {
+
+    position:
+        fixed;
+
+    top:
+        70px;
+
+    left:
+        12px;
+
+    right:
+        12px;
+
+    max-height:
+        calc(
+            100vh - 150px
+        );
+
+    overflow-y:
+        auto;
+
+    padding:
+        18px;
+
+    background:
+        var(--aviso-fundo);
+
+    backdrop-filter:
+        blur(14px);
+
+    -webkit-backdrop-filter:
+        blur(14px);
+
+    border:
+        1px solid
+        var(--aviso-borda);
+
+    border-radius:
+        8px;
+
+    color:
+        var(--texto);
+
+    font-size:
+        14px;
+
+    line-height:
+        1.5;
+
+    box-shadow:
+        0 12px 40px
+        rgba(
+            0,
+            0,
+            0,
+            0.35
+        );
+
+    z-index:
+        9998;
+
+}
+
+
+#resultadoVerificacaoSupabase h3 {
+
+    margin:
+        0 0 18px;
+
+    color:
+        #ffffff;
+
+    font-size:
+        18px;
+
+    font-weight:
+        600;
+
+}
+
+
+#resultadoVerificacaoSupabase p {
+
+    color:
+        var(--texto);
+
+}
+
+
+#resultadoVerificacaoSupabase strong {
+
+    color:
+        #ffffff;
+
+}
+
+
+#resultadoVerificacaoSupabase ul {
+
+    padding-left:
+        24px;
+
+    color:
+        var(--texto-secundario);
+
+}
+
+
+#resultadoVerificacaoSupabase li {
+
+    margin-bottom:
+        5px;
+
+    color:
+        var(--texto-secundario);
+
+}
+
+
+#resultadoVerificacaoSupabase hr {
+
+    margin:
+        18px 0;
+
+    border:
+        0;
+
+    border-top:
+        1px solid
+        var(--aviso-borda);
+
+}
+
+
+/* ============================================================
+   BOTÃO FECHAR DO PAINEL DO SUPABASE
+   ============================================================ */
+
+#resultadoVerificacaoSupabase button {
+
+    min-height:
+        34px;
+
+    padding:
+        6px 14px;
+
+    border:
+        1px solid
+        var(--aviso-borda);
+
+    border-radius:
+        5px;
+
+    background:
+        var(--aviso-botao);
+
+    color:
+        var(--texto);
+
+    font-family:
+        inherit;
+
+    font-size:
+        13px;
+
+    cursor:
+        pointer;
+
+}
+
+
+#resultadoVerificacaoSupabase button:hover {
+
+    background:
+        var(--aviso-botao-hover);
+
+    color:
+        #ffffff;
+
+}
 
