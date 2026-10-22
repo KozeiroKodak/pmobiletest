@@ -566,3 +566,5 @@
         transform: none;
     }
 }
+
+@media (max-width:700px){#statusSupabase .statusSupabase-faixa{gap:8px;padding-left:10px;padding-right:10px}#statusSupabase>button{min-width:34px}}
