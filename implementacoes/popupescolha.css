@@ -1,0 +1,100 @@
+/* ============================================================
+   POPUP PADRÃO DE ESCOLHA
+   ============================================================ */
+
+.pmobile-popup-escolha {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    background: rgba(0, 0, 0, .72);
+    backdrop-filter: blur(3px);
+}
+
+.pmobile-popup-escolha[hidden] {
+    display: none;
+}
+
+.pmobile-popup-escolha-caixa {
+    width: min(100%, 460px);
+    max-height: min(78vh, 620px);
+    overflow: auto;
+    padding: 18px;
+    border: 1px solid var(--borda-clara);
+    border-radius: 14px;
+    background: #181818;
+    box-shadow: 0 18px 55px rgba(0, 0, 0, .45);
+}
+
+.pmobile-popup-escolha-topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.pmobile-popup-escolha-titulo {
+    margin: 0;
+    color: var(--texto);
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.pmobile-popup-escolha-fechar {
+    width: 38px;
+    min-width: 38px;
+    min-height: 38px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 20px;
+}
+
+.pmobile-popup-escolha-opcoes {
+    display: grid;
+    gap: 8px;
+}
+
+.pmobile-popup-escolha-opcao {
+    width: 100%;
+    min-height: 46px;
+    padding: 10px 13px;
+    border: 1px solid #303030;
+    border-radius: 9px;
+    background: #202020;
+    color: var(--texto);
+    text-align: left;
+}
+
+.pmobile-popup-escolha-opcao:hover {
+    border-color: var(--verde);
+    background: #252525;
+}
+
+.pmobile-popup-escolha-opcao.selecionada {
+    border-color: var(--verde);
+    background: rgba(62, 207, 142, .12);
+}
+
+@media (max-width: 700px) {
+    .pmobile-popup-escolha {
+        align-items: flex-end;
+        padding: 10px;
+    }
+
+    .pmobile-popup-escolha-caixa {
+        width: 100%;
+        max-height: 76vh;
+        padding: 15px;
+        border-radius: 16px 16px 12px 12px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pmobile-popup-escolha {
+        backdrop-filter: none;
+    }
+}
