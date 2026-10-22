@@ -12,6 +12,10 @@ function obterSessaoRastreio() {
 }
 
 async function abrirRastreio() {
+    if (!window.usuarioPmobileAtual || !["ADMIN", "NIVEL2"].includes(window.usuarioPmobileAtual.nivel)) {
+        alert("Acesso negado.");
+        return;
+    }
     mostrarTelaSistema("rastreio", "menuRastreio");
     await carregarRastreios();
 }
