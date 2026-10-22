@@ -295,7 +295,7 @@
     letter-spacing: -0.02em;
 }
 
-#contagemManual > .painel:first-of-type {
+#contagemManual > .cabecalho-pagina + .painel {
     max-width: 980px;
     padding: 16px;
     border-color: rgba(62, 207, 142, 0.18);
@@ -482,7 +482,7 @@
         border-radius: 10px;
     }
 
-    #contagemManual > .painel:first-of-type {
+    #contagemManual > .cabecalho-pagina + .painel {
         padding: 12px;
     }
 
@@ -551,7 +551,7 @@
 }
 
 @media (max-width: 390px) {
-    #contagemManual > .painel:first-of-type {
+    #contagemManual > .cabecalho-pagina + .painel {
         padding: 10px;
     }
 
@@ -650,5 +650,76 @@
     #contagemManual .linha-contagem-manual-busca .botao-config-contagem-manual {
         width: 42px;
         min-width: 42px;
+    }
+}
+
+/* ============================================================
+   CORREÇÃO DE SELETORES — CONTAGEM MANUAL
+   ============================================================ */
+
+#contagemManual .registro-contagem-manual {
+    position: relative;
+    margin: 0;
+    padding: 13px 14px;
+    border: 1px solid var(--borda);
+    border-radius: 9px;
+    background: #151515;
+    color: var(--texto-secundario);
+    line-height: 1.45;
+    transition: border-color .14s ease, background-color .14s ease;
+}
+
+#contagemManual .registro-contagem-manual:hover {
+    border-color: var(--borda-clara);
+    background: #191919;
+}
+
+#contagemManual .registro-contagem-manual h3 {
+    margin: 0 0 8px;
+    color: #fff;
+    font-size: 14px;
+    line-height: 1.35;
+    font-weight: 600;
+}
+
+#contagemManual .registro-contagem-manual p {
+    margin: 5px 0;
+    color: var(--texto-secundario);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+#contagemManual .registro-contagem-manual p:last-child {
+    margin-top: 9px;
+    color: var(--texto);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .02em;
+}
+
+@media (max-width: 700px) {
+    #contagemManual .registro-contagem-manual {
+        padding: 12px 13px;
+        border-radius: 8px;
+    }
+
+    #contagemManual .registro-contagem-manual h3 {
+        font-size: 13px;
+    }
+
+    #contagemManual .registro-contagem-manual p {
+        margin: 6px 0;
+        font-size: 12px;
+    }
+
+    #contagemManual .registro-contagem-manual p:last-child {
+        margin-top: 10px;
+        font-size: 10px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #contagemManual .registro-contagem-manual {
+        transition: none;
     }
 }
