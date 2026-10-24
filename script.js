@@ -1986,11 +1986,15 @@ async function abrirGerenciamentoUsuarios() {
                         '<select id="nivelSolicitacao_' + solicitacao.id + '" class="seletor-nivel-usuario-nativo" aria-hidden="true" tabindex="-1">' +
                             '<option value="NIVEL2">Nível 2</option>' +
                             '<option value="ADMIN">Administrativo</option>' +
+                            '<option value="RMADMIN">RMAdmin</option>' +
+                            '<option value="RMMOTORISTAS">RMMotoristas</option>' +
                         '</select>' +
                         '<button type="button" class="seletor-nivel-usuario" id="botaoNivelSolicitacao_' + solicitacao.id + '" onclick="alternarSeletorNivelUsuario(' + solicitacao.id + ')" aria-haspopup="listbox" aria-expanded="false">Nível 2</button>' +
                         '<div id="menuNivelSolicitacao_' + solicitacao.id + '" class="menu-nivel-usuario" role="listbox">' +
                             '<button type="button" onclick="selecionarNivelUsuario(' + solicitacao.id + ', \'NIVEL2\')">Nível 2 — Pesquisa e Contagem manual</button>' +
                             '<button type="button" onclick="selecionarNivelUsuario(' + solicitacao.id + ', \'ADMIN\')">Administrativo — acesso total</button>' +
+                            '<button type="button" onclick="selecionarNivelUsuario(' + solicitacao.id + ', \'RMADMIN\')">RMAdmin — gestão do RMExpress</button>' +
+                            '<button type="button" onclick="selecionarNivelUsuario(' + solicitacao.id + ', \'RMMOTORISTAS\')">RMMotoristas — entregas e roteiro</button>' +
                         '</div>' +
                     '</div>' +
                 '</div>' +
@@ -2065,6 +2069,33 @@ function formatarDataSolicitacaoPmobile(valor) {
 
 }
 
+const NIVEIS_APROVACAO_PMOBILE = [
+    {
+        value: "NIVEL2",
+        label: "Nível 2 — Pesquisa e Contagem manual"
+    },
+    {
+        value: "ADMIN",
+        label: "Administrativo — acesso total"
+    },
+    {
+        value: "RMADMIN",
+        label: "RMAdmin — gestão do RMExpress"
+    },
+    {
+        value: "RMMOTORISTAS",
+        label: "RMMotoristas — entregas e roteiro"
+    }
+];
+
+function obterLabelNivelAprovacaoPmobile(nivel) {
+    const opcao = NIVEIS_APROVACAO_PMOBILE.find(function(item) {
+        return item.value === nivel;
+    });
+
+    return opcao ? opcao.label : nivel;
+}
+
 function alternarSeletorNivelUsuario(solicitacaoId) {
     const seletor = document.getElementById("nivelSolicitacao_" + solicitacaoId);
     const botao = document.getElementById("botaoNivelSolicitacao_" + solicitacaoId);
@@ -2073,18 +2104,13 @@ function alternarSeletorNivelUsuario(solicitacaoId) {
 
     abrirPopupEscolha({
         titulo: "Nível de acesso",
-        opcoes: [
-            {
-                value: "NIVEL2",
-                label: "Nível 2 — Pesquisa e Contagem manual",
-                selected: seletor.value === "NIVEL2"
-            },
-            {
-                value: "ADMIN",
-                label: "Administrativo",
-                selected: seletor.value === "ADMIN"
-            }
-        ],
+        opcoes: NIVEIS_APROVACAO_PMOBILE.map(function(opcao) {
+            return {
+                value: opcao.value,
+                label: opcao.label,
+                selected: seletor.value === opcao.value
+            };
+        }),
         aoEscolher: function(nivel) {
             selecionarNivelUsuario(solicitacaoId, nivel);
         }
@@ -2099,11 +2125,14 @@ function selecionarNivelUsuario(solicitacaoId, nivel) {
 
     if (!seletor || !botao) return;
 
+    const nivelValido = NIVEIS_APROVACAO_PMOBILE.some(function(opcao) {
+        return opcao.value === nivel;
+    });
+
+    if (!nivelValido) return;
+
     seletor.value = nivel;
-    botao.textContent =
-        nivel === "ADMIN"
-            ? "Administrativo"
-            : "Nível 2";
+    botao.textContent = obterLabelNivelAprovacaoPmobile(nivel).split(" — ")[0];
 
     botao.setAttribute("aria-expanded", "false");
 }
@@ -2115,7 +2144,12 @@ async function aprovarCadastroUsuario(solicitacaoId) {
     const seletor = document.getElementById("nivelSolicitacao_" + solicitacaoId);
     const nivel = seletor ? seletor.value : "NIVEL2";
 
-    if (!confirm("Aprovar este usuário como " + (nivel === "ADMIN" ? "ADMINISTRATIVO" : "NÍVEL 2") + "?")) return;
+    if (!NIVEIS_APROVACAO_PMOBILE.some(function(opcao) { return opcao.value === nivel; })) {
+        alert("Selecione um nível de acesso válido.");
+        return;
+    }
+
+    if (!confirm("Aprovar este usuário como " + obterLabelNivelAprovacaoPmobile(nivel) + "?")) return;
 
     try {
         const { data, error } = await window.clienteSupabase.rpc("aprovar_solicitacao_cadastro", {
