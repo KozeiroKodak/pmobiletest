@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.ProtocolException;
 import java.nio.charset.Charset;
 import javax.net.ssl.HttpsURLConnection;
 
@@ -27,7 +28,7 @@ public final class OtaManifestFetcher {
             throw new IllegalArgumentException("Manifest URL is required");
         }
         URL parsed = new URL(manifestUrl);
-        if (!(parsed.openConnection() instanceof HttpsURLConnection)) {
+        if (!"https".equalsIgnoreCase(parsed.getProtocol())) {
             throw new IllegalArgumentException("OTA manifest URL must use HTTPS");
         }
         this.manifestUrl = parsed;
@@ -37,14 +38,21 @@ public final class OtaManifestFetcher {
     public OtaManifest fetch() throws IOException, JSONException {
         HttpsURLConnection connection = null;
         try {
-            connection = (HttpsURLConnection) manifestUrl.openConnection();
+            String separator = manifestUrl.toString().contains("?") ? "&" : "?";
+            URL requestUrl = new URL(manifestUrl.toString() + separator + "_ota=" + System.currentTimeMillis());
+            connection = (HttpsURLConnection) requestUrl.openConnection();
             connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
             connection.setReadTimeout(READ_TIMEOUT_MS);
-            connection.setInstanceFollowRedirects(false);
+            connection.setInstanceFollowRedirects(true);
             connection.setRequestMethod("GET");
             connection.setRequestProperty("Accept", "application/json");
+            connection.setRequestProperty("Cache-Control", "no-cache, no-store");
+            connection.setRequestProperty("Pragma", "no-cache");
 
             int status = connection.getResponseCode();
+            if (!"https".equalsIgnoreCase(connection.getURL().getProtocol())) {
+                throw new ProtocolException("OTA manifest redirected outside HTTPS");
+            }
             if (status < HttpURLConnection.HTTP_OK || status >= HttpURLConnection.HTTP_MULT_CHOICE) {
                 throw new IOException("OTA manifest request failed with HTTP status " + status);
             }
