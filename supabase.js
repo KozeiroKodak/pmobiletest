@@ -263,13 +263,14 @@ function atualizarStatusGeralPmobile() {
                 ? "Sincronizado - Ok"
                 : "Sincronizado - atenção";
     } else {
-        if (sincronizado && !estadoSincronizacaoPmobile.aviso &&
-            !estadoSincronizacaoPmobile.erro) {
-            mensagem = "Offline - ok";
-        } else if (sincronizado && !estadoSincronizacaoPmobile.erro) {
-            mensagem = "Offline - atenção";
-        } else {
+        // Dados pendentes ou inventário ainda não carregado não são falha.
+        // Igual ao PMColetas e PMRomaneios: erro apenas quando há falha real.
+        if (estadoSincronizacaoPmobile.erro) {
             mensagem = "Offline - erro";
+        } else if (sincronizado && !estadoSincronizacaoPmobile.aviso) {
+            mensagem = "Offline - ok";
+        } else {
+            mensagem = "Offline - atenção";
         }
     }
 
