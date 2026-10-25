@@ -76,6 +76,13 @@ async function prepararImportacaoRastreio(arquivoExterno = null) {
             throw new Error("O OneDrive devolveu uma página HTML, não o arquivo Excel. Verifique se o link permite baixar o arquivo diretamente.");
         }
         if (!buffer.byteLength) throw new Error("O arquivo recebido está vazio.");
+        // XLSX/XLSM são ZIP (PK); XLS/XLSB podem usar contêiner OLE.
+        // Nunca encaminhar HTML, JSON ou páginas de erro ao SheetJS.
+        // CSV é permitido somente na importação manual, não na sincronização OneDrive.
+        if (arquivoExterno && !assinaturaZip && !assinaturaOle) {
+            const trecho = new TextDecoder("utf-8").decode(cabecalho).replace(/[\\r\\n\\t]+/g, " ").slice(0, 90);
+            throw new Error("O download do OneDrive não retornou bytes de Excel (assinatura inválida). Conteúdo inicial: " + trecho.replace(/[<>]/g, "") + ". Verifique o link de download.");
+        }
         const worker = new Worker("./rastreioimportacao.worker.js");
 
         const resultado = await new Promise((resolve, reject) => {
