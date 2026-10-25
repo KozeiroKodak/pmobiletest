@@ -450,6 +450,19 @@ async function salvarContagemManual() {
     await atualizarContagensManuais();
 }
 
+// Mescla com a leitura mais recente para não perder registros criados durante a rede.
+async function mesclarContagensManuaisAtuais(base) {
+    const atuais = await lerContagensManuais();
+    const mapa = new Map(base.map(item => [String(item.id), item]));
+    for (const item of atuais) {
+        const id = String(item.id);
+        if (!mapa.has(id)) mapa.set(id, item);
+        else if (!item.sincronizado && !mapa.get(id).sincronizado)
+            mapa.set(id, item);
+    }
+    return Array.from(mapa.values());
+}
+
 async function sincronizarContagensManuaisPendentes(limpezaEm = null) {
     if (!navigator.onLine || typeof obterClienteSupabase !== "function") return;
 
@@ -467,10 +480,11 @@ async function sincronizarContagensManuaisPendentes(limpezaEm = null) {
         })
         : lista;
 
-    if (listaFiltrada.length !== lista.length) {
-        await gravarContagensManuais(listaFiltrada);
-    }
-    const pendentes = listaFiltrada.filter(item => !item.sincronizado);
+    // Não descartar contagens ainda não enviadas após limpeza administrativa.
+    // Mantê-las localmente, bloqueadas para reenvio automático, até revisão.
+    const invalidados = lista.filter(item => !item.sincronizado && !listaFiltrada.includes(item));
+    for (const item of invalidados) item.bloqueadoPorLimpeza = true;
+    const pendentes = listaFiltrada.filter(item => !item.sincronizado && !item.bloqueadoPorLimpeza);
     if (!pendentes.length) return;
 
     const cliente = obterClienteSupabase();
@@ -525,7 +539,7 @@ async function sincronizarContagensManuaisPendentes(limpezaEm = null) {
     }
 
     if (alterou) {
-        await gravarContagensManuais(listaFiltrada);
+        await gravarContagensManuais(await mesclarContagensManuaisAtuais(lista));
         exibirContagensManuais();
     }
 
@@ -600,6 +614,7 @@ async function baixarContagensManuaisSupabase(limpezaEm = null) {
         const limiteLimpeza = limpezaEm ? new Date(limpezaEm).getTime() : null;
         const pendentesLocais = locais.filter(item => {
             if (item.sincronizado) return false;
+            if (item.bloqueadoPorLimpeza) return true;
             if (limiteLimpeza === null) return true;
 
             const dataItem = new Date(item.dataHora || 0).getTime();
@@ -635,7 +650,7 @@ async function baixarContagensManuaisSupabase(limpezaEm = null) {
                 String(b.dataHora || "").localeCompare(String(a.dataHora || ""))
             );
 
-        await gravarContagensManuais(sincronizadas);
+        await gravarContagensManuais(await mesclarContagensManuaisAtuais(sincronizadas));
         return true;
     } catch (erro) {
         console.warn("Não foi possível baixar contagens manuais do Supabase:", erro);
@@ -657,14 +672,18 @@ async function atualizarContagensManuais() {
         const limpezaEm = await obterLimpezaContagensManuaisSupabase();
 
         await sincronizarContagensManuaisPendentes(limpezaEm);
-        await baixarContagensManuaisSupabase(limpezaEm);
+        const baixou = await baixarContagensManuaisSupabase(limpezaEm);
+        if (!baixou) throw new Error("A consulta das contagens ao servidor não foi concluída.");
         exibirContagensManuais();
 
         const status = document.getElementById("statusContagemManual");
         if (status) {
-            const pendentes = (await lerContagensManuais()).filter(item => !item.sincronizado).length;
-            status.textContent = pendentes
-                ? "Sincronização pendente — verificando novamente em 10 segundos."
+            const locais = await lerContagensManuais();
+            const bloqueados = locais.filter(item => item.bloqueadoPorLimpeza && !item.sincronizado).length;
+            const pendentes = locais.filter(item => !item.sincronizado && !item.bloqueadoPorLimpeza).length;
+            status.textContent = bloqueados
+                ? bloqueados + " contagem(ns) preservada(s) após limpeza administrativa; revisão necessária."
+                : pendentes ? "Sincronização pendente — verificando novamente em 10 segundos."
                 : "Sincronizado com o Supabase.";
         }
     } catch (erro) {
