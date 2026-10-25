@@ -11,10 +11,10 @@ async function carregarValoresTotal() {
  }catch(e){status.textContent="Não foi possível carregar os valores: "+(e.message||e);}
 }
 function extrairValoresTotalPlanilha(){const d=typeof dadosImportacaoRastreio!=="undefined"?dadosImportacaoRastreio:null;if(!d?.linhas?.length)return null;
- const linha=[...d.linhas].reverse().find(l=>/^TOTAL(?:\\s*GERAL)?$/i.test(String(l?.[0]??"").trim()));if(!linha)return null;
- const colunas=d.colunas||[];const norm=s=>String(s??"").normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]/g,"");
+ const linha=[...d.linhas].reverse().find(l=>/^TOTAL(?:\s*GERAL)?$/i.test(String(l?.[0]??"").trim()));if(!linha)return null;
+ const colunas=d.colunas||[];const norm=s=>String(s??"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]/g,"");
  const coluna=(nomes,indicePadrao)=>{const i=colunas.findIndex(c=>nomes.some(n=>norm(c).includes(norm(n))));return i>=0?i:indicePadrao;};
- const numero=v=>{if(typeof v==="number")return v;const t=String(v??"").replace(/[^\\d,.-]/g,"");if(!t)return null;return Number(t.includes(",")?t.replace(/\\./g,"").replace(",","."):t)||0;};
+ const numero=v=>{if(typeof v==="number")return v;const t=String(v??"").replace(/[^\d,.-]/g,"");if(!t)return null;return Number(t.includes(",")?t.replace(/\./g,"").replace(",","."):t)||0;};
  return {p_valor_notas:numero(linha[coluna(["valor nf","valor n.f","valor nota"],6)]),p_fretes_embutidos:numero(linha[coluna(["frete embutido"],7)]),p_total_fretes:numero(linha[coluna(["frete transporte","valor frete"],8)]),p_custo_nunes:numero(linha[coluna(["custo nunes"],12)]),p_custo_final:numero(linha[coluna(["custo final"],13)]),p_percentual_final:numero(linha[coluna(["% final","percentual final"],14)]),p_origem:d.arquivo?.name||"OneDrive"};
 }
 async function salvarValoresTotalPlanilha(){const valores=extrairValoresTotalPlanilha();if(!valores)return;const sessao=obterSessaoRastreioImportacao();const r=await window.clienteSupabase.rpc("pmobile_valores_total_salvar",{p_usuario:sessao.usuario,p_credencial:sessao.credencial,...valores});if(r.error)throw r.error;if(document.getElementById("valoresTotal")?.style.display!=="none")await carregarValoresTotal();}
