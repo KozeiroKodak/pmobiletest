@@ -859,7 +859,7 @@
                     <div class="rastreio-onedrive-sync-cabecalho">
                         <div>
                             <h3>Sincronização automática — OneDrive</h3>
-                            <p>Deixe o arquivo Excel (.xlsx ou .xlsm) aberto no PC com salvamento automático. O PMColetas verifica a planilha periodicamente. Com a sincronização de alterações ativada, novos lançamentos, alterações de campos e remoções são refletidos automaticamente.</p>
+                            <p>Deixe o arquivo Excel (.xlsx ou .xlsm) aberto no PC com salvamento automático. O PMobile verifica a planilha a cada 15 segundos enquanto estiver aberto. Com a sincronização de alterações ativada, novos lançamentos, alterações de campos e remoções são refletidos automaticamente.</p>
                         </div>
                         <span id="indicadorOneDriveRastreio" class="rastreio-onedrive-indicador">○ Sincronização parada</span>
                     </div>
@@ -873,20 +873,11 @@
                                 autocomplete="off"
                                 inputmode="url"
                             >
-                            <select id="intervaloOneDriveRastreio" aria-label="Intervalo de sincronização" onchange="salvarPreferenciasOneDriveRastreio()">
-                                <option value="10">A cada 10 segundos</option>
-                                <option value="15" selected>A cada 15 segundos</option>
-                                <option value="30">A cada 30 segundos</option>
-                                <option value="60">A cada 1 minuto</option>
-                                <option value="120">A cada 2 minutos</option>
-                            </select>
+                            <span class="rastreio-intervalo-fixo">Atualização automática: a cada 15 segundos</span>
                         </div>
 
                         <div class="rastreio-onedrive-opcoes">
-                            <label>
-                                <input type="checkbox" id="manterLinkOneDriveRastreio" onchange="salvarPreferenciasOneDriveRastreio()">
-                                <span>Manter link mesmo após fechar</span>
-                            </label>
+                            <button type="button" class="botao-secundario" onclick="salvarLinkOneDriveRastreioSupabase()">💾 Salvar link no Supabase</button>
                             <label>
                                 <input type="checkbox" id="sincronizarAlteracoesOneDriveRastreio" checked onchange="salvarPreferenciasOneDriveRastreio()">
                                 <span>Permitir alterações da planilha em tempo real</span>
@@ -909,17 +900,7 @@
                         Cole o link da planilha, ative a sincronização e, se quiser manter o vínculo após fechar o app, marque a opção correspondente. A planilha passa a ser a fonte de verdade: novas linhas, alterações e remoções são sincronizadas automaticamente. Para trocar completamente de planilha, use "Limpar todos os dados" antes da nova fonte.
                     </div>
                 </div>
-                <label class="rastreio-importacao-sem-motorista">
-                    <input
-                        type="checkbox"
-                        id="rastreioImportarSemMotorista"
-                        onchange="alternarImportacaoSemMotoristaRastreio(this)"
-                    >
-                    <span>
-                        <strong>Importar sem selecionar motorista</strong>
-                        <small>Não será necessário definir motorista por Nota Fiscal.</small>
-                    </span>
-                </label>
+                
 
                 <div id="rastreioMapaMotoristas"></div>
                 <div id="rastreioImportacaoPrevia"></div>
