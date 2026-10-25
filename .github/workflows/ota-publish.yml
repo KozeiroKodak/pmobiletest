@@ -40,12 +40,6 @@ jobs:
         run: |
           set -euo pipefail
 
-          if [[ "${GITHUB_ACTOR}" == "github-actions[bot]" ]]; then
-            echo "publish=false" >> "$GITHUB_OUTPUT"
-            echo "Execução originada pelo próprio pipeline: sem nova OTA."
-            exit 0
-          fi
-
           current_main="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/main" --jq '.object.sha')"
 
           if [[ "${current_main}" != "${GITHUB_SHA}" ]]; then
