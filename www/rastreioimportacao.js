@@ -599,7 +599,7 @@ async function sincronizarOneDriveRastreio(forcar = false) {
         const estadoAnterior = obterEstadoSincronizacaoOneDriveRastreio(url);
         const hashAtual = dadosImportacaoRastreio.sha256 || null;
 
-        if (estadoAnterior?.sha256 && hashAtual && estadoAnterior.sha256 === hashAtual) {
+        if (!forcar && estadoAnterior?.sha256 && hashAtual && estadoAnterior.sha256 === hashAtual) {
             sincronizacaoOneDriveRastreioVerificada = true;
             atualizarIndicadorOneDriveRastreio(true);
             mostrarStatusOneDriveRastreio("🟢 OneDrive conectado · nenhuma alteração detectada · " + new Date().toLocaleTimeString("pt-BR"));
