@@ -134,95 +134,25 @@ async function pesquisarLocalmente(
 }
 
 
-function exibirResultadosPesquisa(
-    resultados,
-    areaResultado
-) {
-    if (!areaResultado) {
-        return;
-    }
-
-    limparResultado(areaResultado);
-
-    if (
-        !Array.isArray(resultados) ||
-        resultados.length === 0
-    ) {
-        areaResultado.innerHTML =
-            "<p>Nenhum material encontrado.</p>";
-        return;
-    }
-
-    const cabecalho = document.createElement("div");
-    cabecalho.className = "pesquisa-cabecalho";
-
-    [
-        "ID",
-        "Descrição",
-        "Referência",
-        "Local",
-        "Marca",
-        "Quantidade",
-        "Reservada"
-    ].forEach(function(label) {
-        const celula = document.createElement("span");
-        celula.textContent = label;
-        cabecalho.appendChild(celula);
-    });
-
-    const fragmento = document.createDocumentFragment();
-    fragmento.appendChild(cabecalho);
-
-    resultados.forEach(function(material) {
-        const bloco = document.createElement("article");
-        bloco.className = "pesquisa-item";
-
-        const quantidadeTotal = Number(material.quantidade ?? 0);
-        const quantidadeReservada = Number(
-            material.quantidadeReservada ??
-            material.quantidade_reservada ??
-            0
-        );
-        const quantidadeDisponivel =
-            quantidadeTotal - quantidadeReservada;
-
-        const campos = [
-            ["ID", material.codigo ?? "-", "pesquisa-id"],
-            ["Descrição", material.descricao ?? "-", "pesquisa-descricao"],
-            ["Referência", material.referencia ?? "-", "pesquisa-referencia"],
-            ["Local", material.local ?? "-", "pesquisa-local"],
-            ["Marca", material.marca ?? "-", "pesquisa-marca"],
-            [
-                "Quantidade",
-                Number.isFinite(quantidadeDisponivel)
-                    ? quantidadeDisponivel
-                    : "-",
-                "pesquisa-quantidade"
-            ],
-            [
-                "Reservada",
-                Number.isFinite(quantidadeReservada)
-                    ? quantidadeReservada
-                    : "-",
-                "pesquisa-reservada"
-            ]
-        ];
-
-        campos.forEach(function(campo) {
-            const celula = document.createElement("div");
-            celula.className =
-                "pesquisa-celula " + campo[2];
-            celula.setAttribute("data-label", campo[0]);
-            celula.textContent = campo[1];
-            bloco.appendChild(celula);
-        });
-
-        fragmento.appendChild(bloco);
-    });
-
-    areaResultado.appendChild(fragmento);
+function exibirResultadosPesquisa(resultados,areaResultado){
+ if(!areaResultado)return;
+ limparResultado(areaResultado);
+ if(!Array.isArray(resultados)||!resultados.length){areaResultado.innerHTML='<div class="pesquisa-v2-vazio"><strong>Nenhum material encontrado</strong><p>Confira os dados e tente novamente.</p></div>';return;}
+ const count=document.createElement("p");count.className="pesquisa-v2-contagem";count.textContent=resultados.length+" material(is) encontrado(s)";areaResultado.appendChild(count);
+ resultados.forEach(function(m){
+  const total=Number(m.quantidade??0),reservada=Number(m.quantidadeReservada??m.quantidade_reservada??0),disponivel=total-reservada;
+  const card=document.createElement("details");card.className="pesquisa-v2-card";
+  const sum=document.createElement("summary");
+  const cod=document.createElement("span");cod.className="pesquisa-v2-codigo";cod.textContent=m.codigo??"-";
+  const badge=document.createElement("span");badge.className="pesquisa-v2-disponivel"+(disponivel<=0?" zero":"");badge.textContent=disponivel>0?"Disponível":"Sem estoque";
+  const desc=document.createElement("strong");desc.textContent=m.descricao??"-";
+  const ref=document.createElement("small");ref.textContent="Ref.: "+(m.referencia??"-")+"  ·  Toque para detalhes";
+  sum.append(cod,badge,desc,ref);card.appendChild(sum);
+  const det=document.createElement("div");det.className="pesquisa-v2-detalhes";
+  [["Código",m.codigo],["Referência",m.referencia],["Marca",m.marca],["Local",m.local],["Quantidade disponível",Number.isFinite(disponivel)?disponivel:"-"],["Quantidade reservada",Number.isFinite(reservada)?reservada:"-"]].forEach(([label,value])=>{const item=document.createElement("div"),small=document.createElement("small"),bold=document.createElement("b");small.textContent=label;bold.textContent=value??"-";item.append(small,bold);det.appendChild(item)});
+  card.appendChild(det);areaResultado.appendChild(card);
+ });
 }
-
 
 function abrirPopupPesquisaMaterial() {
     const seletor = document.getElementById("tipoBuscaPesquisaMaterial");
@@ -243,36 +173,23 @@ function abrirPopupPesquisaMaterial() {
     botao.setAttribute("aria-expanded", "true");
 }
 
-function selecionarTipoBuscaPesquisaMaterial(tipo) {
-    const seletor = document.getElementById("tipoBuscaPesquisaMaterial");
-    const botao = document.getElementById("botaoTipoBuscaPesquisaMaterial");
-    const campo = document.getElementById("campoPesquisaMaterial");
-
-    if (!seletor || !botao || !campo) return;
-
-    const configuracoes = {
-        codigo: {
-            nome: "CÓD",
-            placeholder: "Digite o código"
-        },
-        referencia: {
-            nome: "REF",
-            placeholder: "Digite a referência"
-        },
-        descricao: {
-            nome: "Descrição",
-            placeholder: "Digite a descrição"
-        }
-    };
-
-    const configuracao = configuracoes[tipo] || configuracoes.codigo;
-
-    seletor.value = tipo;
-    botao.textContent = configuracao.nome;
-    campo.placeholder = configuracao.placeholder;
-    botao.setAttribute("aria-expanded", "false");
-    campo.focus();
+function selecionarTipoBuscaPesquisaMaterial(tipo){
+ const seletor=document.getElementById("tipoBuscaPesquisaMaterial"),campo=document.getElementById("campoPesquisaMaterial");
+ if(!seletor||!campo)return;
+ const nomes={codigo:"Digite o código",referencia:"Digite a referência",descricao:"Digite a descrição"};
+ if(!nomes[tipo])tipo="codigo";
+ seletor.value=tipo;campo.placeholder=nomes[tipo];
+ document.querySelectorAll("#pesquisa [data-pesquisa-tipo]").forEach(b=>{b.classList.toggle("ativo",b.dataset.pesquisaTipo===tipo);b.setAttribute("aria-pressed",String(b.dataset.pesquisaTipo===tipo))});
+ campo.focus();
 }
+function atualizarStatusPesquisaMaterial(fonte){
+ const el=document.getElementById("statusPesquisaMaterial"),rodape=document.getElementById("pesquisaV2Fonte");
+ if(el){el.textContent=navigator.onLine?"● Conectado":"● Modo offline";el.classList.toggle("offline",!navigator.onLine)}
+ if(rodape&&fonte)rodape.textContent="Fonte: "+fonte;
+}
+window.addEventListener("online",()=>atualizarStatusPesquisaMaterial());
+window.addEventListener("offline",()=>atualizarStatusPesquisaMaterial());
+document.addEventListener("DOMContentLoaded",()=>atualizarStatusPesquisaMaterial());
 
 async function pesquisarMaterialSelecionado() {
     const seletor = document.getElementById("tipoBuscaPesquisaMaterial");
@@ -294,12 +211,13 @@ async function pesquisarMaterialSelecionado() {
     }
 
     limparResultado(areaResultado);
-    areaResultado.innerHTML = "<p>Pesquisando...</p>";
+    areaResultado.innerHTML = '<div class="pesquisa-v2-vazio"><strong>Pesquisando...</strong></div>';
+    atualizarStatusPesquisaMaterial();
 
     if (!estaOnline()) {
         try {
             const resultados = await pesquisarLocalmente(tipo, buscaOriginal);
-            exibirResultadosPesquisa(resultados, areaResultado);
+            exibirResultadosPesquisa(resultados, areaResultado); atualizarStatusPesquisaMaterial('base local');
         } catch (erro) {
             console.error("Erro na pesquisa offline:", erro);
             areaResultado.innerHTML = "<p>Erro ao consultar o banco local.</p>";
@@ -332,7 +250,7 @@ async function pesquisarMaterialSelecionado() {
             throw error;
         }
 
-        exibirResultadosPesquisa(data || [], areaResultado);
+        exibirResultadosPesquisa(data || [], areaResultado); atualizarStatusPesquisaMaterial('Supabase');
 
     } catch (erro) {
         console.error("Erro na pesquisa online:", erro);
