@@ -761,3 +761,9 @@
  #contagemManual>.painel:last-of-type { padding:13px; }
  #contagemManual>.painel:last-of-type>h3 { font-size:14px; line-height:1.35; }
 }
+
+/* Situação ERP: somente para contagens com local alterado. */
+#contagemManual .contagem-erp-tag { display:inline-block; margin:0 0 0 8px; padding:5px 9px; border-radius:7px; font-size:10px; font-weight:700; letter-spacing:.02em; }
+#contagemManual .contagem-erp-tag.erp-ok { background:#1b4335; color:#93e7b9; }
+#contagemManual .contagem-erp-tag.erp-analise { background:#463719; color:#f6cc77; }
+#contagemManual .contagem-erp-tag.erp-indisponivel { background:#303030; color:#bbb; }
