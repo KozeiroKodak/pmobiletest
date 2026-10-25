@@ -735,3 +735,29 @@
         transition: none;
     }
 }
+
+/* Contagem manual: layout compacto e ações na ordem correta no celular. */
+#contagemManual .registro-contagem-manual { border-left:3px solid #3b8b6b; background:#181c1a; }
+#contagemManual .registro-contagem-manual h3 { font-size:14px; overflow-wrap:anywhere; }
+#contagemManual .registro-contagem-manual p { line-height:1.45; }
+#contagemManual .registro-contagem-manual p:last-child { display:inline-block; padding:5px 9px; border-radius:7px; background:#22382e; color:#8be3bb; letter-spacing:0; }
+#contagemManual .linha-contagem-manual-busca .botao-buscar-contagem-manual { font-weight:650; }
+@media(max-width:700px) {
+ #contagemManual .cabecalho-pagina { margin-bottom:14px; }
+ #contagemManual .cabecalho-pagina>p:not(.cabecalho-caminho) { font-size:12px; line-height:1.45; }
+ #contagemManual>.cabecalho-pagina+.painel { padding:12px; }
+ #contagemManual .linha-contagem-manual-busca { display:grid; grid-template-columns:72px minmax(0,1fr)44px; gap:8px; align-items:center; }
+ #contagemManual .linha-contagem-manual-busca .seletor-contagem-manual-wrapper { grid-column:1; grid-row:1; }
+ #contagemManual .linha-contagem-manual-busca #campoContagemManual { grid-column:2; grid-row:1; width:100%; min-width:0; }
+ #contagemManual .linha-contagem-manual-busca .acoes-contagem-manual-config { grid-column:3; grid-row:1; position:relative; width:44px; min-width:44px; }
+ #contagemManual .linha-contagem-manual-busca .botao-config-contagem-manual { width:44px; min-width:44px; height:44px; padding:0; }
+ #contagemManual .linha-contagem-manual-busca .botao-buscar-contagem-manual { grid-column:1/-1; grid-row:2; width:100%; min-height:42px; margin:0; }
+ #contagemManual .menu-config-contagem-manual { left:auto; right:0; width:max-content; min-width:205px; max-width:calc(100vw - 32px); }
+ #contagemManual #listaContagensManuais { gap:9px; }
+ #contagemManual .registro-contagem-manual { padding:12px; border-radius:10px; }
+ #contagemManual .registro-contagem-manual h3 { margin-bottom:8px; font-size:13px; }
+ #contagemManual .registro-contagem-manual p { margin:4px 0; font-size:11px; }
+ #contagemManual .registro-contagem-manual p:last-child { margin-top:9px; font-size:10px; }
+ #contagemManual>.painel:last-of-type { padding:13px; }
+ #contagemManual>.painel:last-of-type>h3 { font-size:14px; line-height:1.35; }
+}
