@@ -43,11 +43,6 @@
 
     <link
         rel="stylesheet"
-        href="implementacoes/importacaonf.css?v=0.0.248"
-    >
-
-    <link
-        rel="stylesheet"
         href="implementacoes/arquivosteste.css?v=0.0.248"
     >
 
@@ -277,6 +272,8 @@
                         <span class="home-app-seta" aria-hidden="true">›</span>
                     </button>
 
+
+                    <button id="menuValoresTotal" class="home-app-card" onclick="abrirValoresTotal()" title="Valores total"><span class="home-app-icone" aria-hidden="true">💰</span><span class="home-app-conteudo"><strong>Valores total</strong><small>Resumo financeiro da planilha online</small></span><span class="home-app-seta" aria-hidden="true">›</span></button>
                     <button id="menuImportacao" class="home-app-card" onclick="abrirImportacao()" title="Importar inventário">
                         <span class="home-app-icone" aria-hidden="true">📦</span>
                         <span class="home-app-conteudo">
@@ -286,14 +283,7 @@
                         <span class="home-app-seta" aria-hidden="true">›</span>
                     </button>
 
-                    <button id="menuImportacaoNF" class="home-app-card" onclick="abrirImportacaoNF()" title="Importação NF">
-                        <span class="home-app-icone" aria-hidden="true">🧾</span>
-                        <span class="home-app-conteudo">
-                            <strong>Importação NF</strong>
-                            <small>Importe documentos para análise</small>
-                        </span>
-                        <span class="home-app-seta" aria-hidden="true">›</span>
-                    </button>
+
 
                     <button id="menuConferencia" class="home-app-card" onclick="abrirConferencia()" title="Conferência">
                         <span class="home-app-icone" aria-hidden="true">📋</span>
@@ -349,122 +339,14 @@
 
 
         <!-- =================================================
-             IMPORTAÇÃO NF
-             ================================================= -->
-
-        <section
-            id="importacaoNF"
-            class="tela-sistema"
-            style="display: none;"
-        >
-
-            <div class="cabecalho-pagina">
-
-                <p class="cabecalho-caminho">
-                    PMOBILE / Importação NF
-                </p>
-
-                <h1>
-                    Importação NF
-                </h1>
-
-                <p>
-                    Importe a planilha original para uma área isolada do Supabase. Os dados serão preservados para análise antes da definição do Rastreio.
-                </p>
-
-            </div>
-
-            <div class="painel painel-importacao-nf">
-
-                <input
-                    type="file"
-                    id="arquivoImportacaoNF"
-                    class="arquivo-importacao"
-                    accept=".xlsx, .xls, .xlsm, .csv"
-                    onchange="prepararImportacaoNF()"
-                >
-
-                <div class="acoes-importacao">
-
-                    <button
-                        type="button"
-                        class="botao-aba"
-                        onclick="prepararImportacaoNF()"
-                    >
-                        Analisar arquivo
-                    </button>
-
-                </div>
-
-                <div class="importacao-nf-divisor">
-                    <span>ou</span>
-                </div>
-
-                <div class="importacao-nf-online">
-                    <label for="linkImportacaoNF">
-                        Planilha compartilhada online
-                    </label>
-
-                    <div class="importacao-nf-online-linha">
-                        <input
-                            type="url"
-                            id="linkImportacaoNF"
-                            placeholder="Insira o link aqui"
-                            autocomplete="off"
-                            inputmode="url"
-                            onkeydown="if (event.key === 'Enter') { event.preventDefault(); prepararImportacaoNFOnline(); }"
-                        >
-
-                        <button
-                            type="button"
-                            class="botao-aba"
-                            onclick="prepararImportacaoNFOnline()"
-                        >
-                            Ler link
-                        </button>
-                    </div>
-
-                    <small>
-                        Use um link público com permissão para visualizar ou baixar a planilha.
-                        Links do Google Sheets são convertidos automaticamente.
-                    </small>
-                </div>
-
-                <div
-                    id="resultadoImportacaoNF"
-                    class="importacao-nf-resultado"
-                ></div>
-
-                <div
-                    id="statusImportacaoNF"
-                    class="importacao-nf-status"
-                    aria-live="polite"
-                ></div>
-
-            </div>
-
-            <div class="painel painel-importacao-nf importacao-nf-historico">
-
-                <h2>Importações realizadas</h2>
-
-                <div id="listaImportacoesNF"></div>
-
-            </div>
-
-            <div class="painel painel-importacao-nf importacao-nf-visualizacao">
-
-                <h2>Visualização</h2>
-
-                <div id="visualizacaoImportacaoNF"></div>
-
-            </div>
-
-        </section>
-
-        <!-- =================================================
              RASTREIO
              ================================================= -->
 
+
+        <section id="valoresTotal" class="tela-sistema" style="display:none">
+          <div class="cabecalho-pagina"><p class="cabecalho-caminho">PMOBILE / Valores total</p><h1>Valores total</h1><p>Resumo financeiro da última linha Total da planilha online.</p></div>
+          <div class="painel"><div id="valoresTotalStatus" style="color:#aaa;margin-bottom:18px">Consultando valores...</div><div id="valoresTotalCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px"></div><button type="button" class="botao-aba" style="margin-top:18px" onclick="carregarValoresTotal()">↻ Atualizar valores</button></div>
+        </section>
         <section id="rastreio" class="tela-sistema" style="display: none;">
             <div class="cabecalho-pagina">
                 <p class="cabecalho-caminho">PMOBILE / Rastreio</p>
@@ -472,52 +354,10 @@
                 <p>Cada registro representa uma linha operacional da planilha.</p>
             </div>
 
-            <div class="painel rastreio-importacao-painel">
-                <div class="rastreio-importacao-cabecalho">
-                    <div>
-                        <h2>Importação manual</h2>
-                        <p>Use a planilha operacional. Cada linha vira um rastreio independente.</p>
-                    </div>
-                    <input
-                        type="file"
-                        id="arquivoRastreio"
-                        accept=".xlsx,.xls,.xlsm,.csv"
-                        hidden
-                        onchange="prepararImportacaoRastreio()"
-                    >
-                    <button type="button" class="botao-principal" onclick="abrirArquivoRastreio()">
-                        Importar planilha
-                    </button>
-                </div>
-                <div class="rastreio-importacao-divisor"><span>ou</span></div>
-
-                <div class="rastreio-importacao-online">
-                    <label for="linkImportacaoRastreio">Planilha compartilhada online</label>
-                    <div class="rastreio-importacao-online-linha">
-                        <input type="url" id="linkImportacaoRastreio" placeholder="Insira o link aqui" autocomplete="off" inputmode="url"
-                            onkeydown="if (event.key === 'Enter') { event.preventDefault(); prepararImportacaoRastreioOnline(); }">
-                        <button type="button" class="botao-aba" onclick="prepararImportacaoRastreioOnline()">Ler link</button>
-                    </div>
-                    <small>Use um link público com permissão para visualizar ou baixar a planilha. Links do Google Sheets são convertidos automaticamente.</small>
-                </div>
-
-                <label class="rastreio-importacao-sem-motorista">
-                    <input type="checkbox" id="rastreioImportarSemMotorista"
-                        onchange="alternarImportacaoSemMotoristaRastreio(this)">
-                    <span>
-                        <strong>Importar sem selecionar motorista</strong>
-                        <small>Não será necessário definir motorista por Nota Fiscal.</small>
-                    </span>
-                </label>
-                <div id="rastreioMapaMotoristas"></div>
-                <div id="rastreioImportacaoPrevia"></div>
-                <div id="statusImportacaoRastreio" class="rastreio-importacao-status" aria-live="polite"></div>
-            </div>
-
             <div class="painel rastreio-painel">
                 <div class="rastreio-filtros">
                     <input type="search" id="buscaRastreio" placeholder="Cliente, NF, motorista..." oninput="filtrarRastreios()">
-                    <select id="filtroStatusRastreio" onchange="filtrarRastreios()" aria-hidden="true" tabindex="-1">
+                    <select id="filtroStatusRastreio" onchange="filtrarRastreios()">
                         <option value="">Todos os status</option>
                         <option value="PENDENTE">Pendente</option>
                         <option value="EM_TRANSPORTE">Em transporte</option>
@@ -525,7 +365,6 @@
                         <option value="ATRASADO">Atrasado</option>
                         <option value="CANCELADO">Cancelado</option>
                     </select>
-                    <button type="button" id="botaoFiltroStatusRastreio" class="popup-escolha-trigger" onclick="abrirPopupStatusRastreio()" aria-haspopup="dialog" aria-expanded="false">Todos os status</button>
                 </div>
                 <div id="statusRastreio" class="rastreio-status" aria-live="polite"></div>
                 <div id="listaRastreios" class="rastreio-lista"></div>
@@ -1004,19 +843,96 @@
             </div>
 
 
+            <div class="painel configuracoes-painel-importacao" id="painelConfiguracoesImportacao">
+              <details class="configuracoes-accordion"><summary><span class="home-app-icone">📥</span><span class="home-app-conteudo"><strong>Importação de rastreios</strong><small>Planilha, OneDrive e sincronização</small></span><span class="home-app-seta">›</span></summary><div class="configuracoes-conteudo">
+            <div class="painel rastreio-importacao-painel">
+                <div class="rastreio-importacao-cabecalho">
+                    <div>
+                        <h2>Importação manual</h2>
+                        <p>Use a planilha operacional. Cada linha vira um rastreio independente.</p>
+                    </div>
+                    <input type="file" id="arquivoRastreio" accept=".xlsx,.xls,.xlsm,.csv" hidden onchange="prepararImportacaoRastreio()">
+                    <button type="button" class="botao-principal" onclick="abrirArquivoRastreio()">Importar planilha</button>
+                </div>
+
+                <div class="rastreio-onedrive-sync">
+                    <div class="rastreio-onedrive-sync-cabecalho">
+                        <div>
+                            <h3>Sincronização automática — OneDrive</h3>
+                            <p>Deixe o arquivo Excel (.xlsx ou .xlsm) aberto no PC com salvamento automático. O PMobile verifica a planilha a cada 15 segundos enquanto estiver aberto. Com a sincronização de alterações ativada, novos lançamentos, alterações de campos e remoções são refletidos automaticamente.</p>
+                        </div>
+                        <span id="indicadorOneDriveRastreio" class="rastreio-onedrive-indicador">○ Sincronização parada</span>
+                    </div>
+
+                    <div class="rastreio-admin-only">
+                        <div class="rastreio-onedrive-sync-controles">
+                            <input
+                                type="url"
+                                id="linkOneDriveRastreio"
+                                placeholder="Cole aqui o link compartilhado do arquivo Excel (.xlsx/.xlsm) do OneDrive"
+                                autocomplete="off"
+                                inputmode="url"
+                            >
+                            <span class="rastreio-intervalo-fixo">Atualização automática: a cada 15 segundos</span>
+                        </div>
+
+                        <div class="rastreio-onedrive-opcoes">
+                            <button type="button" class="botao-secundario" onclick="salvarLinkOneDriveRastreioSupabase()">💾 Salvar link no Supabase</button>
+                            <label>
+                                <input type="checkbox" id="sincronizarAlteracoesOneDriveRastreio" checked onchange="salvarPreferenciasOneDriveRastreio()">
+                                <span>Permitir alterações da planilha em tempo real</span>
+                            </label>
+                        </div>
+
+                        <div class="rastreio-onedrive-sync-acoes">
+                            <button type="button" class="botao-principal" onclick="iniciarSincronizacaoOneDriveRastreio()">Ativar sincronização</button>
+                            <button type="button" class="botao-secundario" onclick="sincronizarOneDriveRastreio(true)">Sincronizar agora</button>
+                            <button type="button" class="botao-secundario" onclick="pararSincronizacaoOneDriveRastreio()">Parar</button>
+                            <button type="button" class="botao-secundario" onclick="limparLinhaBaseOneDriveRastreio()">Forçar nova leitura da planilha</button>
+                            <button type="button" class="botao-secundario botao-perigo" onclick="limparTodosDadosRastreio()">Limpar todos os dados</button>
+                        </div>
+
+                        <div id="statusOneDriveRastreio" class="rastreio-onedrive-status" aria-live="polite"></div>
+                    </div>
+
+                    <div class="rastreio-onedrive-aviso">
+                        <strong>Como usar:</strong>
+                        Cole o link da planilha, ative a sincronização e, se quiser manter o vínculo após fechar o app, marque a opção correspondente. A planilha passa a ser a fonte de verdade: novas linhas, alterações e remoções são sincronizadas automaticamente. Para trocar completamente de planilha, use "Limpar todos os dados" antes da nova fonte.
+                    </div>
+                </div>
+                
+
+                <div id="rastreioMapaMotoristas"></div>
+                <div id="rastreioImportacaoPrevia"></div>
+                <div id="statusImportacaoRastreio" class="rastreio-importacao-status" aria-live="polite"></div>
+                <div id="rastreioImportacaoProgresso" class="rastreio-importacao-progresso" hidden aria-live="polite">
+                    <div class="rastreio-importacao-progresso-cabecalho">
+                        <strong id="rastreioImportacaoEtapa">Aguardando processamento</strong>
+                        <span id="rastreioImportacaoPercentual">0%</span>
+                    </div>
+                    <div class="rastreio-importacao-progresso-trilho" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                        <span id="rastreioImportacaoProgressoBarra"></span>
+                    </div>
+                    <div id="rastreioImportacaoDetalhe" class="rastreio-importacao-progresso-detalhe">Aguardando início...</div>
+                    <div id="rastreioImportacaoLog" class="rastreio-importacao-progresso-log"></div>
+                </div>
+            </div>
+
+
+              </div></details>
+            </div>
+
             <div class="painel configuracoes-painel-sistema">
-                <h2>⚙️ Sistema</h2>
-                <p>Verifique manualmente se existe uma nova atualização do PMOBILE.</p>
+                <details class="configuracoes-accordion"><summary><span class="home-app-icone">⚙️</span><span class="home-app-conteudo"><strong>Sistema</strong><small>Atualizações do aplicativo</small></span><span class="home-app-seta">›</span></summary><div class="configuracoes-conteudo">
                 <div class="configuracoes-acoes">
                     <button class="botao-aba" type="button" onclick="procurarAtualizacoesOta()">🔄 Procurar atualizações</button>
                 </div>
+                </div></details>
             </div>
 
             <div class="painel configuracoes-painel-admin" id="painelConfiguracoesAdmin" style="display: none;">
 
-                <h2>👑 Administração</h2>
-
-                <p>Gerenciamento de usuários, tokens e solicitações.</p>
+                <details class="configuracoes-accordion"><summary><span class="home-app-icone">👑</span><span class="home-app-conteudo"><strong>Administração</strong><small>Usuários e ferramentas administrativas</small></span><span class="home-app-seta">›</span></summary><div class="configuracoes-conteudo">
 
                 <div class="configuracoes-acoes">
                     <button class="botao-aba" onclick="abrirGerenciamentoUsuarios()">👥 Usuários</button>
@@ -1027,6 +943,7 @@
                     <button class="botao-aba" onclick="abrirDivergencias()">⚠️ Divergências</button>
                 </div>
 
+                </div></details>
             </div>
 
             <div class="painel painel-solicitacoes" id="painelGerenciamentoUsuarios" style="display: none;">
@@ -1110,9 +1027,9 @@
             </div>
 
             <div class="painel" id="painelConfiguracoesUsuario" style="display: none;">
-                <h2>👤 Conta</h2>
-                <p>Informações da conta atualmente conectada.</p>
+                <details class="configuracoes-accordion"><summary><span class="home-app-icone">👤</span><span class="home-app-conteudo"><strong>Conta</strong><small>Informações da sessão</small></span><span class="home-app-seta">›</span></summary><div class="configuracoes-conteudo">
                 <div id="resumoContaPmobile"></div>
+                </div></details>
             </div>
 
         </section>
@@ -1250,10 +1167,9 @@
 
 <script src="importacao.js?v=0.0.248"></script>
 
-<script src="importacaonf.js?v=0.0.248"></script>
-
 <script src="arquivosteste.js?v=0.0.248"></script>
 
+<script src="valorestotal.js?v=1"></script>
 <script src="rastreio.js?v=0.0.248"></script>
 
 <script src="rastreioimportacao.js?v=0.0.248"></script>

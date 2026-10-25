@@ -6,7 +6,7 @@ const TAMANHO_LOTE_RASTREIO = 250;
 let importacaoRastreioEmAndamento = false;
 let dadosImportacaoRastreio = null;
 let mapaMotoristasRastreio = {};
-let importarSemMotoristaRastreio = false;
+let importarSemMotoristaRastreio = true;
 
 function obterSessaoRastreioImportacao() {
     const usuario =
@@ -43,153 +43,133 @@ function alternarImportacaoSemMotoristaRastreio(checkbox) {
 }
 
 async function prepararImportacaoRastreio(arquivoExterno = null) {
-    const arquivo = arquivoExterno || document.getElementById("arquivoRastreio")?.files?.[0];
+    const arquivo =
+        arquivoExterno ||
+        document.getElementById("arquivoRastreio")?.files?.[0];
+
     if (!arquivo) return;
 
-    if (!window.XLSX) {
-        mostrarStatusImportacaoRastreio("🔴 Biblioteca Excel ainda não carregada.");
+    if (typeof Worker === "undefined") {
+        mostrarStatusImportacaoRastreio(
+            "🔴 Este dispositivo não oferece Web Worker para processar a planilha com segurança."
+        );
         return;
     }
 
     try {
-        mostrarStatusImportacaoRastreio("🟡 Lendo planilha de Rastreio...");
+        iniciarProgressoImportacaoRastreio();
+        mostrarStatusImportacaoRastreio("🟡 Preparando leitura da planilha de Rastreio...");
+        await new Promise(resolve => setTimeout(resolve, 0));
 
-        let buffer = await arquivo.arrayBuffer();
-        // Uma leitura curta descobre as abas e os cabeçalhos.
-        // Evita reler o ArrayBuffer uma vez para cada aba candidata.
-        let workbook = window.XLSX.read(buffer, {
-            type: "array",
-            sheetRows: 30,
-            cellDates: false,
-            cellHTML: false,
-            cellFormula: false,
-            cellStyles: false,
-            dense: true
-        });
+        // O ArrayBuffer é transferido para o Worker. Depois do postMessage,
+        // a thread principal deixa de ser proprietária do buffer, evitando
+        // manter uma segunda cópia enquanto o SheetJS processa a planilha.
+        const buffer = await arquivo.arrayBuffer();
+        const worker = new Worker("./rastreioimportacao.worker.js");
 
-        if (!workbook.SheetNames?.length) {
-            throw new Error("A planilha não possui uma aba utilizável.");
-        }
+        const resultado = await new Promise((resolve, reject) => {
+            let concluido = false;
 
-        const ordemAbas = [
-            ...workbook.SheetNames.filter(nome => normalizarChaveRastreio(nome) === "LANCAMENTOS"),
-            ...workbook.SheetNames.filter(nome => normalizarChaveRastreio(nome) !== "LANCAMENTOS")
-        ];
+            const finalizar = callback => valor => {
+                if (concluido) return;
+                concluido = true;
+                try {
+                    worker.terminate();
+                } catch {}
+                callback(valor);
+            };
 
-        let nomeAba = null;
-        let indiceCabecalho = -1;
-        let colunas = null;
-        let modelo = null;
+            worker.onmessage = evento => {
+                const dados = evento.data || {};
 
-        for (const candidata of ordemAbas) {
-            const sheet = workbook.Sheets[candidata];
-            if (!sheet) continue;
+                // Progresso é uma mensagem intermediária. Não pode passar por
+                // finalizar(), pois finalizar() encerra o Worker. Antes, a
+                // primeira atualização (8%) terminava o processador exatamente
+                // antes do XLSX.read(), deixando a importação parada em 8%.
+                if (dados.tipo === "progresso") {
+                    mostrarStatusImportacaoRastreio(dados.mensagem || "🟡 Processando planilha...");
+                    atualizarProgressoImportacaoRastreio(dados);
+                    return;
+                }
 
-            const matrizCandidata = window.XLSX.utils.sheet_to_json(sheet, {
-                header: 1,
-                defval: null,
-                raw: false,
-                blankrows: false
+                if (dados.tipo === "resultado") {
+                    finalizar(resolve)(dados.resultado);
+                    return;
+                }
+
+                if (dados.tipo === "erro") {
+                    finalizar(reject)(
+                        new Error(dados.mensagem || "Não foi possível processar a planilha.")
+                    );
+                }
+            };
+
+            worker.onerror = finalizar(erro => {
+                reject(
+                    new Error(
+                        erro?.message ||
+                        "O processador da planilha não pôde ser iniciado."
+                    )
+                );
             });
 
-            for (let indice = 0; indice < Math.min(matrizCandidata.length, 30); indice++) {
-                const colunasCandidata = normalizarColunasRastreio(matrizCandidata[indice] || []);
-                const modeloCandidato = detectarModeloRastreio(colunasCandidata);
-
-                if (modeloCandidato.cliente && modeloCandidato.notaFiscal &&
-                    modeloCandidato.dataEnvio && modeloCandidato.turno) {
-                    nomeAba = candidata;
-                    indiceCabecalho = indice;
-                    colunas = colunasCandidata;
-                    modelo = modeloCandidato;
-                    break;
-                }
+            try {
+                worker.postMessage(
+                    {
+                        buffer,
+                        tamanhoBytes: arquivo.size,
+                        nomeArquivo: arquivo.name
+                    },
+                    [buffer]
+                );
+            } catch (erro) {
+                try {
+                    worker.terminate();
+                } catch {}
+                reject(erro);
             }
-
-            if (nomeAba) break;
-        }
-
-        if (!nomeAba || !colunas || !modelo || indiceCabecalho < 0) {
-            throw new Error(
-                "Não consegui identificar uma aba de lançamentos com Cliente, Nota Fiscal, Data Envio e Turno. " +
-                "Confira os cabeçalhos da planilha."
-            );
-        }
-
-        // Descoberta concluída. Descarta a primeira representação antes da
-        // leitura completa para evitar manter duas cópias da planilha.
-        workbook = null;
-
-        // Agora apenas a aba operacional é carregada integralmente.
-        workbook = window.XLSX.read(buffer, {
-            type: "array",
-            sheets: nomeAba,
-            cellDates: false,
-            cellHTML: false,
-            cellFormula: false,
-            cellStyles: false,
-            dense: true
         });
-
-        let matriz = window.XLSX.utils.sheet_to_json(workbook.Sheets[nomeAba], {
-            header: 1,
-            defval: null,
-            raw: false,
-            blankrows: false
-        });
-
-        const modeloIndices = {};
-        Object.keys(modelo).forEach(chave => {
-            modeloIndices[chave] = modelo[chave] ? colunas.indexOf(modelo[chave]) : -1;
-        });
-
-        // Mantém somente a lista de linhas da aba escolhida.
-        // As linhas continuam sendo os próprios vetores do SheetJS; não criamos
-        // um objeto adicional para cada registro.
-        const deslocamentoLinha = indiceCabecalho + 2;
-        const linhas = matriz.slice(indiceCabecalho + 1);
-
-        if (!linhas.length) throw new Error("A planilha possui cabeçalho, mas nenhuma linha de dados.");
-
-        // Libera a referência à matriz externa; os vetores das linhas continuam
-        // vivos através de "linhas", sem duplicar seus dados.
-        matriz = null;
-
-        const sha256 = await calcularSha256Rastreio(buffer);
 
         const metadadosArquivo = {
             name: arquivo.name,
             size: arquivo.size
         };
 
-        // Após calcular o SHA, o File/ArrayBuffer não precisa mais permanecer vivo.
-        workbook = null;
-        buffer = null;
+        concluirProgressoImportacaoRastreio();
 
         dadosImportacaoRastreio = {
             arquivo: metadadosArquivo,
-            nomeAba,
-            colunas,
-            linhas,
-            deslocamentoLinha,
-            sha256,
-            tamanhoBytes: arquivo.size,
-            modelo,
-            modeloIndices
+            nomeAba: resultado.nomeAba,
+            colunas: resultado.colunas,
+            linhas: resultado.linhas,
+            deslocamentoLinha: resultado.deslocamentoLinha,
+            sha256: resultado.sha256,
+            tamanhoBytes: resultado.tamanhoBytes || arquivo.size,
+            modelo: resultado.modelo,
+            modeloIndices: resultado.modeloIndices
         };
 
-        mapaMotoristasRastreio = montarMapaMotoristasInicial(linhas, modelo, modeloIndices);
+        mapaMotoristasRastreio = montarMapaMotoristasInicial(
+            resultado.linhas,
+            resultado.modelo,
+            resultado.modeloIndices
+        );
+
         renderizarPreviaImportacaoRastreio();
-        mostrarStatusImportacaoRastreio(importarSemMotoristaRastreio
-            ? "🟢 Planilha analisada. A importação será feita sem selecionar motorista."
-            : "🟢 Planilha analisada. Revise os motoristas antes de enviar.");
+
+        mostrarStatusImportacaoRastreio(
+            importarSemMotoristaRastreio
+                ? "🟢 Planilha analisada. A importação será feita sem selecionar motorista."
+                : "🟢 Planilha analisada. Revise os motoristas antes de enviar."
+        );
     } catch (erro) {
         console.error("Erro ao preparar Rastreio:", erro);
         dadosImportacaoRastreio = null;
-        mostrarStatusImportacaoRastreio("🔴 " + (erro.message || "Não foi possível ler a planilha."));
+        mostrarStatusImportacaoRastreio(
+            "🔴 " + (erro.message || "Não foi possível ler a planilha.")
+        );
     }
 }
-
 
 // ============================================================
 // LER PLANILHA COMPARTILHADA ONLINE
@@ -198,159 +178,541 @@ async function prepararImportacaoRastreio(arquivoExterno = null) {
 // Microsoft 365/SharePoint usa o proxy já existente no Supabase.
 // ============================================================
 
-async function prepararImportacaoRastreioOnline() {
-    const campo = document.getElementById("linkImportacaoRastreio");
-    const urlInformada = campo?.value?.trim();
 
-    if (!urlInformada) {
-        mostrarStatusImportacaoRastreio("🔴 Insira o link público da planilha.");
-        return;
-    }
+const RASTREIO_ONEDRIVE_INTERVALO_PADRAO = 15000;
+const RASTREIO_ONEDRIVE_STORAGE = "pmcoletas.rastreio.onedrive.sync.v1";
+const RASTREIO_ONEDRIVE_CONFIG_STORAGE = "pmcoletas.rastreio.onedrive.config.v2";
+let sincronizacaoOneDriveRastreioAtiva = false;
+let sincronizacaoOneDriveRastreioTimer = null;
+let sincronizacaoOneDriveRastreioExecutando = false;
+let sincronizacaoOneDriveRastreioUrl = "";
+let sincronizacaoOneDriveRastreioUltimaLinha = 0;
+let sincronizacaoOneDriveRastreioVerificada = false;
 
-    if (!window.XLSX) {
-        mostrarStatusImportacaoRastreio("🔴 A biblioteca Excel ainda não foi carregada.");
-        return;
-    }
+function usuarioRastreioEhAdmin() {
+    const usuario = (typeof usuarioPmobileAtual !== "undefined" && usuarioPmobileAtual)
+        ? usuarioPmobileAtual : window.usuarioPmobileAtual;
+    return String(usuario?.nivel || "").toUpperCase() === "ADMIN";
+}
+function obterConfiguracaoOneDriveRastreio() {
+    try { return JSON.parse(localStorage.getItem(RASTREIO_ONEDRIVE_CONFIG_STORAGE) || "null") || null; } catch { return null; }
+}
+function salvarConfiguracaoOneDriveRastreio(configuracao) {
+    try { localStorage.setItem(RASTREIO_ONEDRIVE_CONFIG_STORAGE, JSON.stringify(configuracao)); } catch {}
+}
+function salvarPreferenciasOneDriveRastreio() {
+    const config = obterConfiguracaoOneDriveRastreio() || {};
+    const campo = document.getElementById("linkOneDriveRastreio");
+    config.url = campo?.value?.trim() || config.url || "";
+    config.manterLink = true;
+    config.tempoReal = document.getElementById("sincronizarAlteracoesOneDriveRastreio")?.checked !== false;
+    config.intervalo = obterIntervaloOneDriveRastreio();
+    config.ativo = sincronizacaoOneDriveRastreioAtiva;
+    config.salvoEm = new Date().toISOString();
+    if (config.manterLink && config.url) salvarConfiguracaoOneDriveRastreio(config);
+    else if (!config.manterLink) limparConfiguracaoOneDriveRastreio();
+}
 
+function limparConfiguracaoOneDriveRastreio() {
+    try { localStorage.removeItem(RASTREIO_ONEDRIVE_CONFIG_STORAGE); } catch {}
+}
+let ultimoAcessoAdminRastreio = null;
+function atualizarAcessoAdminRastreio() {
+    const permitido = usuarioRastreioEhAdmin();
+    document.querySelectorAll(".rastreio-admin-only").forEach(el => { el.hidden = !permitido; });
+    if (ultimoAcessoAdminRastreio === permitido) return;
+    ultimoAcessoAdminRastreio = permitido;
+    if (permitido) restaurarConfiguracaoOneDriveRastreio();
+    else if (sincronizacaoOneDriveRastreioAtiva) pararSincronizacaoOneDriveRastreio();
+}
+
+let restaurandoLinkOneDriveServidor = false;
+async function restaurarConfiguracaoOneDriveRastreio() {
+    if (!usuarioRastreioEhAdmin() || restaurandoLinkOneDriveServidor) return;
+    restaurandoLinkOneDriveServidor = true;
     try {
-        mostrarStatusImportacaoRastreio("🟡 Lendo planilha compartilhada online...");
+        const sessao = obterSessaoRastreioImportacao();
+        const {data,error} = await window.clienteSupabase.rpc("pmobile_rastreio_config_link", {p_usuario:sessao.usuario,p_credencial:sessao.credencial});
+        if (error) throw error;
+        const campo = document.getElementById("linkOneDriveRastreio");
+        if (campo && data) campo.value = data;
+        const config = obterConfiguracaoOneDriveRastreio();
+        if (data && config?.ativo && !sincronizacaoOneDriveRastreioAtiva) iniciarSincronizacaoOneDriveRastreio(true);
+    } catch (erro) { console.warn("Não foi possível carregar link OneDrive do Supabase:", erro); }
+    finally { restaurandoLinkOneDriveServidor = false; }
+}
+async function salvarLinkOneDriveRastreioSupabase() {
+    if (!usuarioRastreioEhAdmin()) return mostrarStatusOneDriveRastreio("Somente administradores podem salvar o link.");
+    const url = document.getElementById("linkOneDriveRastreio")?.value?.trim();
+    if (!url) return mostrarStatusOneDriveRastreio("Informe o link do OneDrive.");
+    try {
+        const sessao = obterSessaoRastreioImportacao();
+        const {error} = await window.clienteSupabase.rpc("pmobile_rastreio_config_link",{p_usuario:sessao.usuario,p_credencial:sessao.credencial,p_url:url});
+        if (error) throw error;
+        salvarConfiguracaoOneDriveRastreio({...obterConfiguracaoOneDriveRastreio(),url,manterLink:true,intervalo:15000,tempoReal:true,ativo:sincronizacaoOneDriveRastreioAtiva});
+        mostrarStatusOneDriveRastreio("🟢 Link salvo no Supabase. Disponível aos administradores.");
+    } catch(erro) { mostrarStatusOneDriveRastreio("🔴 Falha ao salvar link: "+(erro.message||erro)); }
+}
 
-        const urlDownload = normalizarUrlPlanilhaOnlineRastreio(urlInformada);
-        const hostOnline = new URL(urlDownload).hostname.toLowerCase();
+function obterEstadoSincronizacaoOneDriveRastreio(url) {
+    try {
+        const bruto = localStorage.getItem(RASTREIO_ONEDRIVE_STORAGE);
+        const estados = bruto ? JSON.parse(bruto) : {};
+        return estados[url] || null;
+    } catch {
+        return null;
+    }
+}
 
-        const microsoft365 =
-            hostOnline === "1drv.ms" ||
-            hostOnline === "onedrive.live.com" ||
-            hostOnline.endsWith(".onedrive.live.com") ||
-            hostOnline === "automotivacba-my.sharepoint.com";
+function salvarEstadoSincronizacaoOneDriveRastreio(url, estado) {
+    try {
+        const bruto = localStorage.getItem(RASTREIO_ONEDRIVE_STORAGE);
+        const estados = bruto ? JSON.parse(bruto) : {};
+        estados[url] = estado;
+        localStorage.setItem(RASTREIO_ONEDRIVE_STORAGE, JSON.stringify(estados));
+    } catch (erro) {
+        console.warn("Não foi possível salvar o estado da sincronização OneDrive:", erro);
+    }
+}
 
-        if (microsoft365) {
-            const respostaProxy = await window.clienteSupabase.functions.invoke(
-                "pmobile-nf-download",
-                { body: { url: urlInformada } }
+function obterIntervaloOneDriveRastreio() { return 15000; }
+
+function mostrarStatusOneDriveRastreio(mensagem) {
+    const area = document.getElementById("statusOneDriveRastreio");
+    if (area) area.textContent = mensagem;
+}
+
+function atualizarIndicadorOneDriveRastreio(ativo, estado = null) {
+    const indicador = document.getElementById("indicadorOneDriveRastreio");
+    if (!indicador) return;
+
+    indicador.classList.remove("ativo", "conectando", "erro", "conectado");
+
+    if (!ativo) {
+        indicador.textContent = "○ Sincronização parada";
+        return;
+    }
+
+    if (estado === "erro") {
+        indicador.textContent = "● Falha na sincronização";
+        indicador.classList.add("erro");
+        return;
+    }
+
+    if (!sincronizacaoOneDriveRastreioVerificada) {
+        indicador.textContent = "● Verificando OneDrive...";
+        indicador.classList.add("conectando");
+        return;
+    }
+
+    indicador.textContent = "● OneDrive conectado";
+    indicador.classList.add("ativo", "conectado");
+}
+
+function agendarProximaSincronizacaoOneDriveRastreio() {
+    if (!sincronizacaoOneDriveRastreioAtiva) return;
+
+    clearTimeout(sincronizacaoOneDriveRastreioTimer);
+    sincronizacaoOneDriveRastreioTimer = setTimeout(
+        () => sincronizarOneDriveRastreio(),
+        obterIntervaloOneDriveRastreio()
+    );
+}
+
+function iniciarSincronizacaoOneDriveRastreio(restaurando = false) {
+    if (!usuarioRastreioEhAdmin()) {
+        mostrarStatusOneDriveRastreio("🔒 Recurso disponível somente para administradores.");
+        return;
+    }
+    const campo = document.getElementById("linkOneDriveRastreio");
+    const url = campo?.value?.trim();
+    if (!url) { mostrarStatusOneDriveRastreio("🔴 Informe o link compartilhado do arquivo .xlsm no OneDrive."); return; }
+    try {
+        const host = new URL(url).hostname.toLowerCase();
+        if (!(host === "1drv.ms" || host === "onedrive.live.com" || host.endsWith(".onedrive.live.com") || host.endsWith(".sharepoint.com"))) {
+            throw new Error("Use um link compartilhado do OneDrive/SharePoint.");
+        }
+    } catch (erro) { mostrarStatusOneDriveRastreio("🔴 " + (erro.message || "Link inválido.")); return; }
+
+    sincronizacaoOneDriveRastreioUrl = url;
+    const estado = obterEstadoSincronizacaoOneDriveRastreio(url);
+    sincronizacaoOneDriveRastreioUltimaLinha = Number(estado?.ultimaLinha || 0);
+    sincronizacaoOneDriveRastreioVerificada = false;
+    sincronizacaoOneDriveRastreioAtiva = true;
+
+    const configuracaoAtual = {
+        url,
+        manterLink: true,
+        tempoReal: document.getElementById("sincronizarAlteracoesOneDriveRastreio")?.checked !== false,
+        intervalo: obterIntervaloOneDriveRastreio(),
+        ativo: true,
+        salvoEm: new Date().toISOString()
+    };
+
+    if (configuracaoAtual.manterLink) {
+        salvarConfiguracaoOneDriveRastreio(configuracaoAtual);
+    } else {
+        limparConfiguracaoOneDriveRastreio();
+    }
+
+    atualizarIndicadorOneDriveRastreio(true);
+    mostrarStatusOneDriveRastreio(restaurando
+        ? "🟡 Restaurando sincronização do OneDrive..."
+        : sincronizacaoOneDriveRastreioUltimaLinha > 0
+            ? "🟢 Sincronização reativada. Verificando a planilha..."
+            : "🟡 Primeiro acesso: lendo a planilha para criar a linha de base...");
+    sincronizarOneDriveRastreio();
+}
+
+function pararSincronizacaoOneDriveRastreio() {
+    sincronizacaoOneDriveRastreioAtiva = false;
+    sincronizacaoOneDriveRastreioVerificada = false;
+    clearTimeout(sincronizacaoOneDriveRastreioTimer);
+    sincronizacaoOneDriveRastreioTimer = null;
+    const config = obterConfiguracaoOneDriveRastreio();
+    if (config?.manterLink && config.url) {
+        config.ativo = false;
+        salvarConfiguracaoOneDriveRastreio(config);
+    } else {
+        limparConfiguracaoOneDriveRastreio();
+    }
+    atualizarIndicadorOneDriveRastreio(false);
+    mostrarStatusOneDriveRastreio("○ Sincronização parada.");
+}
+
+function limparLinhaBaseOneDriveRastreio() {
+    if (!usuarioRastreioEhAdmin()) { mostrarStatusOneDriveRastreio("🔒 Apenas administradores podem alterar a linha de base."); return; }
+    if (!sincronizacaoOneDriveRastreioUrl) return;
+    try {
+        const bruto = localStorage.getItem(RASTREIO_ONEDRIVE_STORAGE);
+        const estados = bruto ? JSON.parse(bruto) : {};
+        delete estados[sincronizacaoOneDriveRastreioUrl];
+        localStorage.setItem(RASTREIO_ONEDRIVE_STORAGE, JSON.stringify(estados));
+    } catch {}
+    sincronizacaoOneDriveRastreioUltimaLinha = 0;
+    mostrarStatusOneDriveRastreio("🟡 Linha de base apagada. A próxima leitura criará uma nova.");
+}
+
+async function baixarPlanilhaOneDriveRastreio(url) {
+    const nomePadrao = "rastreio.xlsx";
+
+    // No APK, o WebView não consegue ler o download do OneDrive diretamente
+    // por causa do CORS. A ponte nativa faz o download HTTPS e devolve o
+    // arquivo em blocos pequenos, evitando uma resposta gigante no bridge.
+    if (window.PMCOLETAS_ONEDRIVE?.iniciarDownload) {
+        const iniciar = JSON.parse(
+            window.PMCOLETAS_ONEDRIVE.iniciarDownload(url)
+        );
+
+        if (!iniciar.ok || !iniciar.id) {
+            throw new Error(
+                iniciar.error || "Não foi possível iniciar o download nativo do OneDrive."
             );
+        }
 
-            if (respostaProxy.error) {
+        const id = iniciar.id;
+        let status = null;
+        const limiteEspera = Date.now() + 300000;
+
+        try {
+            while (Date.now() < limiteEspera) {
+                status = JSON.parse(
+                    window.PMCOLETAS_ONEDRIVE.obterStatus(id)
+                );
+
+                if (!status.ok) {
+                    throw new Error(
+                        status.error || "Não foi possível consultar o download do OneDrive."
+                    );
+                }
+
+                if (status.status === "completed") break;
+
+                if (status.status === "error") {
+                    throw new Error(
+                        status.error || "O download nativo do OneDrive falhou."
+                    );
+                }
+
+                if (status.totalBytes > 0) {
+                    const percentual = Math.min(
+                        100,
+                        Math.round(
+                            (status.downloadedBytes / status.totalBytes) * 100
+                        )
+                    );
+
+                    mostrarStatusOneDriveRastreio(
+                        "🟡 Baixando do OneDrive: " + percentual + "%"
+                    );
+                } else {
+                    mostrarStatusOneDriveRastreio(
+                        "🟡 Baixando a planilha do OneDrive..."
+                    );
+                }
+
+                await new Promise(resolve => setTimeout(resolve, 400));
+            }
+
+            if (!status || status.status !== "completed") {
                 throw new Error(
-                    respostaProxy.error.message ||
-                    "Não foi possível ler a planilha pelo Microsoft 365."
+                    "Tempo limite ao baixar a planilha do OneDrive."
                 );
             }
 
-            const dadosProxy = respostaProxy.data;
+            // O download terminou: fechar o progresso em 100% antes de
+            // entregar o arquivo ao parser da planilha.
+            mostrarStatusOneDriveRastreio("🟢 Download do OneDrive concluído: 100%");
+            await new Promise(resolve => setTimeout(resolve, 150));
 
-            if (
-                !dadosProxy ||
-                !Array.isArray(dadosProxy.colunas) ||
-                !Array.isArray(dadosProxy.linhas)
-            ) {
-                throw new Error(
-                    dadosProxy?.error ||
-                    "O Supabase não retornou os dados da planilha."
+            const partes = [];
+            let offset = 0;
+            let tamanhoTotal = 0;
+
+            while (true) {
+                const respostaChunk = JSON.parse(
+                    window.PMCOLETAS_ONEDRIVE.obterChunk(id, offset)
                 );
+
+                if (!respostaChunk.ok) {
+                    throw new Error(
+                        respostaChunk.error ||
+                        "Não foi possível ler o arquivo baixado."
+                    );
+                }
+
+                if (respostaChunk.base64) {
+                    const binario = atob(respostaChunk.base64);
+                    const bytes = new Uint8Array(binario.length);
+
+                    for (let indice = 0; indice < binario.length; indice++) {
+                        bytes[indice] = binario.charCodeAt(indice);
+                    }
+
+                    partes.push(bytes);
+                    tamanhoTotal += bytes.length;
+                }
+
+                offset = Number(respostaChunk.nextOffset || offset);
+
+                if (respostaChunk.done) break;
             }
 
-            const colunas = normalizarColunasRastreio(dadosProxy.colunas);
-            const modelo = detectarModeloRastreio(colunas);
+            // Não criamos uma segunda Uint8Array gigante para concatenar os
+            // chunks. O Blob/File aceita as partes diretamente, reduzindo o
+            // pico de memória antes do parser assumir o arquivo.
+            let nome = nomePadrao;
 
-            if (!modelo.cliente || !modelo.notaFiscal || !modelo.dataEnvio || !modelo.turno) {
-                throw new Error(
-                    "A planilha online não possui os campos obrigatórios de Rastreio: Cliente, Nota Fiscal, Data Envio e Turno."
+            try {
+                const parsed = new URL(url);
+                const nomeUrl = decodeURIComponent(
+                    parsed.pathname.split("/").pop() || ""
                 );
-            }
 
-            const mapaColunas = {};
-            dadosProxy.colunas.forEach((coluna, indice) => {
-                mapaColunas[coluna] = indice;
-            });
+                if (/\.(xlsx?|xlsm)$/i.test(nomeUrl)) {
+                    nome = nomeUrl;
+                }
+            } catch {}
 
-            const linhas = dadosProxy.linhas.map((linha) => {
-                const dados = linha?.dados && typeof linha.dados === "object"
-                    ? linha.dados
-                    : linha;
-                return colunas.map((colunaOriginal, indice) => {
-                    const chaveOriginal = dadosProxy.colunas[indice];
-                    return dados?.[chaveOriginal] ?? dados?.[colunaOriginal] ?? null;
-                });
-            }).filter(linha => linha.some(valor => String(valor ?? "").trim() !== ""));
+            mostrarStatusOneDriveRastreio("🟢 Download do OneDrive concluído: 100%");
 
-            if (!linhas.length) {
-                throw new Error("A planilha online possui cabeçalho, mas nenhuma linha de dados.");
-            }
-
-            const modeloIndices = {};
-            Object.keys(modelo).forEach(chave => {
-                modeloIndices[chave] = modelo[chave] ? colunas.indexOf(modelo[chave]) : -1;
-            });
-
-            dadosImportacaoRastreio = {
-                arquivo: {
-                    name: dadosProxy.nome_arquivo || "planilha-compartilhada.xlsx",
-                    size: Number(dadosProxy.tamanho_bytes || 0)
-                },
-                nomeAba: dadosProxy.nome_aba || "Planilha",
-                colunas,
-                linhas,
-                deslocamentoLinha: 2,
-                sha256: dadosProxy.sha256 || null,
-                tamanhoBytes: Number(dadosProxy.tamanho_bytes || 0),
-                modelo,
-                modeloIndices
-            };
-
-            mapaMotoristasRastreio = montarMapaMotoristasInicial(
-                linhas,
-                modelo,
-                modeloIndices
+            return new File(
+                partes,
+                nome,
+                { type: "application/octet-stream" }
             );
+        } catch (erro) {
+            try {
+                window.PMCOLETAS_ONEDRIVE.cancelarDownload(id);
+            } catch {}
+            throw erro;
+        }
+    }
 
-            renderizarPreviaImportacaoRastreio();
-            mostrarStatusImportacaoRastreio(
-                importarSemMotoristaRastreio
-                    ? "🟢 Planilha online analisada. A importação será feita sem selecionar motorista."
-                    : "🟢 Planilha online analisada. Revise os motoristas antes de enviar."
-            );
+    // Navegador/desktop: mantém o caminho web para ambientes onde o servidor
+    // autoriza CORS. No APK, a ponte nativa acima é usada automaticamente.
+    const urlDownload = normalizarUrlPlanilhaOnlineRastreio(url);
+    const separador = urlDownload.includes("?") ? "&" : "?";
+    const urlCacheBust =
+        urlDownload + separador + "_pmcoletas_sync=" + Date.now();
+
+    const resposta = await fetch(urlCacheBust, {
+        method: "GET",
+        redirect: "follow",
+        cache: "no-store"
+    });
+
+    if (!resposta.ok) {
+        throw new Error("OneDrive respondeu HTTP " + resposta.status + ".");
+    }
+
+    const buffer = await resposta.arrayBuffer();
+
+    if (!buffer.byteLength) {
+        throw new Error("O OneDrive não retornou nenhum arquivo.");
+    }
+
+    const nome =
+        obterNomeArquivoOnlineRastreio(resposta, urlDownload) || nomePadrao;
+
+    if (!/\.(xlsx?|xlsm)$/i.test(nome)) {
+        throw new Error(
+            "O arquivo sincronizado precisa ser Excel (.xlsx, .xls ou .xlsm)."
+        );
+    }
+
+    return new File(
+        [buffer],
+        nome,
+        { type: "application/octet-stream" }
+    );
+}
+
+async function sincronizarOneDriveRastreio(forcar = false) {
+    if (!usuarioRastreioEhAdmin() || sincronizacaoOneDriveRastreioExecutando) return;
+
+    if (!sincronizacaoOneDriveRastreioUrl) {
+        const campo = document.getElementById("linkOneDriveRastreio");
+        sincronizacaoOneDriveRastreioUrl = campo?.value?.trim() || "";
+    }
+
+    if (!sincronizacaoOneDriveRastreioUrl) {
+        mostrarStatusOneDriveRastreio("🔴 Informe o link compartilhado do arquivo Excel do OneDrive.");
+        return;
+    }
+
+    if (!sincronizacaoOneDriveRastreioAtiva && !forcar) return;
+
+    sincronizacaoOneDriveRastreioExecutando = true;
+    try {
+        const arquivo = await baixarPlanilhaOneDriveRastreio(sincronizacaoOneDriveRastreioUrl);
+        await prepararImportacaoRastreio(arquivo);
+        if (!dadosImportacaoRastreio) throw new Error("A planilha não pôde ser analisada.");
+
+        const url = sincronizacaoOneDriveRastreioUrl;
+        const estadoAnterior = obterEstadoSincronizacaoOneDriveRastreio(url);
+        const hashAtual = dadosImportacaoRastreio.sha256 || null;
+
+        if (estadoAnterior?.sha256 && hashAtual && estadoAnterior.sha256 === hashAtual) {
+            sincronizacaoOneDriveRastreioVerificada = true;
+            atualizarIndicadorOneDriveRastreio(true);
+            mostrarStatusOneDriveRastreio("🟢 OneDrive conectado · nenhuma alteração detectada · " + new Date().toLocaleTimeString("pt-BR"));
+            if (sincronizacaoOneDriveRastreioAtiva) {
+                agendarProximaSincronizacaoOneDriveRastreio();
+            }
             return;
         }
 
-        const resposta = await fetch(urlDownload, {
-            method: "GET",
-            redirect: "follow"
+        const tempoReal =
+            document.getElementById("sincronizarAlteracoesOneDriveRastreio")?.checked !== false;
+
+        if (estadoAnterior && !tempoReal) {
+            sincronizacaoOneDriveRastreioVerificada = true;
+            atualizarIndicadorOneDriveRastreio(true);
+            mostrarStatusOneDriveRastreio(
+                "🟢 OneDrive conectado · alterações da planilha estão pausadas. " +
+                "Ative a opção para aplicar as alterações pendentes."
+            );
+            if (sincronizacaoOneDriveRastreioAtiva) {
+                agendarProximaSincronizacaoOneDriveRastreio();
+            }
+            return;
+        }
+
+        const lotePreparado = prepararLinhasRastreioParaEnvio(0, dadosImportacaoRastreio.linhas.length, true);
+        const sessao = obterSessaoRastreioImportacao();
+        const chave = await calcularChaveFonteOneDriveRastreio(url);
+
+        mostrarStatusOneDriveRastreio("🟡 Sincronizando alterações da planilha...");
+        const resposta = await window.clienteSupabase.rpc("pmobile_rastreio_sincronizar_fonte", {
+            p_usuario: sessao.usuario,
+            p_credencial: sessao.credencial,
+            p_chave: chave,
+            p_url: url,
+            p_arquivo_nome: dadosImportacaoRastreio.arquivo.name,
+            p_sha256: hashAtual,
+            p_linhas: lotePreparado.resultado,
+            p_substituir: false
         });
+        if (resposta.error) throw resposta.error;
+        await salvarValoresTotalPlanilha();
 
-        if (!resposta.ok) {
-            throw new Error("O link respondeu HTTP " + resposta.status + ".");
-        }
+        const resultado = Array.isArray(resposta.data) ? resposta.data[0] : resposta.data;
+        const ultimaLinhaAtual = (Number(dadosImportacaoRastreio.deslocamentoLinha) || 2) + dadosImportacaoRastreio.linhas.length - 1;
+        salvarEstadoSincronizacaoOneDriveRastreio(url, {
+            ultimaLinha: ultimaLinhaAtual,
+            sha256: hashAtual,
+            atualizadoEm: new Date().toISOString()
+        });
+        sincronizacaoOneDriveRastreioUltimaLinha = ultimaLinhaAtual;
+        sincronizacaoOneDriveRastreioVerificada = true;
+        atualizarIndicadorOneDriveRastreio(true);
 
-        const buffer = await resposta.arrayBuffer();
-
-        if (!buffer.byteLength) {
-            throw new Error("O link não retornou nenhum arquivo.");
-        }
-
-        const nomeArquivo = obterNomeArquivoOnlineRastreio(
-            resposta,
-            urlDownload
+        mostrarStatusOneDriveRastreio(
+            "🟢 OneDrive conectado · " +
+            Number(resultado?.novas || 0).toLocaleString("pt-BR") + " novas · " +
+            Number(resultado?.alteradas || 0).toLocaleString("pt-BR") + " alteradas · " +
+            Number(resultado?.removidas || 0).toLocaleString("pt-BR") + " removidas."
         );
-
-        const tipo = resposta.headers.get("content-type") || "application/octet-stream";
-
-        const arquivo = new File(
-            [buffer],
-            nomeArquivo,
-            { type: tipo }
-        );
-
-        await prepararImportacaoRastreio(arquivo);
-
+        if (typeof carregarRastreios === "function") await carregarRastreios();
+        if (sincronizacaoOneDriveRastreioAtiva) {
+            agendarProximaSincronizacaoOneDriveRastreio();
+        }
     } catch (erro) {
-        console.error("❌ Erro ao ler planilha online de Rastreio:", erro);
-        mostrarStatusImportacaoRastreio(
-            "🔴 Não foi possível ler o link. " +
-            (erro.message || "Verifique se a planilha é pública e permite download.")
-        );
+        console.error("Erro na sincronização OneDrive do Rastreio:", erro);
+        sincronizacaoOneDriveRastreioVerificada = false;
+        atualizarIndicadorOneDriveRastreio(sincronizacaoOneDriveRastreioAtiva, "erro");
+        mostrarStatusOneDriveRastreio("🔴 Falha na sincronização: " + (erro.message || "erro desconhecido"));
+
+        // Falhas transitórias não podem matar a sincronização automática.
+        // O próximo ciclo é agendado somente quando a sincronização continua ativa.
+        if (sincronizacaoOneDriveRastreioAtiva) {
+            agendarProximaSincronizacaoOneDriveRastreio();
+        }
+    } finally {
+        sincronizacaoOneDriveRastreioExecutando = false;
     }
 }
+
+async function calcularChaveFonteOneDriveRastreio(url) {
+    const texto = String(url || "").trim().toLowerCase();
+    if (!texto) throw new Error("Link do OneDrive inválido.");
+    if (window.crypto?.subtle) {
+        const digest = await window.crypto.subtle.digest("SHA-256", new TextEncoder().encode(texto));
+        return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+    return texto;
+}
+
+async function limparTodosDadosRastreio() {
+    if (!usuarioRastreioEhAdmin()) {
+        mostrarStatusOneDriveRastreio("🔒 Apenas administradores podem limpar os dados.");
+        return;
+    }
+    if (!window.confirm("ATENÇÃO! Isso apagará TODOS os rastreios, histórico, importações e fontes de sincronização. Esta ação não pode ser desfeita. Continuar?")) return;
+
+    try {
+        const sessao = obterSessaoRastreioImportacao();
+        const resposta = await window.clienteSupabase.rpc("pmobile_rastreio_limpar_todos_dados", {
+            p_usuario: sessao.usuario,
+            p_credencial: sessao.credencial
+        });
+        if (resposta.error) throw resposta.error;
+
+        pararSincronizacaoOneDriveRastreio();
+        limparConfiguracaoOneDriveRastreio();
+        localStorage.removeItem(RASTREIO_ONEDRIVE_STORAGE);
+        const campo = document.getElementById("linkOneDriveRastreio");
+        const manter = document.getElementById("manterLinkOneDriveRastreio");
+        if (campo) campo.value = "";
+        if (manter) manter.checked = false;
+        if (typeof carregarRastreios === "function") await carregarRastreios();
+        mostrarStatusOneDriveRastreio("🟢 Todos os dados de Rastreio foram limpos. Uma nova planilha pode ser cadastrada.");
+    } catch (erro) {
+        mostrarStatusOneDriveRastreio("🔴 Não foi possível limpar os dados: " + (erro.message || "erro desconhecido"));
+    }
+}
+
 
 function normalizarUrlPlanilhaOnlineRastreio(urlInformada) {
     let url;
@@ -498,7 +860,7 @@ function detectarModeloRastreio(colunas) {
         peso: achar("Peso"),
         valorNF: achar("Valor NF", "Valor"),
         valorFreteEmbutido: achar("Valor Frete Embutido", "Frete Embutido", "Frete Imbutido", "Valor Frete Imbutido"),
-        valorFrete: achar("Valor Frete", "Frete"),
+        valorFrete: achar("Frete Transporte", "Valor Frete", "Frete Transportadora", "Frete"),
         dataEnvio: achar("Data Envio", "Data de Envio"),
         turno: achar("Turno Envio", "Turno")
     };
@@ -955,7 +1317,7 @@ function prepararLinhasRastreioParaEnvio(inicio = 0, fim = null, coletarAvisos =
         const notaFiscal = String(valor("notaFiscal") ?? "").trim();
         const chaveNotaFiscal = chaveNotaFiscalRastreio(notaFiscal);
         const motoristaPlanilha = String(valor("motorista") ?? "").trim();
-        const motorista = importarSemMotoristaRastreio ? "" : (motoristaPlanilha || mapaMotoristasRastreio[chaveNotaFiscal] || "");
+        const motorista = "";
 
         const item = {
             cliente: String(valor("cliente") ?? "").trim(),
@@ -978,7 +1340,7 @@ function prepararLinhasRastreioParaEnvio(inicio = 0, fim = null, coletarAvisos =
             const problemas = [];
             if (!item.cliente) problemas.push("Cliente vazio.");
             if (!item.notas_fiscais.trim()) problemas.push("Nota Fiscal vazia.");
-            if (!item.motorista) problemas.push("Motorista não definido.");
+            if (!importarSemMotoristaRastreio && !item.motorista) problemas.push("Motorista não definido.");
             if (!item.data_envio) problemas.push("Data Envio inválida.");
             if (!item.turno) problemas.push("Turno deve ser MANHÃ ou TARDE.");
 
@@ -1151,6 +1513,7 @@ async function enviarImportacaoRastreio() {
             "🟢 Rastreio importado: " + enviadas.toLocaleString("pt-BR") + " linhas."
         );
 
+        await salvarValoresTotalPlanilha();
         cancelarImportacaoRastreio(false);
         await carregarRastreios();
     } catch (erro) {
@@ -1194,9 +1557,61 @@ function cancelarImportacaoRastreio(limparStatus = true) {
     if (limparStatus) mostrarStatusImportacaoRastreio("");
 }
 
+function atualizarProgressoImportacaoRastreio(dados = {}) {
+    const painel = document.getElementById("rastreioImportacaoProgresso");
+    const etapa = document.getElementById("rastreioImportacaoEtapa");
+    const percentual = document.getElementById("rastreioImportacaoPercentual");
+    const detalhe = document.getElementById("rastreioImportacaoDetalhe");
+    const barra = document.getElementById("rastreioImportacaoProgressoBarra");
+    const trilho = barra?.parentElement;
+    const log = document.getElementById("rastreioImportacaoLog");
+
+    if (!painel) return;
+
+    const valor = Math.max(0, Math.min(100, Number(dados.percentual ?? 0)));
+    painel.hidden = false;
+    if (etapa) etapa.textContent = dados.etapa || "Processando planilha";
+    if (percentual) percentual.textContent = Math.round(valor) + "%";
+    if (detalhe) detalhe.textContent = dados.detalhe || "";
+    if (barra) barra.style.setProperty("--rastreio-progresso", valor + "%");
+    if (trilho) trilho.setAttribute("aria-valuenow", String(Math.round(valor)));
+
+    if (log && dados.detalhe) {
+        const anterior = log.dataset.ultimaMensagem || "";
+        if (anterior !== dados.detalhe) {
+            const linha = document.createElement("div");
+            linha.textContent = dados.detalhe;
+            log.appendChild(linha);
+            while (log.children.length > 6) log.removeChild(log.firstChild);
+            log.dataset.ultimaMensagem = dados.detalhe;
+        }
+    }
+}
+
 function mostrarStatusImportacaoRastreio(mensagem) {
     const area = document.getElementById("statusImportacaoRastreio");
     if (area) area.textContent = mensagem;
+}
+
+function iniciarProgressoImportacaoRastreio() {
+    const log = document.getElementById("rastreioImportacaoLog");
+    if (log) {
+        log.innerHTML = "";
+        delete log.dataset.ultimaMensagem;
+    }
+    atualizarProgressoImportacaoRastreio({
+        percentual: 0,
+        etapa: "Preparando",
+        detalhe: "Aguardando transferência do arquivo para o processador..."
+    });
+}
+
+function concluirProgressoImportacaoRastreio() {
+    atualizarProgressoImportacaoRastreio({
+        percentual: 100,
+        etapa: "Concluído",
+        detalhe: "Planilha processada. Preparando os dados do Rastreio..."
+    });
 }
 
 async function calcularSha256Rastreio(buffer) {
@@ -1208,3 +1623,6 @@ async function calcularSha256Rastreio(buffer) {
         .map(byte => byte.toString(16).padStart(2, "0"))
         .join("");
 }
+if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", atualizarAcessoAdminRastreio); else atualizarAcessoAdminRastreio();
+// A sessão é carregada após o DOM; reavaliar permissões quando o login concluir.
+setInterval(atualizarAcessoAdminRastreio, 1500);
