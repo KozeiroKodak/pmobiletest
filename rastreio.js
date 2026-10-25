@@ -17,6 +17,11 @@ async function abrirRastreio() {
         return;
     }
     mostrarTelaSistema("rastreio", "menuRastreio");
+    // A sessão pode ser estabelecida após o DOMContentLoaded.
+    // Reavaliar a permissão ao abrir evita ocultar os controles para ADMIN.
+    if (typeof atualizarAcessoAdminRastreio === "function") {
+        atualizarAcessoAdminRastreio();
+    }
     await carregarRastreios();
 }
 
