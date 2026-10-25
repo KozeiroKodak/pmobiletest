@@ -277,6 +277,8 @@
                         <span class="home-app-seta" aria-hidden="true">›</span>
                     </button>
 
+
+                    <button id="menuValoresTotal" class="home-app-card" onclick="abrirValoresTotal()" title="Valores total"><span class="home-app-icone" aria-hidden="true">💰</span><span class="home-app-conteudo"><strong>Valores total</strong><small>Resumo financeiro da planilha online</small></span><span class="home-app-seta" aria-hidden="true">›</span></button>
                     <button id="menuImportacao" class="home-app-card" onclick="abrirImportacao()" title="Importar inventário">
                         <span class="home-app-icone" aria-hidden="true">📦</span>
                         <span class="home-app-conteudo">
@@ -465,6 +467,11 @@
              RASTREIO
              ================================================= -->
 
+
+        <section id="valoresTotal" class="tela-sistema" style="display:none">
+          <div class="cabecalho-pagina"><p class="cabecalho-caminho">PMOBILE / Valores total</p><h1>Valores total</h1><p>Resumo financeiro da última linha Total da planilha online.</p></div>
+          <div class="painel"><div id="valoresTotalStatus" style="color:#aaa;margin-bottom:18px">Consultando valores...</div><div id="valoresTotalCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px"></div><button type="button" class="botao-aba" style="margin-top:18px" onclick="carregarValoresTotal()">↻ Atualizar valores</button></div>
+        </section>
         <section id="rastreio" class="tela-sistema" style="display: none;">
             <div class="cabecalho-pagina">
                 <p class="cabecalho-caminho">PMOBILE / Rastreio</p>
@@ -1303,6 +1310,7 @@
 
 <script src="arquivosteste.js?v=0.0.248"></script>
 
+<script src="valorestotal.js?v=1"></script>
 <script src="rastreio.js?v=0.0.248"></script>
 
 <script src="rastreioimportacao.js?v=0.0.248"></script>

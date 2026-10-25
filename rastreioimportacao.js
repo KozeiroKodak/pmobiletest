@@ -1499,6 +1499,7 @@ async function enviarImportacaoRastreio() {
             "🟢 Rastreio importado: " + enviadas.toLocaleString("pt-BR") + " linhas."
         );
 
+        await salvarValoresTotalPlanilha();
         cancelarImportacaoRastreio(false);
         await carregarRastreios();
     } catch (erro) {

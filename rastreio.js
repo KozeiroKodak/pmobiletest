@@ -44,7 +44,7 @@ async function carregarRastreios() {
             });
             if (resposta.error) throw resposta.error;
             const pagina = Array.isArray(resposta.data) ? resposta.data : [];
-            registros.push(...pagina);
+            registros.push(...pagina.filter(item => !/^TOTAL(?:\s*GERAL)?$/i.test(String(item.transportadora || "").trim()) && !/^TOTAL(?:\s*GERAL)?$/i.test(String(item.cliente || "").trim())));
             if (status) status.textContent = "Carregando rastreios: " + registros.length.toLocaleString("pt-BR") + "...";
             if (pagina.length < tamanhoPagina) break;
         }
