@@ -45,7 +45,7 @@ async function carregarValoresMensais(cards,sessao) {
    const percentual=document.createElement("div");percentual.style.cssText="background:#151515;border:1px solid #303030;border-radius:10px;padding:14px";const pctTitulo=document.createElement("div");pctTitulo.textContent="% Final";pctTitulo.style.cssText="color:#aaa;font-size:12px;margin-bottom:8px";const pctValor=document.createElement("strong");pctValor.style.fontSize="19px";pctValor.textContent=m.percentual_final==null?"—":(Number(m.percentual_final)*100).toLocaleString("pt-BR",{maximumFractionDigits:2})+"%";percentual.append(pctTitulo,pctValor);grade.append(percentual);
    detalhe.append(cabecalho,grade);
    if(m.custo_nunes==null||m.custo_final==null||m.percentual_final==null){const nota=document.createElement("p");nota.textContent="Alguns valores ainda não estão disponíveis na planilha sincronizada.";nota.style.cssText="color:#999;font-size:12px;margin:14px 0 0";detalhe.append(nota);}
-ecao.append(detalhe);
+   secao.append(detalhe);
   }
  }catch(e){const aviso=document.createElement("p");aviso.textContent="Não foi possível carregar os meses: "+(e.message||e);aviso.style.color="#f88";secao.append(aviso);}
 }
