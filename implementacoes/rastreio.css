@@ -1,5 +1,7 @@
 /* PMOBILE — Rastreio */
 
+.rastreio-card { --rastreio-atrasado: #e6a23c; --rastreio-cancelado: #e05d5d; --rastreio-transporte: #5ea7ff; }
+
 /* ============================================================
    LISTAGEM E FILTROS
    ============================================================ */
@@ -84,15 +86,15 @@
 }
 
 .rastreio-card[data-status="ATRASADO"] {
-    border-left: 3px solid #e6a23c;
+    border-left: 3px solid var(--rastreio-atrasado);
 }
 
 .rastreio-card[data-status="CANCELADO"] {
-    border-left: 3px solid #e05d5d;
+    border-left: 3px solid var(--rastreio-cancelado);
 }
 
 .rastreio-card[data-status="EM_TRANSPORTE"] {
-    border-left: 3px solid #5ea7ff;
+    border-left: 3px solid var(--rastreio-transporte);
 }
 
 .rastreio-card-topo {
@@ -131,12 +133,12 @@
 }
 
 .rastreio-card[data-status="ENTREGUE"] .rastreio-etiqueta { color: var(--verde); }
-.rastreio-card[data-status="ATRASADO"] .rastreio-etiqueta { color: #e6a23c; }
-.rastreio-card[data-status="CANCELADO"] .rastreio-etiqueta { color: #e05d5d; }
-.rastreio-card[data-status="EM_TRANSPORTE"] .rastreio-etiqueta { color: #5ea7ff; }
+.rastreio-card[data-status="ATRASADO"] .rastreio-etiqueta { color: var(--rastreio-atrasado); }
+.rastreio-card[data-status="CANCELADO"] .rastreio-etiqueta { color: var(--rastreio-cancelado); }
+.rastreio-card[data-status="EM_TRANSPORTE"] .rastreio-etiqueta { color: var(--rastreio-transporte); }
 
 .rastreio-nfs {
-    margin-top: 10px;
+    margin-top: 0;
     color: var(--texto);
     font-size: 13px;
     font-weight: 600;
@@ -303,24 +305,47 @@
 @media (prefers-reduced-motion: reduce) {
     .rastreio-filtros input,
     .rastreio-filtros select,
-    .rastreio-card {
+    .rastreio-card,
+    .rastreio-nfs-detalhes,
+    .rastreio-detalhes-modal,
+    .rastreio-detalhes-caixa {
         transition: none;
     }
 }
 
-@media (min-width:701px) and (max-width:1024px){.rastreio-grade{grid-template-columns:repeat(2,minmax(0,1fr))}.rastreio-grade span:nth-child(3n+1){padding-left:0}.rastreio-grade span:not(:nth-child(3n+1)){padding-left:12px}.rastreio-grade span:nth-child(2n+1){padding-left:0;border-left:0}.rastreio-grade span:nth-child(n+3){border-top:1px solid var(--borda)}}
 
 
 /* Detalhes financeiros da NF */
 .rastreio-nfs-detalhes {
     width: 100%;
+    min-height: 0;
+    margin-top: 10px;
+    padding: 2px 0;
     border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--texto);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.4;
     text-align: left;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
+    box-shadow: none;
+    transition: color .16s ease, background-color .16s ease;
+}
+.rastreio-nfs-detalhes:hover {
+    background: transparent;
+    color: var(--texto);
+}
+.rastreio-nfs-detalhes:focus-visible {
+    outline: 2px solid var(--verde);
+    outline-offset: 4px;
+    border-radius: 4px;
 }
 .rastreio-nfs-detalhes small {
     opacity: .7;
@@ -330,14 +355,20 @@
     position: fixed;
     inset: 0;
     z-index: 1200;
-    display: none;
+    display: flex;
     align-items: center;
     justify-content: center;
     padding: 18px;
     background: rgba(0,0,0,.48);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .18s ease, visibility .18s ease;
 }
 .rastreio-detalhes-modal.aberto {
-    display: flex;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
 }
 .rastreio-detalhes-caixa {
     width: min(520px, 100%);
@@ -345,8 +376,13 @@
     overflow: auto;
     border-radius: 18px;
     padding: 20px;
-    background: var(--cor-superficie, #fff);
+    background: var(--fundo-painel);
     box-shadow: 0 20px 60px rgba(0,0,0,.22);
+    transform: translateY(8px) scale(.98);
+    transition: transform .18s ease;
+}
+.rastreio-detalhes-modal.aberto .rastreio-detalhes-caixa {
+    transform: translateY(0) scale(1);
 }
 .rastreio-detalhes-cabecalho {
     display: flex;
@@ -361,10 +397,12 @@
 }
 .rastreio-detalhes-cabecalho h2 {
     margin: 3px 0 0;
+    color: var(--texto);
 }
 .rastreio-detalhes-fechar {
     border: 0;
     background: transparent;
+    color: var(--texto-secundario);
     font-size: 1.7rem;
     line-height: 1;
     cursor: pointer;
@@ -389,7 +427,28 @@
     font-size: 1.05rem;
 }
 @media (max-width: 560px) {
+    .rastreio-detalhes-modal { padding: 10px; }
+    .rastreio-detalhes-caixa { max-height: calc(100vh - 20px); padding: 16px; border-radius: 15px; }
     .rastreio-detalhes-grade {
         grid-template-columns: 1fr;
     }
+}
+
+
+/* ============================================================
+   AUDITORIA VISUAL 2 — RASTREIO
+   ============================================================ */
+@media (max-width: 380px) {
+    .rastreio-card { padding: 11px; }
+    .rastreio-card-topo strong { font-size: 13px; }
+    .rastreio-etiqueta { font-size: 8px; padding: 4px 7px; }
+    .rastreio-grade span,
+    .rastreio-grade span:not(:nth-child(3n + 1)),
+    .rastreio-grade span:nth-child(2n + 1) {
+        grid-template-columns: 76px minmax(0, 1fr);
+        gap: 6px;
+    }
+    .rastreio-detalhes-cabecalho { gap: 10px; }
+    .rastreio-detalhes-cabecalho h2 { font-size: 18px; }
+    .rastreio-detalhes-fechar { flex: 0 0 auto; padding: 4px; }
 }

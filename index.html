@@ -478,46 +478,96 @@
                         <h2>Importação manual</h2>
                         <p>Use a planilha operacional. Cada linha vira um rastreio independente.</p>
                     </div>
-                    <input
-                        type="file"
-                        id="arquivoRastreio"
-                        accept=".xlsx,.xls,.xlsm,.csv"
-                        hidden
-                        onchange="prepararImportacaoRastreio()"
-                    >
-                    <button type="button" class="botao-principal" onclick="abrirArquivoRastreio()">
-                        Importar planilha
-                    </button>
+                    <input type="file" id="arquivoRastreio" accept=".xlsx,.xls,.xlsm,.csv" hidden onchange="prepararImportacaoRastreio()">
+                    <button type="button" class="botao-principal" onclick="abrirArquivoRastreio()">Importar planilha</button>
                 </div>
-                <div class="rastreio-importacao-divisor"><span>ou</span></div>
 
-                <div class="rastreio-importacao-online">
-                    <label for="linkImportacaoRastreio">Planilha compartilhada online</label>
-                    <div class="rastreio-importacao-online-linha">
-                        <input type="url" id="linkImportacaoRastreio" placeholder="Insira o link aqui" autocomplete="off" inputmode="url"
-                            onkeydown="if (event.key === 'Enter') { event.preventDefault(); prepararImportacaoRastreioOnline(); }">
-                        <button type="button" class="botao-aba" onclick="prepararImportacaoRastreioOnline()">Ler link</button>
+                <div class="rastreio-onedrive-sync">
+                    <div class="rastreio-onedrive-sync-cabecalho">
+                        <div>
+                            <h3>Sincronização automática — OneDrive</h3>
+                            <p>Deixe o arquivo Excel (.xlsx ou .xlsm) aberto no PC com salvamento automático. O PMColetas verifica a planilha periodicamente. Com a sincronização de alterações ativada, novos lançamentos, alterações de campos e remoções são refletidos automaticamente.</p>
+                        </div>
+                        <span id="indicadorOneDriveRastreio" class="rastreio-onedrive-indicador">○ Sincronização parada</span>
                     </div>
-                    <small>Use um link público com permissão para visualizar ou baixar a planilha. Links do Google Sheets são convertidos automaticamente.</small>
-                </div>
 
+                    <div class="rastreio-admin-only">
+                        <div class="rastreio-onedrive-sync-controles">
+                            <input
+                                type="url"
+                                id="linkOneDriveRastreio"
+                                placeholder="Cole aqui o link compartilhado do arquivo Excel (.xlsx/.xlsm) do OneDrive"
+                                autocomplete="off"
+                                inputmode="url"
+                            >
+                            <select id="intervaloOneDriveRastreio" aria-label="Intervalo de sincronização" onchange="salvarPreferenciasOneDriveRastreio()">
+                                <option value="10">A cada 10 segundos</option>
+                                <option value="15" selected>A cada 15 segundos</option>
+                                <option value="30">A cada 30 segundos</option>
+                                <option value="60">A cada 1 minuto</option>
+                                <option value="120">A cada 2 minutos</option>
+                            </select>
+                        </div>
+
+                        <div class="rastreio-onedrive-opcoes">
+                            <label>
+                                <input type="checkbox" id="manterLinkOneDriveRastreio" onchange="salvarPreferenciasOneDriveRastreio()">
+                                <span>Manter link mesmo após fechar</span>
+                            </label>
+                            <label>
+                                <input type="checkbox" id="sincronizarAlteracoesOneDriveRastreio" checked onchange="salvarPreferenciasOneDriveRastreio()">
+                                <span>Permitir alterações da planilha em tempo real</span>
+                            </label>
+                        </div>
+
+                        <div class="rastreio-onedrive-sync-acoes">
+                            <button type="button" class="botao-principal" onclick="iniciarSincronizacaoOneDriveRastreio()">Ativar sincronização</button>
+                            <button type="button" class="botao-secundario" onclick="sincronizarOneDriveRastreio(true)">Sincronizar agora</button>
+                            <button type="button" class="botao-secundario" onclick="pararSincronizacaoOneDriveRastreio()">Parar</button>
+                            <button type="button" class="botao-secundario" onclick="limparLinhaBaseOneDriveRastreio()">Recriar linha de base</button>
+                            <button type="button" class="botao-secundario botao-perigo" onclick="limparTodosDadosRastreio()">Limpar todos os dados</button>
+                        </div>
+
+                        <div id="statusOneDriveRastreio" class="rastreio-onedrive-status" aria-live="polite"></div>
+                    </div>
+
+                    <div class="rastreio-onedrive-aviso">
+                        <strong>Como usar:</strong>
+                        Cole o link da planilha, ative a sincronização e, se quiser manter o vínculo após fechar o app, marque a opção correspondente. A planilha passa a ser a fonte de verdade: novas linhas, alterações e remoções são sincronizadas automaticamente. Para trocar completamente de planilha, use "Limpar todos os dados" antes da nova fonte.
+                    </div>
+                </div>
                 <label class="rastreio-importacao-sem-motorista">
-                    <input type="checkbox" id="rastreioImportarSemMotorista"
-                        onchange="alternarImportacaoSemMotoristaRastreio(this)">
+                    <input
+                        type="checkbox"
+                        id="rastreioImportarSemMotorista"
+                        onchange="alternarImportacaoSemMotoristaRastreio(this)"
+                    >
                     <span>
                         <strong>Importar sem selecionar motorista</strong>
                         <small>Não será necessário definir motorista por Nota Fiscal.</small>
                     </span>
                 </label>
+
                 <div id="rastreioMapaMotoristas"></div>
                 <div id="rastreioImportacaoPrevia"></div>
                 <div id="statusImportacaoRastreio" class="rastreio-importacao-status" aria-live="polite"></div>
+                <div id="rastreioImportacaoProgresso" class="rastreio-importacao-progresso" hidden aria-live="polite">
+                    <div class="rastreio-importacao-progresso-cabecalho">
+                        <strong id="rastreioImportacaoEtapa">Aguardando processamento</strong>
+                        <span id="rastreioImportacaoPercentual">0%</span>
+                    </div>
+                    <div class="rastreio-importacao-progresso-trilho" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                        <span id="rastreioImportacaoProgressoBarra"></span>
+                    </div>
+                    <div id="rastreioImportacaoDetalhe" class="rastreio-importacao-progresso-detalhe">Aguardando início...</div>
+                    <div id="rastreioImportacaoLog" class="rastreio-importacao-progresso-log"></div>
+                </div>
             </div>
 
             <div class="painel rastreio-painel">
                 <div class="rastreio-filtros">
                     <input type="search" id="buscaRastreio" placeholder="Cliente, NF, motorista..." oninput="filtrarRastreios()">
-                    <select id="filtroStatusRastreio" onchange="filtrarRastreios()" aria-hidden="true" tabindex="-1">
+                    <select id="filtroStatusRastreio" onchange="filtrarRastreios()">
                         <option value="">Todos os status</option>
                         <option value="PENDENTE">Pendente</option>
                         <option value="EM_TRANSPORTE">Em transporte</option>
@@ -525,7 +575,6 @@
                         <option value="ATRASADO">Atrasado</option>
                         <option value="CANCELADO">Cancelado</option>
                     </select>
-                    <button type="button" id="botaoFiltroStatusRastreio" class="popup-escolha-trigger" onclick="abrirPopupStatusRastreio()" aria-haspopup="dialog" aria-expanded="false">Todos os status</button>
                 </div>
                 <div id="statusRastreio" class="rastreio-status" aria-live="polite"></div>
                 <div id="listaRastreios" class="rastreio-lista"></div>
