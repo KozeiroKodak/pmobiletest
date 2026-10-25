@@ -343,9 +343,36 @@
              ================================================= -->
 
 
-        <section id="valoresTotal" class="tela-sistema" style="display:none">
-          <div class="cabecalho-pagina"><p class="cabecalho-caminho">PMOBILE / Valores total</p><h1>Valores total</h1><p>Resumo financeiro da última linha Total da planilha online.</p></div>
-          <div class="painel"><div id="valoresTotalStatus" style="color:#aaa;margin-bottom:18px">Consultando valores...</div><div id="valoresTotalCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px"></div><button type="button" class="botao-aba" style="margin-top:18px" onclick="carregarValoresTotal()">↻ Atualizar valores</button></div>
+        <style>
+#valoresTotal .valores-hero{position:relative;overflow:hidden;border:1px solid #315e50;border-radius:20px;padding:25px 22px;background:radial-gradient(circle at 90% 0%,rgba(49,201,144,.22),transparent 48%),linear-gradient(135deg,#152b26,#121716 70%);margin-bottom:20px}
+#valoresTotal .valores-hero:after{content:"";position:absolute;width:190px;height:190px;border:1px solid rgba(68,219,159,.17);border-radius:50%;right:-65px;top:-85px;pointer-events:none}
+#valoresTotal .valores-eyebrow{color:#8be3bb;font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase}
+#valoresTotal .valores-hero h1{font-size:clamp(27px,5vw,38px);margin:9px 0 8px;letter-spacing:-1px}
+#valoresTotal .valores-hero p{color:#aec3b8;margin:0;font-size:14px;max-width:460px;line-height:1.6}
+#valoresTotal .valores-painel{background:linear-gradient(180deg,#191d1b,#151515);border:1px solid #2c3731;border-radius:20px;padding:clamp(15px,3vw,26px)}
+#valoresTotal #valoresTotalStatus{display:flex;align-items:center;gap:9px;flex-wrap:wrap;color:#a5b8ad!important;font-size:12px;padding:0 0 16px;border-bottom:1px solid #2a342e;margin-bottom:20px!important}
+#valoresTotal #valoresTotalStatus:before{content:"";width:8px;height:8px;background:#37d79a;border-radius:50%;box-shadow:0 0 0 4px rgba(55,215,154,.1)}
+#valoresTotal #valoresTotalCards{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important}
+#valoresTotal .valores-kpi{position:relative;overflow:hidden;min-width:0;min-height:105px;background:#1b211e;border:1px solid #35413a;border-radius:16px;padding:17px}
+#valoresTotal .valores-kpi:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--kpi-accent,#64796e)}
+#valoresTotal .valores-kpi-label{font-size:12px;color:#a7b8ae;line-height:1.45;margin-bottom:12px}
+#valoresTotal .valores-kpi strong{font-size:clamp(17px,3vw,25px);letter-spacing:-.5px;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+#valoresTotal .valores-kpi.destaque{background:linear-gradient(140deg,#193d31,#1b2722);border-color:#368965}
+#valoresTotal .valores-kpi.destaque strong{color:#81f1b8}
+#valoresTotal .valores-kpi.percentual strong{color:#91d5ff}
+#valoresTotal #valoresTotalMensais{border-top:1px solid #303b34;padding-top:24px}
+#valoresTotal #valoresTotalMensais>h3{font-size:12px!important;letter-spacing:1.8px;text-transform:uppercase;color:#91b9a4;margin-bottom:14px!important}
+#valoresTotal #valoresTotalMensais button{flex:1;min-width:90px;font-weight:700;transition:background .15s,border-color .15s}
+#valoresTotal #valoresTotalMensais details{transition:border-color .15s}
+#valoresTotal #valoresTotalMensais details[open]{border-color:#4a8067!important}
+#valoresTotal #valoresTotalMensais summary{line-height:1.5}
+#valoresTotal .valores-atualizar{margin-top:20px!important;border:1px solid #376b52!important;border-radius:12px!important;color:#b8f6d2!important;background:#20392d!important;padding:11px 16px!important}
+@media(min-width:700px){#valoresTotal #valoresTotalCards{grid-template-columns:repeat(3,minmax(0,1fr))!important}#valoresTotal .valores-kpi{min-height:130px}}
+@media(max-width:380px){#valoresTotal .valores-kpi{padding:12px}#valoresTotal .valores-kpi strong{font-size:16px}}
+</style>
+<section id="valoresTotal" class="tela-sistema" style="display:none">
+          <div class="valores-hero"><div class="valores-eyebrow">PMOBILE · Inteligência financeira</div><h1>Visão financeira</h1><p>Seus números em um só lugar. Totais consolidados e análises por período e transportadora.</p></div>
+          <div class="painel valores-painel"><div id="valoresTotalStatus" style="color:#aaa;margin-bottom:18px">Consultando valores...</div><div id="valoresTotalCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px"></div><button type="button" class="botao-aba" style="margin-top:18px" onclick="carregarValoresTotal()" class="valores-atualizar">↻ Atualizar valores</button></div>
         </section>
         <section id="rastreio" class="tela-sistema" style="display: none;">
             <div class="cabecalho-pagina">
