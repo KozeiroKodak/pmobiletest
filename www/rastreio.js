@@ -97,9 +97,10 @@ function renderizarRastreio(item) {
     const previsao = item.previsao_entrega ? new Date(item.previsao_entrega).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"}) : "-";
     return '<article class="rastreio-card" data-status="' + status + '">' +
         '<div class="rastreio-card-topo"><strong>' + escaparHtmlRastreio(item.cliente) + '</strong><span class="rastreio-etiqueta">' + escaparHtmlRastreio(status.replaceAll("_"," ")) + '</span></div>' +
-        '<button type="button" class="rastreio-nfs rastreio-nfs-detalhes" onclick="abrirDetalhesRastreio(\'' + escaparAtributoRastreio(item.id) + '\')" aria-haspopup="dialog">' +
-            '<span>NF: ' + escaparHtmlRastreio(item.notas_fiscais) + '</span><small>Ver detalhes</small>' +
-        '</button>' +
+        '<div class="rastreio-nfs" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">' +
+            '<span>NF: ' + escaparHtmlRastreio(item.notas_fiscais) + '</span>' +
+            '<span style="font-size:14px;color:#ddd">Valor da nota: <strong>' + escaparHtmlRastreio(formatarMoedaRastreioSeguro(item.valor_nf)) + '</strong></span>' +
+        '</div>' +
         '<div class="rastreio-motorista" style="padding:10px 0;border-bottom:1px solid #303030;color:#ddd"><small style="color:#999;margin-right:10px">Motorista</small><strong>' + escaparHtmlRastreio(item.motorista || "Não informado") + '</strong></div>' +
         '<div class="rastreio-grade" style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:14px">' +
           '<span><small>Destino</small>' + escaparHtmlRastreio(item.regiao || "—") + '</span>' +
