@@ -65,6 +65,17 @@ async function prepararImportacaoRastreio(arquivoExterno = null) {
         // a thread principal deixa de ser proprietária do buffer, evitando
         // manter uma segunda cópia enquanto o SheetJS processa a planilha.
         const buffer = await arquivo.arrayBuffer();
+        // Links de compartilhamento do OneDrive podem devolver uma página de
+        // login/visualização HTML em vez dos bytes do Excel.
+        const cabecalho = new Uint8Array(buffer, 0, Math.min(buffer.byteLength, 512));
+        const assinaturaZip = cabecalho.length >= 4 && cabecalho[0] === 0x50 && cabecalho[1] === 0x4b &&
+            ((cabecalho[2] === 0x03 && cabecalho[3] === 0x04) || (cabecalho[2] === 0x05 && cabecalho[3] === 0x06));
+        const assinaturaOle = cabecalho.length >= 8 && [0xd0,0xcf,0x11,0xe0,0xa1,0xb1,0x1a,0xe1].every((v,i) => cabecalho[i] === v);
+        const inicioTexto = new TextDecoder("utf-8").decode(cabecalho).replace(/^\\uFEFF/, "").trimStart().toLowerCase();
+        if (!assinaturaZip && !assinaturaOle && (/^(<!doctype\\s+html|<html|<head|<body|<table|<script)/.test(inicioTexto) || /<html[\\s>]/.test(inicioTexto.slice(0, 300)))) {
+            throw new Error("O OneDrive devolveu uma página HTML, não o arquivo Excel. Verifique se o link permite baixar o arquivo diretamente.");
+        }
+        if (!buffer.byteLength) throw new Error("O arquivo recebido está vazio.");
         const worker = new Worker("./rastreioimportacao.worker.js");
 
         const resultado = await new Promise((resolve, reject) => {
