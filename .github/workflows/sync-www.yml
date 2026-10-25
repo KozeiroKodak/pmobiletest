@@ -1,14 +1,6 @@
 name: Sync PMobile APK fallback /www
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "*.html"
-      - "*.css"
-      - "*.js"
-      - "implementacoes/**/*.css"
-      - ".github/workflows/sync-www.yml"
   workflow_dispatch:
 
 permissions:
