@@ -83,14 +83,14 @@ public class MainActivity extends BridgeActivity {
 
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
         otaForegroundHandler.removeCallbacks(otaForegroundCheck);
         otaForegroundHandler.postDelayed(otaForegroundCheck, 1500L);
     }
 
     @Override
-    protected void onPause() {
+    public void onPause() {
         otaForegroundHandler.removeCallbacks(otaForegroundCheck);
         super.onPause();
     }
