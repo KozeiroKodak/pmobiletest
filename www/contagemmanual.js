@@ -687,6 +687,28 @@ async function exibirContagensManuais() {
     if (!area) return;
 
     const lista = await lerContagensManuais();
+    // O ERP é confirmado na aba Locais; consultar o servidor para refletir
+    // a confirmação no histórico local sem inventar um status offline.
+    let statusERP = new Map();
+    let statusERPDisponivel = false;
+    if (navigator.onLine && typeof obterClienteSupabase === "function") {
+        try {
+            const usuario = window.usuarioPmobileAtual?.usuario;
+            const credencial = window.credencialPmobileAtual;
+            if (usuario && credencial) {
+                const { data, error } = await obterClienteSupabase().rpc("pmobile_contagens_manuais_listar", {
+                    p_usuario: usuario, p_credencial: credencial, p_somente_alterados: true
+                });
+                if (error) throw error;
+                statusERP = new Map((Array.isArray(data) ? data : []).map(item =>
+                    [String(item.id).toLowerCase(), item.alteracao_status === "CONFIRMADO" ? "ERP - OK" : "EM ANÁLISE"]
+                ));
+                statusERPDisponivel = true;
+            }
+        } catch (erro) {
+            console.warn("Status ERP indisponível para contagem manual:", erro);
+        }
+    }
     area.innerHTML = "";
 
     if (!lista.length) {
@@ -726,6 +748,15 @@ async function exibirContagensManuais() {
         flags.textContent = (registro.localAlterado ? "LOCAL ALTERADO" : "LOCAL MANTIDO") +
             (registro.zerado ? " • ITEM ZERADO" : "");
         bloco.appendChild(flags);
+
+        if (registro.localAlterado) {
+            const erp = document.createElement("span");
+            const situacao = statusERP.get(String(registro.id).toLowerCase()) ||
+                (statusERPDisponivel && registro.sincronizado ? "EM ANÁLISE" : "STATUS ERP INDISPONÍVEL");
+            erp.className = "contagem-erp-tag " + (situacao === "ERP - OK" ? "erp-ok" : situacao === "EM ANÁLISE" ? "erp-analise" : "erp-indisponivel");
+            erp.textContent = situacao;
+            bloco.appendChild(erp);
+        }
 
         area.appendChild(bloco);
     });
