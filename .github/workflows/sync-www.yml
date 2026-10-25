@@ -1,0 +1,78 @@
+name: Sync PMobile APK fallback /www
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "*.html"
+      - "*.css"
+      - "*.js"
+      - "implementacoes/**/*.css"
+      - ".github/workflows/sync-www.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: pmobile-sync-www
+  cancel-in-progress: false
+
+jobs:
+  sync-www:
+    if: github.actor != 'github-actions[bot]' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Copy MAIN web sources into APK fallback
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p www
+          # Only replace web assets; keep other APK assets intact.
+          find www -type f \( -name '*.html' -o -name '*.css' -o -name '*.js' \) -delete
+          while IFS= read -r -d '' file; do
+            case "$file" in
+              *.html|*.css|*.js) ;;
+              *) continue ;;
+            esac
+            case "$file" in
+              www/*|android/*|.github/*|ota/*|build/*|node_modules/*|gradle/*) continue ;;
+            esac
+            mkdir -p "www/$(dirname "$file")"
+            cp "$file" "www/$file"
+          done < <(git ls-files -z)
+          test -s www/index.html
+          test -s www/rastreioimportacao.js
+          cmp index.html www/index.html
+          cmp rastreioimportacao.js www/rastreioimportacao.js
+          echo 'Fallback /www synchronized from MAIN'
+      - name: Commit synchronized fallback
+        id: commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A www
+          if git diff --cached --quiet; then
+            echo 'No /www changes'
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git commit -m "build: sincroniza /www com arquivos web da MAIN"
+          git pull --rebase origin main
+          git push origin HEAD:main
+          echo 'changed=true' >> "$GITHUB_OUTPUT"
+      - name: Publish OTA from MAIN web sources
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run ota-publish.yml --ref main
+      - name: Build APK from synchronized /www
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run android-build.yml --ref main
