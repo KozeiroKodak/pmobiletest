@@ -1,4 +1,11 @@
 // Resumo financeiro independente do Rastreio, persistido no Supabase.
+// Faixas de custo percentual: até 4% verde, acima de 4% amarelo, acima de 4,5% vermelho.
+function corFaixaPercentual(valor) {
+ const n=Number(valor);
+ if(valor==null||!Number.isFinite(n)||n<0||n>1)return null;
+ return n>0.045?"#ef6666":n>0.04?"#f0c35a":"#48df9b";
+}
+
 function abrirValoresTotal() { mostrarTelaSistema("valoresTotal","menuValoresTotal"); carregarValoresTotal(); }
 async function carregarValoresTotal() {
  const status=document.getElementById("valoresTotalStatus"), cards=document.getElementById("valoresTotalCards"); if(!cards)return;
@@ -6,7 +13,7 @@ async function carregarValoresTotal() {
  const v=Array.isArray(r.data)?r.data[0]:r.data;if(!v){status.textContent="Aguardando a próxima importação ou sincronização da planilha.";cards.replaceChildren();return;}
  const moeda=n=>n==null?"—":Number(n).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
  const campos=[["Total das notas fiscais",moeda(v.valor_notas)],["Fretes embutidos (cliente paga)",moeda(v.fretes_embutidos)],["Total dos fretes",moeda(v.total_fretes)],["Custo do frete Nunes",moeda(v.custo_nunes)],["Custo final",moeda(v.custo_final)],["% Final",v.percentual_final==null||!Number.isFinite(Number(v.percentual_final))||Math.abs(Number(v.percentual_final))>1?"—":(Number(v.percentual_final)*100).toLocaleString("pt-BR",{maximumFractionDigits:2})+"%"]];
- cards.replaceChildren();for(const [titulo,valor] of campos){const card=document.createElement("div");card.className="valores-kpi"+(titulo==="Custo final"?" destaque":titulo==="% Final"?" percentual":"");card.style.setProperty("--kpi-accent",titulo==="Custo final"?"#48df9b":titulo==="% Final"?"#73c9f5":"#526f60");const label=document.createElement("div");label.className="valores-kpi-label";label.textContent=titulo;const numero=document.createElement("strong");numero.textContent=valor;card.append(label,numero);cards.append(card);}
+ cards.replaceChildren();for(const [titulo,valor] of campos){const card=document.createElement("div");card.className="valores-kpi"+(titulo==="Custo final"?" destaque":titulo==="% Final"?" percentual":"");card.style.setProperty("--kpi-accent",titulo==="% Final"?(corFaixaPercentual(v.percentual_final)||"#526f60"):titulo==="Custo final"?"#48df9b":"#526f60");const label=document.createElement("div");label.className="valores-kpi-label";label.textContent=titulo;const numero=document.createElement("strong");numero.textContent=valor;card.append(label,numero);cards.append(card);}
  status.textContent="Fonte: "+(v.origem||"planilha")+" · Atualizado em "+new Date(v.atualizado_em).toLocaleString("pt-BR");
  await carregarValoresMensais(cards,sessao);
  }catch(e){status.textContent="Não foi possível carregar os valores: "+(e.message||e);}
@@ -35,7 +42,7 @@ async function carregarValoresMensais(cards,sessao) {
  const cabecalho=(rotulo)=>{const h=document.createElement("h4");h.textContent=rotulo;h.style.cssText="font-size:18px;margin:12px 0";conteudo.append(h);};
  const cartao=(v)=>{const grade=document.createElement("div");grade.style.cssText="display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:12px;margin:12px 0 20px";
   const campos=[["Total das notas fiscais",moeda(v.valor_notas)],["Fretes embutidos (cliente paga)",moeda(v.fretes_embutidos)],["Total dos fretes",moeda(v.total_fretes)],["Custo do frete Nunes",moeda(v.custo_nunes)],["Custo final",moeda(v.custo_final)],["% Final",percent(v.percentual_final)]];
-  for(const [nome,valor] of campos){const item=document.createElement("div");item.style.cssText="background:#1b1b1b;border:1px solid #333;border-radius:12px;padding:16px";const label=document.createElement("div");label.textContent=nome;label.style.cssText="color:#aaa;font-size:12px;margin-bottom:9px";const num=document.createElement("strong");num.textContent=valor;num.style.cssText="font-size:19px;overflow-wrap:anywhere";item.append(label,num);grade.append(item);}
+  for(const [nome,valor] of campos){const item=document.createElement("div");item.style.cssText="background:#1b1b1b;border:1px solid #333;border-radius:12px;padding:16px";if(nome==="% Final"){const cor=corFaixaPercentual(v.percentual_final);if(cor){item.style.borderColor=cor;item.style.background=cor==="#48df9b"?"#14271f":cor==="#f0c35a"?"#2b2516":"#2d191b";}}const label=document.createElement("div");label.textContent=nome;label.style.cssText="color:#aaa;font-size:12px;margin-bottom:9px";const num=document.createElement("strong");num.textContent=valor;num.style.cssText="font-size:19px;overflow-wrap:anywhere";if(nome==="% Final"){const cor=corFaixaPercentual(v.percentual_final);if(cor)num.style.color=cor;}item.append(label,num);grade.append(item);}
   conteudo.append(grade);
   if([v.valor_notas,v.fretes_embutidos,v.total_fretes,v.custo_nunes,v.custo_final].some(x=>x==null)){const aviso=document.createElement("p");aviso.textContent="Alguns valores não estão preenchidos na planilha sincronizada.";aviso.style.cssText="color:#aaa;font-size:12px";conteudo.append(aviso);}
  };
