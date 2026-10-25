@@ -136,7 +136,6 @@ const itensMenuSistema = [
 
     "menuImportacao",
 
-    "menuImportacaoNF",
 
     "menuRastreio",
     "menuValoresTotal",
@@ -1850,7 +1849,6 @@ function atualizarVisibilidadeConfiguracoes() {
         menuSair: !!usuario,
         menuConfiguracoes: isAdmin,
         menuImportacao: isAdmin,
-        menuImportacaoNF: isAdmin,
         menuRastreio: isAdmin || isNivel2,
         menuValoresTotal: isAdmin,
         menuConferencia: isAdmin,
