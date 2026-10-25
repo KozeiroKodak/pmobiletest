@@ -694,7 +694,14 @@ async function exibirContagensManuais() {
         return;
     }
 
-    lista.slice(0, 100).forEach(registro => {
+    // Mostrar sempre as contagens mais recentes primeiro, inclusive offline.
+    const listaOrdenada = [...lista].sort((a, b) => {
+        const dataA = new Date(a.dataHora || 0).getTime();
+        const dataB = new Date(b.dataHora || 0).getTime();
+        return (Number.isFinite(dataB) ? dataB : 0) - (Number.isFinite(dataA) ? dataA : 0);
+    });
+
+    listaOrdenada.slice(0, 100).forEach(registro => {
         const bloco = document.createElement("div");
         bloco.className = "registro-contagem-manual";
 
