@@ -23,9 +23,8 @@ permissions:
 
 concurrency:
   group: pmobile-ota-publish
-  # Se houver vários pushes seguidos, a execução antiga perde prioridade.
-  # A execução mais recente é a que deve gerar a OTA; isso evita fila desnecessária.
-  cancel-in-progress: true
+  # Evita cancelar releases publicadas antes de concluir o manifesto.
+  cancel-in-progress: false
 
 jobs:
   ota-gate:
