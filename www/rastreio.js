@@ -172,8 +172,8 @@ function abrirDetalhesRastreio(id) {
         '<div><small>Volume</small><strong>' + escaparHtmlRastreio(formatarValorRastreio(item.volume)) + '</strong></div>' +
         '<div><small>Peso</small><strong>' + escaparHtmlRastreio(formatarValorRastreio(item.peso)) + '</strong></div>' +
         '<div><small>Valor da nota</small><strong>' + escaparHtmlRastreio(formatarMoedaRastreio(item.valor_nf)) + '</strong></div>' +
-        '<div><small>Valor do frete embutido</small><strong>' + escaparHtmlRastreio(formatarMoedaRastreio(item.valor_frete_embutido)) + '</strong></div>' +
-        '<div><small>Valor do frete</small><strong>' + escaparHtmlRastreio(formatarMoedaRastreio(item.valor_frete)) + '</strong></div>';
+        '<div><small>Valor do frete embutido</small><strong>' + escaparHtmlRastreio(formatarMoedaRastreioSeguro(item.valor_frete_embutido)) + '</strong></div>' +
+        '<div><small>Valor do frete</small><strong>' + escaparHtmlRastreio(formatarMoedaRastreioSeguro(item.valor_frete)) + '</strong></div>';
 
     modal.classList.add("aberto");
     modal.setAttribute("aria-hidden", "false");
