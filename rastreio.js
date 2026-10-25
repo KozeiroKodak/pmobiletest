@@ -36,7 +36,7 @@ async function carregarRastreios() {
         const registros = [];
         const tamanhoPagina = 500;
         for (let deslocamento = 0; ; deslocamento += tamanhoPagina) {
-            const resposta = await window.clienteSupabase.rpc("pmobile_rastreio_listar_v2", {
+            const resposta = await window.clienteSupabase.rpc("pmobile_rastreio_listar_v3", {
                 p_usuario: sessao.usuario,
                 p_credencial: sessao.credencial,
                 p_limit: tamanhoPagina,
@@ -108,9 +108,11 @@ function renderizarRastreio(item) {
           campo("Peso", formatarQuantidadeRastreio(item.peso)) +
           campo("Frete embutido", formatarMoedaRastreioSeguro(item.valor_frete_embutido)) +
           campo("Valor do frete", formatarMoedaRastreioSeguro(item.valor_frete)) +
+          (status === 'ENTREGUE' && item.entregue_em ? campo('Entregue em', formatarDataHoraEntregaRastreio(item.entregue_em)) : '') +
         '</div></article>';
 }
 
+function formatarDataHoraEntregaRastreio(valor) { const d = new Date(valor); return Number.isNaN(d.getTime()) ? '—' : d.toLocaleString('pt-BR', {timeZone:'America/Sao_Paulo',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
 function formatarQuantidadeRastreio(v) { return v == null || v === "" ? "—" : Number(v).toLocaleString("pt-BR", {maximumFractionDigits:3}); }
 function formatarMoedaRastreioSeguro(v) { return v == null || v === "" ? "—" : formatarMoedaRastreio(v); }
 
