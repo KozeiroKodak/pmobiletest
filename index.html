@@ -936,18 +936,16 @@
 
 
             <div class="painel configuracoes-painel-sistema">
-                <h2>⚙️ Sistema</h2>
-                <p>Verifique manualmente se existe uma nova atualização do PMOBILE.</p>
+                <details class="configuracoes-accordion"><summary><span class="home-app-icone">⚙️</span><span class="home-app-conteudo"><strong>Sistema</strong><small>Atualizações do aplicativo</small></span><span class="home-app-seta">›</span></summary><div class="configuracoes-conteudo">
                 <div class="configuracoes-acoes">
                     <button class="botao-aba" type="button" onclick="procurarAtualizacoesOta()">🔄 Procurar atualizações</button>
                 </div>
+                </div></details>
             </div>
 
             <div class="painel configuracoes-painel-admin" id="painelConfiguracoesAdmin" style="display: none;">
 
-                <h2>👑 Administração</h2>
-
-                <p>Gerenciamento de usuários, tokens e solicitações.</p>
+                <details class="configuracoes-accordion"><summary><span class="home-app-icone">👑</span><span class="home-app-conteudo"><strong>Administração</strong><small>Usuários e ferramentas administrativas</small></span><span class="home-app-seta">›</span></summary><div class="configuracoes-conteudo">
 
                 <div class="configuracoes-acoes">
                     <button class="botao-aba" onclick="abrirGerenciamentoUsuarios()">👥 Usuários</button>
@@ -958,6 +956,7 @@
                     <button class="botao-aba" onclick="abrirDivergencias()">⚠️ Divergências</button>
                 </div>
 
+                </div></details>
             </div>
 
             <div class="painel painel-solicitacoes" id="painelGerenciamentoUsuarios" style="display: none;">
@@ -1041,9 +1040,9 @@
             </div>
 
             <div class="painel" id="painelConfiguracoesUsuario" style="display: none;">
-                <h2>👤 Conta</h2>
-                <p>Informações da conta atualmente conectada.</p>
+                <details class="configuracoes-accordion"><summary><span class="home-app-icone">👤</span><span class="home-app-conteudo"><strong>Conta</strong><small>Informações da sessão</small></span><span class="home-app-seta">›</span></summary><div class="configuracoes-conteudo">
                 <div id="resumoContaPmobile"></div>
+                </div></details>
             </div>
 
         </section>
