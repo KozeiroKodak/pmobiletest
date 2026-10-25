@@ -1,5 +1,6 @@
 // PMOBILE - Rastreio
 let rastreiosPmobile = [];
+let limiteExibicaoRastreios = 100;
 
 function obterSessaoRastreio() {
     if (!window.usuarioPmobileAtual || !window.credencialPmobileAtual) {
@@ -32,15 +33,24 @@ async function carregarRastreios() {
     lista.innerHTML = '<div class="rastreio-vazio">Carregando rastreios...</div>';
     try {
         const sessao = obterSessaoRastreio();
-        const resposta = await window.clienteSupabase.rpc("pmobile_rastreio_listar", {
-            p_usuario: sessao.usuario,
-            p_credencial: sessao.credencial,
-            p_limit: 500,
-            p_offset: 0
-        });
-        if (resposta.error) throw resposta.error;
-        rastreiosPmobile = Array.isArray(resposta.data) ? resposta.data : [];
-        if (status) status.textContent = rastreiosPmobile.length + " rastreio(s)";
+        const registros = [];
+        const tamanhoPagina = 500;
+        for (let deslocamento = 0; ; deslocamento += tamanhoPagina) {
+            const resposta = await window.clienteSupabase.rpc("pmobile_rastreio_listar", {
+                p_usuario: sessao.usuario,
+                p_credencial: sessao.credencial,
+                p_limit: tamanhoPagina,
+                p_offset: deslocamento
+            });
+            if (resposta.error) throw resposta.error;
+            const pagina = Array.isArray(resposta.data) ? resposta.data : [];
+            registros.push(...pagina);
+            if (status) status.textContent = "Carregando rastreios: " + registros.length.toLocaleString("pt-BR") + "...";
+            if (pagina.length < tamanhoPagina) break;
+        }
+        rastreiosPmobile = registros;
+        limiteExibicaoRastreios = 100;
+        if (status) status.textContent = rastreiosPmobile.length.toLocaleString("pt-BR") + " rastreio(s)";
         filtrarRastreios();
     } catch (erro) {
         console.error("Erro ao carregar Rastreio:", erro);
@@ -69,7 +79,17 @@ function filtrarRastreios() {
         lista.innerHTML = '<div class="rastreio-vazio"><strong>Nenhum rastreio encontrado.</strong><span>Os registros importados aparecerão aqui.</span></div>';
         return;
     }
-    lista.innerHTML = itens.map(renderizarRastreio).join("");
+    const visiveis = itens.slice(0, limiteExibicaoRastreios);
+    lista.innerHTML = visiveis.map(renderizarRastreio).join("");
+    if (itens.length > visiveis.length) {
+        const botao = document.createElement("button");
+        botao.type = "button";
+        botao.className = "rastreio-carregar-mais";
+        botao.textContent = "Mostrar mais 100 (" + visiveis.length.toLocaleString("pt-BR") + " de " + itens.length.toLocaleString("pt-BR") + ")";
+        botao.style.cssText = "display:block;width:100%;padding:16px;margin:16px 0;background:#232323;color:#fff;border:1px solid #444;border-radius:12px;cursor:pointer";
+        botao.onclick = () => { limiteExibicaoRastreios += 100; filtrarRastreios(); };
+        lista.appendChild(botao);
+    }
 }
 
 function renderizarRastreio(item) {
