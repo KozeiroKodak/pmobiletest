@@ -55,8 +55,6 @@ const telasSistema = [
 
     "contagemManual",
 
-    "conferencia",
-
     "conferencias",
 
     "locais",
@@ -141,8 +139,6 @@ const itensMenuSistema = [
     "menuValoresTotal",
 
     "menuContagemManual",
-
-    "menuConferencia",
 
     "menuConferencias",
 
@@ -1564,37 +1560,6 @@ function abrirContagemManual() {
 // na sidebar.
 //
 // ============================================================
-
-function abrirConferencia() {
-
-    if (!window.usuarioPmobileAtual || window.usuarioPmobileAtual.nivel !== "ADMIN") {
-        alert("Acesso administrativo negado.");
-        return;
-    }
-
-    mostrarTelaSistema(
-        "conferencia",
-        "menuConferencia"
-    );
-
-}
-
-
-// ============================================================
-// VOLTAR DA CONFERÊNCIA
-// ============================================================
-
-function voltarMenuConferencia() {
-
-    mostrarTelaSistema(
-        "homeSistema",
-        null
-    );
-
-}
-
-
-// ============================================================
 // CONFERÊNCIAS REALIZADAS
 // ============================================================
 //
@@ -1851,7 +1816,7 @@ function atualizarVisibilidadeConfiguracoes() {
         menuImportacao: isAdmin,
         menuRastreio: isAdmin || isNivel2,
         menuValoresTotal: isAdmin,
-        menuConferencia: isAdmin,
+
         menuConferencias: isAdmin,
         menuReservas: isAdmin || isNivel2,
         menuPesquisa: isAdmin || isNivel2,
