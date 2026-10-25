@@ -16,9 +16,9 @@ async function snapshot(){
  let conferences=null;
  if(APP==="pmobile"&&typeof obterConferenciasPendentes==="function"){try{const a=await obterConferenciasPendentes();if(Array.isArray(a))conferences=a.length;}catch(e){}}
  const pending=(count||0)+(driver||0)+(conferences||0);
- let state=busy?"busy":!online?"offline":unknown||blocked||s.erro||lastError?"error":pending?"pending":s.aviso||s.inventario!==true||((APP!=="coletas")&&count===null)?"attention":"ok";
+ let state=busy?"busy":!online?"offline":unknown||blocked||s.erro||lastError?"error":pending?"pending":(APP!=="coletas"&&inventory===0)||((APP!=="coletas")&&count===null)?"attention":"ok";
  // Não declarar sucesso se os módulos críticos ainda não foram verificados.
- if(state==="ok"&&APP==="pmobile"&&conferences===null)state="attention";
+ 
  if(state==="ok"&&APP==="coletas"&&driver===null)state="attention";
  return {online,count,blocked,inventory,stamp,driver,unknown,conferences,pending,state};
 }
