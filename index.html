@@ -475,68 +475,27 @@
              ================================================= -->
 
         <section id="contagemManual" class="tela-sistema" style="display: none;">
-            <div class="cabecalho-pagina">
-                <p class="cabecalho-caminho">PMOBILE / Contagem manual</p>
-                <h1>Contagem manual</h1>
-                <p>Localize um material por código, referência ou descrição e registre o local encontrado e a quantidade física.</p>
-            </div>
-
-            <div class="painel">
-                <div class="linha-formulario linha-contagem-manual-busca">
-                    <div class="seletor-contagem-manual-wrapper">
-                        <select id="tipoBuscaContagemManual" class="seletor-contagem-manual-nativo" aria-hidden="true" tabindex="-1">
-                            <option value="codigo">CÓD</option>
-                            <option value="descricao">DESC</option>
-                            <option value="referencia">REF</option>
-                        </select>
-                        <button
-                            type="button"
-                            class="seletor-contagem-manual"
-                            id="botaoTipoBuscaContagemManual"
-                            onclick="alternarSeletorContagemManual()"
-                            aria-haspopup="listbox"
-                            aria-expanded="false"
-                        >CÓD</button>
-                        <div id="menuTipoBuscaContagemManual" class="menu-tipo-busca-contagem-manual" role="listbox">
-                            <button type="button" onclick="selecionarTipoBuscaContagemManual('codigo')">Código</button>
-                            <button type="button" onclick="selecionarTipoBuscaContagemManual('referencia')">Referência</button>
-                            <button type="button" onclick="selecionarTipoBuscaContagemManual('descricao')">Descrição</button>
-                        </div>
-                    </div>
-                    <input type="text" id="campoContagemManual" placeholder="Digite o código" autocomplete="off">
-                    <button class="botao-aba botao-buscar-contagem-manual" onclick="buscarMaterialContagemManual()">🔎 Buscar</button>
-                    <div class="acoes-contagem-manual-config">
-                        <button
-                            type="button"
-                            class="botao-aba botao-config-contagem-manual"
-                            onclick="alternarMenuConfiguracoesContagemManual()"
-                            aria-label="Configurações da contagem manual"
-                            title="Configurações"
-                        >⚙️</button>
-                        <div id="menuConfiguracoesContagemManual" class="menu-config-contagem-manual">
-                            <button type="button" onclick="limparContagensManuais()">🗑️ Limpar contagem manual</button>
-                        </div>
-                    </div>
-                </div>
-                <div id="resultadoBuscaContagemManual"></div>
-            </div>
-
-            <div class="painel" id="painelRegistroContagemManual" style="display: none;">
-                <h3>Registrar contagem</h3>
-                <div id="materialSelecionadoContagemManual"></div>
-                <div class="linha-formulario">
-                    <input type="text" id="localContagemManual" placeholder="Local encontrado" autocomplete="off">
-                    <input type="number" id="quantidadeContagemManual" placeholder="Quantidade física" min="0" step="1" inputmode="numeric">
-                    <button class="botao-aba" onclick="salvarContagemManual()">✓ Salvar contagem</button>
-                </div>
-                <div id="statusContagemManual"></div>
-            </div>
-
-            <div class="painel">
-                <h3>Contagens registradas neste dispositivo</h3>
-                <div id="listaContagensManuais"></div>
-            </div>
-        </section>
+ <div class="cabecalho-pagina"><p class="cabecalho-caminho">PMOBILE / Contagem manual</p><h1>Contagem manual</h1><p>Localize o material e registre o local encontrado e a quantidade física.</p></div>
+ <div class="painel contagem-v2">
+  <div class="contagem-v2-topo"><div class="contagem-v2-marca"><span class="contagem-v2-icone">▤</span><div><strong>PMobile</strong><small>Inventário / Contagem manual</small></div></div><span class="contagem-v2-selo">● Registro local</span></div>
+  <div class="contagem-v2-intro"><h2>Contagem manual</h2><p>Encontre um material para iniciar a contagem.</p></div>
+  <h3 class="contagem-v2-etapa">01 · Localizar material</h3>
+  <div class="linha-formulario linha-contagem-manual-busca">
+   <div class="contagem-v2-campo"><span aria-hidden="true">⌕</span><input type="text" id="campoContagemManual" placeholder="Digite o código" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();buscarMaterialContagemManual();}"></div>
+   <div class="seletor-contagem-manual-wrapper">
+    <select id="tipoBuscaContagemManual" class="seletor-contagem-manual-nativo" aria-hidden="true" tabindex="-1"><option value="codigo">CÓD</option><option value="descricao">DESC</option><option value="referencia">REF</option></select>
+    <button type="button" class="seletor-contagem-manual" id="botaoTipoBuscaContagemManual" onclick="alternarSeletorContagemManual()" aria-haspopup="listbox" aria-expanded="false">CÓD</button>
+    <div id="menuTipoBuscaContagemManual" class="menu-tipo-busca-contagem-manual" role="listbox"><button type="button" onclick="selecionarTipoBuscaContagemManual('codigo')">Código</button><button type="button" onclick="selecionarTipoBuscaContagemManual('referencia')">Referência</button><button type="button" onclick="selecionarTipoBuscaContagemManual('descricao')">Descrição</button></div>
+   </div>
+   <div class="contagem-v2-tipos" role="group" aria-label="Tipo de pesquisa"><button type="button" class="ativo" data-contagem-tipo="codigo" onclick="selecionarTipoBuscaContagemManual('codigo')">Código</button><button type="button" data-contagem-tipo="referencia" onclick="selecionarTipoBuscaContagemManual('referencia')">Referência</button><button type="button" data-contagem-tipo="descricao" onclick="selecionarTipoBuscaContagemManual('descricao')">Descrição</button></div>
+   <button type="button" class="botao-aba botao-buscar-contagem-manual" onclick="buscarMaterialContagemManual()">⌕ &nbsp; Buscar material</button>
+   <div class="acoes-contagem-manual-config"><button type="button" class="botao-aba botao-config-contagem-manual" onclick="alternarMenuConfiguracoesContagemManual()" aria-label="Configurações da contagem manual" title="Configurações">⚙</button><div id="menuConfiguracoesContagemManual" class="menu-config-contagem-manual"><button type="button" onclick="limparContagensManuais()">🗑️ Limpar contagem manual</button></div></div>
+  </div>
+  <div id="resultadoBuscaContagemManual" class="contagem-v2-resultados"></div>
+ </div>
+ <div class="painel contagem-v2 contagem-v2-registro" id="painelRegistroContagemManual" style="display: none;"><h3 class="contagem-v2-etapa">02 · Registrar contagem</h3><div id="materialSelecionadoContagemManual"></div><div class="linha-formulario"><label class="contagem-v2-label">Local encontrado<input type="text" id="localContagemManual" placeholder="Ex.: A-03-12" autocomplete="off"></label><label class="contagem-v2-label">Quantidade física<input type="number" id="quantidadeContagemManual" placeholder="Informe a quantidade" min="0" step="1" inputmode="numeric"></label><button class="botao-aba contagem-v2-salvar" onclick="salvarContagemManual()">✓ &nbsp; Salvar contagem</button></div><div id="statusContagemManual"></div></div>
+ <div class="painel contagem-v2 contagem-v2-lista"><div class="contagem-v2-lista-titulo"><div><h3>Contagens registradas</h3><p>Neste dispositivo</p></div><span aria-hidden="true">▤</span></div><div id="listaContagensManuais"></div></div>
+</section>
 
 
         <!-- =================================================
