@@ -3,6 +3,9 @@ package com.pmobile.app;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.SystemClock;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.widget.LinearLayout;
@@ -23,6 +26,23 @@ public class MainActivity extends BridgeActivity {
     private static final ExecutorService OTA_MANIFEST_EXECUTOR =
         Executors.newSingleThreadExecutor();
     private final AtomicBoolean otaCheckRunning = new AtomicBoolean(false);
+    private static final long OTA_CHECK_INTERVAL_MS = 5 * 60 * 1000L;
+    private final Handler otaForegroundHandler = new Handler(Looper.getMainLooper());
+    private long lastAutomaticOtaCheckMs = -OTA_CHECK_INTERVAL_MS;
+    private boolean otaUpdateDialogVisible = false;
+    private final Runnable otaForegroundCheck = new Runnable() {
+        @Override public void run() {
+            long now = SystemClock.elapsedRealtime();
+            if (now - lastAutomaticOtaCheckMs >= OTA_CHECK_INTERVAL_MS && !otaUpdateDialogVisible) {
+                if (!otaCheckRunning.get()) {
+                    lastAutomaticOtaCheckMs = now;
+                    verificarOta(false);
+                }
+            }
+            otaForegroundHandler.postDelayed(this, OTA_CHECK_INTERVAL_MS);
+        }
+    };
+
 
     private AlertDialog otaProgressDialog;
     private TextView otaStatusText;
@@ -59,7 +79,20 @@ public class MainActivity extends BridgeActivity {
             "PMOBILE_OTA"
         );
 
-        OTA_MANIFEST_EXECUTOR.execute(() -> verificarOta(false));
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        otaForegroundHandler.removeCallbacks(otaForegroundCheck);
+        otaForegroundHandler.postDelayed(otaForegroundCheck, 1500L);
+    }
+
+    @Override
+    protected void onPause() {
+        otaForegroundHandler.removeCallbacks(otaForegroundCheck);
+        super.onPause();
     }
 
     private final class OtaJsBridge {
@@ -377,6 +410,8 @@ public class MainActivity extends BridgeActivity {
             String newWebVersion,
             Runnable onConfirm) {
         runOnUiThread(() -> {
+            if (otaUpdateDialogVisible || isFinishing() || isDestroyed()) return;
+            otaUpdateDialogVisible = true;
             new AlertDialog.Builder(this)
                 .setTitle("Atualização disponível")
                 .setMessage(
@@ -384,8 +419,9 @@ public class MainActivity extends BridgeActivity {
                     + "\nNova versão: " + newWebVersion
                     + "\n\nDeseja atualizar agora?"
                 )
-                .setNegativeButton("Não", null)
+                .setNegativeButton("Não", (dialog, which) -> otaUpdateDialogVisible = false)
                 .setPositiveButton("Sim", (dialog, which) -> {
+                    otaUpdateDialogVisible = false;
                     showOtaProgressDialog(newWebVersion);
                     OTA_MANIFEST_EXECUTOR.execute(onConfirm);
                 })
