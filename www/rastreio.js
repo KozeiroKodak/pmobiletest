@@ -36,7 +36,7 @@ async function carregarRastreios() {
         const registros = [];
         const tamanhoPagina = 500;
         for (let deslocamento = 0; ; deslocamento += tamanhoPagina) {
-            const resposta = await window.clienteSupabase.rpc("pmobile_rastreio_listar", {
+            const resposta = await window.clienteSupabase.rpc("pmobile_rastreio_listar_v2", {
                 p_usuario: sessao.usuario,
                 p_credencial: sessao.credencial,
                 p_limit: tamanhoPagina,
