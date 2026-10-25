@@ -1189,6 +1189,7 @@ async function sincronizarMateriaisLocaisComSupabase(forcar = false) {
         const localVersao = await obterConfiguracaoLocal(chaveVersaoInventarioLocal);
         const quantidadeLocal = await contarMateriaisLocais();
 
+        // Somente o inventário completo da versão oficial pode ser reutilizado.
         if (!forcar && quantidadeLocal > 0 && localVersao && String(localVersao) === remoto.versao) {
             const materiaisValidos = await carregarMateriaisDoIndexedDB(remoto.versao);
             if (materiaisValidos.length === remoto.total) {
@@ -1196,6 +1197,7 @@ async function sincronizarMateriaisLocaisComSupabase(forcar = false) {
                 mostrarStatusSincronizacaoOffline("🟢 Offline OK — " + materiais.length.toLocaleString("pt-BR") + " materiais disponíveis.");
                 return { sucesso: true, sincronizada: false, atualizada: false, existente: true, quantidade: materiais.length, versao: remoto.versao };
             }
+            console.warn("Inventário local incompleto; retomando sincronização integral.", materiaisValidos.length, remoto.total);
         }
 
         if (remoto.total === 0) throw new Error("O PostgreSQL informou que o inventário oficial está vazio.");
@@ -1235,11 +1237,15 @@ async function sincronizarMateriaisLocaisComSupabase(forcar = false) {
             throw new Error("Quantidade sincronizada (" + totalRecebido + ") diferente da quantidade oficial (" + remoto.total + ").");
         }
 
+        // Validar os registros antes de marcar a versão como confirmada.
+        const materiaisBaixados = await carregarMateriaisDoIndexedDB(remoto.versao);
+        if (materiaisBaixados.length !== remoto.total) {
+            throw new Error("Inventário local incompleto: " + materiaisBaixados.length + " / " + remoto.total);
+        }
         await limparVersoesAntigasDoInventario(remoto.versao);
+        materiais = materiaisBaixados;
         const dataSincronizacao = await registrarSincronizacao();
         await salvarConfiguracaoLocal(chaveVersaoInventarioLocal, remoto.versao);
-        materiais = await carregarMateriaisDoIndexedDB(remoto.versao);
-        if (materiais.length !== remoto.total) throw new Error('Inventário local incompleto após sincronização.');
 
         mostrarStatusSincronizacaoOffline("🟢 Offline OK — " + totalRecebido.toLocaleString("pt-BR") + " materiais sincronizados.");
         return { sucesso: true, sincronizada: true, atualizada: true, quantidade: totalRecebido, data: dataSincronizacao, versao: remoto.versao };
