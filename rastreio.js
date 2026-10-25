@@ -100,6 +100,7 @@ function renderizarRastreio(item) {
         '<button type="button" class="rastreio-nfs rastreio-nfs-detalhes" onclick="abrirDetalhesRastreio(\'' + escaparAtributoRastreio(item.id) + '\')" aria-haspopup="dialog">' +
             '<span>NF: ' + escaparHtmlRastreio(item.notas_fiscais) + '</span><small>Ver detalhes</small>' +
         '</button>' +
+        '<div class="rastreio-motorista" style="padding:10px 0;border-bottom:1px solid #303030;color:#ddd"><small style="color:#999;margin-right:10px">Motorista</small><strong>' + escaparHtmlRastreio(item.motorista || "Não informado") + '</strong></div>' +
         '<div class="rastreio-grade" style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:14px">' +
           '<span><small>Destino</small>' + escaparHtmlRastreio(item.regiao || "—") + '</span>' +
           '<span><small>Volumes</small>' + escaparHtmlRastreio(formatarQuantidadeRastreio(item.volume)) + '</span>' +
