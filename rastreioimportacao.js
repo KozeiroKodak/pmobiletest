@@ -622,6 +622,7 @@ async function sincronizarOneDriveRastreio(forcar = false) {
             p_substituir: false
         });
         if (resposta.error) throw resposta.error;
+        await salvarValoresTotalPlanilha();
 
         const resultado = Array.isArray(resposta.data) ? resposta.data[0] : resposta.data;
         const ultimaLinhaAtual = (Number(dadosImportacaoRastreio.deslocamentoLinha) || 2) + dadosImportacaoRastreio.linhas.length - 1;
