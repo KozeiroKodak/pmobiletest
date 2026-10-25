@@ -99,299 +99,83 @@ function formatarDataConferencia(data) {
 // ============================================================
 
 async function exibirConferencias() {
-
-    // ========================================================
-    // LOCALIZAR ÁREA DE RESULTADO
-    // ========================================================
-
-    const areaResultado =
-        document.getElementById("resultadoConferencias");
-
-
-    // ========================================================
-    // VERIFICAR ÁREA
-    // ========================================================
-
-    if (!areaResultado) {
-
-        console.error(
-            "Elemento #resultadoConferencias não encontrado."
-        );
-
-        return;
-
-    }
-
-
-    // ========================================================
-    // MENSAGEM INICIAL
-    // ========================================================
-
-    areaResultado.innerHTML =
-        "<p>🔄 Carregando conferências...</p>";
-
-
+    const area = document.getElementById("resultadoConferencias");
+    if (!area) return;
+    area.textContent = "Carregando histórico de contagens...";
+    let manuais = [];
+    let legadas = [];
+    let aviso = "";
     try {
-
-        // ====================================================
-        // CARREGAR DADOS DO SUPABASE
-        // ====================================================
-
-        await carregarConferencias();
-
-
-        // ====================================================
-        // VERIFICAR RESULTADO
-        // ====================================================
-
-        if (
-            !Array.isArray(conferencias) ||
-            conferencias.length === 0
-        ) {
-
-            areaResultado.innerHTML =
-                "<p>Nenhuma contagem registrada ainda.</p>";
-
-            return;
-
+        if (typeof atualizarContagensManuais === "function" && navigator.onLine) {
+            await atualizarContagensManuais();
         }
-
-
-        // ====================================================
-        // CONTADORES
-        // ====================================================
-
-        let total = conferencias.length;
-
-        let totalOk = 0;
-
-        let totalDivergencias = 0;
-
-
-        // ====================================================
-        // ANALISAR CONFERÊNCIAS
-        // ====================================================
-
-        conferencias.forEach(
-            function (contagem) {
-
-                const diferenca =
-                    Number(
-                        contagem.diferenca ??
-                        contagem.diferenca_material ??
-                        0
-                    );
-
-
-                if (diferenca === 0) {
-
-                    totalOk++;
-
-                } else {
-
-                    totalDivergencias++;
-
-                }
-
-            }
-        );
-
-
-        // ====================================================
-        // MONTAR RESUMO
-        // ====================================================
-
-        areaResultado.innerHTML = `
-
-            <p>
-                <strong>Total conferido:</strong>
-                ${total}
-            </p>
-
-            <p>
-                ✅ OK:
-                ${totalOk}
-            </p>
-
-            <p>
-                ❌ Divergências:
-                ${totalDivergencias}
-            </p>
-
-            <hr>
-
-        `;
-
-
-        // ====================================================
-        // EXIBIR CADA CONFERÊNCIA
-        // ====================================================
-
-        const registrosHTML = [];
-
-        conferencias.forEach(
-            function (contagem) {
-
-                // ============================================
-                // COMPATIBILIDADE COM SUPABASE
-                // ============================================
-
-                const codigo =
-                    contagem.codigo_material ??
-                    contagem.codigo ??
-                    "";
-
-                const descricao =
-                    contagem.descricao_material ??
-                    contagem.descricao ??
-                    "";
-
-                const referencia =
-                    contagem.referencia_material ??
-                    contagem.referencia ??
-                    "";
-
-                const quantidadeEsperada =
-                    Number(
-                        contagem.quantidade_esperada ??
-                        contagem.quantidadeEsperada ??
-                        0
-                    );
-
-                const quantidadeFisica =
-                    Number(
-                        contagem.quantidade_fisica ??
-                        contagem.quantidadeFisica ??
-                        0
-                    );
-
-                const diferenca =
-                    Number(
-                        contagem.diferenca ??
-                        0
-                    );
-
-                const status =
-                    contagem.status ??
-                    "CONFERIDO";
-
-                const data =
-                    contagem.criado_em ??
-                    contagem.data ??
-                    "";
-
-
-                // ============================================
-                // TEXTO DO STATUS
-                // ============================================
-
-                let statusExibicao = status;
-
-
-                if (diferenca === 0) {
-
-                    statusExibicao =
-                        "✅ OK / CONFERIDO";
-
-                } else {
-
-                    statusExibicao =
-                        "❌ DIVERGÊNCIA";
-
-                }
-
-
-                // ============================================
-                // ADICIONAR AO HISTÓRICO
-                // ============================================
-
-                registrosHTML.push(`
-
-                    <div class="registro-conferencia">
-
-                        <h3>
-                            ${escaparHTMLConferencias(descricao)}
-                        </h3>
-
-                        <p>
-                            <strong>Código:</strong>
-                            ${escaparHTMLConferencias(codigo)}
-                        </p>
-
-                        <p>
-                            <strong>Referência:</strong>
-                            ${escaparHTMLConferencias(referencia)}
-                        </p>
-
-                        <p>
-                            <strong>Estoque esperado:</strong>
-                            ${quantidadeEsperada}
-                        </p>
-
-                        <p>
-                            <strong>Quantidade física:</strong>
-                            ${quantidadeFisica}
-                        </p>
-
-                        <p>
-                            <strong>Diferença:</strong>
-                            ${diferenca}
-                        </p>
-
-                        <p>
-                            <strong>Status:</strong>
-                            ${escaparHTMLConferencias(
-                                statusExibicao
-                            )}
-                        </p>
-
-                        <p>
-                            <strong>Data:</strong>
-                            ${escaparHTMLConferencias(
-                                formatarDataConferencia(data)
-                            )}
-                        </p>
-
-                        <hr>
-
-                    </div>
-
-                `);
-
-            }
-
-        );
-
-        areaResultado.insertAdjacentHTML(
-            "beforeend",
-            registrosHTML.join("")
-        );
-
-
+        if (typeof lerContagensManuais === "function") {
+            manuais = await lerContagensManuais();
+        }
     } catch (erro) {
-
-        // ====================================================
-        // TRATAMENTO DE ERRO
-        // ====================================================
-
-        console.error(
-            "Erro ao exibir conferências:",
-            erro
-        );
-
-
-        areaResultado.innerHTML = `
-
-            <p>
-                ⚠️ Não foi possível carregar as conferências.
-            </p>
-
-            <p>
-                Verifique a conexão com o Supabase.
-            </p>
-
-        `;
-
+        console.warn("Histórico manual indisponível:", erro);
+        aviso = "Não foi possível consultar as contagens manuais.";
     }
-
+    try {
+        if (typeof carregarConferencias === "function") {
+            await carregarConferencias();
+            legadas = Array.isArray(conferencias) ? conferencias : [];
+        }
+    } catch (erro) {
+        console.warn("Histórico legado indisponível:", erro);
+        aviso += " Histórico antigo indisponível no momento.";
+    }
+    const normalizadas = [];
+    const ids = new Set();
+    const adicionar = (item) => {
+        const chave = String(item.id || item.conferenciaId || "");
+        if (chave && ids.has(chave)) return;
+        if (chave) ids.add(chave);
+        normalizadas.push(item);
+    };
+    manuais.forEach(x => adicionar({
+        id: x.id, tipo:"manual", codigo:x.codigo, descricao:x.descricao,
+        referencia:x.referencia, quantidadeEsperada:Number(x.quantidadeEsperada || 0),
+        quantidadeFisica:Number(x.quantidadeFisica || 0),
+        localOriginal:x.localOriginal, localEncontrado:x.localEncontrado,
+        usuarioNome:x.usuarioNome, data:x.dataHora,
+        sincronizado:x.sincronizado, bloqueadoPorLimpeza:x.bloqueadoPorLimpeza
+    }));
+    legadas.forEach(x => adicionar({
+        id:x.conferenciaId || x.id, tipo:"legado",
+        codigo:x.codigo_material ?? x.codigo,
+        descricao:x.descricao_material ?? x.descricao,
+        referencia:x.referencia_material ?? x.referencia,
+        quantidadeEsperada:Number(x.quantidade_esperada ?? x.quantidadeEsperada ?? 0),
+        quantidadeFisica:Number(x.quantidade_fisica ?? x.quantidadeFisica ?? 0),
+        usuarioNome:x.usuario_nome ?? x.usuarioNome,
+        data:x.criado_em ?? x.criadoEm ?? x.data
+    }));
+    normalizadas.sort((a,b)=>new Date(b.data || 0)-new Date(a.data || 0));
+    const totalOk = normalizadas.filter(x=>x.quantidadeFisica===x.quantidadeEsperada).length;
+    const texto = x=>escaparHTMLConferencias(x == null ? "—" : x);
+    const numero = n=>Number(n).toLocaleString("pt-BR",{maximumFractionDigits:2});
+    area.innerHTML = '<div class="conferencias-resumo"><strong>Total: '+normalizadas.length+
+        '</strong> · ✅ OK: '+totalOk+' · ❌ Divergências: '+(normalizadas.length-totalOk)+'</div>'+
+        (aviso?'<p>'+texto(aviso)+'</p>':'')+
+        (!normalizadas.length?'<p>Nenhuma contagem registrada ainda.</p>':'')+
+        normalizadas.map(x=>{
+            const diferenca=x.quantidadeFisica-x.quantidadeEsperada;
+            const data=x.data?formatarDataConferencia(x.data):"Data não informada";
+            const local=x.tipo==="manual"?
+                '<p><strong>Local:</strong> '+texto(x.localOriginal)+' → '+texto(x.localEncontrado)+'</p>':'';
+            const situacao=x.tipo==="manual"?
+                '<p><strong>Sincronização:</strong> '+(x.bloqueadoPorLimpeza?'Revisão necessária':x.sincronizado?'Sincronizada':'Pendente')+'</p>':'';
+            return '<article class="registro-conferencia">'+
+                '<h3>'+texto(x.descricao || "Material")+'</h3>'+
+                '<p><strong>Origem:</strong> '+(x.tipo==="manual"?'Contagem manual':'Conferência anterior')+'</p>'+
+                '<p><strong>Código:</strong> '+texto(x.codigo)+'</p>'+
+                '<p><strong>Referência:</strong> '+texto(x.referencia)+'</p>'+local+
+                '<p><strong>Estoque esperado:</strong> '+numero(x.quantidadeEsperada)+'</p>'+
+                '<p><strong>Quantidade física:</strong> '+numero(x.quantidadeFisica)+'</p>'+
+                '<p><strong>Diferença:</strong> '+numero(diferenca)+'</p>'+
+                '<p><strong>Status:</strong> '+(diferenca===0?'✅ OK':'❌ DIVERGÊNCIA')+'</p>'+
+                '<p><strong>Realizado por:</strong> '+texto(x.usuarioNome)+'</p>'+
+                '<p><strong>Data/hora:</strong> '+texto(data)+'</p>'+situacao+'</article>';
+        }).join('');
 }
