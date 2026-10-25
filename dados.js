@@ -1068,16 +1068,25 @@ function obterClienteSupabaseParaDados() {
 // ============================================================
 
 async function obterSessaoInventarioPmobile() {
-    const usuario =
-        (typeof usuarioPmobileAtual !== "undefined" && usuarioPmobileAtual?.usuario)
-            ? usuarioPmobileAtual
-            : window.usuarioPmobileAtual;
-    const credencial =
-        (typeof credencialPmobileAtual !== "undefined" && credencialPmobileAtual)
-            ? credencialPmobileAtual
-            : window.credencialPmobileAtual;
-    if (!usuario || !credencial) throw new Error("Sessão do PMOBILE indisponível para sincronização.");
-    return { usuario, credencial };
+    let dadosUsuario = window.usuarioPmobileAtual ||
+        (typeof usuarioPmobileAtual !== "undefined" ? usuarioPmobileAtual : null);
+    let credencial = window.credencialPmobileAtual ||
+        (typeof credencialPmobileAtual !== "undefined" ? credencialPmobileAtual : null);
+    if ((!dadosUsuario?.usuario || !credencial) &&
+        typeof obterLoginPmobileSalvo === "function") {
+        const salvo = await obterLoginPmobileSalvo();
+        if (salvo?.usuario && salvo?.senha && salvo?.dadosUsuario) {
+            if (typeof restaurarSessaoPmobile === "function") {
+                restaurarSessaoPmobile(salvo.dadosUsuario, salvo.senha);
+            }
+            dadosUsuario = window.usuarioPmobileAtual || salvo.dadosUsuario;
+            credencial = window.credencialPmobileAtual || salvo.senha;
+        }
+    }
+    if (!dadosUsuario?.usuario || !credencial) {
+        throw new Error("Sessão do PMOBILE indisponível para sincronização.");
+    }
+    return { usuario: dadosUsuario.usuario, credencial };
 }
 
 async function obterVersaoInventarioRemota() {
