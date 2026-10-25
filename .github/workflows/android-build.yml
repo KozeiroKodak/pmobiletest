@@ -35,7 +35,7 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
       - name: Usar AAPT2 do runner Linux
-        run: sed -i '/^android\\.aapt2FromMavenOverride=/d' android/gradle.properties
+        run: sed -i '/aapt2FromMavenOverride/d' android/gradle.properties
       - name: Build debug APK
         working-directory: android
         run: ./gradlew assembleDebug
