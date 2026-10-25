@@ -847,7 +847,7 @@ function detectarModeloRastreio(colunas) {
         peso: achar("Peso"),
         valorNF: achar("Valor NF", "Valor"),
         valorFreteEmbutido: achar("Valor Frete Embutido", "Frete Embutido", "Frete Imbutido", "Valor Frete Imbutido"),
-        valorFrete: achar("Valor Frete", "Frete"),
+        valorFrete: achar("Frete Transporte", "Valor Frete", "Frete Transportadora", "Frete"),
         dataEnvio: achar("Data Envio", "Data de Envio"),
         turno: achar("Turno Envio", "Turno")
     };
