@@ -456,55 +456,16 @@
 
             </div>
 
-            <div class="painel">
-
-                <div class="linha-formulario linha-contagem-manual-busca">
-
-                    <div class="seletor-contagem-manual-wrapper">
-
-                        <select
-                            id="tipoBuscaPesquisaMaterial"
-                            class="seletor-contagem-manual-nativo"
-                            aria-hidden="true"
-                            tabindex="-1"
-                        >
-                            <option value="codigo">CÓD</option>
-                            <option value="referencia">REF</option>
-                            <option value="descricao">DESC</option>
-                        </select>
-
-                        <button
-                            type="button"
-                            class="seletor-contagem-manual popup-escolha-trigger"
-                            id="botaoTipoBuscaPesquisaMaterial"
-                            onclick="abrirPopupPesquisaMaterial()"
-                            aria-haspopup="dialog"
-                            aria-expanded="false"
-                        >CÓD</button>
-
-                    </div>
-
-                    <input
-                        type="text"
-                        id="campoPesquisaMaterial"
-                        placeholder="Digite o código"
-                        autocomplete="off"
-                        onkeydown="if (event.key === 'Enter') { event.preventDefault(); pesquisarMaterialSelecionado(); }"
-                    >
-
-                    <button
-                        type="button"
-                        class="botao-principal botao-buscar-contagem-manual"
-                        onclick="pesquisarMaterialSelecionado()"
-                    >
-                        Pesquisar
-                    </button>
-
-                </div>
-
-                <div id="resultadoPesquisaMaterial"></div>
-
-            </div>
+            <div class="painel pesquisa-v2">
+  <div class="pesquisa-v2-topo"><div class="pesquisa-v2-marca"><span class="pesquisa-v2-icone">⌕</span><div><strong>PMobile</strong><small>Catálogo de materiais</small></div></div><span id="statusPesquisaMaterial" class="pesquisa-v2-status">● Verificando conexão</span></div>
+  <div class="pesquisa-v2-intro"><h2>Encontrar material</h2><p>Pesquise por código, referência ou descrição.</p></div>
+  <div class="pesquisa-v2-campo"><span aria-hidden="true" class="pesquisa-v2-lupa">⌕</span><input type="text" id="campoPesquisaMaterial" placeholder="Digite o código" autocomplete="off" aria-label="Termo de pesquisa" onkeydown="if(event.key==='Enter'){event.preventDefault();pesquisarMaterialSelecionado();}"></div>
+  <select id="tipoBuscaPesquisaMaterial" class="pesquisa-v2-select" aria-label="Tipo de pesquisa"><option value="codigo">Código</option><option value="referencia">Referência</option><option value="descricao">Descrição</option></select>
+  <div class="pesquisa-v2-tipos" role="group" aria-label="Pesquisar por"><button type="button" class="ativo" data-pesquisa-tipo="codigo" onclick="selecionarTipoBuscaPesquisaMaterial('codigo')">Código</button><button type="button" data-pesquisa-tipo="referencia" onclick="selecionarTipoBuscaPesquisaMaterial('referencia')">Referência</button><button type="button" data-pesquisa-tipo="descricao" onclick="selecionarTipoBuscaPesquisaMaterial('descricao')">Descrição</button></div>
+  <button type="button" class="pesquisa-v2-buscar" onclick="pesquisarMaterialSelecionado()">⌕ &nbsp; Pesquisar material</button>
+  <div id="resultadoPesquisaMaterial" class="pesquisa-v2-resultados" aria-live="polite"><div class="pesquisa-v2-vazio"><span>⌕</span><strong>Encontre o que precisa</strong><p>Selecione o tipo de pesquisa e informe o material.</p></div></div>
+  <div class="pesquisa-v2-rodape"><span>◉</span><span id="pesquisaV2Fonte">Fonte: aguardando consulta</span></div>
+</div>
 
         </section>
 
