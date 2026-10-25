@@ -69,6 +69,8 @@ function detectarModeloRastreio(colunas) {
             "Valor Frete Imbutido"
         ),
         valorFrete: achar("Frete Transporte", "Valor Frete", "Frete Transportadora", "Valor do Frete", "Frete"),
+        custoNunes: achar("Custo Nunes", "Custo Nunes:"),
+        custoFinal: achar("Custo Final"),
         dataEnvio: achar("Data Envio", "Data de Envio"),
         turno: achar("Turno Envio", "Turno")
     };
