@@ -1,7 +1,7 @@
 /* Central de sincronização v1 — somente apresentação e ações existentes. */
 (function(){
 "use strict";
-const APP=location.pathname.toLowerCase().includes("coletas")?"coletas":document.title.toLowerCase().includes("romaneios")?"romaneios":"pmobile";
+const APP="pmobile";
 let expanded=false,busy=false,lastAttempt=null,lastError="",refreshing=false;
 const el=(tag,cls,txt)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(txt!==undefined)e.textContent=txt;return e;};
 const time=t=>{if(!t)return "Não registrada";const d=new Date(t);return isNaN(d.getTime())?String(t):d.toLocaleString("pt-BR");};
@@ -12,7 +12,7 @@ async function snapshot(){
  if(typeof lerContagensManuais==="function"){try{const list=await lerContagensManuais();if(Array.isArray(list)){count=list.filter(x=>!x.sincronizado&&!x.bloqueadoPorLimpeza).length;blocked=list.filter(x=>!x.sincronizado&&x.bloqueadoPorLimpeza).length;}}catch(e){lastError=String(e.message||e);}}
  if(typeof obterMateriaisLocais==="function"){try{const a=obterMateriaisLocais();if(Array.isArray(a))inventory=a.length;}catch(e){}}
  if(typeof obterDataUltimaSincronizacao==="function"){try{stamp=await obterDataUltimaSincronizacao();}catch(e){}}
- if(APP==="coletas"&&window.PMColetasOffline){try{const all=await window.PMColetasOffline.listar();const user=String(window.usuarioPmobileAtual?.usuario||"");const own=all.filter(x=>x.usuario===user);driver=own.filter(x=>x.estado==="pendente"||x.estado==="enviando").length;unknown=own.filter(x=>x.estado==="incerto").length;}catch(e){lastError=String(e.message||e);}}
+ if(APP==="coletas"&&window.PMColetasOffline){try{const all=await window.PMColetasOffline.listar();const user=String((typeof sessaoMotorista==="function" ? sessaoMotorista()?.usuario : null)||window.usuarioPmobileAtual?.usuario||"");const own=all.filter(x=>x.usuario===user);driver=own.filter(x=>x.estado==="pendente"||x.estado==="enviando").length;unknown=own.filter(x=>x.estado==="incerto").length;}catch(e){lastError=String(e.message||e);}}
  let conferences=null;
  if(APP==="pmobile"&&typeof obterConferenciasPendentes==="function"){try{const a=await obterConferenciasPendentes();if(Array.isArray(a))conferences=a.length;}catch(e){}}
  const pending=(count||0)+(driver||0)+(conferences||0);
