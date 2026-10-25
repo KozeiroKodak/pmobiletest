@@ -81,3 +81,16 @@
         min-height: 42px;
     }
 }
+
+/* Cartões expansíveis no padrão visual da página inicial */
+#configuracoes .configuracoes-painel-sistema,#configuracoes .configuracoes-painel-admin,#configuracoes #painelConfiguracoesUsuario{padding:0;overflow:hidden;border:1px solid var(--borda,#343434);border-radius:18px;background:var(--fundo-card,#1a1a1a);margin-bottom:14px}
+#configuracoes .configuracoes-painel-admin{border-left:1px solid var(--borda,#343434)}
+.configuracoes-accordion summary{display:flex;align-items:center;gap:18px;padding:22px;cursor:pointer;list-style:none;min-height:104px}
+.configuracoes-accordion summary::-webkit-details-marker{display:none}
+.configuracoes-accordion summary .home-app-conteudo{display:flex;flex:1;flex-direction:column;gap:5px;min-width:0}
+.configuracoes-accordion summary .home-app-conteudo strong{font-size:1.05rem}
+.configuracoes-accordion summary .home-app-conteudo small{font-size:.9rem;opacity:.65}
+.configuracoes-accordion summary .home-app-seta{font-size:1.7rem;opacity:.55;transition:transform .2s}
+.configuracoes-accordion[open] summary .home-app-seta{transform:rotate(90deg)}
+.configuracoes-conteudo{padding:0 22px 22px}
+.configuracoes-conteudo .configuracoes-acoes{margin-top:0}
