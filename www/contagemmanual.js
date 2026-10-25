@@ -59,6 +59,11 @@ function selecionarTipoBuscaContagemManual(tipo) {
 
     seletor.value = tipo;
     botao.textContent = nomesCurtos[tipo] || "CÓD";
+    document.querySelectorAll("#contagemManual [data-contagem-tipo]").forEach(function(item) {
+        const ativo = item.dataset.contagemTipo === tipo;
+        item.classList.toggle("ativo", ativo);
+        item.setAttribute("aria-pressed", String(ativo));
+    });
 
     const campo = document.getElementById("campoContagemManual");
     const placeholders = {
