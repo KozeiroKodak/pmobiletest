@@ -108,54 +108,48 @@ async function buscarMaterialContagemManual() {
     const campo = document.getElementById("campoContagemManual");
     const area = document.getElementById("resultadoBuscaContagemManual");
     if (!campo || !area) return;
-
-    const termoOriginal = campo.value.trim();
-    const busca = normalizarTextoContagemManual(termoOriginal);
+    const termo = campo.value.trim();
+    const busca = normalizarTextoContagemManual(termo);
+    const seletor = document.getElementById("tipoBuscaContagemManual");
+    const tipo = ["codigo", "referencia", "descricao"].includes(seletor?.value) ? seletor.value : "codigo";
     materialContagemManualSelecionado = null;
     const painel = document.getElementById("painelRegistroContagemManual");
     if (painel) painel.style.display = "none";
-    if (!busca) {
-        area.innerHTML = "<p>Digite um código, referência ou descrição.</p>";
-        return;
-    }
-
-    const seletor = document.getElementById("tipoBuscaContagemManual");
-    const tipo = ["codigo", "descricao", "referencia"].includes(seletor?.value) ? seletor.value : "codigo";
-    area.innerHTML = "<p>Pesquisando...</p>";
-
-    // Consulta central quando há conexão, mantendo a mesma fonte da aba Pesquisa.
-    // Sem conexão (ou se o servidor falhar), utiliza a cópia local.
-    if (navigator.onLine && typeof obterClienteSupabase === "function") {
+    if (!busca) { area.textContent = "Digite um código, referência ou descrição."; return; }
+    area.textContent = "Pesquisando...";
+    let online = [], erroOnline = null;
+    if (navigator.onLine && window.clienteSupabase) {
         try {
-            let consulta = obterClienteSupabase().from("materiais")
+            // Mesma fonte e campos utilizados na aba Pesquisa.
+            let consulta = window.clienteSupabase.from("materiais")
                 .select("id,codigo,descricao,referencia,marca,local,quantidade,quantidade_reservada");
-            if (tipo === "codigo") {
-                consulta = consulta.eq("codigo", termoOriginal).order("codigo", { ascending: true });
-            } else {
-                const valor = typeof escaparBuscaILike === "function"
-                    ? escaparBuscaILike(termoOriginal)
-                    : termoOriginal.replace(/\\/g, "\\\\").replace(/%/g, "\\%").replace(/_/g, "\\_");
-                consulta = consulta.ilike(tipo, "%" + valor + "%").order(tipo, { ascending: true });
+            if (tipo === "codigo") consulta = consulta.eq("codigo", termo);
+            else {
+                const escapado = typeof escaparBuscaILike === "function" ? escaparBuscaILike(termo) : termo;
+                consulta = consulta.ilike(tipo, "%" + escapado + "%");
             }
-            const { data, error } = await consulta.limit(50);
-            if (error) throw error;
-            renderizarResultadosContagemManual(Array.isArray(data) ? data : []);
-            return;
-        } catch (erroOnline) {
-            console.warn("Contagem manual: consulta online falhou, tentando inventário local.", erroOnline);
-        }
+            const resposta = await consulta.limit(100);
+            if (resposta.error) throw resposta.error;
+            online = Array.isArray(resposta.data) ? resposta.data : [];
+        } catch (erro) { erroOnline = erro; console.warn("Consulta online da contagem:", erro); }
     }
-
+    if (online.length) { renderizarResultadosContagemManual(online); return; }
     try {
+        // Uma consulta online vazia não deve impedir o uso do inventário já salvo.
         const inventario = await obterInventarioContagemManual();
-        const encontrados = inventario.filter(material => {
+        const locais = inventario.filter(material => {
             const valor = normalizarTextoContagemManual(material?.[tipo]);
             return tipo === "codigo" ? valor === busca : valor.includes(busca);
-        }).slice(0, 50);
-        renderizarResultadosContagemManual(encontrados);
+        }).slice(0, 100);
+        renderizarResultadosContagemManual(locais);
+        if (!locais.length && (erroOnline || !navigator.onLine)) {
+            area.textContent = "Nenhum material encontrado no inventário local. " +
+                (erroOnline ? "Consulta ao servidor indisponível." : "Modo offline.");
+        }
     } catch (erro) {
-        console.error("Erro na busca da contagem manual:", erro);
-        area.innerHTML = "<p>Não foi possível consultar o inventário. Verifique a conexão ou sincronize os materiais.</p>";
+        console.error("Erro na consulta local da contagem:", erro);
+        renderizarResultadosContagemManual([]);
+        if (erroOnline || !navigator.onLine) area.textContent = "Não foi possível consultar o servidor nem o inventário local.";
     }
 }
 
