@@ -369,6 +369,33 @@
 #valoresTotal .valores-atualizar{margin-top:20px!important;border:1px solid #376b52!important;border-radius:12px!important;color:#b8f6d2!important;background:#20392d!important;padding:11px 16px!important}
 @media(min-width:700px){#valoresTotal #valoresTotalCards{grid-template-columns:repeat(3,minmax(0,1fr))!important}#valoresTotal .valores-kpi{min-height:130px}}
 @media(max-width:380px){#valoresTotal .valores-kpi{padding:12px}#valoresTotal .valores-kpi strong{font-size:16px}}
+
+/* Reaproveita a escala responsiva global do PMobile para o painel financeiro. */
+@media(max-width:700px){
+ #valoresTotal{padding:12px 10px}
+ #valoresTotal .valores-hero{padding:16px 15px;border-radius:14px;margin-bottom:12px}
+ #valoresTotal .valores-hero:after{width:120px;height:120px;right:-50px;top:-55px}
+ #valoresTotal .valores-hero h1{font-size:24px;margin:6px 0}
+ #valoresTotal .valores-hero p{font-size:12px;line-height:1.4}
+ #valoresTotal .valores-painel{padding:12px;border-radius:14px}
+ #valoresTotal #valoresTotalStatus{font-size:11px;padding-bottom:12px;margin-bottom:12px!important}
+ #valoresTotal #valoresTotalCards{gap:8px!important}
+ #valoresTotal .valores-kpi{min-height:82px;padding:11px;border-radius:11px}
+ #valoresTotal .valores-kpi-label{font-size:11px;line-height:1.3;margin-bottom:8px}
+ #valoresTotal .valores-kpi strong{font-size:clamp(14px,3.8vw,18px);letter-spacing:-.3px}
+ #valoresTotal #valoresTotalMensais{padding-top:14px;margin-top:16px!important}
+ #valoresTotal #valoresTotalMensais>h3{font-size:11px!important;margin-bottom:10px!important}
+ #valoresTotal #valoresTotalMensais button{min-width:0!important;padding:9px 7px!important;font-size:12px}
+ #valoresTotal #valoresTotalMensais details{padding:11px!important;border-radius:11px!important;margin-bottom:9px!important}
+ #valoresTotal #valoresTotalMensais summary{font-size:13px}
+ #valoresTotal #valoresTotalMensais select{min-width:0;max-width:100%;font-size:14px}
+ #valoresTotal .valores-atualizar{margin-top:12px!important}
+}
+@media(max-width:360px){
+ #valoresTotal #valoresTotalCards{grid-template-columns:1fr!important}
+ #valoresTotal .valores-kpi{min-height:68px}
+}
+
 </style>
 <section id="valoresTotal" class="tela-sistema" style="display:none">
           <div class="valores-hero"><div class="valores-eyebrow">PMOBILE</div><h1>Visão financeira</h1><p>Totais consolidados e análises por período e transportadora.</p></div>
