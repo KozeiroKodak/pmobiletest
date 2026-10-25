@@ -94,3 +94,7 @@
 .configuracoes-accordion[open] summary .home-app-seta{transform:rotate(90deg)}
 .configuracoes-conteudo{padding:0 22px 22px}
 .configuracoes-conteudo .configuracoes-acoes{margin-top:0}
+
+#configuracoes .configuracoes-painel-importacao{padding:0;overflow:hidden;border:1px solid var(--borda,#343434);border-radius:18px;background:var(--fundo-card,#1a1a1a);margin-bottom:14px}
+#configuracoes .configuracoes-painel-importacao .rastreio-importacao-painel{margin:0;padding:0;border:0;background:transparent}
+#configuracoes .configuracoes-painel-importacao .configuracoes-conteudo{padding:0 18px 18px}
