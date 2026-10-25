@@ -326,7 +326,7 @@ function iniciarSincronizacaoOneDriveRastreio(restaurando = false) {
     }
     const campo = document.getElementById("linkOneDriveRastreio");
     const url = campo?.value?.trim();
-    if (!url) { mostrarStatusOneDriveRastreio("🔴 Informe o link compartilhado do arquivo .xlsm no OneDrive."); return; }
+    if (!url) { mostrarStatusOneDriveRastreio("🔴 Informe o link compartilhado do arquivo Excel no OneDrive."); return; }
     try {
         const host = new URL(url).hostname.toLowerCase();
         if (!(host === "1drv.ms" || host === "onedrive.live.com" || host.endsWith(".onedrive.live.com") || host.endsWith(".sharepoint.com"))) {
@@ -509,7 +509,7 @@ async function baixarPlanilhaOneDriveRastreio(url) {
                     parsed.pathname.split("/").pop() || ""
                 );
 
-                if (/\.(xlsx?|xlsm)$/i.test(nomeUrl)) {
+                if (/\.(xlsx?|xlsm|xlsb)$/i.test(nomeUrl)) {
                     nome = nomeUrl;
                 }
             } catch {}
@@ -778,7 +778,7 @@ function obterNomeArquivoOnlineRastreio(resposta, url) {
             pathname.split("/").pop() || ""
         ).trim();
 
-        if (nome && /\.(xlsx?|xlsm|csv)$/i.test(nome)) {
+        if (nome && /\.(xlsx?|xlsm|xlsb|csv)$/i.test(nome)) {
             return nome;
         }
     } catch {
