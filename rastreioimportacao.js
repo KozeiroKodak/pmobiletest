@@ -414,10 +414,10 @@ function limparLinhaBaseOneDriveRastreio() {
 async function baixarPlanilhaOneDriveRastreio(url) {
     const nomePadrao = "rastreio.xlsx";
 
-    // No APK, o WebView não consegue ler o download do OneDrive diretamente
+    // Preferir o proxy Supabase em navegador e APK para links compartilhados.\n    // A ponte nativa é fallback apenas quando o proxy não estiver disponível.\n    // No APK, o WebView não consegue ler o download do OneDrive diretamente
     // por causa do CORS. A ponte nativa faz o download HTTPS e devolve o
     // arquivo em blocos pequenos, evitando uma resposta gigante no bridge.
-    if (window.PMCOLETAS_ONEDRIVE?.iniciarDownload) {
+    if (!window.clienteSupabase?.functions?.invoke && window.PMCOLETAS_ONEDRIVE?.iniciarDownload) {
         const iniciar = JSON.parse(
             window.PMCOLETAS_ONEDRIVE.iniciarDownload(url)
         );
