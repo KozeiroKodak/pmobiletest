@@ -216,12 +216,16 @@ function salvarPreferenciasOneDriveRastreio() {
 function limparConfiguracaoOneDriveRastreio() {
     try { localStorage.removeItem(RASTREIO_ONEDRIVE_CONFIG_STORAGE); } catch {}
 }
+let ultimoAcessoAdminRastreio = null;
 function atualizarAcessoAdminRastreio() {
     const permitido = usuarioRastreioEhAdmin();
     document.querySelectorAll(".rastreio-admin-only").forEach(el => { el.hidden = !permitido; });
+    if (ultimoAcessoAdminRastreio === permitido) return;
+    ultimoAcessoAdminRastreio = permitido;
     if (permitido) restaurarConfiguracaoOneDriveRastreio();
     else if (sincronizacaoOneDriveRastreioAtiva) pararSincronizacaoOneDriveRastreio();
 }
+
 let restaurandoLinkOneDriveServidor = false;
 async function restaurarConfiguracaoOneDriveRastreio() {
     if (!usuarioRastreioEhAdmin() || restaurandoLinkOneDriveServidor) return;
@@ -1620,3 +1624,5 @@ async function calcularSha256Rastreio(buffer) {
         .join("");
 }
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", atualizarAcessoAdminRastreio); else atualizarAcessoAdminRastreio();
+// A sessão é carregada após o DOM; reavaliar permissões quando o login concluir.
+setInterval(atualizarAcessoAdminRastreio, 1500);
