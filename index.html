@@ -725,7 +725,7 @@
                     type="file"
                     id="arquivoExcel"
                     class="arquivo-importacao"
-                    accept=".xlsx, .xls"
+                    accept=".xlsx,.xls,.xlsm,.xlsb,.csv"
                 >
 
 
@@ -851,7 +851,7 @@
                         <h2>Importação manual</h2>
                         <p>Use a planilha operacional. Cada linha vira um rastreio independente.</p>
                     </div>
-                    <input type="file" id="arquivoRastreio" accept=".xlsx,.xls,.xlsm,.csv" hidden onchange="prepararImportacaoRastreio()">
+                    <input type="file" id="arquivoRastreio" accept=".xlsx,.xls,.xlsm,.xlsb,.csv" hidden onchange="prepararImportacaoRastreio()">
                     <button type="button" class="botao-principal" onclick="abrirArquivoRastreio()">Importar planilha</button>
                 </div>
 
@@ -859,7 +859,7 @@
                     <div class="rastreio-onedrive-sync-cabecalho">
                         <div>
                             <h3>Sincronização automática — OneDrive</h3>
-                            <p>Deixe o arquivo Excel (.xlsx ou .xlsm) aberto no PC com salvamento automático. O PMobile verifica a planilha a cada 15 segundos enquanto estiver aberto. Com a sincronização de alterações ativada, novos lançamentos, alterações de campos e remoções são refletidos automaticamente.</p>
+                            <p>Deixe o arquivo Excel (.xlsx, .xls, .xlsm ou .xlsb) aberto no PC com salvamento automático. O PMobile verifica a planilha a cada 15 segundos enquanto estiver aberto. Com a sincronização de alterações ativada, novos lançamentos, alterações de campos e remoções são refletidos automaticamente.</p>
                         </div>
                         <span id="indicadorOneDriveRastreio" class="rastreio-onedrive-indicador">○ Sincronização parada</span>
                     </div>
@@ -869,7 +869,7 @@
                             <input
                                 type="url"
                                 id="linkOneDriveRastreio"
-                                placeholder="Cole aqui o link compartilhado do arquivo Excel (.xlsx/.xlsm) do OneDrive"
+                                placeholder="Cole aqui o link compartilhado do arquivo Excel (.xlsx/.xls/.xlsm/.xlsb) do OneDrive"
                                 autocomplete="off"
                                 inputmode="url"
                             >
