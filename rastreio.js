@@ -100,15 +100,19 @@ function renderizarRastreio(item) {
         '<button type="button" class="rastreio-nfs rastreio-nfs-detalhes" onclick="abrirDetalhesRastreio(\'' + escaparAtributoRastreio(item.id) + '\')" aria-haspopup="dialog">' +
             '<span>NF: ' + escaparHtmlRastreio(item.notas_fiscais) + '</span><small>Ver detalhes</small>' +
         '</button>' +
-        '<div class="rastreio-grade">' +
-          '<span><small>Transportadora</small>' + escaparHtmlRastreio(item.transportadora) + '</span>' +
-          '<span><small>Motorista</small>' + escaparHtmlRastreio(item.motorista || "-") + '</span>' +
-          '<span><small>Destino</small>' + escaparHtmlRastreio(item.regiao || "-") + '</span>' +
-          '<span><small>Turno</small>' + escaparHtmlRastreio(item.turno || "-") + '</span>' +
-          '<span><small>Previsão</small>' + escaparHtmlRastreio(previsao) + '</span>' +
-          '<span><small>Conferência</small>' + escaparHtmlRastreio(item.conferencia || "PENDENTE") + '</span>' +
-        '</div></article>';
+        '<div class="rastreio-grade" style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:14px">' +
+          '<span><small>Destino</small>' + escaparHtmlRastreio(item.regiao || "—") + '</span>' +
+          '<span><small>Volumes</small>' + escaparHtmlRastreio(formatarQuantidadeRastreio(item.volume)) + '</span>' +
+          '<span><small>Turno</small>' + escaparHtmlRastreio(item.turno || "—") + '</span>' +
+          '<span><small>Peso</small>' + escaparHtmlRastreio(formatarQuantidadeRastreio(item.peso)) + '</span>' +
+          '<span><small>Frete embutido</small>' + escaparHtmlRastreio(formatarMoedaRastreioSeguro(item.valor_frete_embutido)) + '</span>' +
+          '<span><small>Valor do frete</small>' + escaparHtmlRastreio(formatarMoedaRastreioSeguro(item.valor_frete)) + '</span>' +
+        '</div>' +
+        '</article>';
 }
+
+function formatarQuantidadeRastreio(v) { return v == null || v === "" ? "—" : Number(v).toLocaleString("pt-BR", {maximumFractionDigits:3}); }
+function formatarMoedaRastreioSeguro(v) { return v == null || v === "" ? "—" : formatarMoedaRastreio(v); }
 
 function escaparHtmlRastreio(valor) {
     return String(valor ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
