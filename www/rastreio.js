@@ -94,23 +94,21 @@ function filtrarRastreios() {
 
 function renderizarRastreio(item) {
     const status = statusVisualRastreio(item);
-    const previsao = item.previsao_entrega ? new Date(item.previsao_entrega).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"}) : "-";
-    return '<article class="rastreio-card" data-status="' + status + '">' +
-        '<div class="rastreio-card-topo"><strong>' + escaparHtmlRastreio(item.cliente) + '</strong><span class="rastreio-etiqueta">' + escaparHtmlRastreio(status.replaceAll("_"," ")) + '</span></div>' +
-        '<div class="rastreio-nfs" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">' +
-            '<span>NF: ' + escaparHtmlRastreio(item.notas_fiscais) + '</span>' +
-            '<span style="font-size:14px;color:#ddd">Valor da nota: <strong>' + escaparHtmlRastreio(formatarMoedaRastreioSeguro(item.valor_nf)) + '</strong></span>' +
-        '</div>' +
-        '<div class="rastreio-motorista" style="padding:10px 0;border-bottom:1px solid #303030;color:#ddd"><small style="color:#999;margin-right:10px">Motorista</small><strong>' + escaparHtmlRastreio(item.motorista || "Não informado") + '</strong></div>' +
-        '<div class="rastreio-grade" style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:14px">' +
-          '<span><small>Destino</small>' + escaparHtmlRastreio(item.regiao || "—") + '</span>' +
-          '<span><small>Volumes</small>' + escaparHtmlRastreio(formatarQuantidadeRastreio(item.volume)) + '</span>' +
-          '<span><small>Turno</small>' + escaparHtmlRastreio(item.turno || "—") + '</span>' +
-          '<span><small>Peso</small>' + escaparHtmlRastreio(formatarQuantidadeRastreio(item.peso)) + '</span>' +
-          '<span><small>Frete embutido</small>' + escaparHtmlRastreio(formatarMoedaRastreioSeguro(item.valor_frete_embutido)) + '</span>' +
-          '<span><small>Valor do frete</small>' + escaparHtmlRastreio(formatarMoedaRastreioSeguro(item.valor_frete)) + '</span>' +
-        '</div>' +
-        '</article>';
+    const campo = (rotulo, valor) =>
+        '<div class="rastreio-dado"><small>' + rotulo + '</small><strong>' + escaparHtmlRastreio(valor) + '</strong></div>';
+    return '<article class="rastreio-card" data-status="' + escaparAtributoRastreio(status) + '">' +
+        '<div class="rastreio-card-topo"><strong>' + escaparHtmlRastreio(item.cliente || "Cliente não informado") + '</strong><span class="rastreio-etiqueta">' + escaparHtmlRastreio(status.replaceAll("_", " ")) + '</span></div>' +
+        '<div class="rastreio-resumo"><div class="rastreio-nf">NF <strong>' + escaparHtmlRastreio(item.notas_fiscais || "—") + '</strong></div>' +
+        '<div class="rastreio-valor-nota"><small>Valor da nota</small><strong>' + escaparHtmlRastreio(formatarMoedaRastreioSeguro(item.valor_nf)) + '</strong></div></div>' +
+        '<div class="rastreio-motorista"><small>Motorista</small><strong>' + escaparHtmlRastreio(item.motorista || "Não informado") + '</strong></div>' +
+        '<div class="rastreio-grade">' +
+          campo("Destino", item.regiao || "—") +
+          campo("Turno", item.turno || "—") +
+          campo("Volumes", formatarQuantidadeRastreio(item.volume)) +
+          campo("Peso", formatarQuantidadeRastreio(item.peso)) +
+          campo("Frete embutido", formatarMoedaRastreioSeguro(item.valor_frete_embutido)) +
+          campo("Valor do frete", formatarMoedaRastreioSeguro(item.valor_frete)) +
+        '</div></article>';
 }
 
 function formatarQuantidadeRastreio(v) { return v == null || v === "" ? "—" : Number(v).toLocaleString("pt-BR", {maximumFractionDigits:3}); }
