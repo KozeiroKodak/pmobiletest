@@ -867,6 +867,8 @@ function detectarModeloRastreio(colunas) {
         valorNF: achar("Valor NF", "Valor"),
         valorFreteEmbutido: achar("Valor Frete Embutido", "Frete Embutido", "Frete Imbutido", "Valor Frete Imbutido"),
         valorFrete: achar("Frete Transporte", "Valor Frete", "Frete Transportadora", "Valor do Frete", "Frete"),
+        custoNunes: achar("Custo Nunes", "Custo Nunes:"),
+        custoFinal: achar("Custo Final"),
         dataEnvio: achar("Data Envio", "Data de Envio"),
         turno: achar("Turno Envio", "Turno")
     };
@@ -1336,6 +1338,8 @@ function prepararLinhasRastreioParaEnvio(inicio = 0, fim = null, coletarAvisos =
             valor_nf: normalizarNumeroRastreio(valor("valorNF")),
             valor_frete_embutido: normalizarNumeroRastreio(valor("valorFreteEmbutido")),
             valor_frete: normalizarNumeroRastreio(valor("valorFrete")),
+            custo_nunes: normalizarNumeroRastreio(valor("custoNunes")),
+            custo_final: normalizarNumeroRastreio(valor("custoFinal")),
             data_envio: dataEnvio,
             turno,
             previsao_entrega: calcularPrevisaoRastreio(dataEnvio, turno),
