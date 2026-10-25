@@ -8,6 +8,15 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
+import android.util.Base64;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.RandomAccessFile;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -25,6 +34,12 @@ public class MainActivity extends BridgeActivity {
     private static final String NATIVE_WEB_BUNDLE_VERSION = "0.0.249";
     private static final ExecutorService OTA_MANIFEST_EXECUTOR =
         Executors.newSingleThreadExecutor();
+    private static final ExecutorService ONEDRIVE_EXECUTOR =
+        Executors.newCachedThreadPool();
+    private static final long MAX_ONEDRIVE_FILE_BYTES = 100L * 1024L * 1024L;
+    private static final int ONEDRIVE_CHUNK_BYTES = 128 * 1024;
+    private final Map<String, OneDriveDownloadState> oneDriveDownloads =
+        new ConcurrentHashMap<>();
     private final AtomicBoolean otaCheckRunning = new AtomicBoolean(false);
     private static final long OTA_CHECK_INTERVAL_MS = 5 * 60 * 1000L;
     private final Handler otaForegroundHandler = new Handler(Looper.getMainLooper());
@@ -78,6 +93,10 @@ public class MainActivity extends BridgeActivity {
             new OtaJsBridge(),
             "PMOBILE_OTA"
         );
+        getBridge().getWebView().addJavascriptInterface(
+            new OneDriveJsBridge(),
+            "PMCOLETAS_ONEDRIVE"
+        );
 
     }
 
@@ -93,6 +112,211 @@ public class MainActivity extends BridgeActivity {
     public void onPause() {
         otaForegroundHandler.removeCallbacks(otaForegroundCheck);
         super.onPause();
+    }
+
+    private static final class OneDriveDownloadState {
+        final String id;
+        final File file;
+        volatile long totalBytes = -1L;
+        volatile long downloadedBytes = 0L;
+        volatile String status = "downloading";
+        volatile String error = null;
+
+        OneDriveDownloadState(String id, File file) {
+            this.id = id;
+            this.file = file;
+        }
+    }
+
+    private final class OneDriveJsBridge {
+        @JavascriptInterface
+        public String iniciarDownload(String urlInformada) {
+            try {
+                URL url = validarUrlOneDrive(urlInformada);
+                String id = UUID.randomUUID().toString();
+                File dir = new File(getCacheDir(), "pmcoletas-onedrive");
+                if (!dir.exists() && !dir.mkdirs()) {
+                    throw new java.io.IOException("Não foi possível criar a área temporária do OneDrive.");
+                }
+
+                File destino = new File(dir, id + ".bin");
+                OneDriveDownloadState state = new OneDriveDownloadState(id, destino);
+                oneDriveDownloads.put(id, state);
+
+                ONEDRIVE_EXECUTOR.execute(() -> executarDownloadOneDrive(url, state));
+                return jsonDownloadState(state);
+            } catch (Exception exception) {
+                return "{\"ok\":false,\"error\":\"" + escaparJson(exception.getMessage()) + "\"}";
+            }
+        }
+
+        @JavascriptInterface
+        public String obterStatus(String id) {
+            OneDriveDownloadState state = oneDriveDownloads.get(id);
+            if (state == null) {
+                return "{\"ok\":false,\"error\":\"Download não encontrado.\"}";
+            }
+            return jsonDownloadState(state);
+        }
+
+        @JavascriptInterface
+        public String obterChunk(String id, long offset) {
+            OneDriveDownloadState state = oneDriveDownloads.get(id);
+            if (state == null) {
+                return "{\"ok\":false,\"error\":\"Download não encontrado.\"}";
+            }
+            if (!"completed".equals(state.status)) {
+                return "{\"ok\":false,\"error\":\"Download ainda não terminou.\"}";
+            }
+
+            try (RandomAccessFile input = new RandomAccessFile(state.file, "r")) {
+                if (offset < 0L || offset > input.length()) {
+                    throw new java.io.IOException("Offset inválido.");
+                }
+
+                input.seek(offset);
+                int quantidade = (int) Math.min(ONEDRIVE_CHUNK_BYTES, input.length() - offset);
+                byte[] buffer = new byte[quantidade];
+                int lidos = input.read(buffer);
+
+                if (lidos <= 0) {
+                    oneDriveDownloads.remove(id);
+                    if (state.file.exists()) state.file.delete();
+                    return "{\"ok\":true,\"offset\":" + offset + ",\"nextOffset\":" + offset + ",\"done\":true,\"base64\":\"\"}";
+                }
+
+                String base64 = Base64.encodeToString(buffer, 0, lidos, Base64.NO_WRAP);
+                long nextOffset = offset + lidos;
+                boolean done = nextOffset >= input.length();
+
+                if (done) {
+                    oneDriveDownloads.remove(id);
+                    if (state.file.exists()) state.file.delete();
+                }
+
+                return "{\"ok\":true,\"offset\":" + offset
+                    + ",\"nextOffset\":" + nextOffset
+                    + ",\"done\":" + done
+                    + ",\"base64\":\"" + base64 + "\"}";
+            } catch (Exception exception) {
+                if (state.file.exists()) state.file.delete();
+                oneDriveDownloads.remove(id);
+                return "{\"ok\":false,\"error\":\"" + escaparJson(exception.getMessage()) + "\"}";
+            }
+        }
+
+        @JavascriptInterface
+        public String cancelarDownload(String id) {
+            OneDriveDownloadState state = oneDriveDownloads.remove(id);
+            if (state != null && state.file.exists()) {
+                state.file.delete();
+            }
+            return "{\"ok\":true}";
+        }
+    }
+
+    private void executarDownloadOneDrive(URL url, OneDriveDownloadState state) {
+        HttpURLConnection connection = null;
+        try {
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setConnectTimeout(20000);
+            connection.setReadTimeout(60000);
+            connection.setInstanceFollowRedirects(true);
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("Accept",
+                "application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/octet-stream,*/*");
+            connection.setRequestProperty("Cache-Control", "no-cache");
+
+            int status = connection.getResponseCode();
+            if (status < 200 || status >= 300) {
+                throw new java.io.IOException("OneDrive respondeu HTTP " + status + ".");
+            }
+
+            URL finalUrl = connection.getURL();
+            validarHostOneDrive(finalUrl.getHost());
+
+            long contentLength = connection.getContentLengthLong();
+            if (contentLength > MAX_ONEDRIVE_FILE_BYTES) {
+                throw new java.io.IOException("A planilha excede o limite de 50 MB.");
+            }
+            state.totalBytes = contentLength;
+
+            try (
+                java.io.InputStream input = connection.getInputStream();
+                java.io.OutputStream output = new java.io.BufferedOutputStream(
+                    new java.io.FileOutputStream(state.file)
+                )
+            ) {
+                byte[] buffer = new byte[64 * 1024];
+                int count;
+                while ((count = input.read(buffer)) != -1) {
+                    state.downloadedBytes += count;
+                    if (state.downloadedBytes > MAX_ONEDRIVE_FILE_BYTES) {
+                        throw new java.io.IOException("A planilha excede o limite de 50 MB.");
+                    }
+                    output.write(buffer, 0, count);
+                }
+            }
+
+            if (state.downloadedBytes <= 0L || !state.file.exists()) {
+                throw new java.io.IOException("O OneDrive não retornou nenhum arquivo.");
+            }
+
+            state.status = "completed";
+        } catch (Exception exception) {
+            state.status = "error";
+            state.error = exception.getMessage() != null
+                ? exception.getMessage()
+                : exception.getClass().getSimpleName();
+            if (state.file.exists()) state.file.delete();
+            Log.w(TAG, "Download nativo OneDrive falhou: " + state.error);
+        } finally {
+            if (connection != null) connection.disconnect();
+        }
+    }
+
+    private static URL validarUrlOneDrive(String urlInformada) throws java.io.IOException {
+        if (urlInformada == null || urlInformada.trim().isEmpty()) {
+            throw new java.io.IOException("Link do OneDrive não informado.");
+        }
+        URL url = new URL(urlInformada.trim());
+        if (!"https".equalsIgnoreCase(url.getProtocol())) {
+            throw new java.io.IOException("O link do OneDrive precisa usar HTTPS.");
+        }
+        validarHostOneDrive(url.getHost());
+        return url;
+    }
+
+    private static void validarHostOneDrive(String hostInformado) throws java.io.IOException {
+        String host = hostInformado == null ? "" : hostInformado.toLowerCase(java.util.Locale.US);
+        boolean permitido =
+            "1drv.ms".equals(host) ||
+            "onedrive.live.com".equals(host) ||
+            host.endsWith(".onedrive.live.com") ||
+            host.endsWith(".sharepoint.com") ||
+            host.endsWith(".1drv.com");
+
+        if (!permitido) {
+            throw new java.io.IOException("Redirecionamento para domínio não autorizado.");
+        }
+    }
+
+    private static String jsonDownloadState(OneDriveDownloadState state) {
+        String error = state.error == null ? "" : escaparJson(state.error);
+        return "{\"ok\":true"
+            + ",\"id\":\"" + state.id + "\""
+            + ",\"status\":\"" + state.status + "\""
+            + ",\"downloadedBytes\":" + state.downloadedBytes
+            + ",\"totalBytes\":" + state.totalBytes
+            + ",\"error\":\"" + error + "\"}";
+    }
+
+    private static String escaparJson(String valor) {
+        if (valor == null) return "";
+        return valor.replace("\\", "\\\\")
+            .replace("\"", "\\\"")
+            .replace("\r", " ")
+            .replace("\n", " ");
     }
 
     private final class OtaJsBridge {
