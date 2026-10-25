@@ -529,43 +529,31 @@ async function baixarPlanilhaOneDriveRastreio(url) {
         }
     }
 
-    // Navegador/desktop: mantém o caminho web para ambientes onde o servidor
-    // autoriza CORS. No APK, a ponte nativa acima é usada automaticamente.
-    const urlDownload = normalizarUrlPlanilhaOnlineRastreio(url);
-    const separador = urlDownload.includes("?") ? "&" : "?";
-    const urlCacheBust =
-        urlDownload + separador + "_pmcoletas_sync=" + Date.now();
-
-    const resposta = await fetch(urlCacheBust, {
-        method: "GET",
-        redirect: "follow",
-        cache: "no-store"
-    });
-
-    if (!resposta.ok) {
-        throw new Error("OneDrive respondeu HTTP " + resposta.status + ".");
+    // Navegador: download via Supabase para evitar CORS do OneDrive.
+    // A função só aceita URLs Microsoft HTTPS e valida os redirecionamentos.
+    if (!window.clienteSupabase?.functions?.invoke) {
+        throw new Error("Conexão com o Supabase indisponível.");
     }
-
-    const buffer = await resposta.arrayBuffer();
-
-    if (!buffer.byteLength) {
-        throw new Error("O OneDrive não retornou nenhum arquivo.");
-    }
-
-    const nome =
-        obterNomeArquivoOnlineRastreio(resposta, urlDownload) || nomePadrao;
-
-    if (!/\.(xlsx?|xlsm)$/i.test(nome)) {
-        throw new Error(
-            "O arquivo sincronizado precisa ser Excel (.xlsx, .xls ou .xlsm)."
-        );
-    }
-
-    return new File(
-        [buffer],
-        nome,
-        { type: "application/octet-stream" }
+    mostrarStatusOneDriveRastreio("🟡 Baixando planilha pelo Supabase...");
+    const { data, error } = await window.clienteSupabase.functions.invoke(
+        "pmobile-rastreio-download",
+        { body: { url } }
     );
+    if (error) {
+        let mensagem = error.message || "Falha ao baixar a planilha pelo Supabase.";
+        if (error.context?.json) {
+            try {
+                const detalhe = await error.context.json();
+                mensagem = detalhe?.error || mensagem;
+            } catch {}
+        }
+        throw new Error(mensagem);
+    }
+    if (!data) throw new Error("O Supabase não retornou a planilha.");
+    const blob = data instanceof Blob ? data : new Blob([data]);
+    if (!blob.size) throw new Error("O arquivo recebido está vazio.");
+    mostrarStatusOneDriveRastreio("🟢 Download pelo Supabase concluído.");
+    return new File([blob], nomePadrao, { type: "application/octet-stream" });
 }
 
 async function sincronizarOneDriveRastreio(forcar = false) {
