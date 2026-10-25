@@ -131,3 +131,47 @@
 .menu-tipo-busca-contagem-manual.aberto {
     display: block;
 }
+
+
+/* PMobile Pesquisa 2.0 — escopo exclusivo da aba Pesquisa */
+#pesquisa .pesquisa-v2{max-width:820px;margin:0 auto;padding:22px;border:1px solid #293a31;border-radius:24px;background:#101512;overflow:visible}
+#pesquisa .pesquisa-v2-topo,#pesquisa .pesquisa-v2-marca{display:flex;align-items:center;gap:12px}
+#pesquisa .pesquisa-v2-topo{justify-content:space-between;padding-bottom:22px;border-bottom:1px solid #2b3b32}
+#pesquisa .pesquisa-v2-marca strong,#pesquisa .pesquisa-v2-marca small{display:block}
+#pesquisa .pesquisa-v2-marca strong{font-size:17px;color:#f1f6f3}
+#pesquisa .pesquisa-v2-marca small{font-size:12px;color:#99a99f;margin-top:3px}
+#pesquisa .pesquisa-v2-icone{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;background:#194333;color:#4bdaa0;font-size:34px}
+#pesquisa .pesquisa-v2-status{border-radius:99px;background:#1b3226;color:#a8e4c0;font-size:11px;padding:8px 10px;white-space:nowrap}
+#pesquisa .pesquisa-v2-status.offline{background:#3b3020;color:#efc18a}
+#pesquisa .pesquisa-v2-intro{padding:25px 0 17px}
+#pesquisa .pesquisa-v2-intro h2{margin:0 0 8px;font-size:25px;color:#f3f7f4}
+#pesquisa .pesquisa-v2-intro p{margin:0;color:#9eada3;font-size:14px}
+#pesquisa .pesquisa-v2-campo{display:flex;align-items:center;gap:10px;padding:7px 13px;border:1px solid #365145;border-radius:16px;background:#1c2420}
+#pesquisa .pesquisa-v2-lupa{font-size:28px;color:#51dca0}
+#pesquisa .pesquisa-v2-campo input{border:0!important;box-shadow:none!important;background:transparent!important;min-height:43px;font-size:16px}
+#pesquisa .pesquisa-v2-select{display:none}
+#pesquisa .pesquisa-v2-tipos{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0}
+#pesquisa .pesquisa-v2-tipos button{padding:10px 18px;border:1px solid #45564b;border-radius:99px;background:transparent;color:#b5c0b9;font-size:13px}
+#pesquisa .pesquisa-v2-tipos button.ativo{background:#11965a;border-color:#11965a;color:#fff;font-weight:700}
+#pesquisa .pesquisa-v2-buscar{width:100%;min-height:52px;background:#3dcb92;border:0;border-radius:13px;color:#071c12;font-size:15px;font-weight:700}
+#pesquisa .pesquisa-v2-buscar:hover{background:#55dca4}
+#pesquisa .pesquisa-v2-resultados{margin-top:24px;padding-top:18px;border-top:1px solid #293b30}
+#pesquisa .pesquisa-v2-vazio{text-align:center;padding:30px 10px;color:#a8b8ad}
+#pesquisa .pesquisa-v2-vazio span{display:block;font-size:40px;color:#56d69c}
+#pesquisa .pesquisa-v2-vazio strong{display:block;color:#e5eee8;margin:8px 0}
+#pesquisa .pesquisa-v2-vazio p{margin:0;font-size:13px}
+#pesquisa .pesquisa-v2-contagem{margin:0 0 13px;color:#a7b7ac;font-size:13px}
+#pesquisa .pesquisa-v2-card{margin:10px 0;border:1px solid #31483a;border-radius:15px;background:#1a241e;overflow:hidden}
+#pesquisa .pesquisa-v2-card summary{cursor:pointer;padding:16px;list-style:none}
+#pesquisa .pesquisa-v2-card summary::-webkit-details-marker{display:none}
+#pesquisa .pesquisa-v2-card summary strong{display:block;color:#f2f7f3;font-size:15px;margin:8px 0}
+#pesquisa .pesquisa-v2-card summary small{color:#a5b7aa}
+#pesquisa .pesquisa-v2-codigo{color:#64e1a5;font-size:12px;font-weight:700}
+#pesquisa .pesquisa-v2-disponivel{float:right;color:#9de7bc;font-size:12px}
+#pesquisa .pesquisa-v2-disponivel.zero{color:#efbd87}
+#pesquisa .pesquisa-v2-detalhes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:16px;border-top:1px solid #34463b}
+#pesquisa .pesquisa-v2-detalhes div{min-width:0;overflow-wrap:anywhere}
+#pesquisa .pesquisa-v2-detalhes small{display:block;color:#91a799;margin-bottom:4px}
+#pesquisa .pesquisa-v2-detalhes b{color:#ecf5ef}
+#pesquisa .pesquisa-v2-rodape{display:flex;justify-content:center;gap:8px;padding:20px 0 0;color:#92ac9a;font-size:12px}
+@media(max-width:700px){#pesquisa .pesquisa-v2{padding:15px;border-radius:19px}#pesquisa .pesquisa-v2-intro h2{font-size:22px}#pesquisa .pesquisa-v2-status{font-size:10px}#pesquisa .pesquisa-v2-tipos button{padding:9px 13px}}
