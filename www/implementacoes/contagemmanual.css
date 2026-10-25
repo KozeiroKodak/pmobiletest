@@ -267,10 +267,12 @@
 
 .menu-tipo-busca-contagem-manual {
     display: none;
+    pointer-events: none;
 }
 
 .menu-tipo-busca-contagem-manual.aberto {
     display: block;
+    pointer-events: auto;
 }
 
 .menu-config-contagem-manual {
@@ -279,4 +281,457 @@
 
 .menu-config-contagem-manual.aberto {
     display: block;
+}
+
+
+/* ============================================================
+   REWORK VISUAL — CONTAGEM MANUAL
+   Foco: fluxo Buscar → Selecionar → Registrar → Conferir
+   ============================================================ */
+
+#contagemManual .cabecalho-pagina {
+    max-width: 820px;
+}
+
+#contagemManual .cabecalho-pagina h1 {
+    letter-spacing: -0.02em;
+}
+
+#contagemManual > .cabecalho-pagina + .painel {
+    max-width: 980px;
+    padding: 16px;
+    border-color: rgba(62, 207, 142, 0.18);
+    background:
+        linear-gradient(180deg, rgba(62, 207, 142, 0.045), transparent 52%),
+        var(--fundo-painel);
+}
+
+#contagemManual > .cabecalho-pagina + .painel {
+    overflow: visible;
+}
+
+#contagemManual .linha-contagem-manual-busca,
+#contagemManual .seletor-contagem-manual-wrapper {
+    position: relative;
+    overflow: visible;
+}
+
+#contagemManual .linha-contagem-manual-busca {
+    display: grid;
+    grid-template-columns: 82px minmax(180px, 1fr) 96px 44px;
+    gap: 8px;
+    align-items: stretch;
+}
+
+#contagemManual .seletor-contagem-manual-wrapper,
+#contagemManual .seletor-contagem-manual,
+#contagemManual .botao-buscar-contagem-manual,
+#contagemManual .acoes-contagem-manual-config,
+#contagemManual .botao-config-contagem-manual {
+    width: 100%;
+    min-width: 0;
+}
+
+#contagemManual .seletor-contagem-manual {
+    min-height: 42px;
+    padding: 9px 10px;
+    border: 1px solid var(--borda-clara);
+    border-radius: 8px;
+    background: #151515;
+    color: var(--texto);
+    font-weight: 600;
+    text-align: center;
+}
+
+#contagemManual .seletor-contagem-manual:hover {
+    background: var(--fundo-hover);
+}
+
+#contagemManual #campoContagemManual {
+    max-width: none;
+    min-height: 42px;
+    border-radius: 8px;
+    background: #0f0f0f;
+}
+
+#contagemManual .botao-buscar-contagem-manual {
+    min-height: 42px;
+    border-radius: 8px;
+}
+
+#contagemManual .botao-config-contagem-manual {
+    min-height: 42px;
+    border: 1px solid var(--borda-clara);
+    border-radius: 8px;
+    background: #202020;
+}
+
+#contagemManual #resultadoBuscaContagemManual {
+    margin-top: 14px;
+}
+
+#contagemManual .resultado-contagem-manual {
+    position: relative;
+    margin: 8px 0;
+    padding: 14px 15px;
+    border: 1px solid var(--borda);
+    border-radius: 9px;
+    background: #151515;
+    transition: border-color .14s ease, background-color .14s ease, transform .08s ease;
+}
+
+#contagemManual .resultado-contagem-manual:hover {
+    border-color: var(--borda-clara);
+    background: #191919;
+}
+
+#contagemManual .resultado-contagem-manual h3 {
+    margin: 0 0 10px;
+    padding-right: 4px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+#contagemManual .resultado-contagem-manual p {
+    display: inline-block;
+    margin: 3px 16px 3px 0;
+    color: var(--texto-secundario);
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+#contagemManual .resultado-contagem-manual p strong {
+    color: #d7d7d7;
+    font-weight: 600;
+}
+
+#contagemManual .resultado-contagem-manual .botao-principal {
+    float: right;
+    min-height: 36px;
+    margin-top: 2px;
+}
+
+#contagemManual .resultado-contagem-manual hr {
+    display: none;
+}
+
+#contagemManual #painelRegistroContagemManual {
+    max-width: 980px;
+    border-color: rgba(62, 207, 142, 0.28);
+    background:
+        linear-gradient(180deg, rgba(62, 207, 142, 0.065), transparent 70%),
+        var(--fundo-painel);
+}
+
+#contagemManual #painelRegistroContagemManual h3 {
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+#contagemManual #materialSelecionadoContagemManual {
+    margin-bottom: 14px;
+    padding: 11px 13px;
+    border-left: 3px solid var(--verde);
+    border-radius: 0 7px 7px 0;
+    background: rgba(62, 207, 142, 0.06);
+    color: #e9e9e9;
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+#contagemManual #painelRegistroContagemManual .linha-formulario {
+    display: grid;
+    grid-template-columns: minmax(150px, 1fr) minmax(130px, .55fr) auto;
+    gap: 8px;
+}
+
+#contagemManual #painelRegistroContagemManual .linha-formulario input {
+    max-width: none;
+}
+
+#contagemManual #painelRegistroContagemManual .botao-aba {
+    min-height: 40px;
+    white-space: nowrap;
+}
+
+#contagemManual #statusContagemManual {
+    min-height: 18px;
+    margin-top: 9px;
+    color: var(--texto-secundario);
+    font-size: 12px;
+}
+
+#contagemManual > .painel:last-of-type {
+    max-width: 980px;
+}
+
+#contagemManual #listaContagensManuais {
+    display: grid;
+    gap: 7px;
+}
+
+#contagemManual #listaContagensManuais > * {
+    min-width: 0;
+    border-color: var(--borda);
+}
+
+@media (max-width: 1024px) {
+    #contagemManual .linha-contagem-manual-busca {
+        grid-template-columns: 76px minmax(160px, 1fr) 92px 42px;
+    }
+
+    #contagemManual .resultado-contagem-manual .botao-principal {
+        float: none;
+        display: block;
+        width: 100%;
+        margin-top: 9px;
+    }
+}
+
+@media (max-width: 700px) {
+    #contagemManual .painel {
+        border-radius: 10px;
+    }
+
+    #contagemManual > .cabecalho-pagina + .painel {
+        padding: 12px;
+    }
+
+    #contagemManual .linha-contagem-manual-busca {
+        display: grid;
+        grid-template-columns: 76px 1fr;
+        gap: 7px;
+    }
+
+    #contagemManual .seletor-contagem-manual,
+    #contagemManual #campoContagemManual,
+    #contagemManual .botao-buscar-contagem-manual,
+    #contagemManual .botao-config-contagem-manual {
+        min-height: 44px;
+    }
+
+    #contagemManual #campoContagemManual {
+        font-size: 16px;
+    }
+
+    #contagemManual .botao-buscar-contagem-manual {
+        grid-column: 1 / -1;
+        width: 100%;
+    }
+
+    #contagemManual .acoes-contagem-manual-config {
+        position: static;
+    }
+
+    #contagemManual .menu-config-contagem-manual {
+        left: 12px;
+        right: 12px;
+        width: auto;
+        max-width: none;
+    }
+
+    #contagemManual .resultado-contagem-manual {
+        margin: 6px 0;
+        padding: 13px;
+    }
+
+    #contagemManual .resultado-contagem-manual h3 {
+        font-size: 13px;
+        line-height: 1.3;
+    }
+
+    #contagemManual .resultado-contagem-manual p {
+        display: block;
+        margin: 5px 0;
+    }
+
+    #contagemManual #painelRegistroContagemManual .linha-formulario {
+        grid-template-columns: 1fr;
+    }
+
+    #contagemManual #painelRegistroContagemManual .linha-formulario input,
+    #contagemManual #painelRegistroContagemManual .botao-aba {
+        width: 100%;
+        min-height: 44px;
+        max-width: none;
+    }
+
+    #contagemManual #materialSelecionadoContagemManual {
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 390px) {
+    #contagemManual > .cabecalho-pagina + .painel {
+        padding: 10px;
+    }
+
+    #contagemManual .linha-contagem-manual-busca {
+        grid-template-columns: 70px 1fr;
+    }
+
+    #contagemManual .seletor-contagem-manual {
+        padding-left: 6px;
+        padding-right: 6px;
+        font-size: 12px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #contagemManual .resultado-contagem-manual {
+        transition: none;
+    }
+}
+
+/* ============================================================
+   REWORK VISUAL CORRETIVO — CONTAGEM MANUAL MOBILE
+   ============================================================ */
+
+#contagemManual > .cabecalho-pagina + .painel {
+    max-width: 980px;
+    padding: 14px;
+    border-color: rgba(62, 207, 142, .18);
+    background:
+        linear-gradient(180deg, rgba(62, 207, 142, .045), transparent 62%),
+        var(--fundo-painel);
+}
+
+#contagemManual .linha-contagem-manual-busca {
+    display: grid;
+    grid-template-columns: 82px minmax(180px, 1fr) 96px 44px;
+    gap: 8px;
+    align-items: stretch;
+}
+
+#contagemManual .linha-contagem-manual-busca .acoes-contagem-manual-config {
+    width: 44px;
+    min-width: 44px;
+}
+
+#contagemManual .linha-contagem-manual-busca .botao-config-contagem-manual {
+    width: 44px;
+    min-width: 44px;
+    padding: 0;
+}
+
+#contagemManual #resultadoBuscaContagemManual {
+    margin-top: 10px;
+}
+
+@media (max-width: 700px) {
+    #contagemManual > .cabecalho-pagina + .painel {
+        padding: 10px;
+    }
+
+    #contagemManual .linha-contagem-manual-busca {
+        grid-template-columns: 76px minmax(0, 1fr) 44px;
+        gap: 7px;
+    }
+
+    #contagemManual .linha-contagem-manual-busca .seletor-contagem-manual,
+    #contagemManual .linha-contagem-manual-busca #campoContagemManual,
+    #contagemManual .linha-contagem-manual-busca .botao-config-contagem-manual {
+        min-height: 44px;
+    }
+
+    #contagemManual .linha-contagem-manual-busca .acoes-contagem-manual-config,
+    #contagemManual .linha-contagem-manual-busca .botao-config-contagem-manual {
+        width: 44px;
+        min-width: 44px;
+    }
+
+    #contagemManual .botao-buscar-contagem-manual {
+        grid-column: 1 / -1;
+        width: 100%;
+        min-height: 42px;
+    }
+
+    #contagemManual #resultadoBuscaContagemManual {
+        margin-top: 8px;
+    }
+}
+
+@media (max-width: 390px) {
+    #contagemManual .linha-contagem-manual-busca {
+        grid-template-columns: 70px minmax(0, 1fr) 42px;
+        gap: 6px;
+    }
+
+    #contagemManual .linha-contagem-manual-busca .acoes-contagem-manual-config,
+    #contagemManual .linha-contagem-manual-busca .botao-config-contagem-manual {
+        width: 42px;
+        min-width: 42px;
+    }
+}
+
+/* ============================================================
+   CORREÇÃO DE SELETORES — CONTAGEM MANUAL
+   ============================================================ */
+
+#contagemManual .registro-contagem-manual {
+    position: relative;
+    margin: 0;
+    padding: 13px 14px;
+    border: 1px solid var(--borda);
+    border-radius: 9px;
+    background: #151515;
+    color: var(--texto-secundario);
+    line-height: 1.45;
+    transition: border-color .14s ease, background-color .14s ease;
+}
+
+#contagemManual .registro-contagem-manual:hover {
+    border-color: var(--borda-clara);
+    background: #191919;
+}
+
+#contagemManual .registro-contagem-manual h3 {
+    margin: 0 0 8px;
+    color: #fff;
+    font-size: 14px;
+    line-height: 1.35;
+    font-weight: 600;
+}
+
+#contagemManual .registro-contagem-manual p {
+    margin: 5px 0;
+    color: var(--texto-secundario);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+#contagemManual .registro-contagem-manual p:last-child {
+    margin-top: 9px;
+    color: var(--texto);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .02em;
+}
+
+@media (max-width: 700px) {
+    #contagemManual .registro-contagem-manual {
+        padding: 12px 13px;
+        border-radius: 8px;
+    }
+
+    #contagemManual .registro-contagem-manual h3 {
+        font-size: 13px;
+    }
+
+    #contagemManual .registro-contagem-manual p {
+        margin: 6px 0;
+        font-size: 12px;
+    }
+
+    #contagemManual .registro-contagem-manual p:last-child {
+        margin-top: 10px;
+        font-size: 10px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #contagemManual .registro-contagem-manual {
+        transition: none;
+    }
 }

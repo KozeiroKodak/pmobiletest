@@ -1845,6 +1845,10 @@ async function processarArquivoHTML(
             material
         );
 
+        // Libera a linha original assim que ela foi convertida.
+        // Evita manter ~94 mil objetos de entrada junto do inventário novo.
+        linhas[i] = null;
+
 
         // ----------------------------------------------------
         // Liberar processamento periodicamente
@@ -1935,11 +1939,11 @@ async function processarArquivoExcel(
     }
 
 
-    const arrayBuffer =
+    let arrayBuffer =
         await arquivo.arrayBuffer();
 
 
-    const workbook =
+    let workbook =
         XLSX.read(
             arrayBuffer,
             {
@@ -1970,7 +1974,7 @@ async function processarArquivoExcel(
         ];
 
 
-    const linhas =
+    let linhas =
         XLSX.utils.sheet_to_json(
             planilha,
             {
@@ -2078,6 +2082,11 @@ async function processarArquivoExcel(
 
     }
 
+
+    // A partir daqui somente novoInventario é necessário.
+    linhas = null;
+    workbook = null;
+    arrayBuffer = null;
 
     atualizarBarraProgresso(
         50,
@@ -2266,6 +2275,9 @@ async function importarParaSupabase(
 
             enviados += lote.length;
 
+            // Libera a referência do lote imediatamente após o envio.
+            lote.length = 0;
+
             const percentual =
                 50 +
                 (enviados / materiais.length) *
@@ -2304,24 +2316,62 @@ async function importarParaSupabase(
             throw new Error("Sessão administrativa sem credencial disponível.");
         }
 
-        const {
-            data: totalInserido,
-            error: erroFinalizacao
-        } =
-            await window.clienteSupabase.rpc(
-                "pmobile_finalizar_importacao_materiais",
-                {
-                    p_importacao_id: importacaoId,
-                    p_usuario: usuarioSessao.usuario,
-                    p_credencial: credencialSessao
-                }
+        // A finalização é feita em lotes pequenos para evitar
+        // statement timeout no PostgREST/Supabase ao inserir milhares
+        // de materiais já indexados.
+        const TAMANHO_LOTE_FINALIZACAO = 5000;
+        let totalInserido = 0;
+
+        for (
+            let ordemInicio = 0;
+            ordemInicio < materiais.length;
+            ordemInicio += TAMANHO_LOTE_FINALIZACAO
+        ) {
+            const ultimoLote =
+                ordemInicio + TAMANHO_LOTE_FINALIZACAO >= materiais.length;
+
+            const resultadoLote =
+                await window.clienteSupabase.rpc(
+                    "pmobile_finalizar_importacao_materiais_lote",
+                    {
+                        p_importacao_id: importacaoId,
+                        p_usuario: usuarioSessao.usuario,
+                        p_credencial: credencialSessao,
+                        p_ordem_inicio: ordemInicio,
+                        p_tamanho_lote: TAMANHO_LOTE_FINALIZACAO,
+                        p_primeiro_lote: ordemInicio === 0,
+                        p_ultimo_lote: ultimoLote
+                    }
+                );
+
+            if (resultadoLote.error) {
+                throw new Error(
+                    "Erro ao finalizar lote " +
+                    (Math.floor(ordemInicio / TAMANHO_LOTE_FINALIZACAO) + 1) +
+                    ": " +
+                    resultadoLote.error.message
+                );
+            }
+
+            const dadosLote = Array.isArray(resultadoLote.data)
+                ? resultadoLote.data[0]
+                : resultadoLote.data;
+
+            totalInserido += Number(dadosLote?.inseridos || 0);
+
+            const percentualFinalizacao =
+                92 +
+                ((ordemInicio + Math.min(TAMANHO_LOTE_FINALIZACAO, materiais.length - ordemInicio))
+                    / materiais.length) * 7;
+
+            atualizarBarraProgresso(
+                percentualFinalizacao,
+                ultimoLote
+                    ? "✅ Consolidando inventário..."
+                    : "☁️ Consolidando inventário..."
             );
 
-        if (erroFinalizacao) {
-            throw new Error(
-                "Erro ao finalizar importação: " +
-                erroFinalizacao.message
-            );
+            await new Promise(resolve => setTimeout(resolve, 0));
         }
 
         const quantidadeFinal =

@@ -408,6 +408,10 @@ let sincronizacaoBackgroundDivergenciasEmAndamento = false;
 
 async function sincronizarDivergenciasEmBackground() {
     const areaResultado = document.getElementById("resultadoDivergencias");
+
+    if (document.visibilityState === "hidden") {
+        return;
+    }
     if (!areaResultado || navigator.onLine === false || sincronizacaoBackgroundDivergenciasEmAndamento) {
         return;
     }

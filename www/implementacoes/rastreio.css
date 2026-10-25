@@ -309,3 +309,87 @@
 }
 
 @media (min-width:701px) and (max-width:1024px){.rastreio-grade{grid-template-columns:repeat(2,minmax(0,1fr))}.rastreio-grade span:nth-child(3n+1){padding-left:0}.rastreio-grade span:not(:nth-child(3n+1)){padding-left:12px}.rastreio-grade span:nth-child(2n+1){padding-left:0;border-left:0}.rastreio-grade span:nth-child(n+3){border-top:1px solid var(--borda)}}
+
+
+/* Detalhes financeiros da NF */
+.rastreio-nfs-detalhes {
+    width: 100%;
+    border: 0;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+.rastreio-nfs-detalhes small {
+    opacity: .7;
+    white-space: nowrap;
+}
+.rastreio-detalhes-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    background: rgba(0,0,0,.48);
+}
+.rastreio-detalhes-modal.aberto {
+    display: flex;
+}
+.rastreio-detalhes-caixa {
+    width: min(520px, 100%);
+    max-height: min(720px, calc(100vh - 36px));
+    overflow: auto;
+    border-radius: 18px;
+    padding: 20px;
+    background: var(--cor-superficie, #fff);
+    box-shadow: 0 20px 60px rgba(0,0,0,.22);
+}
+.rastreio-detalhes-cabecalho {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+.rastreio-detalhes-cabecalho span {
+    font-size: .78rem;
+    opacity: .65;
+}
+.rastreio-detalhes-cabecalho h2 {
+    margin: 3px 0 0;
+}
+.rastreio-detalhes-fechar {
+    border: 0;
+    background: transparent;
+    font-size: 1.7rem;
+    line-height: 1;
+    cursor: pointer;
+}
+.rastreio-detalhes-grade {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+.rastreio-detalhes-grade > div {
+    padding: 14px;
+    border: 1px solid rgba(127,127,127,.18);
+    border-radius: 12px;
+}
+.rastreio-detalhes-grade small {
+    display: block;
+    margin-bottom: 5px;
+    opacity: .68;
+}
+.rastreio-detalhes-grade strong {
+    display: block;
+    font-size: 1.05rem;
+}
+@media (max-width: 560px) {
+    .rastreio-detalhes-grade {
+        grid-template-columns: 1fr;
+    }
+}

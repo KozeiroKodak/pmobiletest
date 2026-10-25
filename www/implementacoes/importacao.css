@@ -59,3 +59,37 @@
 .importacao-progresso-concluido::-moz-progress-bar {
     background: #16a34a;
 }
+
+
+/* ============================================================
+   RESPONSIVIDADE — IMPORTAÇÃO DE MATERIAIS
+   ============================================================ */
+@media (max-width: 1024px) {
+    .importacao-progresso {
+        height: 18px;
+        margin: 8px 0;
+    }
+}
+
+@media (max-width: 700px) {
+    .botao-importar-materiais {
+        width: 100%;
+        min-height: 44px;
+    }
+
+    .importacao-progresso {
+        height: 16px;
+        margin: 7px 0;
+        border-radius: 8px;
+    }
+
+    .importacao-progresso::-webkit-progress-bar,
+    .importacao-progresso::-webkit-progress-value,
+    .importacao-progresso::-moz-progress-bar {
+        border-radius: 8px;
+    }
+
+    .importacao-progresso-percentual {
+        font-size: 12px;
+    }
+}

@@ -80,6 +80,55 @@ const telasSistema = [
 //
 // ============================================================
 
+// ============================================================
+// HISTÓRICO DE NAVEGAÇÃO DAS ABAS
+// ============================================================
+//
+// Mantém a última aba principal para permitir retorno pelo:
+// - tecla ESC do computador;
+// - botão/gesto Voltar do Android.
+//
+// ============================================================
+
+const historicoTelasSistema = [];
+
+function obterTelaSistemaAtual() {
+
+    const telas =
+        document.querySelectorAll(".tela-sistema");
+
+    for (const tela of telas) {
+
+        if (tela.style.display !== "none") {
+            return tela.id;
+        }
+
+    }
+
+    return null;
+
+}
+
+function voltarTelaAnteriorPmobile() {
+
+    const anterior =
+        historicoTelasSistema.pop();
+
+    if (!anterior) {
+        return false;
+    }
+
+    mostrarTelaSistema(
+        anterior,
+        null,
+        true
+    );
+
+    return true;
+
+}
+
+
 const itensMenuSistema = [
 
     "menuPesquisa",
@@ -95,7 +144,6 @@ const itensMenuSistema = [
     "menuConferencia",
 
     "menuConferencias",
-"menuDivergencias",
 
     "menuConfiguracoes"
 
@@ -204,8 +252,27 @@ function limparMenuAtivo() {
 
 function mostrarTelaSistema(
     idTela,
-    idMenu
+    idMenu,
+    restaurandoHistorico = false
 ) {
+
+    const atual = obterTelaSistemaAtual();
+
+    if (
+        !restaurandoHistorico &&
+        atual &&
+        atual !== idTela &&
+        atual !== "homeSistema"
+    ) {
+
+        historicoTelasSistema.push(atual);
+
+        // Evita crescimento indefinido em navegações repetidas.
+        if (historicoTelasSistema.length > 30) {
+            historicoTelasSistema.shift();
+        }
+
+    }
 
     esconderTelasSistema();
 
@@ -1446,9 +1513,12 @@ function abrirPesquisa() {
 
 function voltarMenu() {
 
+    historicoTelasSistema.length = 0;
+
     mostrarTelaSistema(
         "homeSistema",
-        null
+        null,
+        true
     );
 
 }
@@ -1607,7 +1677,7 @@ function abrirDivergencias() {
 
     mostrarTelaSistema(
         "divergencias",
-        "menuDivergencias"
+        null
     );
 
 
@@ -1782,6 +1852,7 @@ function atualizarVisibilidadeConfiguracoes() {
         menuRastreio: isAdmin || isNivel2,
         menuConferencia: isAdmin,
         menuConferencias: isAdmin,
+        menuReservas: isAdmin || isNivel2,
         menuPesquisa: isAdmin || isNivel2,
         menuContagemManual: isAdmin || isNivel2,
         menuDivergencias: isAdmin
@@ -1915,11 +1986,15 @@ async function abrirGerenciamentoUsuarios() {
                         '<select id="nivelSolicitacao_' + solicitacao.id + '" class="seletor-nivel-usuario-nativo" aria-hidden="true" tabindex="-1">' +
                             '<option value="NIVEL2">Nível 2</option>' +
                             '<option value="ADMIN">Administrativo</option>' +
+                            '<option value="RMADMIN">RMAdmin</option>' +
+                            '<option value="RMMOTORISTAS">RMMotoristas</option>' +
                         '</select>' +
                         '<button type="button" class="seletor-nivel-usuario" id="botaoNivelSolicitacao_' + solicitacao.id + '" onclick="alternarSeletorNivelUsuario(' + solicitacao.id + ')" aria-haspopup="listbox" aria-expanded="false">Nível 2</button>' +
                         '<div id="menuNivelSolicitacao_' + solicitacao.id + '" class="menu-nivel-usuario" role="listbox">' +
                             '<button type="button" onclick="selecionarNivelUsuario(' + solicitacao.id + ', \'NIVEL2\')">Nível 2 — Pesquisa e Contagem manual</button>' +
                             '<button type="button" onclick="selecionarNivelUsuario(' + solicitacao.id + ', \'ADMIN\')">Administrativo — acesso total</button>' +
+                            '<button type="button" onclick="selecionarNivelUsuario(' + solicitacao.id + ', \'RMADMIN\')">RMAdmin — gestão do RMExpress</button>' +
+                            '<button type="button" onclick="selecionarNivelUsuario(' + solicitacao.id + ', \'RMMOTORISTAS\')">RMMotoristas — entregas e roteiro</button>' +
                         '</div>' +
                     '</div>' +
                 '</div>' +
@@ -1994,6 +2069,33 @@ function formatarDataSolicitacaoPmobile(valor) {
 
 }
 
+const NIVEIS_APROVACAO_PMOBILE = [
+    {
+        value: "NIVEL2",
+        label: "Nível 2 — Pesquisa e Contagem manual"
+    },
+    {
+        value: "ADMIN",
+        label: "Administrativo — acesso total"
+    },
+    {
+        value: "RMADMIN",
+        label: "RMAdmin — gestão do RMExpress"
+    },
+    {
+        value: "RMMOTORISTAS",
+        label: "RMMotoristas — entregas e roteiro"
+    }
+];
+
+function obterLabelNivelAprovacaoPmobile(nivel) {
+    const opcao = NIVEIS_APROVACAO_PMOBILE.find(function(item) {
+        return item.value === nivel;
+    });
+
+    return opcao ? opcao.label : nivel;
+}
+
 function alternarSeletorNivelUsuario(solicitacaoId) {
     const seletor = document.getElementById("nivelSolicitacao_" + solicitacaoId);
     const botao = document.getElementById("botaoNivelSolicitacao_" + solicitacaoId);
@@ -2002,18 +2104,13 @@ function alternarSeletorNivelUsuario(solicitacaoId) {
 
     abrirPopupEscolha({
         titulo: "Nível de acesso",
-        opcoes: [
-            {
-                value: "NIVEL2",
-                label: "Nível 2 — Pesquisa e Contagem manual",
-                selected: seletor.value === "NIVEL2"
-            },
-            {
-                value: "ADMIN",
-                label: "Administrativo",
-                selected: seletor.value === "ADMIN"
-            }
-        ],
+        opcoes: NIVEIS_APROVACAO_PMOBILE.map(function(opcao) {
+            return {
+                value: opcao.value,
+                label: opcao.label,
+                selected: seletor.value === opcao.value
+            };
+        }),
         aoEscolher: function(nivel) {
             selecionarNivelUsuario(solicitacaoId, nivel);
         }
@@ -2028,11 +2125,14 @@ function selecionarNivelUsuario(solicitacaoId, nivel) {
 
     if (!seletor || !botao) return;
 
+    const nivelValido = NIVEIS_APROVACAO_PMOBILE.some(function(opcao) {
+        return opcao.value === nivel;
+    });
+
+    if (!nivelValido) return;
+
     seletor.value = nivel;
-    botao.textContent =
-        nivel === "ADMIN"
-            ? "Administrativo"
-            : "Nível 2";
+    botao.textContent = obterLabelNivelAprovacaoPmobile(nivel).split(" — ")[0];
 
     botao.setAttribute("aria-expanded", "false");
 }
@@ -2044,7 +2144,12 @@ async function aprovarCadastroUsuario(solicitacaoId) {
     const seletor = document.getElementById("nivelSolicitacao_" + solicitacaoId);
     const nivel = seletor ? seletor.value : "NIVEL2";
 
-    if (!confirm("Aprovar este usuário como " + (nivel === "ADMIN" ? "ADMINISTRATIVO" : "NÍVEL 2") + "?")) return;
+    if (!NIVEIS_APROVACAO_PMOBILE.some(function(opcao) { return opcao.value === nivel; })) {
+        alert("Selecione um nível de acesso válido.");
+        return;
+    }
+
+    if (!confirm("Aprovar este usuário como " + obterLabelNivelAprovacaoPmobile(nivel) + "?")) return;
 
     try {
         const { data, error } = await window.clienteSupabase.rpc("aprovar_solicitacao_cadastro", {
@@ -2411,24 +2516,14 @@ async function confirmarZeramento(
                 return;
             }
 
-            // Pesquisa: como existe uma única tela de pesquisa,
-            // o botão Voltar retorna diretamente para Home.
-            const pesquisa =
-                document.getElementById(
-                    "pesquisa"
-                );
-
-            if (
-                pesquisa &&
-                pesquisa.style.display !== "none"
-            ) {
-
-                voltarMenu();
+            // Primeiro tenta retornar para a aba principal anterior.
+            // Isso mantém o mesmo comportamento esperado da tecla ESC
+            // no computador.
+            if (voltarTelaAnteriorPmobile()) {
                 return;
-
             }
 
-            // Qualquer módulo principal retorna para Home.
+            // Sem histórico, qualquer módulo principal retorna para Home.
             const home =
                 document.getElementById(
                     "homeSistema"
@@ -2549,3 +2644,69 @@ function procurarAtualizacoesOta() {
 }
 
 window.PMOBILE_OK = true;
+
+// ============================================================
+// TECLA ESC — RETORNO ENTRE ABAS
+// ============================================================
+//
+// No computador, ESC funciona como o botão Voltar:
+// ao abrir uma aba, ESC retorna para a aba anterior.
+//
+// ============================================================
+
+document.addEventListener(
+    "keydown",
+    function(evento) {
+
+        if (evento.key !== "Escape") {
+            return;
+        }
+
+        const aplicacao =
+            document.getElementById("aplicacao");
+
+        if (
+            !aplicacao ||
+            aplicacao.style.display === "none"
+        ) {
+            return;
+        }
+
+        // Na Home não há aba anterior para retornar.
+        if (obterTelaSistemaAtual() === "homeSistema") {
+            return;
+        }
+
+        // Não interfere em diálogos/modais que tenham
+        // tratamento próprio de ESC.
+        const modalAberto =
+            document.querySelector(
+                ".modal[style*=\"display: flex\"], " +
+                ".modal[style*=\"display:block\"], " +
+                "[role=\"dialog\"][style*=\"display: flex\"]"
+            );
+
+        if (modalAberto) {
+            return;
+        }
+
+        // Se algum controle local já consumiu o ESC, não navega.
+        if (evento.defaultPrevented) {
+            return;
+        }
+
+        if (voltarTelaAnteriorPmobile()) {
+            evento.preventDefault();
+            evento.stopPropagation();
+            return;
+        }
+
+        // Fallback: se a tela foi aberta por uma rotina que não
+        // registrou histórico, ESC ainda deve retornar para a Home.
+        voltarMenu();
+        evento.preventDefault();
+        evento.stopPropagation();
+
+    }
+);
+

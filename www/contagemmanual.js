@@ -59,6 +59,20 @@ function selecionarTipoBuscaContagemManual(tipo) {
 
     seletor.value = tipo;
     botao.textContent = nomesCurtos[tipo] || "CÓD";
+
+    const campo = document.getElementById("campoContagemManual");
+    const placeholders = {
+        codigo: "Digite o código",
+        referencia: "Digite a referência",
+        descricao: "Digite a descrição"
+    };
+
+    if (campo) {
+        campo.value = "";
+        campo.placeholder = placeholders[tipo] || "Digite para buscar";
+        campo.focus();
+    }
+
     menu.classList.remove("aberto");
     botao.setAttribute("aria-expanded", "false");
 }
@@ -69,7 +83,7 @@ document.addEventListener("click", function(evento) {
     const wrapper = botao?.closest(".seletor-contagem-manual-wrapper");
 
     if (menu && wrapper && !wrapper.contains(evento.target)) {
-        menu.style.display = "none";
+        menu.classList.remove("aberto");
         botao.setAttribute("aria-expanded", "false");
     }
 });
@@ -446,27 +460,36 @@ async function sincronizarContagensManuaisPendentes(limpezaEm = null) {
 
     for (const item of pendentes) {
         try {
-            const payload = {
-                id: item.id,
-                material_id: item.idSupabase || null,
-                codigo_material: item.codigo || "",
-                descricao_material: item.descricao || "",
-                referencia_material: item.referencia || null,
-                marca_material: item.marca || null,
-                local_original: item.localOriginal || null,
-                local_encontrado: item.localEncontrado,
-                quantidade_esperada: Number(item.quantidadeEsperada || 0),
-                quantidade_fisica: Number(item.quantidadeFisica || 0),
-                local_alterado: Boolean(item.localAlterado),
-                zerado: Boolean(item.zerado),
-                data_hora: item.dataHora,
-                usuario_id: item.usuarioId ?? window.usuarioPmobileAtual?.id ?? null,
-                usuario_nome: item.usuarioNome ?? window.usuarioPmobileAtual?.nome ?? window.usuarioPmobileAtual?.usuario ?? "Usuário não identificado"
-            };
+            const usuarioSessao =
+                (typeof usuarioPmobileAtual !== "undefined" && usuarioPmobileAtual?.usuario)
+                    ? usuarioPmobileAtual
+                    : window.usuarioPmobileAtual;
+            const credencialSessao =
+                (typeof credencialPmobileAtual !== "undefined" && credencialPmobileAtual)
+                    ? credencialPmobileAtual
+                    : window.credencialPmobileAtual;
 
-            const { error } = await cliente
-                .from(TABELA_CONTAGENS_MANUAIS_SUPABASE)
-                .insert(payload);
+            if (!usuarioSessao?.usuario || !credencialSessao) {
+                throw new Error("Sessão do usuário não disponível para sincronizar a contagem.");
+            }
+
+            const { error } = await cliente.rpc("pmobile_contagem_manual_inserir", {
+                p_usuario: usuarioSessao.usuario,
+                p_credencial: credencialSessao,
+                p_id: item.id,
+                // O ID local pode ficar obsoleto após uma nova importação do inventário.
+                // O código é a identidade funcional e permite ao RPC resolver o material atual.
+                p_material_id: null,
+                p_codigo_material: item.codigo || "",
+                p_descricao_material: item.descricao || "",
+                p_referencia_material: item.referencia || null,
+                p_marca_material: item.marca || null,
+                p_local_original: item.localOriginal || null,
+                p_local_encontrado: item.localEncontrado,
+                p_quantidade_esperada: Number(item.quantidadeEsperada || 0),
+                p_quantidade_fisica: Number(item.quantidadeFisica || 0),
+                p_data_hora: item.dataHora
+            });
 
             if (error) throw error;
 
@@ -520,9 +543,25 @@ async function baixarContagensManuaisSupabase(limpezaEm = null) {
         while (true) {
             const fim = inicio + tamanhoPagina - 1;
 
+            const usuarioSessao =
+                (typeof usuarioPmobileAtual !== "undefined" && usuarioPmobileAtual?.usuario)
+                    ? usuarioPmobileAtual
+                    : window.usuarioPmobileAtual;
+            const credencialSessao =
+                (typeof credencialPmobileAtual !== "undefined" && credencialPmobileAtual)
+                    ? credencialPmobileAtual
+                    : window.credencialPmobileAtual;
+
+            if (!usuarioSessao?.usuario || !credencialSessao) {
+                return false;
+            }
+
             const { data, error } = await cliente
-                .from(TABELA_CONTAGENS_MANUAIS_SUPABASE)
-                .select("*")
+                .rpc("pmobile_contagens_manuais_listar", {
+                    p_usuario: usuarioSessao.usuario,
+                    p_credencial: credencialSessao,
+                    p_somente_alterados: false
+                })
                 .order("data_hora", { ascending: false })
                 .range(inicio, fim);
 
@@ -628,7 +667,9 @@ function iniciarMonitoramentoContagensManuais() {
     }
 
     intervaloSincronizacaoContagensManuais = setInterval(function() {
-        atualizarContagensManuais();
+        if (document.visibilityState !== "hidden") {
+            atualizarContagensManuais();
+        }
     }, 10000);
 }
 
@@ -682,6 +723,18 @@ async function exibirContagensManuais() {
         area.appendChild(bloco);
     });
 }
+
+document.addEventListener("keydown", function(evento) {
+    if (evento.key !== "Escape") return;
+
+    const menu = document.getElementById("menuTipoBuscaContagemManual");
+    const botao = document.getElementById("botaoTipoBuscaContagemManual");
+
+    if (menu?.classList.contains("aberto")) {
+        menu.classList.remove("aberto");
+        botao?.setAttribute("aria-expanded", "false");
+    }
+});
 
 document.addEventListener("DOMContentLoaded", function() {
     const campo = document.getElementById("campoContagemManual");

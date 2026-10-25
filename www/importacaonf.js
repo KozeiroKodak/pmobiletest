@@ -460,10 +460,10 @@ async function analisarArquivoImportacaoNF(
 
     try {
 
-        const buffer =
+        let buffer =
             await arquivo.arrayBuffer();
 
-        const workbook =
+        let workbook =
             window.XLSX.read(
                 buffer,
                 {
@@ -484,7 +484,7 @@ async function analisarArquivoImportacaoNF(
         const planilha =
             workbook.Sheets[nomeAba];
 
-        const matriz =
+        let matriz =
             window.XLSX.utils.sheet_to_json(
                 planilha,
                 {
@@ -570,6 +570,9 @@ async function analisarArquivoImportacaoNF(
                 }
             );
 
+            // Libera a linha bruta depois de convertê-la para o formato de envio.
+            matriz[i] = null;
+
         }
 
         if (!linhas.length) {
@@ -583,8 +586,19 @@ async function analisarArquivoImportacaoNF(
                 buffer
             );
 
+        const metadadosArquivo = {
+            name: arquivo.name,
+            size: arquivo.size
+        };
+
+        // O objeto File não é mais necessário após a leitura e o SHA.
+        // Mantemos somente os metadados usados pela tela e pelo envio.
+        matriz = null;
+        workbook = null;
+        buffer = null;
+
         window.dadosImportacaoNFAtual = {
-            arquivo,
+            arquivo: metadadosArquivo,
             nomeAba,
             colunas,
             linhas,

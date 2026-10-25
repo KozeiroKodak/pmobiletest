@@ -14,55 +14,56 @@
 
     <link
         rel="stylesheet"
-        href="style.css?v=0.0.220"
+        href="style.css?v=0.0.247"
     >
 <link
         rel="stylesheet"
-        href="implementacoes/locais.css?v=0.0.220"
+        href="implementacoes/locais.css?v=0.0.247"
     >
 
     <link
         rel="stylesheet"
-        href="implementacoes/reservas.css?v=0.0.220"
+        href="implementacoes/reservas.css?v=0.0.247"
     >
 
     <link
         rel="stylesheet"
-        href="implementacoes/pesquisa.css?v=0.0.220"
+        href="implementacoes/pesquisa.css?v=0.0.247"
     >
 
     <link
         rel="stylesheet"
-        href="implementacoes/conferencia.css?v=0.0.220"
+        href="implementacoes/conferencia.css?v=0.0.247"
     >
 
     <link
         rel="stylesheet"
-        href="implementacoes/conferenciasrealizadas.css?v=0.0.220"
+        href="implementacoes/conferenciasrealizadas.css?v=0.0.247"
     >
 
     <link
         rel="stylesheet"
-        href="implementacoes/importacaonf.css?v=0.0.220"
+        href="implementacoes/importacaonf.css?v=0.0.247"
     >
 
     <link
         rel="stylesheet"
-        href="implementacoes/arquivosteste.css?v=0.0.220"
+        href="implementacoes/arquivosteste.css?v=0.0.247"
     >
 
-        <link rel="stylesheet" href="implementacoes/inicio.css?v=0.0.220">
-    <link rel="stylesheet" href="implementacoes/home.css?v=0.0.220">
-    <link rel="stylesheet" href="implementacoes/status.css?v=0.0.220">
-    <link rel="stylesheet" href="implementacoes/login.css?v=0.0.220">
-    <link rel="stylesheet" href="implementacoes/contagemmanual.css?v=0.0.220">
-    <link rel="stylesheet" href="implementacoes/configuracoes.css?v=0.0.220">
-    <link rel="stylesheet" href="implementacoes/solicitacoes.css?v=0.0.220">
-    <link rel="stylesheet" href="implementacoes/importacao.css?v=0.0.220">
+        <link rel="stylesheet" href="implementacoes/inicio.css?v=0.0.247">
+    <link rel="stylesheet" href="implementacoes/home.css?v=0.0.247">
+    <link rel="stylesheet" href="implementacoes/status.css?v=0.0.247">
+<link rel="stylesheet" href="implementacoes/popupescolha.css?v=0.0.247">
+    <link rel="stylesheet" href="implementacoes/login.css?v=0.0.247">
+    <link rel="stylesheet" href="implementacoes/contagemmanual.css?v=0.0.247">
+    <link rel="stylesheet" href="implementacoes/configuracoes.css?v=0.0.247">
+    <link rel="stylesheet" href="implementacoes/solicitacoes.css?v=0.0.247">
+    <link rel="stylesheet" href="implementacoes/importacao.css?v=0.0.247">
 
-    <link rel="stylesheet" href="implementacoes/rastreio.css?v=0.0.220">
+    <link rel="stylesheet" href="implementacoes/rastreio.css?v=0.0.247">
 
-    <link rel="stylesheet" href="implementacoes/rastreioimportacao.css?v=0.0.220">
+    <link rel="stylesheet" href="implementacoes/rastreioimportacao.css?v=0.0.247">
 
 </head>
 
@@ -216,238 +217,9 @@
          SIDEBAR
          ===================================================== -->
 
-    <aside id="sistema">
+    
+    <aside id="sistema" aria-hidden="true"></aside>
 
-
-        <!-- =================================================
-             IDENTIFICAÇÃO
-             ================================================= -->
-
-        <div class="sidebar-topo">
-
-            <div class="sidebar-logo">
-                P
-            </div>
-
-            <div class="sidebar-titulo">
-
-                <strong>
-                    PMOBILE
-                </strong>
-
-                <span>
-                    Estoque
-                </span>
-
-            </div>
-
-        </div>
-
-
-        <!-- =================================================
-             NAVEGAÇÃO PRINCIPAL
-             ================================================= -->
-
-        <nav class="sidebar-menu">
-
-
-            <!-- PESQUISA -->
-
-            <button
-                id="menuPesquisa"
-                class="sidebar-item"
-                onclick="abrirPesquisa()"
-                title="Pesquisar material"
-            >
-
-                <span class="sidebar-icone">
-                    🔎
-                </span>
-
-                <span class="sidebar-texto">
-                    Pesquisar material
-                </span>
-
-            </button>
-
-
-            <!-- IMPORTAÇÃO -->
-
-            <button
-                id="menuImportacao"
-                class="sidebar-item"
-                onclick="abrirImportacao()"
-                title="Importar inventário"
-            >
-
-                <span class="sidebar-icone">
-                    📦
-                </span>
-
-                <span class="sidebar-texto">
-                    Importar inventário
-                </span>
-
-            </button>
-
-
-            <!-- IMPORTAÇÃO NF -->
-
-            <button
-                id="menuImportacaoNF"
-                class="sidebar-item"
-                onclick="abrirImportacaoNF()"
-                title="Importação NF"
-            >
-
-                <span class="sidebar-icone">
-                    🧾
-                </span>
-
-                <span class="sidebar-texto">
-                    Importação NF
-                </span>
-
-            </button>
-
-
-            <!-- RASTREIO -->
-
-            <button id="menuRastreio" class="sidebar-item" onclick="abrirRastreio()" title="Rastreio">
-                <span class="sidebar-icone">🚚</span>
-                <span class="sidebar-texto">Rastreio</span>
-            </button>
-
-
-            <!-- CONTAGEM MANUAL -->
-
-            <button
-                id="menuContagemManual"
-                class="sidebar-item"
-                onclick="abrirContagemManual()"
-                title="Contagem manual"
-            >
-                <span class="sidebar-icone">✍️</span>
-                <span class="sidebar-texto">Contagem manual</span>
-            </button>
-
-
-            <!-- CONFERÊNCIA -->
-
-            <button
-                id="menuConferencia"
-                class="sidebar-item"
-                onclick="abrirConferencia()"
-                title="Conferência"
-            >
-
-                <span class="sidebar-icone">
-                    📋
-                </span>
-
-                <span class="sidebar-texto">
-                    Conferência
-                </span>
-
-            </button>
-
-
-            <!-- CONFERÊNCIAS -->
-
-            <button
-                id="menuConferencias"
-                class="sidebar-item"
-                onclick="abrirConferencias()"
-                title="Conferências realizadas"
-            >
-
-                <span class="sidebar-icone">
-                    🗂️
-                </span>
-
-                <span class="sidebar-texto">
-                    Conferências
-                </span>
-
-            </button>
-            <!-- RESERVAS -->
-
-            <button
-                id="menuReservas"
-                class="sidebar-item"
-                onclick="abrirReservas()"
-                title="Reservas"
-            >
-                <span class="sidebar-icone">📦</span>
-                <span class="sidebar-texto">Reservas</span>
-            </button>
-
-
-            <!-- DIVERGÊNCIAS -->
-
-            <button
-                id="menuDivergencias"
-                class="sidebar-item"
-                onclick="abrirDivergencias()"
-                title="Divergências"
-            >
-
-                <span class="sidebar-icone">
-                    ⚠️
-                </span>
-
-                <span class="sidebar-texto">
-                    Divergências
-                </span>
-
-            </button>
-
-
-        </nav>
-
-
-        <!-- =================================================
-             PARTE INFERIOR DA SIDEBAR
-             ================================================= -->
-
-        <div class="sidebar-rodape">
-
-            <button
-                id="menuSair"
-                class="sidebar-item sidebar-item-sair"
-                onclick="sairPmobile()"
-                title="Sair"
-            >
-                <span class="sidebar-icone">
-                    🚪
-                </span>
-
-                <span class="sidebar-texto">
-                    Sair
-                </span>
-            </button>
-
-            <button
-                id="menuConfiguracoes"
-                class="sidebar-item"
-                onclick="abrirConfiguracoes()"
-                title="Configurações"
-            >
-
-                <span class="sidebar-icone">
-                    ⚙️
-                </span>
-
-                <span class="sidebar-texto">
-                    Configurações
-                </span>
-
-            </button>
-
-        </div>
-
-
-    </aside>
 
 
     <!-- =====================================================
@@ -466,19 +238,109 @@
             class="tela-sistema"
         >
 
-            <div class="cabecalho-pagina">
+            <div class="home-apps">
 
-                <p class="cabecalho-caminho">
-                    PMOBILE
-                </p>
+                <div class="home-apps-cabecalho">
+                    <div>
+                        <p class="home-apps-kicker">PMOBILE</p>
+                        <h1>Estoque</h1>
+                        <p>Selecione uma aplicação para continuar.</p>
+                    </div>
+                </div>
 
-                <h1>
-                    Estoque
-                </h1>
+                <div class="home-apps-grade" aria-label="Aplicações do PMOBILE">
 
-                <p>
-                    Selecione uma opção no menu lateral.
-                </p>
+                    <button id="menuPesquisa" class="home-app-card" onclick="abrirPesquisa()" title="Pesquisar material">
+                        <span class="home-app-icone" aria-hidden="true">🔎</span>
+                        <span class="home-app-conteudo">
+                            <strong>Pesquisa</strong>
+                            <small>Encontre materiais no estoque</small>
+                        </span>
+                        <span class="home-app-seta" aria-hidden="true">›</span>
+                    </button>
+
+                    <button id="menuContagemManual" class="home-app-card" onclick="abrirContagemManual()" title="Contagem manual">
+                        <span class="home-app-icone" aria-hidden="true">✍️</span>
+                        <span class="home-app-conteudo">
+                            <strong>Contagem manual</strong>
+                            <small>Registre contagens e alterações</small>
+                        </span>
+                        <span class="home-app-seta" aria-hidden="true">›</span>
+                    </button>
+
+                    <button id="menuRastreio" class="home-app-card" onclick="abrirRastreio()" title="Rastreio">
+                        <span class="home-app-icone" aria-hidden="true">🚚</span>
+                        <span class="home-app-conteudo">
+                            <strong>Rastreio</strong>
+                            <small>Acompanhe registros operacionais</small>
+                        </span>
+                        <span class="home-app-seta" aria-hidden="true">›</span>
+                    </button>
+
+                    <button id="menuImportacao" class="home-app-card" onclick="abrirImportacao()" title="Importar inventário">
+                        <span class="home-app-icone" aria-hidden="true">📦</span>
+                        <span class="home-app-conteudo">
+                            <strong>Importar estoque</strong>
+                            <small>Atualize a relação de materiais</small>
+                        </span>
+                        <span class="home-app-seta" aria-hidden="true">›</span>
+                    </button>
+
+                    <button id="menuImportacaoNF" class="home-app-card" onclick="abrirImportacaoNF()" title="Importação NF">
+                        <span class="home-app-icone" aria-hidden="true">🧾</span>
+                        <span class="home-app-conteudo">
+                            <strong>Importação NF</strong>
+                            <small>Importe documentos para análise</small>
+                        </span>
+                        <span class="home-app-seta" aria-hidden="true">›</span>
+                    </button>
+
+                    <button id="menuConferencia" class="home-app-card" onclick="abrirConferencia()" title="Conferência">
+                        <span class="home-app-icone" aria-hidden="true">📋</span>
+                        <span class="home-app-conteudo">
+                            <strong>Conferência</strong>
+                            <small>Faça a conferência do estoque</small>
+                        </span>
+                        <span class="home-app-seta" aria-hidden="true">›</span>
+                    </button>
+
+                    <button id="menuConferencias" class="home-app-card" onclick="abrirConferencias()" title="Conferências realizadas">
+                        <span class="home-app-icone" aria-hidden="true">🗂️</span>
+                        <span class="home-app-conteudo">
+                            <strong>Conferências</strong>
+                            <small>Consulte conferências realizadas</small>
+                        </span>
+                        <span class="home-app-seta" aria-hidden="true">›</span>
+                    </button>
+
+                    <button id="menuReservas" class="home-app-card" onclick="abrirReservas()" title="Reservas">
+                        <span class="home-app-icone" aria-hidden="true">📦</span>
+                        <span class="home-app-conteudo">
+                            <strong>Reservas</strong>
+                            <small>Consulte e acompanhe reservas</small>
+                        </span>
+                        <span class="home-app-seta" aria-hidden="true">›</span>
+                    </button>
+
+                    <button id="menuConfiguracoes" class="home-app-card home-app-card-config" onclick="abrirConfiguracoes()" title="Configurações">
+                        <span class="home-app-icone" aria-hidden="true">⚙️</span>
+                        <span class="home-app-conteudo">
+                            <strong>Configurações</strong>
+                            <small>Administração e ferramentas do sistema</small>
+                        </span>
+                        <span class="home-app-seta" aria-hidden="true">›</span>
+                    </button>
+
+                    <button id="menuSair" class="home-app-card home-app-card-sair" onclick="sairPmobile()" title="Sair">
+                        <span class="home-app-icone" aria-hidden="true">🚪</span>
+                        <span class="home-app-conteudo">
+                            <strong>Sair</strong>
+                            <small>Encerrar a sessão atual</small>
+                        </span>
+                        <span class="home-app-seta" aria-hidden="true">›</span>
+                    </button>
+
+                </div>
 
             </div>
 
@@ -627,6 +489,26 @@
                         Importar planilha
                     </button>
                 </div>
+                <div class="rastreio-importacao-divisor"><span>ou</span></div>
+
+                <div class="rastreio-importacao-online">
+                    <label for="linkImportacaoRastreio">Planilha compartilhada online</label>
+                    <div class="rastreio-importacao-online-linha">
+                        <input type="url" id="linkImportacaoRastreio" placeholder="Insira o link aqui" autocomplete="off" inputmode="url"
+                            onkeydown="if (event.key === 'Enter') { event.preventDefault(); prepararImportacaoRastreioOnline(); }">
+                        <button type="button" class="botao-aba" onclick="prepararImportacaoRastreioOnline()">Ler link</button>
+                    </div>
+                    <small>Use um link público com permissão para visualizar ou baixar a planilha. Links do Google Sheets são convertidos automaticamente.</small>
+                </div>
+
+                <label class="rastreio-importacao-sem-motorista">
+                    <input type="checkbox" id="rastreioImportarSemMotorista"
+                        onchange="alternarImportacaoSemMotoristaRastreio(this)">
+                    <span>
+                        <strong>Importar sem selecionar motorista</strong>
+                        <small>Não será necessário definir motorista por Nota Fiscal.</small>
+                    </span>
+                </label>
                 <div id="rastreioMapaMotoristas"></div>
                 <div id="rastreioImportacaoPrevia"></div>
                 <div id="statusImportacaoRastreio" class="rastreio-importacao-status" aria-live="polite"></div>
@@ -635,7 +517,7 @@
             <div class="painel rastreio-painel">
                 <div class="rastreio-filtros">
                     <input type="search" id="buscaRastreio" placeholder="Cliente, NF, motorista..." oninput="filtrarRastreios()">
-                    <select id="filtroStatusRastreio" onchange="filtrarRastreios()">
+                    <select id="filtroStatusRastreio" onchange="filtrarRastreios()" aria-hidden="true" tabindex="-1">
                         <option value="">Todos os status</option>
                         <option value="PENDENTE">Pendente</option>
                         <option value="EM_TRANSPORTE">Em transporte</option>
@@ -643,6 +525,7 @@
                         <option value="ATRASADO">Atrasado</option>
                         <option value="CANCELADO">Cancelado</option>
                     </select>
+                    <button type="button" id="botaoFiltroStatusRastreio" class="popup-escolha-trigger" onclick="abrirPopupStatusRastreio()" aria-haspopup="dialog" aria-expanded="false">Todos os status</button>
                 </div>
                 <div id="statusRastreio" class="rastreio-status" aria-live="polite"></div>
                 <div id="listaRastreios" class="rastreio-lista"></div>
@@ -694,22 +577,12 @@
 
                         <button
                             type="button"
-                            class="seletor-contagem-manual"
+                            class="seletor-contagem-manual popup-escolha-trigger"
                             id="botaoTipoBuscaPesquisaMaterial"
-                            onclick="alternarSeletorPesquisaMaterial()"
-                            aria-haspopup="listbox"
+                            onclick="abrirPopupPesquisaMaterial()"
+                            aria-haspopup="dialog"
                             aria-expanded="false"
                         >CÓD</button>
-
-                        <div
-                            id="menuTipoBuscaPesquisaMaterial"
-                            class="menu-tipo-busca-contagem-manual"
-                            role="listbox"
-                        >
-                            <button type="button" onclick="selecionarTipoBuscaPesquisaMaterial('codigo')">Código</button>
-                            <button type="button" onclick="selecionarTipoBuscaPesquisaMaterial('referencia')">Referência</button>
-                            <button type="button" onclick="selecionarTipoBuscaPesquisaMaterial('descricao')">Descrição</button>
-                        </div>
 
                     </div>
 
@@ -1151,6 +1024,7 @@
                     <button class="botao-aba" onclick="abrirSolicitacoesResetToken()">🔑 Recuperação de tokens</button>
                     <button class="botao-perigo" onclick="abrirManutencaoBanco()">🛠️ Manutenção</button>
                     <button class="botao-aba" onclick="abrirArquivosTeste()">📁 Arquivos de teste</button>
+                    <button class="botao-aba" onclick="abrirDivergencias()">⚠️ Divergências</button>
                 </div>
 
             </div>
@@ -1203,6 +1077,8 @@
                 <h2>🛠️ Manutenção</h2>
                 <p>Operações administrativas do banco de dados.</p>
                 <button class="botao-perigo" onclick="limparMateriaisSupabase()">🗑️ Materiais importados</button>
+                <button class="botao-perigo" onclick="limparRastreioSupabase()">🗑️ Rastreio importado</button>
+                <button class="botao-perigo" onclick="limparLocaisAlteradosSupabase()">🗑️ Locais alterados</button>
             </div>
 
             <div class="painel arquivos-teste-painel" id="painelArquivosTeste" style="display: none;">
@@ -1355,73 +1231,74 @@
      CONFIGURAÇÕES DO SISTEMA
      ========================================================= -->
 
-<script src="supabase.js?v=0.0.220"></script>
+<script src="supabase.js?v=0.0.247"></script>
 
 
 <!-- =========================================================
      NÚCLEO / DADOS
      ========================================================= -->
 
-<script src="dados.js?v=0.0.220"></script>
+<script src="dados.js?v=0.0.247"></script>
+<script src="popupescolha.js?v=0.0.247"></script>
 
 
 <!-- =========================================================
      IMPORTAÇÃO
      ========================================================= -->
 
-<script src="bancoimportacao.js?v=0.0.220"></script>
+<script src="bancoimportacao.js?v=0.0.247"></script>
 
-<script src="importacao.js?v=0.0.220"></script>
+<script src="importacao.js?v=0.0.247"></script>
 
-<script src="importacaonf.js?v=0.0.220"></script>
+<script src="importacaonf.js?v=0.0.247"></script>
 
-<script src="arquivosteste.js?v=0.0.220"></script>
+<script src="arquivosteste.js?v=0.0.247"></script>
 
-<script src="rastreio.js?v=0.0.220"></script>
+<script src="rastreio.js?v=0.0.247"></script>
 
-<script src="rastreioimportacao.js?v=0.0.220"></script>
+<script src="rastreioimportacao.js?v=0.0.247"></script>
 
 
 <!-- =========================================================
      PESQUISA
      ========================================================= -->
 
-<script src="pesquisa.js?v=0.0.220"></script>
+<script src="pesquisa.js?v=0.0.247"></script>
 
 
 <!-- =========================================================
      CONTAGEM MANUAL
      ========================================================= -->
 
-<script src="contagemmanual.js?v=0.0.220"></script>
+<script src="contagemmanual.js?v=0.0.247"></script>
 
-<script src="locais.js?v=0.0.220"></script>
-<script src="reservas.js?v=0.0.220"></script>
+<script src="locais.js?v=0.0.247"></script>
+<script src="reservas.js?v=0.0.247"></script>
 
 
 <!-- =========================================================
      CONFERÊNCIA
      ========================================================= -->
 
-<script src="conferencia.js?v=0.0.220"></script>
+<script src="conferencia.js?v=0.0.247"></script>
 
-<script src="conferencias.js?v=0.0.220"></script>
+<script src="conferencias.js?v=0.0.247"></script>
 
-<script src="conferenciasrealizadas.js?v=0.0.220"></script>
+<script src="conferenciasrealizadas.js?v=0.0.247"></script>
 
 
 <!-- =========================================================
      DIVERGÊNCIAS
      ========================================================= -->
 
-<script src="divergencias.js?v=0.0.220"></script>
+<script src="divergencias.js?v=0.0.247"></script>
 
 
 <!-- =========================================================
      CONTROLE GERAL
      ========================================================= -->
 
-<script src="script.js?v=0.0.220"></script>        <!-- =================================================
+<script src="script.js?v=0.0.247"></script>        <!-- =================================================
 
 </body>
 

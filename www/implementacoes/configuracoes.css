@@ -53,3 +53,31 @@
 
 
 @media (max-width:700px){.configuracoes-acoes{display:grid;grid-template-columns:1fr}.configuracoes-acoes button{width:100%}.solicitacao-usuario-acoes{display:grid;grid-template-columns:1fr}.solicitacao-usuario-acoes button{width:100%}}
+
+
+/* ============================================================
+   RESPONSIVIDADE — CONFIGURAÇÕES
+   ============================================================ */
+@media (max-width: 1024px) {
+    .configuracoes-acoes {
+        gap: 9px;
+    }
+
+    .solicitacao-usuario-acoes {
+        gap: 9px;
+    }
+}
+
+@media (max-width: 700px) {
+    .configuracoes-acoes,
+    .solicitacao-usuario-acoes {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .configuracoes-acoes button,
+    .solicitacao-usuario-acoes button {
+        width: 100%;
+        min-height: 42px;
+    }
+}

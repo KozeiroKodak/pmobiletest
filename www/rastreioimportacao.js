@@ -6,6 +6,7 @@ const TAMANHO_LOTE_RASTREIO = 250;
 let importacaoRastreioEmAndamento = false;
 let dadosImportacaoRastreio = null;
 let mapaMotoristasRastreio = {};
+let importarSemMotoristaRastreio = false;
 
 function obterSessaoRastreioImportacao() {
     const usuario =
@@ -29,8 +30,20 @@ function abrirArquivoRastreio() {
     document.getElementById("arquivoRastreio")?.click();
 }
 
-async function prepararImportacaoRastreio() {
-    const arquivo = document.getElementById("arquivoRastreio")?.files?.[0];
+function alternarImportacaoSemMotoristaRastreio(checkbox) {
+    importarSemMotoristaRastreio = Boolean(checkbox?.checked);
+    if (importarSemMotoristaRastreio) {
+        mapaMotoristasRastreio = {};
+    }
+    if (dadosImportacaoRastreio) {
+        renderizarPreviaImportacaoRastreio();
+    } else {
+        montarMapaMotoristasUI();
+    }
+}
+
+async function prepararImportacaoRastreio(arquivoExterno = null) {
+    const arquivo = arquivoExterno || document.getElementById("arquivoRastreio")?.files?.[0];
     if (!arquivo) return;
 
     if (!window.XLSX) {
@@ -41,7 +54,7 @@ async function prepararImportacaoRastreio() {
     try {
         mostrarStatusImportacaoRastreio("🟡 Lendo planilha de Rastreio...");
 
-        const buffer = await arquivo.arrayBuffer();
+        let buffer = await arquivo.arrayBuffer();
         // Uma leitura curta descobre as abas e os cabeçalhos.
         // Evita reler o ArrayBuffer uma vez para cada aba candidata.
         let workbook = window.XLSX.read(buffer, {
@@ -143,8 +156,18 @@ async function prepararImportacaoRastreio() {
         matriz = null;
 
         const sha256 = await calcularSha256Rastreio(buffer);
+
+        const metadadosArquivo = {
+            name: arquivo.name,
+            size: arquivo.size
+        };
+
+        // Após calcular o SHA, o File/ArrayBuffer não precisa mais permanecer vivo.
+        workbook = null;
+        buffer = null;
+
         dadosImportacaoRastreio = {
-            arquivo,
+            arquivo: metadadosArquivo,
             nomeAba,
             colunas,
             linhas,
@@ -157,12 +180,262 @@ async function prepararImportacaoRastreio() {
 
         mapaMotoristasRastreio = montarMapaMotoristasInicial(linhas, modelo, modeloIndices);
         renderizarPreviaImportacaoRastreio();
-        mostrarStatusImportacaoRastreio("🟢 Planilha analisada. Revise os motoristas antes de enviar.");
+        mostrarStatusImportacaoRastreio(importarSemMotoristaRastreio
+            ? "🟢 Planilha analisada. A importação será feita sem selecionar motorista."
+            : "🟢 Planilha analisada. Revise os motoristas antes de enviar.");
     } catch (erro) {
         console.error("Erro ao preparar Rastreio:", erro);
         dadosImportacaoRastreio = null;
         mostrarStatusImportacaoRastreio("🔴 " + (erro.message || "Não foi possível ler a planilha."));
     }
+}
+
+
+// ============================================================
+// LER PLANILHA COMPARTILHADA ONLINE
+// Reaproveita a mesma leitura da Importação NF:
+// Google Sheets/Drive são convertidos para download XLSX;
+// Microsoft 365/SharePoint usa o proxy já existente no Supabase.
+// ============================================================
+
+async function prepararImportacaoRastreioOnline() {
+    const campo = document.getElementById("linkImportacaoRastreio");
+    const urlInformada = campo?.value?.trim();
+
+    if (!urlInformada) {
+        mostrarStatusImportacaoRastreio("🔴 Insira o link público da planilha.");
+        return;
+    }
+
+    if (!window.XLSX) {
+        mostrarStatusImportacaoRastreio("🔴 A biblioteca Excel ainda não foi carregada.");
+        return;
+    }
+
+    try {
+        mostrarStatusImportacaoRastreio("🟡 Lendo planilha compartilhada online...");
+
+        const urlDownload = normalizarUrlPlanilhaOnlineRastreio(urlInformada);
+        const hostOnline = new URL(urlDownload).hostname.toLowerCase();
+
+        const microsoft365 =
+            hostOnline === "1drv.ms" ||
+            hostOnline === "onedrive.live.com" ||
+            hostOnline.endsWith(".onedrive.live.com") ||
+            hostOnline === "automotivacba-my.sharepoint.com";
+
+        if (microsoft365) {
+            const respostaProxy = await window.clienteSupabase.functions.invoke(
+                "pmobile-nf-download",
+                { body: { url: urlInformada } }
+            );
+
+            if (respostaProxy.error) {
+                throw new Error(
+                    respostaProxy.error.message ||
+                    "Não foi possível ler a planilha pelo Microsoft 365."
+                );
+            }
+
+            const dadosProxy = respostaProxy.data;
+
+            if (
+                !dadosProxy ||
+                !Array.isArray(dadosProxy.colunas) ||
+                !Array.isArray(dadosProxy.linhas)
+            ) {
+                throw new Error(
+                    dadosProxy?.error ||
+                    "O Supabase não retornou os dados da planilha."
+                );
+            }
+
+            const colunas = normalizarColunasRastreio(dadosProxy.colunas);
+            const modelo = detectarModeloRastreio(colunas);
+
+            if (!modelo.cliente || !modelo.notaFiscal || !modelo.dataEnvio || !modelo.turno) {
+                throw new Error(
+                    "A planilha online não possui os campos obrigatórios de Rastreio: Cliente, Nota Fiscal, Data Envio e Turno."
+                );
+            }
+
+            const mapaColunas = {};
+            dadosProxy.colunas.forEach((coluna, indice) => {
+                mapaColunas[coluna] = indice;
+            });
+
+            const linhas = dadosProxy.linhas.map((linha) => {
+                const dados = linha?.dados && typeof linha.dados === "object"
+                    ? linha.dados
+                    : linha;
+                return colunas.map((colunaOriginal, indice) => {
+                    const chaveOriginal = dadosProxy.colunas[indice];
+                    return dados?.[chaveOriginal] ?? dados?.[colunaOriginal] ?? null;
+                });
+            }).filter(linha => linha.some(valor => String(valor ?? "").trim() !== ""));
+
+            if (!linhas.length) {
+                throw new Error("A planilha online possui cabeçalho, mas nenhuma linha de dados.");
+            }
+
+            const modeloIndices = {};
+            Object.keys(modelo).forEach(chave => {
+                modeloIndices[chave] = modelo[chave] ? colunas.indexOf(modelo[chave]) : -1;
+            });
+
+            dadosImportacaoRastreio = {
+                arquivo: {
+                    name: dadosProxy.nome_arquivo || "planilha-compartilhada.xlsx",
+                    size: Number(dadosProxy.tamanho_bytes || 0)
+                },
+                nomeAba: dadosProxy.nome_aba || "Planilha",
+                colunas,
+                linhas,
+                deslocamentoLinha: 2,
+                sha256: dadosProxy.sha256 || null,
+                tamanhoBytes: Number(dadosProxy.tamanho_bytes || 0),
+                modelo,
+                modeloIndices
+            };
+
+            mapaMotoristasRastreio = montarMapaMotoristasInicial(
+                linhas,
+                modelo,
+                modeloIndices
+            );
+
+            renderizarPreviaImportacaoRastreio();
+            mostrarStatusImportacaoRastreio(
+                importarSemMotoristaRastreio
+                    ? "🟢 Planilha online analisada. A importação será feita sem selecionar motorista."
+                    : "🟢 Planilha online analisada. Revise os motoristas antes de enviar."
+            );
+            return;
+        }
+
+        const resposta = await fetch(urlDownload, {
+            method: "GET",
+            redirect: "follow"
+        });
+
+        if (!resposta.ok) {
+            throw new Error("O link respondeu HTTP " + resposta.status + ".");
+        }
+
+        const buffer = await resposta.arrayBuffer();
+
+        if (!buffer.byteLength) {
+            throw new Error("O link não retornou nenhum arquivo.");
+        }
+
+        const nomeArquivo = obterNomeArquivoOnlineRastreio(
+            resposta,
+            urlDownload
+        );
+
+        const tipo = resposta.headers.get("content-type") || "application/octet-stream";
+
+        const arquivo = new File(
+            [buffer],
+            nomeArquivo,
+            { type: tipo }
+        );
+
+        await prepararImportacaoRastreio(arquivo);
+
+    } catch (erro) {
+        console.error("❌ Erro ao ler planilha online de Rastreio:", erro);
+        mostrarStatusImportacaoRastreio(
+            "🔴 Não foi possível ler o link. " +
+            (erro.message || "Verifique se a planilha é pública e permite download.")
+        );
+    }
+}
+
+function normalizarUrlPlanilhaOnlineRastreio(urlInformada) {
+    let url;
+
+    try {
+        url = new URL(urlInformada);
+    } catch {
+        throw new Error("O link informado não é uma URL válida.");
+    }
+
+    if (url.protocol !== "https:" && url.protocol !== "http:") {
+        throw new Error("O link deve começar com http:// ou https://.");
+    }
+
+    const host = url.hostname.toLowerCase();
+
+    const matchGoogle = url.pathname.match(/^\/spreadsheets\/d\/([^/]+)/);
+
+    if (
+        (host === "docs.google.com" || host === "sheets.google.com") &&
+        matchGoogle
+    ) {
+        return (
+            "https://docs.google.com/spreadsheets/d/" +
+            encodeURIComponent(matchGoogle[1]) +
+            "/export?format=xlsx"
+        );
+    }
+
+    const matchDrive = url.pathname.match(/^\/file\/d\/([^/]+)/);
+
+    if (host === "drive.google.com" && matchDrive) {
+        return (
+            "https://drive.google.com/uc?export=download&id=" +
+            encodeURIComponent(matchDrive[1])
+        );
+    }
+
+    if (
+        host === "1drv.ms" ||
+        host === "onedrive.live.com" ||
+        host.endsWith(".onedrive.live.com") ||
+        host === "automotivacba-my.sharepoint.com"
+    ) {
+        if (url.pathname.startsWith("/:x:/g/")) {
+            url.search = "?download=1";
+            return url.toString();
+        }
+
+        url.searchParams.set("download", "1");
+        return url.toString();
+    }
+
+    return url.toString();
+}
+
+function obterNomeArquivoOnlineRastreio(resposta, url) {
+    const disposicao = resposta.headers.get("content-disposition");
+
+    const nomeHeader = disposicao?.match(
+        /filename\*?=(?:UTF-8''|")?([^";]+)/
+    )?.[1];
+
+    if (nomeHeader) {
+        try {
+            return decodeURIComponent(nomeHeader).trim();
+        } catch {
+            return nomeHeader.trim();
+        }
+    }
+
+    try {
+        const pathname = new URL(url).pathname;
+        const nome = decodeURIComponent(
+            pathname.split("/").pop() || ""
+        ).trim();
+
+        if (nome && /\.(xlsx?|xlsm|csv)$/i.test(nome)) {
+            return nome;
+        }
+    } catch {
+        // usa o nome padrão
+    }
+
+    return "planilha-online.xlsx";
 }
 
 function normalizarChaveRastreio(valor) {
@@ -201,27 +474,54 @@ function detectarModeloRastreio(colunas) {
     };
 
     return {
-        cliente: achar("Cliente", "Destinatário"),
-        notaFiscal: achar("Nota Fiscal", "NF", "Notas Fiscais"),
+        cliente: achar(
+            "Cliente",
+            "Destinatário",
+            "Cliente / Destinatário",
+            "Cliente Destinatário"
+        ),
+        notaFiscal: achar(
+            "Nota Fiscal",
+            "NF",
+            "Notas Fiscais",
+            "Nº NF",
+            "N° NF",
+            "Numero NF",
+            "Número NF",
+            "Nº Nota Fiscal",
+            "N° Nota Fiscal"
+        ),
         transportadora: achar("Transportadora", "Transportador"),
         motorista: achar("Motorista"),
         regiao: achar("Região", "Regiao", "Cidade", "Destino"),
         volume: achar("Volume", "Volumes"),
         peso: achar("Peso"),
         valorNF: achar("Valor NF", "Valor"),
+        valorFreteEmbutido: achar("Valor Frete Embutido", "Frete Embutido", "Frete Imbutido", "Valor Frete Imbutido"),
+        valorFrete: achar("Valor Frete", "Frete"),
         dataEnvio: achar("Data Envio", "Data de Envio"),
         turno: achar("Turno Envio", "Turno")
     };
+}
+
+function chaveNotaFiscalRastreio(valor) {
+    return String(valor ?? "")
+        .trim()
+        .replace(/\\s+/g, " ")
+        .toUpperCase();
 }
 
 function montarMapaMotoristasInicial(linhas, modelo, modeloIndices) {
     const mapa = {};
     if (modelo.motorista) return mapa;
 
-    const indiceRegiao = modeloIndices?.regiao ?? -1;
+    const indiceNotaFiscal = modeloIndices?.notaFiscal ?? -1;
     linhas.forEach(valores => {
-        const regiao = indiceRegiao >= 0 ? String(valores?.[indiceRegiao] ?? "").trim() : "";
-        if (regiao && !(regiao in mapa)) mapa[regiao] = "";
+        const notaFiscal = indiceNotaFiscal >= 0
+            ? String(valores?.[indiceNotaFiscal] ?? "").trim()
+            : "";
+        const chave = chaveNotaFiscalRastreio(notaFiscal);
+        if (chave && !(chave in mapa)) mapa[chave] = "";
     });
 
     return mapa;
@@ -233,36 +533,65 @@ function montarMapaMotoristasUI() {
 
     const modelo = dadosImportacaoRastreio.modelo;
 
+    if (importarSemMotoristaRastreio) {
+        area.innerHTML = '<div class="rastreio-importacao-aviso">✓ Opção ativa: os rastreios serão importados sem selecionar motorista.</div>';
+        return;
+    }
+
     if (modelo.motorista) {
         area.innerHTML =
             '<div class="rastreio-importacao-aviso">✓ A planilha já possui a coluna <strong>Motorista</strong>. Nenhum preenchimento adicional é necessário.</div>';
         return;
     }
 
-    const regioes = Object.keys(mapaMotoristasRastreio);
+    const notasFiscais = Object.keys(mapaMotoristasRastreio);
 
-    if (!regioes.length) {
+    if (!notasFiscais.length) {
         area.innerHTML =
-            '<div class="rastreio-importacao-aviso">Não foi encontrada uma região/destino para montar o vínculo de motorista.</div>';
+            '<div class="rastreio-importacao-aviso">Não foi encontrada nenhuma Nota Fiscal válida para montar o vínculo de motorista.</div>';
         return;
     }
 
+    const indiceNotaFiscal = dadosImportacaoRastreio.modeloIndices?.notaFiscal ?? -1;
+
+    const indiceCliente = dadosImportacaoRastreio.modeloIndices?.cliente ?? -1;
+    const nomesNotas = new Map();
+    const clientesNotas = new Map();
+    dadosImportacaoRastreio.linhas.forEach(valores => {
+        const nota = indiceNotaFiscal >= 0
+            ? String(valores?.[indiceNotaFiscal] ?? "").trim()
+            : "";
+        const cliente = indiceCliente >= 0
+            ? String(valores?.[indiceCliente] ?? "").trim()
+            : "";
+        const chave = chaveNotaFiscalRastreio(nota);
+        if (chave && !nomesNotas.has(chave)) {
+            nomesNotas.set(chave, nota);
+            clientesNotas.set(chave, cliente);
+        }
+    });
+
     area.innerHTML =
         '<div class="rastreio-importacao-motoristas-titulo">' +
-            '<strong>Motorista por região</strong>' +
-            '<span>Preencha uma vez. O PMOBILE aplicará ao conjunto de linhas daquela região.</span>' +
+            '<strong>Motorista por Nota Fiscal</strong>' +
+            '<span>Defina o motorista uma vez. O PMOBILE aplicará o vínculo a todas as linhas da mesma NF.</span>' +
         '</div>' +
         '<div class="rastreio-importacao-motoristas-lista">' +
-            regioes.map(regiao =>
-                '<label>' +
-                    '<span>' + escaparHtmlRastreio(regiao) + '</span>' +
-                    '<input type="text" readonly data-regiao-motorista="' + escaparHtmlRastreio(regiao) + '"' +
-                        ' value="' + escaparHtmlRastreio(mapaMotoristasRastreio[regiao]) + '"' +
-                        ' placeholder="Toque para informar o motorista"' +
-                        ' aria-label="Motorista da região ' + escaparHtmlRastreio(regiao) + '"' +
+            notasFiscais.map(chave => {
+                const nota = nomesNotas.get(chave) || chave;
+                const cliente = clientesNotas.get(chave) || "Cliente não informado";
+                return '<label>' +
+                    '<span class="rastreio-importacao-nf-cliente">' +
+                        '<strong>' + escaparHtmlRastreio(nota) + '</strong>' +
+                        '<em> - ' + escaparHtmlRastreio(cliente) + '</em>' +
+                    '</span>' +
+                    '<input type="text" readonly data-nf-motorista="' + escaparHtmlRastreio(chave) + '"' +
+                        ' value="' + escaparHtmlRastreio(mapaMotoristasRastreio[chave]) + '"' +
+                        ' placeholder="Selecione o motorista"' +
+                        ' aria-label="Motorista da Nota Fiscal ' + escaparHtmlRastreio(nota) + '"' +
                         ' onclick="abrirEditorMotoristaRastreio(this)">' +
-                '</label>'
-            ).join("") +
+                '</label>';
+            }).join("") +
         '</div>';
 }
 
@@ -277,18 +606,23 @@ function fecharEditorMotoristaRastreio() {
 function salvarEditorMotoristaRastreio() {
     const modal = document.getElementById("rastreioEditorMotorista");
     const campo = document.getElementById("rastreioEditorMotoristaInput");
-    const alvo = modal?.dataset?.alvo ? document.querySelector('[data-regiao-motorista="' + CSS.escape(modal.dataset.alvo) + '"]') : null;
+    const chave = modal?.dataset?.alvo || "";
+    const alvo = chave
+        ? document.querySelector('[data-nf-motorista="' + CSS.escape(chave) + '"]')
+        : null;
+
     if (!modal || !campo || !alvo) return;
 
     const nome = campo.value.trim();
-    mapaMotoristasRastreio[modal.dataset.alvo] = nome;
+    mapaMotoristasRastreio[chave] = nome;
     alvo.value = nome;
     fecharEditorMotoristaRastreio();
+    renderizarPreviaImportacaoRastreio();
 }
 
 function abrirEditorMotoristaRastreio(input) {
-    const regiao = input?.dataset?.regiaoMotorista;
-    if (!regiao) return;
+    const chave = input?.dataset?.nfMotorista;
+    if (!chave) return;
 
     let modal = document.getElementById("rastreioEditorMotorista");
     if (!modal) {
@@ -302,7 +636,7 @@ function abrirEditorMotoristaRastreio(input) {
                 '<div class="rastreio-editor-motorista-cabecalho">' +
                     '<div>' +
                         '<span class="rastreio-editor-motorista-kicker">VÍNCULO OPERACIONAL</span>' +
-                        '<h3 id="rastreioEditorMotoristaTitulo">Motorista da região</h3>' +
+                        '<h3 id="rastreioEditorMotoristaTitulo">Motorista da Nota Fiscal</h3>' +
                         '<p id="rastreioEditorMotoristaRegiao"></p>' +
                     '</div>' +
                     '<button type="button" class="rastreio-editor-motorista-fechar" aria-label="Fechar">×</button>' +
@@ -310,7 +644,7 @@ function abrirEditorMotoristaRastreio(input) {
                 '<div class="rastreio-editor-motorista-campo">' +
                     '<label for="rastreioEditorMotoristaInput">Nome do motorista</label>' +
                     '<input id="rastreioEditorMotoristaInput" type="text" autocomplete="name" placeholder="Digite o nome completo">' +
-                    '<small>Esse nome será aplicado a todas as linhas desta região.</small>' +
+                    '<small>Esse nome será aplicado a todas as linhas desta Nota Fiscal.</small>' +
                 '</div>' +
                 '<div class="rastreio-editor-motorista-acoes">' +
                     '<button type="button" class="botao-secundario" data-cancelar-rastreio-editor>Cancelar</button>' +
@@ -330,16 +664,30 @@ function abrirEditorMotoristaRastreio(input) {
             ?.addEventListener("click", salvarEditorMotoristaRastreio);
         modal.querySelector("#rastreioEditorMotoristaInput")
             ?.addEventListener("keydown", evento => {
-                if (evento.key === "Enter") salvarEditorMotoristaRastreio();
-                if (evento.key === "Escape") fecharEditorMotoristaRastreio();
+                if (evento.key === "Enter") {
+                    evento.preventDefault();
+                    salvarEditorMotoristaRastreio();
+                    return;
+                }
+                if (evento.key === "Escape") {
+                    evento.preventDefault();
+                    evento.stopPropagation();
+                    fecharEditorMotoristaRastreio();
+                }
             });
     }
 
     const campo = modal.querySelector("#rastreioEditorMotoristaInput");
-    const regiaoEl = modal.querySelector("#rastreioEditorMotoristaRegiao");
-    modal.dataset.alvo = regiao;
-    regiaoEl.textContent = regiao;
-    campo.value = mapaMotoristasRastreio[regiao] || "";
+    const identificacao = modal.querySelector("#rastreioEditorMotoristaRegiao");
+    modal.dataset.alvo = chave;
+
+    const indiceNotaFiscal = dadosImportacaoRastreio.modeloIndices?.notaFiscal ?? -1;
+    const notaFiscal = dadosImportacaoRastreio.linhas
+        .map(linha => indiceNotaFiscal >= 0 ? String(linha?.[indiceNotaFiscal] ?? "").trim() : "")
+        .find(nota => chaveNotaFiscalRastreio(nota) === chave) || chave;
+
+    identificacao.textContent = "NF " + notaFiscal;
+    campo.value = mapaMotoristasRastreio[chave] || "";
     modal.classList.add("aberto");
     modal.setAttribute("aria-hidden", "false");
     document.body.classList.add("rastreio-modal-aberto");
@@ -351,8 +699,8 @@ function abrirEditorMotoristaRastreio(input) {
 }
 
 function capturarMapaMotoristasUI() {
-    document.querySelectorAll("[data-regiao-motorista]").forEach(input => {
-        mapaMotoristasRastreio[input.dataset.regiaoMotorista] = input.value.trim();
+    document.querySelectorAll("[data-nf-motorista]").forEach(input => {
+        mapaMotoristasRastreio[input.dataset.nfMotorista] = input.value.trim();
     });
 }
 
@@ -383,14 +731,30 @@ function normalizarDataRastreio(valor) {
     if (valor == null || String(valor).trim() === "") return null;
 
     const texto = String(valor).trim();
+
+    const montarDataValida = (ano, mes, dia) => {
+        const data = new Date(Number(ano), Number(mes) - 1, Number(dia));
+        if (
+            data.getFullYear() !== Number(ano) ||
+            data.getMonth() !== Number(mes) - 1 ||
+            data.getDate() !== Number(dia)
+        ) {
+            return null;
+        }
+
+        return String(ano) + "-" +
+            String(mes).padStart(2, "0") + "-" +
+            String(dia).padStart(2, "0");
+    };
+
     const br = texto.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/);
     if (br) {
-        return br[3] + "-" + br[2].padStart(2, "0") + "-" + br[1].padStart(2, "0");
+        return montarDataValida(br[3], br[2], br[1]);
     }
 
     const iso = texto.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
     if (iso) {
-        return iso[1] + "-" + iso[2].padStart(2, "0") + "-" + iso[3].padStart(2, "0");
+        return montarDataValida(iso[1], iso[2], iso[3]);
     }
 
     const data = new Date(valor);
@@ -433,11 +797,59 @@ function linhaPossuiDadosRastreio(valores) {
     });
 }
 
+function linhaEstruturalRastreio(valores) {
+    if (!Array.isArray(valores)) return false;
+
+    const { modeloIndices } = dadosImportacaoRastreio || {};
+    if (!modeloIndices) return false;
+
+    const obter = chave => {
+        const indice = modeloIndices[chave];
+        return indice >= 0 ? String(valores[indice] ?? "").trim() : "";
+    };
+
+    const cliente = obter("cliente");
+    const notaFiscal = obter("notaFiscal");
+    const dataEnvio = obter("dataEnvio");
+    const turno = obter("turno");
+    const transportadora = normalizarChaveRastreio(obter("transportadora"));
+    const motorista = obter("motorista");
+    const regiao = obter("regiao");
+    const volume = obter("volume");
+    const peso = obter("peso");
+    const valorNF = obter("valorNF");
+
+    // Resíduos comuns de exportações: TOTAL, SOMA, cabeçalhos repetidos
+    // ou linhas de fechamento. Não são rastreios e não devem gerar falso erro.
+    const semCamposObrigatorios =
+        !cliente && !notaFiscal && !dataEnvio && !turno;
+
+    const marcadorEstrutural =
+        transportadora === "TOTAL" ||
+        transportadora === "TOTALGERAL" ||
+        transportadora === "SOMA" ||
+        transportadora === "FRETE";
+
+    const semQualquerOutroDado =
+        !motorista && !regiao && !volume && !peso && !valorNF;
+
+    return semCamposObrigatorios && marcadorEstrutural && semQualquerOutroDado;
+}
+
+function classificarLinhaRastreio(valores) {
+    if (!linhaPossuiDadosRastreio(valores)) return "VAZIA";
+    if (linhaEstruturalRastreio(valores)) return "ESTRUTURAL";
+    return "OPERACIONAL";
+}
+
 function validarLinhasObrigatoriasRastreio() {
     if (!dadosImportacaoRastreio) {
         return {
             totalErros: 1,
-            erros: ["Nenhuma planilha de Rastreio foi preparada."]
+            erros: ["Nenhuma planilha de Rastreio foi preparada."],
+            totalOperacionais: 0,
+            totalEstruturais: 0,
+            totalVazias: 0
         };
     }
 
@@ -446,14 +858,25 @@ function validarLinhasObrigatoriasRastreio() {
         Number(dadosImportacaoRastreio.deslocamentoLinha) || 2;
     const erros = [];
     let totalErros = 0;
+    let totalOperacionais = 0;
+    let totalEstruturais = 0;
+    let totalVazias = 0;
 
     for (let indice = 0; indice < linhas.length; indice++) {
         const d = linhas[indice];
+        const classificacao = classificarLinhaRastreio(d);
 
-        // Planilhas exportadas podem conter linhas estruturais, fórmulas
-        // vazias ou resíduos fora das colunas operacionais. Elas não são
-        // rastreios e não devem ser tratadas como registros inválidos.
-        if (!linhaPossuiDadosRastreio(d)) continue;
+        if (classificacao === "VAZIA") {
+            totalVazias++;
+            continue;
+        }
+
+        if (classificacao === "ESTRUTURAL") {
+            totalEstruturais++;
+            continue;
+        }
+
+        totalOperacionais++;
 
         const valor = chave => {
             const indiceColuna = modeloIndices[chave];
@@ -472,6 +895,17 @@ function validarLinhasObrigatoriasRastreio() {
         if (!dataEnvio) problemas.push("Data Envio inválida");
         if (!turno) problemas.push("Turno deve ser MANHÃ ou TARDE");
 
+        for (const chaveNumerica of ["volume", "peso", "valorNF"]) {
+            const bruto = valor(chaveNumerica);
+            if (bruto != null && String(bruto).trim() !== "" &&
+                normalizarNumeroRastreio(bruto) == null) {
+                const rotulo = chaveNumerica === "valorNF"
+                    ? "Valor NF"
+                    : chaveNumerica.charAt(0).toUpperCase() + chaveNumerica.slice(1);
+                problemas.push(rotulo + " inválido");
+            }
+        }
+
         if (problemas.length) {
             totalErros += problemas.length;
 
@@ -487,7 +921,13 @@ function validarLinhasObrigatoriasRastreio() {
         }
     }
 
-    return { totalErros, erros };
+    return {
+        totalErros,
+        erros,
+        totalOperacionais,
+        totalEstruturais,
+        totalVazias
+    };
 }
 
 function prepararLinhasRastreioParaEnvio(inicio = 0, fim = null, coletarAvisos = false) {
@@ -502,8 +942,8 @@ function prepararLinhasRastreioParaEnvio(inicio = 0, fim = null, coletarAvisos =
     for (let indice = inicio; indice < limite; indice++) {
         const d = linhas[indice];
 
-        // Ignora linhas sem qualquer dado nas colunas reconhecidas do Rastreio.
-        if (!linhaPossuiDadosRastreio(d)) continue;
+        // Ignora linhas vazias e resíduos estruturais detectados na validação.
+        if (classificarLinhaRastreio(d) !== "OPERACIONAL") continue;
 
         const valor = chave => {
             const indice = modeloIndices[chave];
@@ -512,8 +952,10 @@ function prepararLinhasRastreioParaEnvio(inicio = 0, fim = null, coletarAvisos =
         const turno = normalizarTurnoRastreio(valor("turno"));
         const dataEnvio = normalizarDataRastreio(valor("dataEnvio"));
         const regiao = String(valor("regiao") ?? "").trim();
+        const notaFiscal = String(valor("notaFiscal") ?? "").trim();
+        const chaveNotaFiscal = chaveNotaFiscalRastreio(notaFiscal);
         const motoristaPlanilha = String(valor("motorista") ?? "").trim();
-        const motorista = motoristaPlanilha || mapaMotoristasRastreio[regiao] || "";
+        const motorista = importarSemMotoristaRastreio ? "" : (motoristaPlanilha || mapaMotoristasRastreio[chaveNotaFiscal] || "");
 
         const item = {
             cliente: String(valor("cliente") ?? "").trim(),
@@ -524,6 +966,8 @@ function prepararLinhasRastreioParaEnvio(inicio = 0, fim = null, coletarAvisos =
             volume: normalizarNumeroRastreio(valor("volume")),
             peso: normalizarNumeroRastreio(valor("peso")),
             valor_nf: normalizarNumeroRastreio(valor("valorNF")),
+            valor_frete_embutido: normalizarNumeroRastreio(valor("valorFreteEmbutido")),
+            valor_frete: normalizarNumeroRastreio(valor("valorFrete")),
             data_envio: dataEnvio,
             turno,
             previsao_entrega: calcularPrevisaoRastreio(dataEnvio, turno),
@@ -576,7 +1020,12 @@ function renderizarPreviaImportacaoRastreio() {
                 const d = linha;
                 const indices = dadosImportacaoRastreio.modeloIndices;
                 const regiao = indices.regiao >= 0 ? String(d[indices.regiao] ?? "").trim() : "";
-                const motorista = indices.motorista >= 0 ? String(d[indices.motorista] ?? "").trim() : (mapaMotoristasRastreio[regiao] || "—");
+                const notaFiscal = indices.notaFiscal >= 0 ? String(d[indices.notaFiscal] ?? "").trim() : "";
+                const motorista = importarSemMotoristaRastreio
+                    ? "—"
+                    : (indices.motorista >= 0
+                        ? String(d[indices.motorista] ?? "").trim()
+                        : (mapaMotoristasRastreio[chaveNotaFiscalRastreio(notaFiscal)] || "—"));
                 return '<div class="linha">' +
                     '<span>' + (dadosImportacaoRastreio.deslocamentoLinha + indiceAmostra) + '</span>' +
                     '<span>' + escaparHtmlRastreio(d[indices.cliente]) + '</span>' +
@@ -604,18 +1053,22 @@ async function enviarImportacaoRastreio() {
     try {
         const sessao = obterSessaoRastreioImportacao();
 
-        // O banco exige Cliente, NF, Data Envio e Turno. Valida toda a
-        // planilha antes de criar a importação para impedir que um lote
-        // parcialmente inválido chegue ao PostgreSQL.
+        // A importação é tolerante: campos ausentes, inválidos ou não
+        // normalizáveis não bloqueiam o lote. A validação continua sendo
+        // executada para registrar os avisos, enquanto o banco preserva
+        // esses campos como NULL.
         const validacao = validarLinhasObrigatoriasRastreio();
 
         if (validacao.totalErros > 0) {
-            const detalhes = validacao.erros.join("\n");
-            throw new Error(
-                "A planilha possui " +
+            console.warn("Importação de Rastreio com inconsistências toleradas:", {
+                total: validacao.totalErros,
+                amostra: validacao.erros
+            });
+
+            mostrarStatusImportacaoRastreio(
+                "🟡 Importação tolerante: " +
                 validacao.totalErros.toLocaleString("pt-BR") +
-                " campo(s) obrigatório(s) inválido(s)." +
-                (detalhes ? "\n\n" + detalhes : "")
+                " inconsistência(s) serão preservadas como campo vazio."
             );
         }
 
