@@ -6,7 +6,7 @@ const TAMANHO_LOTE_RASTREIO = 250;
 let importacaoRastreioEmAndamento = false;
 let dadosImportacaoRastreio = null;
 let mapaMotoristasRastreio = {};
-let importarSemMotoristaRastreio = false;
+let importarSemMotoristaRastreio = true;
 
 function obterSessaoRastreioImportacao() {
     const usuario =
@@ -204,7 +204,7 @@ function salvarPreferenciasOneDriveRastreio() {
     const config = obterConfiguracaoOneDriveRastreio() || {};
     const campo = document.getElementById("linkOneDriveRastreio");
     config.url = campo?.value?.trim() || config.url || "";
-    config.manterLink = document.getElementById("manterLinkOneDriveRastreio")?.checked === true;
+    config.manterLink = true;
     config.tempoReal = document.getElementById("sincronizarAlteracoesOneDriveRastreio")?.checked !== false;
     config.intervalo = obterIntervaloOneDriveRastreio();
     config.ativo = sincronizacaoOneDriveRastreioAtiva;
@@ -222,19 +222,32 @@ function atualizarAcessoAdminRastreio() {
     if (permitido) restaurarConfiguracaoOneDriveRastreio();
     else if (sincronizacaoOneDriveRastreioAtiva) pararSincronizacaoOneDriveRastreio();
 }
-function restaurarConfiguracaoOneDriveRastreio() {
-    if (!usuarioRastreioEhAdmin()) return;
-    const config = obterConfiguracaoOneDriveRastreio();
-    if (!config?.manterLink || !config.url) return;
-    const campo = document.getElementById("linkOneDriveRastreio");
-    const intervalo = document.getElementById("intervaloOneDriveRastreio");
-    const manter = document.getElementById("manterLinkOneDriveRastreio");
-    const tempoReal = document.getElementById("sincronizarAlteracoesOneDriveRastreio");
-    if (campo) campo.value = config.url;
-    if (intervalo && config.intervalo) intervalo.value = String(config.intervalo / 1000);
-    if (manter) manter.checked = true;
-    if (tempoReal) tempoReal.checked = config.tempoReal !== false;
-    if (config.ativo && !sincronizacaoOneDriveRastreioAtiva) iniciarSincronizacaoOneDriveRastreio(true);
+let restaurandoLinkOneDriveServidor = false;
+async function restaurarConfiguracaoOneDriveRastreio() {
+    if (!usuarioRastreioEhAdmin() || restaurandoLinkOneDriveServidor) return;
+    restaurandoLinkOneDriveServidor = true;
+    try {
+        const sessao = obterSessaoRastreioImportacao();
+        const {data,error} = await window.clienteSupabase.rpc("pmobile_rastreio_config_link", {p_usuario:sessao.usuario,p_credencial:sessao.credencial});
+        if (error) throw error;
+        const campo = document.getElementById("linkOneDriveRastreio");
+        if (campo && data) campo.value = data;
+        const config = obterConfiguracaoOneDriveRastreio();
+        if (data && config?.ativo && !sincronizacaoOneDriveRastreioAtiva) iniciarSincronizacaoOneDriveRastreio(true);
+    } catch (erro) { console.warn("Não foi possível carregar link OneDrive do Supabase:", erro); }
+    finally { restaurandoLinkOneDriveServidor = false; }
+}
+async function salvarLinkOneDriveRastreioSupabase() {
+    if (!usuarioRastreioEhAdmin()) return mostrarStatusOneDriveRastreio("Somente administradores podem salvar o link.");
+    const url = document.getElementById("linkOneDriveRastreio")?.value?.trim();
+    if (!url) return mostrarStatusOneDriveRastreio("Informe o link do OneDrive.");
+    try {
+        const sessao = obterSessaoRastreioImportacao();
+        const {error} = await window.clienteSupabase.rpc("pmobile_rastreio_config_link",{p_usuario:sessao.usuario,p_credencial:sessao.credencial,p_url:url});
+        if (error) throw error;
+        salvarConfiguracaoOneDriveRastreio({...obterConfiguracaoOneDriveRastreio(),url,manterLink:true,intervalo:15000,tempoReal:true,ativo:sincronizacaoOneDriveRastreioAtiva});
+        mostrarStatusOneDriveRastreio("🟢 Link salvo no Supabase. Disponível aos administradores.");
+    } catch(erro) { mostrarStatusOneDriveRastreio("🔴 Falha ao salvar link: "+(erro.message||erro)); }
 }
 
 function obterEstadoSincronizacaoOneDriveRastreio(url) {
@@ -258,11 +271,7 @@ function salvarEstadoSincronizacaoOneDriveRastreio(url, estado) {
     }
 }
 
-function obterIntervaloOneDriveRastreio() {
-    const campo = document.getElementById("intervaloOneDriveRastreio");
-    const segundos = Number(campo?.value || 15);
-    return Math.max(10, Math.min(300, segundos)) * 1000;
-}
+function obterIntervaloOneDriveRastreio() { return 15000; }
 
 function mostrarStatusOneDriveRastreio(mensagem) {
     const area = document.getElementById("statusOneDriveRastreio");
@@ -329,7 +338,7 @@ function iniciarSincronizacaoOneDriveRastreio(restaurando = false) {
 
     const configuracaoAtual = {
         url,
-        manterLink: document.getElementById("manterLinkOneDriveRastreio")?.checked === true,
+        manterLink: true,
         tempoReal: document.getElementById("sincronizarAlteracoesOneDriveRastreio")?.checked !== false,
         intervalo: obterIntervaloOneDriveRastreio(),
         ativo: true,
@@ -1304,7 +1313,7 @@ function prepararLinhasRastreioParaEnvio(inicio = 0, fim = null, coletarAvisos =
         const notaFiscal = String(valor("notaFiscal") ?? "").trim();
         const chaveNotaFiscal = chaveNotaFiscalRastreio(notaFiscal);
         const motoristaPlanilha = String(valor("motorista") ?? "").trim();
-        const motorista = importarSemMotoristaRastreio ? "" : (motoristaPlanilha || mapaMotoristasRastreio[chaveNotaFiscal] || "");
+        const motorista = "";
 
         const item = {
             cliente: String(valor("cliente") ?? "").trim(),
