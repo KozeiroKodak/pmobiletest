@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class MainActivity extends BridgeActivity {
 
     private static final String TAG = "PMobileOta";
-    private static final String NATIVE_WEB_BUNDLE_VERSION = "0.0.248";
+    private static final String NATIVE_WEB_BUNDLE_VERSION = "0.0.249";
     private static final ExecutorService OTA_MANIFEST_EXECUTOR =
         Executors.newSingleThreadExecutor();
     private final AtomicBoolean otaCheckRunning = new AtomicBoolean(false);
