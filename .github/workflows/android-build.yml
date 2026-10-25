@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths:
       - "android/**"
+      - ".github/workflows/android-build.yml"
       - "www/**"
       - "capacitor.config.json"
       - "package.json"
