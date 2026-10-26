@@ -575,11 +575,14 @@ async function baixarPlanilhaOneDriveRastreio(url) {
 
             mostrarStatusOneDriveRastreio("🟢 Download do OneDrive concluído: 100%");
 
-            return new File(
-                partes,
-                nome,
-                { type: "application/octet-stream" }
-            );
+            const arquivoNativo = new File(partes, nome, { type: "application/octet-stream" });
+            const inicio = new Uint8Array(await arquivoNativo.slice(0, 8).arrayBuffer());
+            const excelZip = inicio[0] === 0x50 && inicio[1] === 0x4b;
+            const excelOle = inicio[0] === 0xd0 && inicio[1] === 0xcf;
+            if (!excelZip && !excelOle) {
+                throw new Error("Download nativo não retornou Excel (possível página HTML do OneDrive).");
+            }
+            return arquivoNativo;
         } catch (erro) {
             try {
                 window.PMCOLETAS_ONEDRIVE.cancelarDownload(id);
