@@ -32,11 +32,13 @@ async function sincronizar(forcar=false){
     const arquivo=await obterArquivo(url);
     await prepararImportacaoRastreio(arquivo);
     if(!dadosImportacaoRastreio)throw Error("A planilha não pôde ser processada.");
-    const hash=dadosImportacaoRastreio.sha256||"";\n    if(!dadosImportacaoRastreio.linhas?.length)throw Error("Nenhuma linha operacional encontrada; nada foi enviado.");
+    const hash=dadosImportacaoRastreio.sha256||"";
+    if(!dadosImportacaoRastreio.linhas?.length)throw Error("Nenhuma linha operacional encontrada; nada foi enviado.");
     if(!forcar&&hash&&ultimaHash===hash&&ultimaUrl===url){status("🟢 Sem alterações · "+new Date().toLocaleTimeString("pt-BR"));return;}
     if(!document.getElementById("alteracoesOneDriveAlternativo")?.checked){status("🟡 Arquivo lido; aplicação das alterações desativada.");return;}
     if(!window.clienteSupabase?.rpc)throw Error("Supabase indisponível.");
-    const lote=prepararLinhasRastreioParaEnvio(0,dadosImportacaoRastreio.linhas.length,true);\n    if(!lote.resultado?.length)throw Error("Nenhuma linha válida para sincronização.");
+    const lote=prepararLinhasRastreioParaEnvio(0,dadosImportacaoRastreio.linhas.length,true);
+    if(!lote.resultado?.length)throw Error("Nenhuma linha válida para sincronização.");
     const sessao=obterSessaoRastreioImportacao();
     const chave=await calcularChaveFonteOneDriveRastreio(url);
     const {data,error}=await window.clienteSupabase.rpc("pmobile_rastreio_sincronizar_fonte",{
