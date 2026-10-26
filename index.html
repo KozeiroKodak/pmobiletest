@@ -849,6 +849,31 @@
               </div></details>
             </div>
 
+            <div class="painel configuracoes-painel-importacao" id="painelImportacaoAlternativa">
+              <details class="configuracoes-accordion">
+                <summary><span class="home-app-icone">🧪</span><span class="home-app-conteudo"><strong>Importação alternativa — Beta</strong><small>Projeto independente · Excel e OneDrive pessoal/empresarial</small></span><span class="home-app-seta">›</span></summary>
+                <div class="configuracoes-conteudo">
+                  <div class="rastreio-onedrive-sync">
+                    <h3>Importador alternativo de rastreios</h3>
+                    <p>Use o mesmo modelo de planilha e as mesmas colunas. Esta opção testa outro caminho de download sem substituir o importador original.</p>
+                    <label for="linkOneDriveAlternativo">Link compartilhado do Excel</label>
+                    <input id="linkOneDriveAlternativo" type="url" placeholder="https://1drv.ms/..." autocomplete="off" style="width:100%;padding:14px;background:#171717;color:#fff;border:1px solid #444;border-radius:10px">
+                    <div class="rastreio-onedrive-opcoes"><label><input type="checkbox" id="alteracoesOneDriveAlternativo" checked> Permitir alterações da planilha em tempo real</label></div>
+                    <p>Intervalo automático: 15 segundos. A importação utiliza a mesma validação e sincronização de rastreios do projeto original.</p>
+                    <div class="rastreio-onedrive-sync-acoes">
+                      <button type="button" class="botao-principal" onclick="PMImportadorAlternativo.iniciar()">Ativar sincronização</button>
+                      <button type="button" class="botao-secundario" onclick="PMImportadorAlternativo.sincronizar(true)">Sincronizar agora</button>
+                      <button type="button" class="botao-secundario" onclick="PMImportadorAlternativo.parar()">Parar</button>
+                      <button type="button" class="botao-secundario" onclick="PMImportadorAlternativo.reler()">Forçar nova leitura</button>
+                      <button type="button" class="botao-secundario" onclick="document.getElementById('arquivoImportacaoAlternativa').click()">Importar arquivo local</button>
+                    </div>
+                    <input type="file" id="arquivoImportacaoAlternativa" accept=".xlsx,.xls,.xlsm,.xlsb,.csv" hidden onchange="PMImportadorAlternativo.importarArquivo(this.files[0])">
+                    <p id="statusImportacaoAlternativa" class="rastreio-onedrive-status" aria-live="polite">Aguardando configuração.</p>
+                    <p style="font-size:.85em;opacity:.75">Arquivos privados exigem acesso autorizado pela Microsoft. Esta opção não altera permissões do OneDrive.</p>
+                  </div>
+                </div>
+              </details>
+            </div>
             <div class="painel configuracoes-painel-sistema">
                 <details class="configuracoes-accordion"><summary><span class="home-app-icone">⚙️</span><span class="home-app-conteudo"><strong>Sistema</strong><small>Atualizações do aplicativo</small></span><span class="home-app-seta">›</span></summary><div class="configuracoes-conteudo">
                 <div class="configuracoes-acoes">
@@ -1144,6 +1169,7 @@
 <script src="script.js?v=0.0.248"></script>
 <!-- Central de sincronização -->
 
+<script src="importador-alternativo.js?v=1.0.0"></script>
 <script src="sync-center.js?v=1.0.2"></script>
 </body>
 
