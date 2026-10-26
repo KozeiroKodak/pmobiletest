@@ -298,6 +298,7 @@ function obterIntervaloOneDriveRastreio() { return 15000; }
 function mostrarStatusOneDriveRastreio(mensagem) {
     const area = document.getElementById("statusOneDriveRastreio");
     if (area) area.textContent = mensagem;
+    window.estadoOneDriveRastreio = { ...(window.estadoOneDriveRastreio || {}), mensagem, atualizadoEm: Date.now() };
 }
 
 function atualizarIndicadorOneDriveRastreio(ativo, estado = null) {
@@ -312,6 +313,7 @@ function atualizarIndicadorOneDriveRastreio(ativo, estado = null) {
     }
 
     if (estado === "erro") {
+        window.estadoOneDriveRastreio = { estado: "erro", atualizadoEm: Date.now() };
         indicador.textContent = "● Falha na sincronização";
         indicador.classList.add("erro");
         return;
@@ -323,6 +325,7 @@ function atualizarIndicadorOneDriveRastreio(ativo, estado = null) {
         return;
     }
 
+    window.estadoOneDriveRastreio = { estado: "conectado", atualizadoEm: Date.now() };
     indicador.textContent = "● OneDrive conectado";
     indicador.classList.add("ativo", "conectado");
 }
