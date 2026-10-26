@@ -8,26 +8,19 @@ const urlAtual=()=>campo()?.value.trim()||"";
 const validar=(url)=>{const u=new URL(url);if(u.protocol!=="https:"||!/^(1drv\.ms|onedrive\.live\.com|[a-z0-9.-]+\.sharepoint\.com)$/i.test(u.hostname))throw Error("Informe um link HTTPS válido do OneDrive/SharePoint.");return u;};
 const agendar=()=>{clearTimeout(timer);if(ativo)timer=setTimeout(()=>sincronizar(false),15000);};
 async function obterArquivo(url){
-  // Testa o proxy, depois a ponte nativa; ambos devem entregar bytes de Excel.
-  let erro=null;
-  const testar=async(blob)=>{
-    const a=new Uint8Array(await blob.slice(0,8).arrayBuffer());
-    if(!((a[0]===80&&a[1]===75)||(a[0]===208&&a[1]===207)))throw Error("Recebida página HTML em vez de Excel.");
-    return new File([blob],"rastreio-alternativo.xlsm",{type:"application/octet-stream"});
-  };
-  if(window.clienteSupabase?.functions?.invoke){
-    try{
-      const {data,error}=await window.clienteSupabase.functions.invoke("pmobile-rastreio-download",{body:{url}});
-      if(error)throw error;
-      if(!data)throw Error("Resposta vazia do proxy.");
-      return await testar(data instanceof Blob?data:new Blob([data]));
-    }catch(e){erro=e;console.warn("Importador alternativo: proxy",e);}
+  // Transporte V2 independente: não chama proxy antigo nem ponte nativa.
+  if(!window.clienteSupabase?.functions?.invoke)throw Error("Cliente Supabase indisponível.");
+  const {data,error}=await window.clienteSupabase.functions.invoke("pmobile-onedrive-v2",{body:{url}});
+  if(error){
+    let detail=error.message||"Falha no download V2";
+    try{const json=await error.context?.json?.();if(json?.error)detail=json.error;}catch{}
+    throw Error(detail);
   }
-  // A ponte nativa existente faz streaming e valida a assinatura.
-  if(typeof baixarPlanilhaOneDriveRastreio==="function"){
-    try{return await testar(await baixarPlanilhaOneDriveRastreio(url));}catch(e){erro=e;}
-  }
-  throw erro||Error("Não foi possível obter o Excel. Verifique as permissões do compartilhamento.");
+  if(!data)throw Error("O download V2 não retornou conteúdo.");
+  const blob=data instanceof Blob?data:new Blob([data]);
+  const a=new Uint8Array(await blob.slice(0,8).arrayBuffer());
+  if(!((a[0]===80&&a[1]===75)||(a[0]===208&&a[1]===207)))throw Error("A rota V2 não retornou Excel.");
+  return new File([blob],"onedrive-v2.xlsm",{type:"application/octet-stream"});
 }
 async function sincronizar(forcar=false){
   if(executando)return;
@@ -39,11 +32,11 @@ async function sincronizar(forcar=false){
     const arquivo=await obterArquivo(url);
     await prepararImportacaoRastreio(arquivo);
     if(!dadosImportacaoRastreio)throw Error("A planilha não pôde ser processada.");
-    const hash=dadosImportacaoRastreio.sha256||"";
+    const hash=dadosImportacaoRastreio.sha256||"";\n    if(!dadosImportacaoRastreio.linhas?.length)throw Error("Nenhuma linha operacional encontrada; nada foi enviado.");
     if(!forcar&&hash&&ultimaHash===hash&&ultimaUrl===url){status("🟢 Sem alterações · "+new Date().toLocaleTimeString("pt-BR"));return;}
-    if(!document.getElementById("alteracoesOneDriveAlternativo")?.checked&&ultimaHash){status("🟡 Arquivo lido; aplicação das alterações desativada.");return;}
+    if(!document.getElementById("alteracoesOneDriveAlternativo")?.checked){status("🟡 Arquivo lido; aplicação das alterações desativada.");return;}
     if(!window.clienteSupabase?.rpc)throw Error("Supabase indisponível.");
-    const lote=prepararLinhasRastreioParaEnvio(0,dadosImportacaoRastreio.linhas.length,true);
+    const lote=prepararLinhasRastreioParaEnvio(0,dadosImportacaoRastreio.linhas.length,true);\n    if(!lote.resultado?.length)throw Error("Nenhuma linha válida para sincronização.");
     const sessao=obterSessaoRastreioImportacao();
     const chave=await calcularChaveFonteOneDriveRastreio(url);
     const {data,error}=await window.clienteSupabase.rpc("pmobile_rastreio_sincronizar_fonte",{
@@ -55,7 +48,7 @@ async function sincronizar(forcar=false){
     if(typeof salvarValoresTotalPlanilha==="function")await salvarValoresTotalPlanilha();
     if(typeof carregarRastreios==="function")await carregarRastreios();
     const d=Array.isArray(data)?data[0]:data;
-    status("🟢 Sincronizado · "+Number(d?.novas||0)+" novas · "+Number(d?.alteradas||0)+" alteradas · "+Number(d?.removidas||0)+" removidas.");
+    status("🟢 V2 sincronizado · "+Number(d?.novas||0)+" novas · "+Number(d?.alteradas||0)+" alteradas · "+Number(d?.removidas||0)+" removidas.");
   }catch(e){console.error("Importador alternativo:",e);status("🔴 "+(e.message||e));}
   finally{executando=false;agendar();}
 }
