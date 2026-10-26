@@ -849,6 +849,7 @@
               </div></details>
             </div>
 
+            <div class="painel configuracoes-painel-importacao" id="painelMicrosoftOneDrive"><details class="configuracoes-accordion"><summary><span class="home-app-icone">🔐</span><span class="home-app-conteudo"><strong>Conta Microsoft — OneDrive</strong><small>Conectar conta pessoal ou corporativa e selecionar Excel</small></span><span class="home-app-seta">›</span></summary><div class="configuracoes-conteudo"><div class="rastreio-onedrive-sync"><h3>Conexão Microsoft segura</h3><p>Autenticação Microsoft OAuth 2.0 com PKCE. Não informe sua senha ao PMobile. É necessário registrar o aplicativo no Microsoft Entra e autorizar a URL de retorno.</p><label for="pmMsClientId">ID do aplicativo (Client ID)</label><input id="pmMsClientId" type="text" placeholder="ID do aplicativo registrado no Microsoft Entra" autocomplete="off" style="width:100%;padding:13px;background:#171717;color:white;border:1px solid #444;border-radius:10px"><p id="pmMsRedirect" style="font-size:.8em;overflow-wrap:anywhere"></p><div class="rastreio-onedrive-sync-acoes"><button type="button" class="botao-principal" onclick="PMMicrosoft.login()">Entrar com Microsoft</button><button type="button" class="botao-secundario" onclick="PMMicrosoft.listar()">Selecionar arquivo Excel</button><button type="button" class="botao-secundario" onclick="PMMicrosoft.sair()">Desconectar</button></div><p id="pmMsStatus" class="rastreio-onedrive-status" aria-live="polite">Conta desconectada.</p><div id="pmMsArquivos"></div><p style="font-size:.85em;opacity:.8">Etapa de conexão e seleção: a sincronização automática autenticada será habilitada após a integração do servidor. A sincronização atual por link permanece inalterada.</p></div></div></details></div>
             <div class="painel configuracoes-painel-importacao" id="painelImportacaoSharePoint"><details class="configuracoes-accordion"><summary><span class="home-app-icone">📁</span><span class="home-app-conteudo"><strong>Importador SharePoint — Laboratório</strong><small>Teste de acesso ao Excel corporativo · somente leitura</small></span><span class="home-app-seta">›</span></summary><div class="configuracoes-conteudo"><div class="rastreio-onedrive-sync"><h3>Conexão SharePoint</h3><p>Informe o link do arquivo no SharePoint. Verificaremos se o Excel pode ser obtido com as permissões atuais. Links que exigem login corporativo podem não permitir download direto.</p><label for="pmspLink">Link do arquivo SharePoint</label><input id="pmspLink" type="url" placeholder="https://empresa.sharepoint.com/..." autocomplete="off" style="width:100%;padding:14px;background:#171717;color:white;border:1px solid #444;border-radius:10px"><div class="rastreio-onedrive-sync-acoes"><button type="button" class="botao-principal" onclick="PMSharePointLab.testar()">Testar acesso (somente leitura)</button><button type="button" class="botao-secundario" onclick="PMSharePointLab.testarServidor()">Testar via Supabase</button><button type="button" class="botao-secundario" onclick="PMSharePointLab.abrir()">Abrir link no navegador</button><button type="button" class="botao-secundario" onclick="PMSharePointLab.limpar()">Limpar</button></div><p id="pmspStatus" class="rastreio-onedrive-status" aria-live="polite">Aguardando link do SharePoint.</p><p style="font-size:.85em;opacity:.8">Não modifica rastreios nem contorna autenticação corporativa. O navegador pode bloquear acesso por CORS.</p></div></div></details></div>
             <div class="painel configuracoes-painel-sistema">
                 <details class="configuracoes-accordion"><summary><span class="home-app-icone">⚙️</span><span class="home-app-conteudo"><strong>Sistema</strong><small>Atualizações do aplicativo</small></span><span class="home-app-seta">›</span></summary><div class="configuracoes-conteudo">
@@ -1147,6 +1148,64 @@
 
 <script src="importador-sharepoint.js?v=1.1.0"></script>
 <script src="sync-center.js?v=1.0.2"></script>
+<script>
+window.PMMicrosoft=(()=>{
+ const KEY="pm_ms_client_id", STATE="pm_ms_oauth_state", VERIFIER="pm_ms_pkce", REDIRECT=location.origin+location.pathname;
+ let access=null,expires=0;
+ const status=m=>{const el=document.getElementById("pmMsStatus");if(el)el.textContent=m;};
+ const client=()=>document.getElementById("pmMsClientId")?.value.trim()||localStorage.getItem(KEY)||"";
+ const b64=b=>btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+ const random=()=>b64(crypto.getRandomValues(new Uint8Array(32)));
+ const valid=()=>access&&Date.now()<expires-60000;
+ async function login(){
+  const id=client();if(!/^[a-f0-9-]{36}$/i.test(id)){status("Informe um Client ID válido do Microsoft Entra.");return;}
+  if(!crypto.subtle){status("OAuth exige HTTPS.");return;}
+  localStorage.setItem(KEY,id);
+  const verifier=random(),state=random();
+  sessionStorage.setItem(VERIFIER,verifier);sessionStorage.setItem(STATE,state);
+  const challenge=b64(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(verifier)));
+  const u=new URL("https://login.microsoftonline.com/common/oauth2/v2.0/authorize");
+  for(const [k,v] of Object.entries({client_id:id,response_type:"code",redirect_uri:REDIRECT,response_mode:"query",scope:"openid profile User.Read Files.Read offline_access",state,code_challenge:challenge,code_challenge_method:"S256",prompt:"select_account"}))u.searchParams.set(k,v);
+  location.assign(u.toString());
+ }
+ async function retorno(){
+  const u=new URL(location.href),code=u.searchParams.get("code"),err=u.searchParams.get("error");
+  if(!code&&!err)return;
+  history.replaceState(null,"",REDIRECT+location.hash);
+  if(err){status("Microsoft: "+(u.searchParams.get("error_description")||err));return;}
+  const state=sessionStorage.getItem(STATE),verifier=sessionStorage.getItem(VERIFIER);
+  sessionStorage.removeItem(STATE);sessionStorage.removeItem(VERIFIER);
+  if(!state||state!==u.searchParams.get("state")||!verifier){status("Falha de validação OAuth. Tente novamente.");return;}
+  const body=new URLSearchParams({client_id:client(),grant_type:"authorization_code",code,redirect_uri:REDIRECT,code_verifier:verifier,scope:"openid profile User.Read Files.Read offline_access"});
+  try{
+   const r=await fetch("https://login.microsoftonline.com/common/oauth2/v2.0/token",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body});
+   const d=await r.json();if(!r.ok||!d.access_token)throw Error(d.error_description||"Falha ao obter token");
+   access=d.access_token;expires=Date.now()+Number(d.expires_in||3600)*1000;
+   status("🟢 Conta conectada nesta sessão. Selecione o arquivo.");
+  }catch(e){status("Falha de autenticação: "+e.message);}
+ }
+ async function listar(path="https://graph.microsoft.com/v1.0/me/drive/root/children"){
+  if(!valid()){status("Entre com Microsoft para listar arquivos.");return;}
+  const area=document.getElementById("pmMsArquivos");if(!area)return;area.replaceChildren();
+  try{
+   const u=new URL(path);if(u.origin!=="https://graph.microsoft.com")throw Error("Destino inválido");
+   const r=await fetch(u,{headers:{Authorization:"Bearer "+access}}),d=await r.json();
+   if(!r.ok)throw Error(d.error?.message||"Falha na consulta");
+   for(const f of d.value||[]){
+    if(!f.folder&&!/\.xls(x|m|b)?$/i.test(f.name||""))continue;
+    const b=document.createElement("button");b.type="button";b.className="botao-secundario";b.style.cssText="display:block;width:100%;margin:8px 0;text-align:left;overflow-wrap:anywhere";
+    b.textContent=(f.folder?"📁 ":"📊 ")+f.name;
+    b.onclick=()=>f.folder?listar("https://graph.microsoft.com/v1.0/me/drive/items/"+encodeURIComponent(f.id)+"/children"):(status("Arquivo selecionado: "+f.name+" — conexão com sincronizador ainda pendente."),sessionStorage.setItem("pm_ms_selected_file",JSON.stringify({id:f.id,name:f.name})));
+    area.append(b);
+   }
+   if(!area.childNodes.length)status("Nenhuma pasta ou planilha Excel encontrada neste local.");
+  }catch(e){status("Erro Microsoft Graph: "+e.message);}
+ }
+ function sair(){access=null;expires=0;sessionStorage.removeItem("pm_ms_selected_file");document.getElementById("pmMsArquivos")?.replaceChildren();status("Conta desconectada.");}
+ document.addEventListener("DOMContentLoaded",()=>{const id=document.getElementById("pmMsClientId");if(id)id.value=localStorage.getItem(KEY)||"";const p=document.getElementById("pmMsRedirect");if(p)p.textContent="URL de retorno para cadastrar no Entra (SPA): "+REDIRECT;retorno();});
+ return {login,listar,sair};
+})();
+</script>
 </body>
 
 </html>
