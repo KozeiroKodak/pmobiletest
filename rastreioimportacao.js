@@ -451,7 +451,7 @@ async function baixarPlanilhaOneDriveRastreio(url) {
             // Erros de autorização/HTML não são falhas de rede: o fallback
             // nativo repetiria o mesmo acesso e esconderia o diagnóstico.
             if (!window.PMCOLETAS_ONEDRIVE?.iniciarDownload ||
-                /HTTP\\s*(401|403)|login|autentica|permiss|página|html|Excel válido|resposta inválida/i.test(mensagem)) {
+                /HTTP\\s*(401|403)|login|autentica|permiss/i.test(mensagem)) {
                 throw erro;
             }
             console.warn("Proxy OneDrive indisponível; tentando ponte nativa:", erro);
