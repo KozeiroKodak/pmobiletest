@@ -434,11 +434,23 @@ async function baixarPlanilhaOneDriveRastreio(url) {
             if (!data) throw new Error("O Supabase não retornou a planilha.");
             const blob = data instanceof Blob ? data : new Blob([data]);
             if (!blob.size) throw new Error("O arquivo recebido está vazio.");
+            const assinatura = new Uint8Array(await blob.slice(0, 8).arrayBuffer());
+            const zip = assinatura[0] === 0x50 && assinatura[1] === 0x4b;
+            const ole = assinatura[0] === 0xd0 && assinatura[1] === 0xcf;
+            if (!zip && !ole) {
+                throw new Error("O OneDrive retornou uma página ou resposta inválida, não um Excel. Confira o acesso ao link compartilhado.");
+            }
             mostrarStatusOneDriveRastreio("🟢 Download pelo Supabase concluído.");
             return new File([blob], nomePadrao, { type: "application/octet-stream" });
         } catch (erro) {
             erroProxy = erro;
-            if (!window.PMCOLETAS_ONEDRIVE?.iniciarDownload) throw erro;
+            const mensagem = String(erro?.message || erro);
+            // Erros de autorização/HTML não são falhas de rede: o fallback
+            // nativo repetiria o mesmo acesso e esconderia o diagnóstico.
+            if (!window.PMCOLETAS_ONEDRIVE?.iniciarDownload ||
+                /HTTP\\s*(401|403)|login|autentica|permiss|página|html|Excel válido|resposta inválida/i.test(mensagem)) {
+                throw erro;
+            }
             console.warn("Proxy OneDrive indisponível; tentando ponte nativa:", erro);
         }
     }
