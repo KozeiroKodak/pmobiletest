@@ -874,6 +874,32 @@
                 </div>
               </details>
             </div>
+            <div class="painel configuracoes-painel-importacao" id="painelImportacaoV3">
+              <details class="configuracoes-accordion">
+                <summary><span class="home-app-icone">🔐</span><span class="home-app-conteudo"><strong>Importador V3 — Microsoft Graph</strong><small>OneDrive pessoal e empresarial · autenticação oficial</small></span><span class="home-app-seta">›</span></summary>
+                <div class="configuracoes-conteudo">
+                  <div class="rastreio-onedrive-sync">
+                    <h3>Laboratório V3 · conexão Microsoft</h3>
+                    <p>Login pelo navegador do Android com OAuth 2.0 e PKCE. Compatível com contas Microsoft pessoais e corporativas, conforme permissões da organização.</p>
+                    <label for="pmv3ClientId">ID do aplicativo Microsoft (Client ID)</label>
+                    <input id="pmv3ClientId" type="text" placeholder="ID do aplicativo registrado no Microsoft Entra" autocomplete="off" style="width:100%;padding:14px;background:#171717;color:white;border:1px solid #444;border-radius:10px">
+                    <p style="font-size:.85em;opacity:.8">Registro: contas organizacionais e pessoais; plataforma SPA; URI de retorno exibida abaixo. Não informe segredo de cliente.</p>
+                    <div id="pmv3Redirect" style="overflow-wrap:anywhere;font-size:.8em;opacity:.8"></div>
+                    <div class="rastreio-onedrive-sync-acoes">
+                      <button type="button" class="botao-principal" onclick="PMImportadorV3.conectar()">Conectar Microsoft</button>
+                      <button type="button" class="botao-secundario" onclick="PMImportadorV3.desconectar()">Desconectar</button>
+                      <button type="button" class="botao-secundario" onclick="PMImportadorV3.listar()">Listar arquivos Excel</button>
+                    </div>
+                    <label for="pmv3Arquivo">Arquivos disponíveis</label>
+                    <select id="pmv3Arquivo" style="width:100%;padding:14px;background:#171717;color:white;border:1px solid #444;border-radius:10px"><option value="">Conecte sua conta e liste os arquivos</option></select>
+                    <div class="rastreio-onedrive-sync-acoes">
+                      <button type="button" class="botao-secundario" onclick="PMImportadorV3.testar()">Testar download e leitura (sem gravar)</button>
+                    </div>
+                    <p id="pmv3Status" class="rastreio-onedrive-status" aria-live="polite">V3 aguardando conexão. Testes não modificam rastreios.</p>
+                  </div>
+                </div>
+              </details>
+            </div>
             <div class="painel configuracoes-painel-sistema">
                 <details class="configuracoes-accordion"><summary><span class="home-app-icone">⚙️</span><span class="home-app-conteudo"><strong>Sistema</strong><small>Atualizações do aplicativo</small></span><span class="home-app-seta">›</span></summary><div class="configuracoes-conteudo">
                 <div class="configuracoes-acoes">
@@ -1170,6 +1196,7 @@
 <!-- Central de sincronização -->
 
 <script src="importador-alternativo.js?v=2.0.0"></script>
+<script src="importador-v3.js?v=1.0.0"></script>
 <script src="sync-center.js?v=1.0.2"></script>
 </body>
 
