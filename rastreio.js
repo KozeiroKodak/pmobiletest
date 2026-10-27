@@ -13,7 +13,7 @@ let buscaNFRastreioRequisicao = 0;
 
 function agendarBuscaRastreioServidor() {
     const termo = String(document.getElementById("buscaRastreio")?.value || "").trim();
-    if (!/^\\d{3,40}$/.test(termo)) {
+    if (!/^\d{3,40}$/.test(termo)) {
         clearTimeout(buscaNFRastreioTemporizador);
         buscaNFRastreioUltimoTermo = "";
         buscaNFRastreioCarregando = false;
@@ -120,8 +120,8 @@ async function carregarRastreios() {
             };
             const adicionarPagina = pagina => {
                 registros.push(...pagina.filter(item =>
-                    !/^TOTAL(?:\\s*GERAL)?$/i.test(String(item.transportadora || "").trim()) &&
-                    !/^TOTAL(?:\\s*GERAL)?$/i.test(String(item.cliente || "").trim())
+                    !/^TOTAL(?:\s*GERAL)?$/i.test(String(item.transportadora || "").trim()) &&
+                    !/^TOTAL(?:\s*GERAL)?$/i.test(String(item.cliente || "").trim())
                 ));
                 if (status) status.textContent = "Carregando rastreios: " +
                     registros.length.toLocaleString("pt-BR") + "...";
