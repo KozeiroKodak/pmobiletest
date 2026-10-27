@@ -53,11 +53,11 @@
 }
 
 .importacao-progresso-concluido::-webkit-progress-value {
-    background: #16a34a;
+    background: #a3a3a3;
 }
 
 .importacao-progresso-concluido::-moz-progress-bar {
-    background: #16a34a;
+    background: #a3a3a3;
 }
 
 
