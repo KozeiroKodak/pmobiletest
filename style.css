@@ -83,8 +83,8 @@
 
     /* COR PRINCIPAL */
 
-    --verde: #3ecf8e;
-    --verde-hover: #34b27b;
+    --verde: #d7d7d7;
+    --verde-hover: #f0f0f0;
 
 
     /* AVISOS TRANSPARENTES */
@@ -1622,7 +1622,7 @@ textarea:focus {
     outline: none;
     border-color: var(--verde);
     background: #141414;
-    box-shadow: 0 0 0 3px rgba(62, 207, 142, .10);
+    box-shadow: 0 0 0 3px rgba(215,215,215, .10);
 }
 
 input:not([type="checkbox"]):not([type="radio"]):disabled,
