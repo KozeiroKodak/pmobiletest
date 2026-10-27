@@ -1,6 +1,8 @@
 // PMOBILE - Rastreio
 let rastreiosPmobile = [];
 let limiteExibicaoRastreios = 100;
+let carregamentoRastreiosAtual = null;
+let rastreiosUltimaConsulta = 0;
 
 function obterSessaoRastreio() {
     if (!window.usuarioPmobileAtual || !window.credencialPmobileAtual) {
@@ -23,39 +25,55 @@ async function abrirRastreio() {
     if (typeof atualizarAcessoAdminRastreio === "function") {
         atualizarAcessoAdminRastreio();
     }
+    if (rastreiosPmobile.length) {
+        filtrarRastreios();
+        if (Date.now() - rastreiosUltimaConsulta < 30000) return;
+    }
     await carregarRastreios();
 }
 
 async function carregarRastreios() {
-    const lista = document.getElementById("listaRastreios");
-    const status = document.getElementById("statusRastreio");
-    if (!lista) return;
-    lista.innerHTML = '<div class="rastreio-vazio">Carregando rastreios...</div>';
-    try {
-        const sessao = obterSessaoRastreio();
-        const registros = [];
-        const tamanhoPagina = 500;
-        for (let deslocamento = 0; ; deslocamento += tamanhoPagina) {
-            const resposta = await window.clienteSupabase.rpc("pmobile_rastreio_listar_v3", {
-                p_usuario: sessao.usuario,
-                p_credencial: sessao.credencial,
-                p_limit: tamanhoPagina,
-                p_offset: deslocamento
-            });
-            if (resposta.error) throw resposta.error;
-            const pagina = Array.isArray(resposta.data) ? resposta.data : [];
-            registros.push(...pagina.filter(item => !/^TOTAL(?:\s*GERAL)?$/i.test(String(item.transportadora || "").trim()) && !/^TOTAL(?:\s*GERAL)?$/i.test(String(item.cliente || "").trim())));
-            if (status) status.textContent = "Carregando rastreios: " + registros.length.toLocaleString("pt-BR") + "...";
-            if (pagina.length < tamanhoPagina) break;
+    if (carregamentoRastreiosAtual) return carregamentoRastreiosAtual;
+    carregamentoRastreiosAtual = (async () => {
+        const lista = document.getElementById("listaRastreios");
+        const status = document.getElementById("statusRastreio");
+        if (!lista) return;
+        const possuiCache = rastreiosPmobile.length > 0;
+        if (!possuiCache) lista.innerHTML = '<div class="rastreio-vazio">Carregando rastreios...</div>';
+        try {
+            const sessao = obterSessaoRastreio();
+            const registros = [];
+            const tamanhoPagina = 500;
+            for (let deslocamento = 0; ; deslocamento += tamanhoPagina) {
+                const resposta = await window.clienteSupabase.rpc("pmobile_rastreio_listar_v3", {
+                    p_usuario: sessao.usuario,
+                    p_credencial: sessao.credencial,
+                    p_limit: tamanhoPagina,
+                    p_offset: deslocamento
+                });
+                if (resposta.error) throw resposta.error;
+                const pagina = Array.isArray(resposta.data) ? resposta.data : [];
+                registros.push(...pagina.filter(item => !/^TOTAL(?:\\s*GERAL)?$/i.test(String(item.transportadora || "").trim()) && !/^TOTAL(?:\\s*GERAL)?$/i.test(String(item.cliente || "").trim())));
+                if (status) status.textContent = "Carregando rastreios: " + registros.length.toLocaleString("pt-BR") + "...";
+                // Mostra resultados assim que chega a primeira página, sem esperar a última.
+                if (!possuiCache && (deslocamento === 0 || deslocamento % 2000 === 0)) {
+                    rastreiosPmobile = registros.slice();
+                    filtrarRastreios();
+                }
+                if (pagina.length < tamanhoPagina) break;
+            }
+            rastreiosPmobile = registros;
+            rastreiosUltimaConsulta = Date.now();
+            limiteExibicaoRastreios = 100;
+            if (status) status.textContent = rastreiosPmobile.length.toLocaleString("pt-BR") + " rastreio(s)";
+            filtrarRastreios();
+        } catch (erro) {
+            console.error("Erro ao carregar Rastreio:", erro);
+            if (status) status.textContent = "Falha ao atualizar rastreios.";
+            if (!rastreiosPmobile.length) lista.innerHTML = '<div class="rastreio-erro">' + escaparHtmlRastreio(erro.message || "Não foi possível carregar os rastreios.") + '</div>';
         }
-        rastreiosPmobile = registros;
-        limiteExibicaoRastreios = 100;
-        if (status) status.textContent = rastreiosPmobile.length.toLocaleString("pt-BR") + " rastreio(s)";
-        filtrarRastreios();
-    } catch (erro) {
-        console.error("Erro ao carregar Rastreio:", erro);
-        lista.innerHTML = '<div class="rastreio-erro">' + escaparHtmlRastreio(erro.message || "Não foi possível carregar os rastreios.") + '</div>';
-    }
+    })();
+    try { await carregamentoRastreiosAtual; } finally { carregamentoRastreiosAtual = null; }
 }
 
 function statusVisualRastreio(item) {
