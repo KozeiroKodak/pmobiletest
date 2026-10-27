@@ -696,7 +696,7 @@ async function sincronizarOneDriveRastreio(forcar = false) {
         }
 
         mostrarStatusOneDriveRastreio("🟡 Sincronizando alterações da planilha...");
-        const resposta = await window.clienteSupabase.rpc("pmobile_rastreio_sincronizar_fonte", {
+        const resposta = await window.clienteSupabase.rpc("pmobile_rastreio_sincronizar_fonte_v2", {
             p_usuario: sessao.usuario,
             p_credencial: sessao.credencial,
             p_chave: chave,
