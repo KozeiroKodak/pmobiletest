@@ -39,3 +39,47 @@ input:not([type=checkbox]):not([type=radio]):focus-visible,select:focus-visible,
  outline-color:rgba(235,235,235,.55)
 }
 @media(prefers-reduced-motion:reduce){button{transition:none!important}}
+
+/* V2.1 — Cobertura das demais telas e componentes, sem mudar status semânticos. */
+:root{color-scheme:dark}
+#pesquisa,#rastreio,#reservas,#conferencias,#configuracoes,#contagemManual,#importacao,#solicitacoes,#locais{
+ background-color:var(--fundo);color:var(--texto)
+}
+:is(.painel,.painel-reservas,.rastreio-painel,.configuracoes-painel-admin,.painel-solicitacoes,.painel-locais,.rastreio-importacao-painel,.arquivos-teste-painel){
+ background-color:var(--fundo-painel);border-color:var(--borda)
+}
+:is(.pesquisa-item,.reserva-item,.registro-conferencia,.rastreio-card,.solicitacao-facebook-card,.local-alterado-card,.local-vazio-area-card,.arquivo-teste-card){
+ border-color:var(--borda)!important;
+ background-image:linear-gradient(145deg,rgba(255,255,255,.025),transparent 70%);
+}
+:is(.pesquisa-item,.reserva-item,.registro-conferencia,.rastreio-card,.solicitacao-facebook-card,.local-alterado-card,.local-vazio-area-card,.arquivo-teste-card):hover{
+ border-color:rgba(235,235,235,.26)!important;
+ background-color:#222!important
+}
+:is(.rastreio-filtros input,.rastreio-filtros select,.pesquisa-filtros input,.pesquisa-filtros select,.seletor-contagem-manual,.solicitacao-filtro,.aba-locais,.pmobile-popup-escolha-opcao){
+ background-color:#171717;color:var(--texto);border-color:var(--borda-clara)
+}
+:is(.rastreio-filtros input,.rastreio-filtros select,.pesquisa-filtros input,.pesquisa-filtros select,.seletor-contagem-manual):focus{
+ border-color:#c9c9c9!important;box-shadow:0 0 0 2px rgba(255,255,255,.07)!important
+}
+:is(.aba-locais.ativo,.solicitacao-filtro.ativo,.pmobile-popup-escolha-opcao.selecionada){
+ background-color:#303030!important;border-color:#707070!important;color:#f2f2f2!important
+}
+:is(.pmobile-popup-escolha-caixa,.menu-config-contagem-manual,.menu-tipo-busca-contagem-manual){
+ background-color:#1b1b1b;border-color:#393939;box-shadow:0 16px 36px rgba(0,0,0,.38)
+}
+:is(.pmobile-popup-escolha-opcao,.menu-config-contagem-manual button,.menu-tipo-busca-contagem-manual button):hover{
+ background-color:#292929!important
+}
+:is(.rastreio-importacao-painel,.rastreio-importacao-resumo,.rastreio-importacao-acoes,.arquivos-teste-painel){
+ --verde:#d7d7d7;--verde-hover:#f0f0f0
+}
+:is(.botao-importar-materiais,.botao-buscar-contagem-manual,.botao-config-contagem-manual){
+ background-image:linear-gradient(135deg,rgba(255,255,255,.075),transparent 70%)
+}
+/* Conservar as cores de entrega, erro, avisos e sincronização. */
+#statusSupabase{--verde:#3ecf8e;--verde-hover:#34b27b}
+@media(max-width:700px){
+ :is(.painel,.rastreio-painel,.painel-reservas,.painel-locais){max-width:100%;min-width:0}
+ :is(#pesquisa,#rastreio,#reservas,#conferencias,#configuracoes,#opcoesCotacoes,#cotacoesRegiao,#cotacoesDetalhe){max-width:100%;overflow-x:clip}
+}
