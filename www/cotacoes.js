@@ -57,6 +57,15 @@ async function executarConsultaCotacoes(){
   renderRegioes();
  }catch(e){console.error("Cotações por região:",e);status.textContent="Não foi possível atualizar: "+(e.message||e);if(!mapa.size)$("cotLista").innerHTML="";}
 }
+// Se o Android publicar nova planilha no Supabase, invalidar o cache
+// de cotações do PC. Não alterar o Rastreio nem criar consultas duplicadas.
+window.addEventListener("pmobile:rastreio-atualizado",()=>{
+ mapa=new Map();
+ ultimaConsulta=0;
+ const lista=$("cotacoesRegiao"),detalhe=$("cotacoesDetalhe");
+ const visivel=el=>!!el&&getComputedStyle(el).display!=="none"&&el.getClientRects().length>0;
+ if(visivel(lista)||visivel(detalhe))carregarCotacoesRegiao();
+});
 document.addEventListener("click",e=>{const b=e.target.closest("[data-cot-regiao]");if(b)abrirDetalheCotacao(b.dataset.cotRegiao);});
 document.addEventListener("input",e=>{if(e.target?.id==="cotBusca")renderRegioes();});
 window.abrirOpcoesCotacoes=abrirOpcoesCotacoes;window.abrirCotacoesRegiao=abrirCotacoesRegiao;window.voltarOpcoesCotacoes=voltarOpcoesCotacoes;window.voltarListaCotacoes=voltarListaCotacoes;
