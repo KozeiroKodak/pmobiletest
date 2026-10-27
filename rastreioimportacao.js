@@ -213,6 +213,31 @@ let sincronizacaoOneDriveRastreioUrl = "";
 let sincronizacaoOneDriveRastreioUltimaLinha = 0;
 let sincronizacaoOneDriveRastreioVerificada = false;
 let sincronizacaoOneDriveRastreioFalhasConsecutivas = 0;
+// No navegador, o Supabase é a fonte de verdade; só o Android nativo
+// precisa ler o arquivo Excel para publicar mudanças.
+let ultimaVersaoCentralRastreio = null;
+function possuiLeitorNativoOneDriveRastreio() {
+    return typeof window.PMCOLETAS_ONEDRIVE?.iniciarDownload === "function";
+}
+function configurarModoCentralRastreio() {
+    if (possuiLeitorNativoOneDriveRastreio()) return;
+    const descricao = document.getElementById("descricaoSincronizacaoOneDriveRastreio");
+    if (descricao) descricao.textContent =
+        "Neste navegador, o PMobile acompanha a versão do Rastreio salva no Supabase a cada 15 segundos. " +
+        "O Android envia as alterações do Excel; o PC recebe e atualiza os dados sem baixar o arquivo.";
+    const intervalo = document.getElementById("intervaloOneDriveRastreio");
+    if (intervalo) intervalo.textContent = "Verificação do Supabase: a cada 15 segundos";
+    const ativar = document.getElementById("botaoAtivarSincronizacaoRastreio");
+    if (ativar) ativar.textContent = "Ativar acompanhamento";
+    const agora = document.getElementById("botaoSincronizarAgoraRastreio");
+    if (agora) agora.textContent = "Consultar Supabase agora";
+    const releitura = document.getElementById("botaoForcarLeituraRastreio");
+    if (releitura) {
+        releitura.textContent = "Leitura do Excel: somente Android";
+        releitura.disabled = true;
+        releitura.title = "O PC recebe as atualizações já gravadas no Supabase. Não precisa abrir a planilha.";
+    }
+}
 
 function usuarioRastreioEhAdmin() {
     const usuario = (typeof usuarioPmobileAtual !== "undefined" && usuarioPmobileAtual)
@@ -247,7 +272,10 @@ function atualizarAcessoAdminRastreio() {
     document.querySelectorAll(".rastreio-admin-only").forEach(el => { el.hidden = !permitido; });
     if (ultimoAcessoAdminRastreio === permitido) return;
     ultimoAcessoAdminRastreio = permitido;
-    if (permitido) restaurarConfiguracaoOneDriveRastreio();
+    if (permitido) {
+        configurarModoCentralRastreio();
+        restaurarConfiguracaoOneDriveRastreio();
+    }
     else if (sincronizacaoOneDriveRastreioAtiva) pararSincronizacaoOneDriveRastreio();
 }
 
@@ -265,7 +293,13 @@ async function restaurarConfiguracaoOneDriveRastreio() {
             sincronizacaoOneDriveRastreioUrl = data;
         }
         const config = obterConfiguracaoOneDriveRastreio();
-        if (data && config?.ativo && !sincronizacaoOneDriveRastreioAtiva) iniciarSincronizacaoOneDriveRastreio(true);
+        if (!possuiLeitorNativoOneDriveRastreio() && !sincronizacaoOneDriveRastreioAtiva) {
+            // Acompanhamento somente de leitura no PC: não depende de link nem
+            // do cache local, portanto inicia após o login de um ADMIN.
+            iniciarSincronizacaoOneDriveRastreio(true);
+        } else if (data && config?.ativo && !sincronizacaoOneDriveRastreioAtiva) {
+            iniciarSincronizacaoOneDriveRastreio(true);
+        }
     } catch (erro) { console.warn("Não foi possível carregar link OneDrive do Supabase:", erro); }
     finally { restaurandoLinkOneDriveServidor = false; }
 }
@@ -321,25 +355,32 @@ function atualizarIndicadorOneDriveRastreio(ativo, estado = null) {
     indicador.classList.remove("ativo", "conectando", "erro", "conectado");
 
     if (!ativo) {
-        indicador.textContent = "○ Sincronização parada";
+        indicador.textContent = possuiLeitorNativoOneDriveRastreio()
+            ? "○ Sincronização parada" : "○ Acompanhamento parado";
         return;
     }
 
     if (estado === "erro") {
         window.estadoOneDriveRastreio = { estado: "erro", atualizadoEm: Date.now() };
-        indicador.textContent = "● Falha na sincronização";
+        indicador.textContent = possuiLeitorNativoOneDriveRastreio()
+            ? "● Falha na sincronização" : "● Falha na consulta ao Supabase";
         indicador.classList.add("erro");
         return;
     }
 
     if (!sincronizacaoOneDriveRastreioVerificada) {
-        indicador.textContent = "● Verificando OneDrive...";
+        indicador.textContent = possuiLeitorNativoOneDriveRastreio()
+            ? "● Verificando OneDrive..." : "● Consultando Supabase...";
         indicador.classList.add("conectando");
         return;
     }
 
-    window.estadoOneDriveRastreio = { estado: "conectado", atualizadoEm: Date.now() };
-    indicador.textContent = "● OneDrive conectado";
+    window.estadoOneDriveRastreio = {
+        ...(window.estadoOneDriveRastreio || {}),
+        estado: "conectado", atualizadoEm: Date.now()
+    };
+    indicador.textContent = possuiLeitorNativoOneDriveRastreio()
+        ? "● OneDrive conectado" : "● Supabase atualizado";
     indicador.classList.add("ativo", "conectado");
 }
 
@@ -360,6 +401,20 @@ function agendarProximaSincronizacaoOneDriveRastreio() {
 function iniciarSincronizacaoOneDriveRastreio(restaurando = false) {
     if (!usuarioRastreioEhAdmin()) {
         mostrarStatusOneDriveRastreio("🔒 Recurso disponível somente para administradores.");
+        return;
+    }
+    if (!possuiLeitorNativoOneDriveRastreio()) {
+        configurarModoCentralRastreio();
+        sincronizacaoOneDriveRastreioAtiva = true;
+        sincronizacaoOneDriveRastreioFalhasConsecutivas = 0;
+        salvarConfiguracaoOneDriveRastreio({
+            ...(obterConfiguracaoOneDriveRastreio() || {}),
+            manterLink: true, intervalo: obterIntervaloOneDriveRastreio(),
+            ativo: true, modo: "central", salvoEm: new Date().toISOString()
+        });
+        atualizarIndicadorOneDriveRastreio(true);
+        mostrarStatusOneDriveRastreio("🟡 Consultando os dados centrais do Supabase...");
+        consultarEstadoCentralRastreio();
         return;
     }
     const campo = document.getElementById("linkOneDriveRastreio");
@@ -416,7 +471,8 @@ function pararSincronizacaoOneDriveRastreio() {
         limparConfiguracaoOneDriveRastreio();
     }
     atualizarIndicadorOneDriveRastreio(false);
-    mostrarStatusOneDriveRastreio("○ Sincronização parada.");
+    mostrarStatusOneDriveRastreio(possuiLeitorNativoOneDriveRastreio()
+        ? "○ Sincronização parada." : "○ Acompanhamento do Supabase parado.");
 }
 
 function limparLinhaBaseOneDriveRastreio() {
@@ -628,7 +684,91 @@ async function baixarPlanilhaOneDriveRastreio(url) {
     throw erroNativo || erroProxy || new Error("Download indisponível: conexão com o Supabase não encontrada.");
 }
 
+// Consulta apenas os metadados da fonte sincronizada, nunca o Excel nem seu
+// link. O Supabase já contém os registros que o Android importou.
+async function consultarEstadoCentralRastreio(forcar = false) {
+    if (!usuarioRastreioEhAdmin() || sincronizacaoOneDriveRastreioExecutando) return;
+    if (!sincronizacaoOneDriveRastreioAtiva && !forcar) return;
+    sincronizacaoOneDriveRastreioExecutando = true;
+    try {
+        const sessao = obterSessaoRastreioImportacao();
+        const {data, error} = await window.clienteSupabase.rpc("pmobile_rastreio_estado_central", {
+            p_usuario: sessao.usuario,
+            p_credencial: sessao.credencial
+        });
+        if (error) throw error;
+        const fonte = data || {};
+        const quantidade = Number(fonte.registros || 0);
+        if (!fonte.presente) {
+            ultimaVersaoCentralRastreio = null;
+            sincronizacaoOneDriveRastreioVerificada = false;
+            atualizarIndicadorOneDriveRastreio(true);
+            mostrarStatusOneDriveRastreio(
+                "🟡 Supabase disponível · aguardando a primeira sincronização da planilha pelo Android.");
+            window.estadoOneDriveRastreio = {
+                estado: "atencao", mensagem: "Aguardando envio do Android", atualizadoEm: Date.now()
+            };
+            return;
+        }
+        if (!fonte.integra) {
+            sincronizacaoOneDriveRastreioVerificada = false;
+            atualizarIndicadorOneDriveRastreio(true, "erro");
+            mostrarStatusOneDriveRastreio(
+                "🔴 A fonte central possui " + quantidade.toLocaleString("pt-BR") +
+                " registros de " + Number(fonte.total_linhas || 0).toLocaleString("pt-BR") +
+                " esperados. Aguardando correção pela sincronização do Android.");
+            return;
+        }
+        const versao = String(fonte.fonte_id || "") + ":" +
+            String(fonte.sha256 || "") + ":" +
+            String(fonte.atualizado_em || "") + ":" + quantidade;
+        const mudou = ultimaVersaoCentralRastreio !== versao;
+        ultimaVersaoCentralRastreio = versao;
+        sincronizacaoOneDriveRastreioVerificada = true;
+        sincronizacaoOneDriveRastreioFalhasConsecutivas = 0;
+        atualizarIndicadorOneDriveRastreio(true);
+        const atualizado = fonte.atualizado_em
+            ? new Date(fonte.atualizado_em).toLocaleString("pt-BR") : "não informado";
+        mostrarStatusOneDriveRastreio(
+            "🟢 Supabase sincronizado · " + quantidade.toLocaleString("pt-BR") +
+            " rastreios · última alteração: " + atualizado +
+            (mudou ? " · dados atualizados no servidor." : " · nenhuma alteração nova."));
+        if (mudou) {
+            // Invalidar caches sem reimportar/alterar os registros.
+            if (typeof rastreiosPmobile !== "undefined") rastreiosPmobile = [];
+            if (typeof rastreiosUltimaConsulta !== "undefined") rastreiosUltimaConsulta = 0;
+            const visivel = (id) => {
+                const el = document.getElementById(id);
+                return !!el && getComputedStyle(el).display !== "none" &&
+                    el.getClientRects().length > 0;
+            };
+            if (visivel("rastreio") && typeof carregarRastreios === "function") {
+                await carregarRastreios();
+            }
+            if (visivel("valoresTotal") && typeof carregarValoresTotal === "function") {
+                await carregarValoresTotal();
+            }
+            window.dispatchEvent(new CustomEvent("pmobile:rastreio-atualizado", {
+                detail: {versao, quantidade, atualizadoEm: fonte.atualizado_em}
+            }));
+        }
+    } catch (erro) {
+        sincronizacaoOneDriveRastreioFalhasConsecutivas++;
+        sincronizacaoOneDriveRastreioVerificada = false;
+        atualizarIndicadorOneDriveRastreio(true, "erro");
+        mostrarStatusOneDriveRastreio(
+            "🔴 Não foi possível consultar o Supabase: " + (erro.message || erro) +
+            ". Nenhum registro foi alterado.");
+    } finally {
+        sincronizacaoOneDriveRastreioExecutando = false;
+        if (sincronizacaoOneDriveRastreioAtiva) agendarProximaSincronizacaoOneDriveRastreio();
+    }
+}
+
 async function sincronizarOneDriveRastreio(forcar = false) {
+    if (!possuiLeitorNativoOneDriveRastreio()) {
+        return consultarEstadoCentralRastreio(forcar);
+    }
     if (!usuarioRastreioEhAdmin() || sincronizacaoOneDriveRastreioExecutando) return;
     // O botão Sincronizar agora deve utilizar o link visível na tela.
     const linkInformado = document.getElementById("linkOneDriveRastreio")?.value?.trim();
