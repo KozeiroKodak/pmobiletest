@@ -48,7 +48,7 @@ function alternarImportacaoSemMotoristaRastreio(checkbox) {
     }
 }
 
-async function prepararImportacaoRastreio(arquivoExterno = null, modoAutomatico = false) {
+async function prepararImportacaoRastreio(arquivoExterno = null, modoAutomatico = false, bufferPrecarregado = null) {
     const arquivo =
         arquivoExterno ||
         document.getElementById("arquivoRastreio")?.files?.[0];
@@ -70,7 +70,7 @@ async function prepararImportacaoRastreio(arquivoExterno = null, modoAutomatico 
         // O ArrayBuffer é transferido para o Worker. Depois do postMessage,
         // a thread principal deixa de ser proprietária do buffer, evitando
         // manter uma segunda cópia enquanto o SheetJS processa a planilha.
-        const buffer = await arquivo.arrayBuffer();
+        const buffer = bufferPrecarregado || await arquivo.arrayBuffer();
         // Links de compartilhamento do OneDrive podem devolver uma página de
         // login/visualização HTML em vez dos bytes do Excel.
         const cabecalho = new Uint8Array(buffer, 0, Math.min(buffer.byteLength, 512));
@@ -212,6 +212,7 @@ let sincronizacaoOneDriveRastreioExecutando = false;
 let sincronizacaoOneDriveRastreioUrl = "";
 let sincronizacaoOneDriveRastreioUltimaLinha = 0;
 let sincronizacaoOneDriveRastreioVerificada = false;
+let sincronizacaoOneDriveRastreioFalhasConsecutivas = 0;
 
 function usuarioRastreioEhAdmin() {
     const usuario = (typeof usuarioPmobileAtual !== "undefined" && usuarioPmobileAtual)
@@ -340,9 +341,13 @@ function agendarProximaSincronizacaoOneDriveRastreio() {
     if (!sincronizacaoOneDriveRastreioAtiva) return;
 
     clearTimeout(sincronizacaoOneDriveRastreioTimer);
+    // Em falhas de acesso, evita milhares de requisições 401 ao OneDrive.
+    // Em funcionamento normal, mantém os 15 segundos de atualização.
+    const erros = Math.min(sincronizacaoOneDriveRastreioFalhasConsecutivas, 4);
+    const intervalo = erros > 0 ? Math.min(120000, obterIntervaloOneDriveRastreio() * (2 ** erros))
+                                : obterIntervaloOneDriveRastreio();
     sincronizacaoOneDriveRastreioTimer = setTimeout(
-        () => sincronizarOneDriveRastreio(),
-        obterIntervaloOneDriveRastreio()
+        () => sincronizarOneDriveRastreio(), intervalo
     );
 }
 
@@ -618,27 +623,32 @@ async function sincronizarOneDriveRastreio(forcar = false) {
     sincronizacaoOneDriveRastreioExecutando = true;
     try {
         const arquivo = await baixarPlanilhaOneDriveRastreio(sincronizacaoOneDriveRastreioUrl);
-        await prepararImportacaoRastreio(arquivo, true);
-        if (!dadosImportacaoRastreio) throw new Error("A planilha não pôde ser analisada.");
-
         const url = sincronizacaoOneDriveRastreioUrl;
-        const estadoAnterior = obterEstadoSincronizacaoOneDriveRastreio(url);
-        const hashAtual = dadosImportacaoRastreio.sha256 || null;
-        // Se a rotina foi parada durante o download, não aplicar o resultado atrasado.
         if (!forcar && !sincronizacaoOneDriveRastreioAtiva) {
-            mostrarStatusOneDriveRastreio("○ Sincronização interrompida antes do envio ao banco.");
+            mostrarStatusOneDriveRastreio("○ Sincronização interrompida após o download.");
             return;
         }
 
-        if (!forcar && estadoAnterior?.sha256 && hashAtual && estadoAnterior.sha256 === hashAtual) {
-            // Mesmo com hash local igual, a base pode ter sido limpa no Supabase.
-            // Só declarar "sem alterações" após conferir a fonte e os registros remotos.
-            const sessaoVerificacao = obterSessaoRastreioImportacao();
-            const chaveVerificacao = await calcularChaveFonteOneDriveRastreio(url);
+        // O SHA-256 é calculado ANTES de abrir o workbook.
+        // Em ciclos sem mudanças não iniciamos o SheetJS, não montamos 9 mil linhas
+        // e não enviamos um lote pesado de rastreios ao PostgreSQL.
+        mostrarStatusOneDriveRastreio("🟡 Conferindo rapidamente o arquivo OneDrive...");
+        const bufferArquivo = await arquivo.arrayBuffer();
+        let hashAtual = null;
+        if (window.crypto?.subtle) {
+            const digest = await window.crypto.subtle.digest("SHA-256", bufferArquivo);
+            hashAtual = Array.from(new Uint8Array(digest))
+                .map(byte => byte.toString(16).padStart(2, "0")).join("");
+        }
+
+        const estadoAnterior = obterEstadoSincronizacaoOneDriveRastreio(url);
+        const sessao = obterSessaoRastreioImportacao();
+        const chave = await calcularChaveFonteOneDriveRastreio(url);
+        if (hashAtual) {
             const verificacao = await window.clienteSupabase.rpc("pmobile_rastreio_verificar_fonte", {
-                p_usuario: sessaoVerificacao.usuario,
-                p_credencial: sessaoVerificacao.credencial,
-                p_chave: chaveVerificacao
+                p_usuario: sessao.usuario,
+                p_credencial: sessao.credencial,
+                p_chave: chave
             });
             if (verificacao.error) throw verificacao.error;
             const fonteRemota = verificacao.data;
@@ -646,15 +656,31 @@ async function sincronizarOneDriveRastreio(forcar = false) {
                 fonteRemota.sha256 === hashAtual &&
                 Number(fonteRemota.registros) > 0 &&
                 Number(fonteRemota.registros) === Number(fonteRemota.total_linhas);
+
             if (fonteIntegra) {
+                // O hash remoto é a confirmação compartilhada por PC e Android.
+                // Não depende de um cache local que pode ter sido apagado.
+                salvarEstadoSincronizacaoOneDriveRastreio(url, {
+                    ultimaLinha: Number(estadoAnterior?.ultimaLinha || 0),
+                    totalLinhas: Number(fonteRemota.total_linhas),
+                    sha256: hashAtual,
+                    atualizadoEm: new Date().toISOString()
+                });
+                sincronizacaoOneDriveRastreioFalhasConsecutivas = 0;
                 sincronizacaoOneDriveRastreioVerificada = true;
                 atualizarIndicadorOneDriveRastreio(true);
-                mostrarStatusOneDriveRastreio("🟢 OneDrive conectado · fonte e rastreios confirmados · " + new Date().toLocaleTimeString("pt-BR"));
+                mostrarStatusOneDriveRastreio("🟢 OneDrive conectado · arquivo sem alterações · verificado sem reprocessar Excel · " + new Date().toLocaleTimeString("pt-BR"));
                 if (sincronizacaoOneDriveRastreioAtiva) agendarProximaSincronizacaoOneDriveRastreio();
                 return;
             }
-            mostrarStatusOneDriveRastreio("🟡 A fonte no Supabase precisa ser recuperada. Reimportando do OneDrive com segurança...");
         }
+
+        // Só abrir a planilha quando seu conteúdo realmente mudou ou o banco
+        // precisa ser reconstruído. Reaproveitar o ArrayBuffer já baixado.
+        mostrarStatusOneDriveRastreio("🟡 Alteração detectada. Lendo novas linhas da planilha...");
+        await prepararImportacaoRastreio(arquivo, true, bufferArquivo);
+        if (!dadosImportacaoRastreio) throw new Error("A planilha não pôde ser analisada.");
+        hashAtual = dadosImportacaoRastreio.sha256 || hashAtual;
 
         const tempoReal =
             document.getElementById("sincronizarAlteracoesOneDriveRastreio")?.checked !== false;
@@ -686,8 +712,7 @@ async function sincronizarOneDriveRastreio(forcar = false) {
                     " linhas desde a última sincronização. Alteração grande bloqueada para evitar perda de dados.");
             }
         }
-        const sessao = obterSessaoRastreioImportacao();
-        const chave = await calcularChaveFonteOneDriveRastreio(url);
+        // Credenciais e chave da fonte já foram verificadas antes de ler o workbook.
 
         // O RPC v2 valida a planilha e grava em uma única transação PostgreSQL.
         // Evita repetir a transferência de milhares de linhas em dois RPCs.
@@ -721,6 +746,7 @@ async function sincronizarOneDriveRastreio(forcar = false) {
         });
         sincronizacaoOneDriveRastreioUltimaLinha = ultimaLinhaAtual;
         sincronizacaoOneDriveRastreioVerificada = true;
+        sincronizacaoOneDriveRastreioFalhasConsecutivas = 0;
         atualizarIndicadorOneDriveRastreio(true);
 
         mostrarStatusOneDriveRastreio(
@@ -735,13 +761,17 @@ async function sincronizarOneDriveRastreio(forcar = false) {
         }
     } catch (erro) {
         console.error("Erro na sincronização OneDrive do Rastreio:", erro);
+        sincronizacaoOneDriveRastreioFalhasConsecutivas++;
         sincronizacaoOneDriveRastreioVerificada = false;
         atualizarIndicadorOneDriveRastreio(sincronizacaoOneDriveRastreioAtiva, "erro");
         const foiTimeout = String(erro?.code || "") === "57014" ||
             /statement timeout|tempo limite|query timeout/i.test(String(erro?.message || ""));
+        const foiAcesso = /HTTP\\s*(401|403)|acesso negado|login.*onedrive|permiss/i.test(String(erro?.message || ""));
         mostrarStatusOneDriveRastreio(foiTimeout
-            ? "🔴 O Supabase atingiu o tempo limite. Nenhuma sincronização parcial foi confirmada; a próxima tentativa será automática. Não limpe os dados."
-            : "🔴 Falha na sincronização: " + (erro.message || "erro desconhecido"));
+            ? "🔴 O Supabase atingiu o tempo limite. Nenhuma sincronização parcial foi confirmada. Não limpe os dados."
+            : foiAcesso
+                ? "🔴 OneDrive recusou acesso sem login (401/403). Crie um link de 'Qualquer pessoa com o link', habilite download e salve o novo link no Supabase. Seus rastreios foram preservados."
+                : "🔴 Falha na sincronização: " + (erro.message || "erro desconhecido"));
 
         // Falhas transitórias não podem matar a sincronização automática.
         // O próximo ciclo é agendado somente quando a sincronização continua ativa.
