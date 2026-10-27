@@ -673,29 +673,13 @@ async function sincronizarOneDriveRastreio(forcar = false) {
         const sessao = obterSessaoRastreioImportacao();
         const chave = await calcularChaveFonteOneDriveRastreio(url);
 
-        // Conferência no PostgreSQL antes de qualquer escrita. O preflight
-        // impede que uma planilha incompleta apague lançamentos ou entregas.
-        mostrarStatusOneDriveRastreio("🟡 Validando integridade dos rastreios...");
-        const linhasConferencia = lotePreparado.resultado.map(item => ({
-            linha_origem: item.linha_origem,
-            notas_fiscais: item.notas_fiscais
-        }));
-        const validacaoServidor = await window.clienteSupabase.rpc("pmobile_rastreio_preflight_sincronizacao", {
-            p_usuario: sessao.usuario,
-            p_credencial: sessao.credencial,
-            p_chave: chave,
-            p_linhas: linhasConferencia
-        });
-        if (validacaoServidor.error) throw validacaoServidor.error;
-        if (validacaoServidor.data?.permitido !== true) {
-            throw new Error("O Supabase não confirmou a integridade da sincronização. Nenhum dado foi enviado.");
-        }
+        // O RPC v2 valida a planilha e grava em uma única transação PostgreSQL.
+        // Evita repetir a transferência de milhares de linhas em dois RPCs.
         if (!forcar && !sincronizacaoOneDriveRastreioAtiva) {
             mostrarStatusOneDriveRastreio("○ Sincronização parada antes da gravação.");
             return;
         }
-
-        mostrarStatusOneDriveRastreio("🟡 Sincronizando alterações da planilha...");
+        mostrarStatusOneDriveRastreio("🟡 Validando e sincronizando rastreios com segurança...");
         const resposta = await window.clienteSupabase.rpc("pmobile_rastreio_sincronizar_fonte_v2", {
             p_usuario: sessao.usuario,
             p_credencial: sessao.credencial,
