@@ -1254,10 +1254,9 @@ function linhaEstruturalRastreio(valores) {
         transportadora === "SOMA" ||
         transportadora === "FRETE";
 
-    const semQualquerOutroDado =
-        !motorista && !regiao && !volume && !peso && !valorNF;
-
-    return semCamposObrigatorios && marcadorEstrutural && semQualquerOutroDado;
+    // A linha TOTAL pode conter somatorios de peso, volume e valores.
+    // Esses valores nunca representam uma NF operacional individual.
+    return semCamposObrigatorios && marcadorEstrutural;
 }
 
 function classificarLinhaRastreio(valores) {
