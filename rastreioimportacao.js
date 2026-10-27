@@ -220,13 +220,18 @@ function possuiLeitorNativoOneDriveRastreio() {
     return typeof window.PMCOLETAS_ONEDRIVE?.iniciarDownload === "function";
 }
 function configurarModoCentralRastreio() {
-    if (possuiLeitorNativoOneDriveRastreio()) return;
+    if (possuiLeitorNativoOneDriveRastreio()) {
+        const intervalo = document.getElementById("intervaloOneDriveRastreio");
+        if (intervalo) intervalo.textContent =
+            "Atualização automática: a cada 10 segundos (com app aberto)";
+        return;
+    }
     const descricao = document.getElementById("descricaoSincronizacaoOneDriveRastreio");
     if (descricao) descricao.textContent =
         "Neste navegador, o PMobile acompanha a versão do Rastreio salva no Supabase a cada 15 segundos. " +
         "O Android envia as alterações do Excel; o PC recebe e atualiza os dados sem baixar o arquivo.";
     const intervalo = document.getElementById("intervaloOneDriveRastreio");
-    if (intervalo) intervalo.textContent = "Verificação do Supabase: a cada 15 segundos";
+    if (intervalo) intervalo.textContent = "Verificação do Supabase: a cada 5 segundos";
     const ativar = document.getElementById("botaoAtivarSincronizacaoRastreio");
     if (ativar) ativar.textContent = "Ativar acompanhamento";
     const agora = document.getElementById("botaoSincronizarAgoraRastreio");
@@ -314,7 +319,7 @@ async function salvarLinkOneDriveRastreioSupabase() {
         // Aplicar imediatamente o link que foi salvo; não continuar usando
         // a URL anterior guardada quando a sincronização já está ativa.
         sincronizacaoOneDriveRastreioUrl = url;
-        salvarConfiguracaoOneDriveRastreio({...obterConfiguracaoOneDriveRastreio(),url,manterLink:true,intervalo:15000,tempoReal:true,ativo:sincronizacaoOneDriveRastreioAtiva});
+        salvarConfiguracaoOneDriveRastreio({...obterConfiguracaoOneDriveRastreio(),url,manterLink:true,intervalo:obterIntervaloOneDriveRastreio(),tempoReal:true,ativo:sincronizacaoOneDriveRastreioAtiva});
         mostrarStatusOneDriveRastreio("🟢 Link salvo no Supabase. Disponível aos administradores.");
     } catch(erro) { mostrarStatusOneDriveRastreio("🔴 Falha ao salvar link: "+(erro.message||erro)); }
 }
@@ -340,7 +345,13 @@ function salvarEstadoSincronizacaoOneDriveRastreio(url, estado) {
     }
 }
 
-function obterIntervaloOneDriveRastreio() { return 15000; }
+function obterIntervaloOneDriveRastreio() {
+    // Acompanhamento no PC: RPC pequena somente-leitura a cada 5 s.
+    // Android: leitura do Excel em até 10 s quando em primeiro plano;
+    // em segundo plano conserva 15 s para poupar rede e bateria.
+    if (!possuiLeitorNativoOneDriveRastreio()) return 5000;
+    return document.hidden ? 15000 : 10000;
+}
 
 function mostrarStatusOneDriveRastreio(mensagem) {
     const area = document.getElementById("statusOneDriveRastreio");
@@ -938,7 +949,19 @@ async function sincronizarOneDriveRastreio(forcar = false) {
             Number(resultado?.alteradas || 0).toLocaleString("pt-BR") + " alteradas · " +
             Number(resultado?.removidas || 0).toLocaleString("pt-BR") + " removidas."
         );
-        if (typeof carregarRastreios === "function") await carregarRastreios();
+        // Disponibilizar a nova versão imediatamente para o campo de NF e
+        // para as outras telas. Não baixar novamente todos os 9 mil rastreios
+        // enquanto o usuário ainda está em Configurações.
+        window.dispatchEvent(new CustomEvent("pmobile:rastreio-atualizado", {
+            detail: {versao: hashAtual, quantidade: totalNovo, atualizadoEm: new Date().toISOString()}
+        }));
+        const telaRastreio = document.getElementById("rastreio");
+        const rastreioVisivel = telaRastreio &&
+            getComputedStyle(telaRastreio).display !== "none" &&
+            telaRastreio.getClientRects().length > 0;
+        if (rastreioVisivel && typeof carregarRastreios === "function") {
+            await carregarRastreios();
+        }
         if (sincronizacaoOneDriveRastreioAtiva) {
             agendarProximaSincronizacaoOneDriveRastreio();
         }
