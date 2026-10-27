@@ -707,6 +707,21 @@ async function sincronizarOneDriveRastreio(forcar = false) {
             p_substituir: false
         });
         if (resposta.error) throw resposta.error;
+
+        // Grava a coluna O (% FINAL) pelo identificador estável da linha e NF.
+        // O RPC principal mantém a mesma identidade do rastreio e de sua entrega.
+        const percentuais = lotePreparado.resultado.map(item => ({
+            linha_origem: item.linha_origem,
+            notas_fiscais: item.notas_fiscais,
+            percentual_final: item.percentual_final
+        }));
+        const valoresPercentuais = await window.clienteSupabase.rpc("pmobile_rastreio_aplicar_percentuais_fonte", {
+            p_usuario: sessao.usuario,
+            p_credencial: sessao.credencial,
+            p_chave: chave,
+            p_linhas: percentuais
+        });
+        if (valoresPercentuais.error) throw valoresPercentuais.error;
         await salvarValoresTotalPlanilha();
 
         const resultado = Array.isArray(resposta.data) ? resposta.data[0] : resposta.data;
