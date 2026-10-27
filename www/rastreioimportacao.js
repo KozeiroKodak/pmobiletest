@@ -875,6 +875,7 @@ function detectarModeloRastreio(colunas) {
         valorFrete: achar("Frete Transporte", "Valor Frete", "Frete Transportadora", "Valor do Frete", "Frete"),
         custoNunes: achar("Custo Nunes", "Custo Nunes:"),
         custoFinal: achar("Custo Final"),
+        percentualFinal: achar("% Final", "Percentual Final", "Porcentagem Final"),
         dataEnvio: achar("Data Envio", "Data de Envio"),
         turno: achar("Turno Envio", "Turno")
     };
@@ -1346,6 +1347,7 @@ function prepararLinhasRastreioParaEnvio(inicio = 0, fim = null, coletarAvisos =
             valor_frete: normalizarNumeroRastreio(valor("valorFrete")),
             custo_nunes: normalizarNumeroRastreio(valor("custoNunes")),
             custo_final: normalizarNumeroRastreio(valor("custoFinal")),
+            percentual_final: normalizarNumeroRastreio(valor("percentualFinal")),
             data_envio: dataEnvio,
             turno,
             previsao_entrega: calcularPrevisaoRastreio(dataEnvio, turno),
@@ -1487,7 +1489,7 @@ async function enviarImportacaoRastreio() {
             }
             const lote = lotePreparado.resultado;
 
-            const resposta = await window.clienteSupabase.rpc("pmobile_rastreio_inserir_lote", {
+            const resposta = await window.clienteSupabase.rpc("pmobile_rastreio_inserir_lote_v2", {
                 p_usuario: sessao.usuario,
                 p_credencial: sessao.credencial,
                 p_importacao_id: importacaoId,
