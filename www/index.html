@@ -58,7 +58,7 @@
     <link rel="stylesheet" href="implementacoes/rastreioimportacao.css?v=0.0.248">
 
 <link rel="stylesheet" href="sync-center.css?v=1.0.0">
-</head>
+<link rel="stylesheet" href="cotacoes.css?v=1"></head>
 
 <body>
 
@@ -300,6 +300,12 @@
                             <strong>Reservas</strong>
                             <small>Consulte e acompanhe reservas</small>
                         </span>
+                        <span class="home-app-seta" aria-hidden="true">›</span>
+                    </button>
+
+                    <button id="menuOpcoesCotacoes" class="home-app-card" onclick="abrirOpcoesCotacoes()" title="Opções de Cotações">
+                        <span class="home-app-icone" aria-hidden="true">📋</span>
+                        <span class="home-app-conteudo"><strong>Opções de Cotações</strong><small>Consulte transportadoras por região</small></span>
                         <span class="home-app-seta" aria-hidden="true">›</span>
                     </button>
 
@@ -962,6 +968,23 @@
         </section>
 
 
+        <!-- COTAÇÕES — páginas independentes -->
+        <section id="opcoesCotacoes" class="tela-sistema" style="display:none">
+          <div class="cot-wrap"><button class="cot-back" onclick="mostrarTelaSistema('homeSistema')" type="button">← Voltar</button>
+          <p class="cot-kicker">PMOBILE</p><h1>Opções de Cotações</h1><p class="cot-sub">Consulte opções de transporte disponíveis.</p>
+          <button class="cot-card" onclick="abrirCotacoesRegiao()" type="button"><span class="cot-icon">🌎</span><span><strong>Cotações por Região</strong><small>Consulte as transportadoras que atendem cada região.</small></span><span class="cot-arrow">›</span></button></div>
+        </section>
+        <section id="cotacoesRegiao" class="tela-sistema" style="display:none">
+          <div class="cot-wrap"><button class="cot-back" onclick="voltarOpcoesCotacoes()" type="button">← Opções de Cotações</button>
+          <p class="cot-kicker">PMOBILE / COTAÇÕES</p><h1>🌎 Cotações por Região</h1><p class="cot-sub">Encontre transportadoras por região com base nos rastreios sincronizados.</p>
+          <label class="cot-label" for="cotBusca">PESQUISAR REGIÃO</label><input class="cot-search" id="cotBusca" type="search" placeholder="🔎 Digite uma região..." autocomplete="off">
+          <p class="cot-status" id="cotStatus" role="status"></p><div class="cot-list" id="cotLista"></div></div>
+        </section>
+        <section id="cotacoesDetalhe" class="tela-sistema" style="display:none">
+          <div class="cot-wrap"><button class="cot-back" onclick="voltarListaCotacoes()" type="button">← Cotações por Região</button>
+          <p class="cot-kicker">PMOBILE / REGIÃO</p><h1 id="cotDetalheTitulo"></h1><p class="cot-sub">Transportadoras identificadas nesta região.</p>
+          <p class="cot-status" id="cotDetalheStatus"></p><div class="cot-list" id="cotDetalheLista"></div></div>
+        </section>
     </main>
 
 
@@ -1145,6 +1168,6 @@
 
 <script src="sync-center.js?v=1.0.0"></script>
 
-</body>
+<script src="cotacoes.js?v=1"></script></body>
 
 </html>
