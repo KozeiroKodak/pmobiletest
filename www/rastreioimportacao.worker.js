@@ -1,7 +1,7 @@
 // PMCOLETAS - Parser de Rastreio em Web Worker
 // Mantém o SheetJS fora da thread principal para impedir congelamento do WebView.
 
-importScripts("https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js");
+importScripts("./xlsx.full.min.js");
 
 function normalizarChaveRastreio(valor) {
     return String(valor ?? "")
