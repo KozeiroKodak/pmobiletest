@@ -466,13 +466,13 @@ async function baixarPlanilhaOneDriveRastreio(url) {
         } catch (erro) {
             erroProxy = erro;
             const mensagem = String(erro?.message || erro);
-            // Erros de autorização/HTML não são falhas de rede: o fallback
-            // nativo repetiria o mesmo acesso e esconderia o diagnóstico.
-            if (!window.PMCOLETAS_ONEDRIVE?.iniciarDownload ||
-                /HTTP\s*(401|403)|login|autentica|permiss/i.test(mensagem)) {
+            // RESTAURA O FALLBACK DO APK: a ponte nativa usa uma conexão
+            // independente. Um HTTP 401/403 do proxy não prova que o download
+            // nativo também falhará. O arquivo nativo ainda é validado como Excel.
+            if (!window.PMCOLETAS_ONEDRIVE?.iniciarDownload) {
                 throw erro;
             }
-            console.warn("Proxy OneDrive indisponível; tentando ponte nativa:", erro);
+            console.warn("Proxy OneDrive indisponível (" + mensagem + "); tentando download nativo.");
         }
     }
     // A ponte nativa é alternativa somente no APK.
