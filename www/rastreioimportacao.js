@@ -418,7 +418,7 @@ function limparLinhaBaseOneDriveRastreio() {
 }
 
 async function baixarPlanilhaOneDriveRastreio(url) {
-    const nomePadrao = "rastreio.xlsx";
+    const nomePadrao = "Planilha de frete.xlsx";
 
     // Preferir o proxy Supabase em navegador e APK para links compartilhados.\n    // A ponte nativa é fallback apenas quando o proxy não estiver disponível.\n    // No APK, o WebView não consegue ler o download do OneDrive diretamente
     // por causa do CORS. A ponte nativa faz o download HTTPS e devolve o
