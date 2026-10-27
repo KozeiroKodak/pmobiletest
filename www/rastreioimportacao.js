@@ -304,6 +304,7 @@ function obterIntervaloOneDriveRastreio() { return 15000; }
 function mostrarStatusOneDriveRastreio(mensagem) {
     const area = document.getElementById("statusOneDriveRastreio");
     if (area) area.textContent = mensagem;
+    window.estadoOneDriveRastreio = { ...(window.estadoOneDriveRastreio || {}), mensagem, atualizadoEm: Date.now() };
 }
 
 function atualizarIndicadorOneDriveRastreio(ativo, estado = null) {
@@ -318,6 +319,7 @@ function atualizarIndicadorOneDriveRastreio(ativo, estado = null) {
     }
 
     if (estado === "erro") {
+        window.estadoOneDriveRastreio = { estado: "erro", atualizadoEm: Date.now() };
         indicador.textContent = "● Falha na sincronização";
         indicador.classList.add("erro");
         return;
@@ -329,6 +331,7 @@ function atualizarIndicadorOneDriveRastreio(ativo, estado = null) {
         return;
     }
 
+    window.estadoOneDriveRastreio = { estado: "conectado", atualizadoEm: Date.now() };
     indicador.textContent = "● OneDrive conectado";
     indicador.classList.add("ativo", "conectado");
 }
@@ -420,9 +423,47 @@ function limparLinhaBaseOneDriveRastreio() {
 async function baixarPlanilhaOneDriveRastreio(url) {
     const nomePadrao = "Planilha de Frete Online";
 
-    // Preferir o proxy Supabase em navegador e APK para links compartilhados.\n    // A ponte nativa é fallback apenas quando o proxy não estiver disponível.\n    // No APK, o WebView não consegue ler o download do OneDrive diretamente
-    // por causa do CORS. A ponte nativa faz o download HTTPS e devolve o
-    // arquivo em blocos pequenos, evitando uma resposta gigante no bridge.
+    // OneDrive pessoal e empresarial: usar primeiro o proxy Supabase,
+    // evitando CORS e diferenças entre WebView e navegador.
+    // Se a rede/proxy falhar no APK, tentar a ponte nativa.
+    let erroProxy = null;
+    if (window.clienteSupabase?.functions?.invoke) {
+        try {
+            mostrarStatusOneDriveRastreio("🟡 Baixando planilha pelo Supabase...");
+            const { data, error } = await window.clienteSupabase.functions.invoke(
+                "pmobile-rastreio-download", { body: { url } }
+            );
+            if (error) {
+                let mensagem = error.message || "Falha ao baixar pelo Supabase.";
+                if (error.context?.json) {
+                    try { const detalhe = await error.context.json(); mensagem = detalhe?.error || mensagem; } catch {}
+                }
+                throw new Error(mensagem);
+            }
+            if (!data) throw new Error("O Supabase não retornou a planilha.");
+            const blob = data instanceof Blob ? data : new Blob([data]);
+            if (!blob.size) throw new Error("O arquivo recebido está vazio.");
+            const assinatura = new Uint8Array(await blob.slice(0, 8).arrayBuffer());
+            const zip = assinatura[0] === 0x50 && assinatura[1] === 0x4b;
+            const ole = assinatura[0] === 0xd0 && assinatura[1] === 0xcf;
+            if (!zip && !ole) {
+                throw new Error("O OneDrive retornou uma página ou resposta inválida, não um Excel. Confira o acesso ao link compartilhado.");
+            }
+            mostrarStatusOneDriveRastreio("🟢 Download pelo Supabase concluído.");
+            return new File([blob], nomePadrao, { type: "application/octet-stream" });
+        } catch (erro) {
+            erroProxy = erro;
+            const mensagem = String(erro?.message || erro);
+            // Erros de autorização/HTML não são falhas de rede: o fallback
+            // nativo repetiria o mesmo acesso e esconderia o diagnóstico.
+            if (!window.PMCOLETAS_ONEDRIVE?.iniciarDownload ||
+                /HTTP\\s*(401|403)|login|autentica|permiss/i.test(mensagem)) {
+                throw erro;
+            }
+            console.warn("Proxy OneDrive indisponível; tentando ponte nativa:", erro);
+        }
+    }
+    // A ponte nativa é alternativa somente no APK.
     if (window.PMCOLETAS_ONEDRIVE?.iniciarDownload) {
         const iniciar = JSON.parse(
             window.PMCOLETAS_ONEDRIVE.iniciarDownload(url)
@@ -540,11 +581,14 @@ async function baixarPlanilhaOneDriveRastreio(url) {
 
             mostrarStatusOneDriveRastreio("🟢 Download do OneDrive concluído: 100%");
 
-            return new File(
-                partes,
-                nome,
-                { type: "application/octet-stream" }
-            );
+            const arquivoNativo = new File(partes, nome, { type: "application/octet-stream" });
+            const inicio = new Uint8Array(await arquivoNativo.slice(0, 8).arrayBuffer());
+            const excelZip = inicio[0] === 0x50 && inicio[1] === 0x4b;
+            const excelOle = inicio[0] === 0xd0 && inicio[1] === 0xcf;
+            if (!excelZip && !excelOle) {
+                throw new Error("Download nativo não retornou Excel (possível página HTML do OneDrive).");
+            }
+            return arquivoNativo;
         } catch (erro) {
             try {
                 window.PMCOLETAS_ONEDRIVE.cancelarDownload(id);
@@ -553,31 +597,7 @@ async function baixarPlanilhaOneDriveRastreio(url) {
         }
     }
 
-    // Navegador: download via Supabase para evitar CORS do OneDrive.
-    // A função só aceita URLs Microsoft HTTPS e valida os redirecionamentos.
-    if (!window.clienteSupabase?.functions?.invoke) {
-        throw new Error("Conexão com o Supabase indisponível.");
-    }
-    mostrarStatusOneDriveRastreio("🟡 Baixando planilha pelo Supabase...");
-    const { data, error } = await window.clienteSupabase.functions.invoke(
-        "pmobile-rastreio-download",
-        { body: { url } }
-    );
-    if (error) {
-        let mensagem = error.message || "Falha ao baixar a planilha pelo Supabase.";
-        if (error.context?.json) {
-            try {
-                const detalhe = await error.context.json();
-                mensagem = detalhe?.error || mensagem;
-            } catch {}
-        }
-        throw new Error(mensagem);
-    }
-    if (!data) throw new Error("O Supabase não retornou a planilha.");
-    const blob = data instanceof Blob ? data : new Blob([data]);
-    if (!blob.size) throw new Error("O arquivo recebido está vazio.");
-    mostrarStatusOneDriveRastreio("🟢 Download pelo Supabase concluído.");
-    return new File([blob], nomePadrao, { type: "application/octet-stream" });
+    throw erroProxy || new Error("Download indisponível: conexão com o Supabase não encontrada.");
 }
 
 async function sincronizarOneDriveRastreio(forcar = false) {
@@ -604,6 +624,11 @@ async function sincronizarOneDriveRastreio(forcar = false) {
         const url = sincronizacaoOneDriveRastreioUrl;
         const estadoAnterior = obterEstadoSincronizacaoOneDriveRastreio(url);
         const hashAtual = dadosImportacaoRastreio.sha256 || null;
+        // Se a rotina foi parada durante o download, não aplicar o resultado atrasado.
+        if (!forcar && !sincronizacaoOneDriveRastreioAtiva) {
+            mostrarStatusOneDriveRastreio("○ Sincronização interrompida antes do envio ao banco.");
+            return;
+        }
 
         if (!forcar && estadoAnterior?.sha256 && hashAtual && estadoAnterior.sha256 === hashAtual) {
             sincronizacaoOneDriveRastreioVerificada = true;
@@ -632,6 +657,19 @@ async function sincronizarOneDriveRastreio(forcar = false) {
         }
 
         const lotePreparado = prepararLinhasRastreioParaEnvio(0, dadosImportacaoRastreio.linhas.length, true);
+        const totalAnterior = Number(estadoAnterior?.totalLinhas || 0);
+        const totalNovo = lotePreparado.resultado.length;
+        if (!totalNovo) {
+            throw new Error("A planilha não contém lançamentos válidos. A base anterior foi preservada.");
+        }
+        if (totalAnterior >= 100 && totalNovo < totalAnterior) {
+            const removidos = totalAnterior - totalNovo;
+            const limiteSeguro = Math.max(25, Math.ceil(totalAnterior * 0.03));
+            if (removidos > limiteSeguro) {
+                throw new Error("A planilha perdeu " + removidos.toLocaleString("pt-BR") +
+                    " linhas desde a última sincronização. Alteração grande bloqueada para evitar perda de dados.");
+            }
+        }
         const sessao = obterSessaoRastreioImportacao();
         const chave = await calcularChaveFonteOneDriveRastreio(url);
 
@@ -653,6 +691,7 @@ async function sincronizarOneDriveRastreio(forcar = false) {
         const ultimaLinhaAtual = (Number(dadosImportacaoRastreio.deslocamentoLinha) || 2) + dadosImportacaoRastreio.linhas.length - 1;
         salvarEstadoSincronizacaoOneDriveRastreio(url, {
             ultimaLinha: ultimaLinhaAtual,
+            totalLinhas: totalNovo,
             sha256: hashAtual,
             atualizadoEm: new Date().toISOString()
         });
@@ -1432,6 +1471,9 @@ async function enviarImportacaoRastreio() {
 
     try {
         const sessao = obterSessaoRastreioImportacao();
+        if (sincronizacaoOneDriveRastreioAtiva) {
+            throw new Error("Há uma sincronização OneDrive ativa. Pare a importação manual e atualize pela fonte sincronizada para não duplicar registros.");
+        }
 
         // A importação é tolerante: campos ausentes, inválidos ou não
         // normalizáveis não bloqueiam o lote. A validação continua sendo
