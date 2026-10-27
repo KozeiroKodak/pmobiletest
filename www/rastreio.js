@@ -148,9 +148,14 @@ async function carregarRastreios() {
             if (!possuiCache) {
                 rastreiosPmobile = registros.slice();
             } else {
-                const ids = new Set(rastreiosPmobile.map(item => String(item.id)));
-                const recentes = primeiraPagina.filter(item => !ids.has(String(item.id)));
-                if (recentes.length) rastreiosPmobile = [...recentes, ...rastreiosPmobile];
+                // Substituir os cartões da primeira página pelos dados atuais:
+                // ao inserir uma linha acima, a NF antiga muda de posição
+                // mesmo mantendo o identificador de registro.
+                const idsAtualizados = new Set(primeiraPagina.map(item => String(item.id)));
+                rastreiosPmobile = [
+                    ...primeiraPagina,
+                    ...rastreiosPmobile.filter(item => !idsAtualizados.has(String(item.id)))
+                ];
             }
             filtrarRastreios();
             if (primeiraPagina.length === tamanhoPagina) {
