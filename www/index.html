@@ -413,7 +413,7 @@
 
             <div class="painel rastreio-painel">
                 <div class="rastreio-filtros">
-                    <input type="search" id="buscaRastreio" placeholder="Cliente, NF, motorista..." oninput="filtrarRastreios()">
+                    <input type="search" id="buscaRastreio" placeholder="Cliente, NF, motorista..." oninput="atualizarBuscaRastreio()">
                     <select id="filtroStatusRastreio" onchange="filtrarRastreios()">
                         <option value="">Todos os status</option>
                         <option value="PENDENTE">Pendente</option>
@@ -1156,9 +1156,9 @@
 <script src="arquivosteste.js?v=0.0.248"></script>
 
 <script src="valorestotal.js?v=0.0.354-financeiro"></script>
-<script src="rastreio.js?v=0.0.328-percentual"></script>
+<script src="rastreio.js?v=0.0.365-busca-imediata"></script>
 
-<script src="rastreioimportacao.js?v=0.0.361-supabase-central"></script>
+<script src="rastreioimportacao.js?v=0.0.365-sync-rapida"></script>
 <script src="importacaonf.js?v=0.0.333-reintegracao"></script>
 
 
