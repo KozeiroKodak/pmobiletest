@@ -1,0 +1,41 @@
+/* PMobile Monochrome V2 — camada visual global, reversível.
+   Estados operacionais (sucesso/erro/alerta) preservam suas cores. */
+:root{
+ --fundo:#101010;--fundo-sidebar:#161616;--fundo-painel:#1b1b1b;
+ --fundo-hover:#252525;--fundo-ativo:#303030;
+ --borda:#303030;--borda-clara:#454545;
+ --texto:#ededed;--texto-secundario:#a3a3a3;--texto-fraco:#777;
+ --pm-acento:#d7d7d7;--pm-brilho:rgba(235,235,235,.12);
+}
+/* Compatibilidade: módulos antigos usam --verde para decoração.
+   Status de sucesso com cor explícita não é alterado. */
+:root{--verde:#d7d7d7;--verde-hover:#f0f0f0}
+#homeSistema{background:radial-gradient(circle at 78% 5%,rgba(255,255,255,.045),transparent 35%),var(--fundo)!important}
+#homeSistema::after{border-color:rgba(255,255,255,.055)!important}
+.home-app-card,.cot-card,.cot-row{
+ background:linear-gradient(145deg,rgba(255,255,255,.035),transparent 65%),var(--fundo-painel)!important;
+ border-color:rgba(255,255,255,.10)!important;
+}
+.home-app-card:hover,.cot-card:hover,.cot-row:hover{
+ background:linear-gradient(145deg,rgba(255,255,255,.07),transparent 65%),var(--fundo-painel)!important;
+ border-color:rgba(235,235,235,.28)!important;
+}
+.home-app-card:hover::before{border-left-color:#c6c6c6!important}
+.home-app-card:hover .home-app-icone,.cot-icon{background:rgba(255,255,255,.065)!important;border-color:rgba(255,255,255,.13)!important}
+.home-app-card:hover .home-app-seta,.cot-back:hover{color:#ededed!important}
+#opcoesCotacoes,#cotacoesRegiao,#cotacoesDetalhe{
+ background:radial-gradient(circle at 85% 5%,rgba(255,255,255,.045),transparent 28%),var(--fundo)!important
+}
+.cot-wrap::before{border-color:rgba(255,255,255,.06)!important}
+.cot-sub::after{background:#bdbdbd!important;box-shadow:0 0 12px rgba(255,255,255,.10)!important}
+.cot-kicker,.cot-back{color:#c4c4c4!important}
+.cot-search:focus{border-color:#c9c9c9!important}
+.cot-card:focus-visible,.cot-row:focus-visible,.cot-search:focus-visible,.home-app-card:focus-visible{
+ outline-color:rgba(230,230,230,.55)!important
+}
+/* Botões e foco: neutralizar apenas decoração; não mascarar feedback de estado. */
+button:not(:disabled){transition:background-color .16s ease,border-color .16s ease,transform .16s ease}
+input:not([type=checkbox]):not([type=radio]):focus-visible,select:focus-visible,textarea:focus-visible{
+ outline-color:rgba(235,235,235,.55)
+}
+@media(prefers-reduced-motion:reduce){button{transition:none!important}}
