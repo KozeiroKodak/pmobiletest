@@ -484,3 +484,6 @@
  .rastreio-resumo { align-items:flex-start; }
  .rastreio-valor-nota { flex:0 1 auto; }
 }
+
+/* Referência da posição real na aba LANÇAMENTOS do Excel. */
+.rastreio-linha-planilha { display:block; margin-top:5px; font-size:10px; font-weight:400; color:var(--texto-fraco, #999); line-height:1.4; }
