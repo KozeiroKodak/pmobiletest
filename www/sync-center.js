@@ -7,6 +7,7 @@ const el=(tag,cls,txt)=>{const e=document.createElement(tag);if(cls)e.className=
 const time=t=>{if(!t)return "Não registrada";const d=new Date(t);return isNaN(d.getTime())?String(t):d.toLocaleString("pt-BR");};
 async function snapshot(){
  const s=window.estadoSincronizacaoPmobile||{};
+ const onedrive=window.estadoOneDriveRastreio||{};
  const online=navigator.onLine&&s.internetConfirmada!==false;
  let count=null,blocked=0,inventory=null,stamp=null,driver=null,unknown=0;
  if(typeof lerContagensManuais==="function"){try{const list=await lerContagensManuais();if(Array.isArray(list)){count=list.filter(x=>!x.sincronizado&&!x.bloqueadoPorLimpeza).length;blocked=list.filter(x=>!x.sincronizado&&x.bloqueadoPorLimpeza).length;}}catch(e){lastError=String(e.message||e);}}
@@ -16,11 +17,11 @@ async function snapshot(){
  let conferences=null;
  if(APP==="pmobile"&&typeof obterConferenciasPendentes==="function"){try{const a=await obterConferenciasPendentes();if(Array.isArray(a))conferences=a.length;}catch(e){}}
  const pending=(count||0)+(driver||0)+(conferences||0);
- let state=busy?"busy":!online?"offline":unknown||blocked||s.erro||lastError?"error":pending?"pending":s.aviso||s.inventario!==true||((APP!=="coletas")&&count===null)?"attention":"ok";
+ let state=busy?"busy":!online?"offline":unknown||blocked||s.erro||lastError||onedrive.estado==="erro"?"error":pending?"pending":(APP!=="coletas"&&inventory===0)||((APP!=="coletas")&&count===null)?"attention":"ok";
  // Não declarar sucesso se os módulos críticos ainda não foram verificados.
- if(state==="ok"&&APP==="pmobile"&&conferences===null)state="attention";
+ 
  if(state==="ok"&&APP==="coletas"&&driver===null)state="attention";
- return {online,count,blocked,inventory,stamp,driver,unknown,conferences,pending,state};
+ return {online,count,blocked,inventory,stamp,driver,unknown,conferences,pending,state,onedrive};
 }
 const labels={ok:["Tudo sincronizado","Registros confirmados"],attention:["Sincronização requer atenção","Verifique os detalhes"],pending:["Operações pendentes","Aguardando confirmação do servidor"],offline:["Modo offline","Dados locais disponíveis, quando carregados"],busy:["Sincronizando...","Verificando operações"],error:["Sincronização requer revisão","Existem falhas ou registros a verificar"]};
 let root,button,panel;
@@ -44,6 +45,8 @@ async function render(){
  if(d.blocked)panel.append(detailRow("Contagens bloqueadas — revisar",d.blocked));
  if(d.stamp)panel.append(detailRow("Último inventário",time(d.stamp)));
  if(lastAttempt)panel.append(detailRow("Última tentativa",time(lastAttempt)));
+ if(d.onedrive.estado==="erro")panel.append(detailRow("OneDrive","Falha na sincronização"));
+ if(d.onedrive.estado==="erro"&&d.onedrive.mensagem)panel.append(el("p","sync-error",d.onedrive.mensagem.slice(0,220)));
  if(lastError)panel.append(el("p","sync-error",lastError.slice(0,220)));
  if(d.unknown||d.blocked)panel.append(el("p","sync-note","Operações em revisão não são reenviadas automaticamente."));
  const action=el("button","sync-action",busy?"Sincronizando...":"↻  Sincronizar agora");
