@@ -76,7 +76,7 @@
 
 .pmobile-popup-escolha-opcao.selecionada {
     border-color: var(--verde);
-    background: rgba(62, 207, 142, .12);
+    background: rgba(215, 215, 215, .12);
 }
 
 @media (max-width: 700px) {
