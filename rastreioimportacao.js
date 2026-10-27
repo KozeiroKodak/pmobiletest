@@ -432,51 +432,9 @@ function limparLinhaBaseOneDriveRastreio() {
     mostrarStatusOneDriveRastreio("🟡 Linha de base apagada. A próxima leitura criará uma nova.");
 }
 
-async function baixarPlanilhaOneDriveRastreio(url) {
-    const nomePadrao = "Planilha de Frete Online";
-
-    // OneDrive pessoal e empresarial: usar primeiro o proxy Supabase,
-    // evitando CORS e diferenças entre WebView e navegador.
-    // Se a rede/proxy falhar no APK, tentar a ponte nativa.
-    let erroProxy = null;
-    if (window.clienteSupabase?.functions?.invoke) {
-        try {
-            mostrarStatusOneDriveRastreio("🟡 Baixando planilha pelo Supabase...");
-            const { data, error } = await window.clienteSupabase.functions.invoke(
-                "pmobile-rastreio-download", { body: { url } }
-            );
-            if (error) {
-                let mensagem = error.message || "Falha ao baixar pelo Supabase.";
-                if (error.context?.json) {
-                    try { const detalhe = await error.context.json(); mensagem = detalhe?.error || mensagem; } catch {}
-                }
-                throw new Error(mensagem);
-            }
-            if (!data) throw new Error("O Supabase não retornou a planilha.");
-            const blob = data instanceof Blob ? data : new Blob([data]);
-            if (!blob.size) throw new Error("O arquivo recebido está vazio.");
-            const assinatura = new Uint8Array(await blob.slice(0, 8).arrayBuffer());
-            const zip = assinatura[0] === 0x50 && assinatura[1] === 0x4b;
-            const ole = assinatura[0] === 0xd0 && assinatura[1] === 0xcf;
-            if (!zip && !ole) {
-                throw new Error("O OneDrive retornou uma página ou resposta inválida, não um Excel. Confira o acesso ao link compartilhado.");
-            }
-            mostrarStatusOneDriveRastreio("🟢 Download pelo Supabase concluído.");
-            return new File([blob], nomePadrao, { type: "application/octet-stream" });
-        } catch (erro) {
-            erroProxy = erro;
-            const mensagem = String(erro?.message || erro);
-            // RESTAURA O FALLBACK DO APK: a ponte nativa usa uma conexão
-            // independente. Um HTTP 401/403 do proxy não prova que o download
-            // nativo também falhará. O arquivo nativo ainda é validado como Excel.
-            if (!window.PMCOLETAS_ONEDRIVE?.iniciarDownload) {
-                throw erro;
-            }
-            console.warn("Proxy OneDrive indisponível (" + mensagem + "); tentando download nativo.");
-        }
-    }
-    // A ponte nativa é alternativa somente no APK.
-    if (window.PMCOLETAS_ONEDRIVE?.iniciarDownload) {
+async function baixarPlanilhaOneDriveRastreioNativa(url, nomePadrao) {
+    if (!window.PMCOLETAS_ONEDRIVE?.iniciarDownload) throw new Error("A ponte nativa OneDrive não está disponível.");
+    {
         const iniciar = JSON.parse(
             window.PMCOLETAS_ONEDRIVE.iniciarDownload(url)
         );
@@ -609,7 +567,65 @@ async function baixarPlanilhaOneDriveRastreio(url) {
         }
     }
 
-    throw erroProxy || new Error("Download indisponível: conexão com o Supabase não encontrada.");
+}
+
+async function baixarPlanilhaOneDriveRastreio(url) {
+    const nomePadrao = "Planilha de Frete Online";
+    // O download NATIVO é prioritário no APK: não aguardar repetidos erros
+    // HTTP 502 do proxy, que não concluiu os downloads da fonte histórica.
+    // Se a ponte nativa falhar, manter o proxy como alternativa.
+    let erroNativo = null;
+    if (window.PMCOLETAS_ONEDRIVE?.iniciarDownload) {
+        try {
+            mostrarStatusOneDriveRastreio("🟡 Baixando diretamente pelo Android...");
+            return await baixarPlanilhaOneDriveRastreioNativa(url, nomePadrao);
+        } catch (erro) {
+            erroNativo = erro;
+            console.warn("Download nativo OneDrive indisponível; tentando o proxy seguro:", erro);
+        }
+    }
+    // OneDrive pessoal e empresarial: usar primeiro o proxy Supabase,
+    // evitando CORS e diferenças entre WebView e navegador.
+    // Se a rede/proxy falhar no APK, tentar a ponte nativa.
+    let erroProxy = null;
+    if (window.clienteSupabase?.functions?.invoke) {
+        try {
+            mostrarStatusOneDriveRastreio("🟡 Baixando planilha pelo Supabase...");
+            const { data, error } = await window.clienteSupabase.functions.invoke(
+                "pmobile-rastreio-download", { body: { url } }
+            );
+            if (error) {
+                let mensagem = error.message || "Falha ao baixar pelo Supabase.";
+                if (error.context?.json) {
+                    try { const detalhe = await error.context.json(); mensagem = detalhe?.error || mensagem; } catch {}
+                }
+                throw new Error(mensagem);
+            }
+            if (!data) throw new Error("O Supabase não retornou a planilha.");
+            const blob = data instanceof Blob ? data : new Blob([data]);
+            if (!blob.size) throw new Error("O arquivo recebido está vazio.");
+            const assinatura = new Uint8Array(await blob.slice(0, 8).arrayBuffer());
+            const zip = assinatura[0] === 0x50 && assinatura[1] === 0x4b;
+            const ole = assinatura[0] === 0xd0 && assinatura[1] === 0xcf;
+            if (!zip && !ole) {
+                throw new Error("O OneDrive retornou uma página ou resposta inválida, não um Excel. Confira o acesso ao link compartilhado.");
+            }
+            mostrarStatusOneDriveRastreio("🟢 Download pelo Supabase concluído.");
+            return new File([blob], nomePadrao, { type: "application/octet-stream" });
+        } catch (erro) {
+            erroProxy = erro;
+            const mensagem = String(erro?.message || erro);
+            // O Android já tentou a ponte nativa antes deste proxy.
+            // Reportar os dois diagnósticos sem ocultar a falha real.
+            if (erroNativo) {
+                throw new Error("Download nativo: " + (erroNativo.message || erroNativo) +
+                    " | Proxy Supabase: " + mensagem);
+            }
+            throw erro;
+        }
+    }
+
+    throw erroNativo || erroProxy || new Error("Download indisponível: conexão com o Supabase não encontrada.");
 }
 
 async function sincronizarOneDriveRastreio(forcar = false) {
