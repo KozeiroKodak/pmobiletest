@@ -380,8 +380,8 @@
 }
 
 .local-alterado-status.confirmado {
-    border-color: rgba(62,207,142,.24);
-    background: rgba(62,207,142,.08);
+    border-color: rgba(215, 215, 215,.24);
+    background: rgba(215, 215, 215,.08);
     color: #72d8aa;
 }
 
@@ -400,17 +400,17 @@
 .botao-local-confirmar {
     min-height: 38px;
     padding: 8px 13px;
-    border: 1px solid rgba(62,207,142,.35);
+    border: 1px solid rgba(215, 215, 215,.35);
     border-radius: 6px;
-    background: rgba(62,207,142,.10);
+    background: rgba(215, 215, 215,.10);
     color: #7be0b2;
     font-size: 12px;
     transition: background .12s ease, border-color .12s ease;
 }
 
 .botao-local-confirmar:hover {
-    background: rgba(62,207,142,.18);
-    border-color: rgba(62,207,142,.55);
+    background: rgba(215, 215, 215,.18);
+    border-color: rgba(215, 215, 215,.55);
 }
 
 .local-vazio-area-card {
