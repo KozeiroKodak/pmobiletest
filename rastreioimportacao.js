@@ -644,7 +644,17 @@ async function sincronizarOneDriveRastreio(forcar = false) {
 
         const estadoAnterior = obterEstadoSincronizacaoOneDriveRastreio(url);
         const sessao = obterSessaoRastreioImportacao();
-        const chave = await calcularChaveFonteOneDriveRastreio(url);
+        const chaveCalculada = await calcularChaveFonteOneDriveRastreio(url);
+        // Um link novo do MESMO Excel deve continuar na fonte existente.
+        // A identidade só é preservada quando o SHA-256 é idêntico ao remoto.
+        const respostaFonte = await window.clienteSupabase.rpc("pmobile_rastreio_resolver_chave_fonte", {
+            p_usuario: sessao.usuario,
+            p_credencial: sessao.credencial,
+            p_chave: chaveCalculada,
+            p_sha256: hashAtual
+        });
+        if (respostaFonte.error) throw respostaFonte.error;
+        const chave = String(respostaFonte.data || chaveCalculada);
         if (hashAtual) {
             const verificacao = await window.clienteSupabase.rpc("pmobile_rastreio_verificar_fonte", {
                 p_usuario: sessao.usuario,
