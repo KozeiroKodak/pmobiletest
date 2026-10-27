@@ -29,3 +29,29 @@
 .cot-status{margin:17px 0;color:var(--texto-secundario);font-size:.82rem;line-height:1.5}
 .cot-empty{padding:22px;border:1px dashed var(--borda-clara);border-radius:12px;color:var(--texto-secundario);font-size:.86rem;line-height:1.5}
 @media(max-width:700px){.cot-wrap{padding:20px 12px 90px}.cot-card{min-height:76px;padding:12px 13px;border-radius:12px}.cot-icon{width:42px;height:42px;border-radius:11px}.cot-row{min-height:70px;padding:13px}.cot-row small{max-width:45%}}
+
+/* Correção responsiva: impedir deslocamento horizontal na WebView Android. */
+#opcoesCotacoes,#cotacoesRegiao,#cotacoesDetalhe{
+ width:100%;
+ max-width:100%;
+ min-width:0;
+ overflow-x:clip;
+ box-sizing:border-box;
+}
+#opcoesCotacoes .cot-wrap,#cotacoesRegiao .cot-wrap,#cotacoesDetalhe .cot-wrap{
+ width:100%;
+ max-width:1040px;
+ min-width:0;
+ box-sizing:border-box;
+ overflow-wrap:anywhere;
+}
+.cot-wrap::before{right:0;max-width:80vw;transform:translateX(35%);}
+.cot-card,.cot-row,.cot-list,.cot-search{max-width:100%;min-width:0;}
+.cot-card>span:nth-child(2){min-width:0;flex:1;}
+.cot-card strong,.cot-card small{white-space:normal;overflow-wrap:anywhere;}
+.cot-row>span{flex:1;min-width:0;}
+.cot-row>small{flex:none;max-width:48%;overflow-wrap:anywhere;}
+@media(max-width:700px){
+ #opcoesCotacoes .cot-wrap,#cotacoesRegiao .cot-wrap,#cotacoesDetalhe .cot-wrap{padding-left:12px;padding-right:12px;}
+ .cot-wrap h1{overflow-wrap:anywhere;font-size:clamp(1.65rem,8vw,2.25rem);}
+}
