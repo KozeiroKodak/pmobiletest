@@ -146,8 +146,8 @@
 
 .rastreio-importacao-motoristas-lista input:focus {
     outline: none;
-    border-color: var(--verde, #3ecf8e);
-    box-shadow: 0 0 0 2px rgba(62, 207, 142, .10);
+    border-color: var(--pm-acento, #d7d7d7);
+    box-shadow: 0 0 0 2px rgba(215, 215, 215, .10);
 }
 
 .rastreio-importacao-previa-titulo {
@@ -303,7 +303,7 @@
 .rastreio-editor-motorista-kicker {
     display: block;
     margin-bottom: 5px;
-    color: var(--verde, #3ecf8e);
+    color: var(--pm-acento, #d7d7d7);
     font-size: 9px;
     font-weight: 700;
     letter-spacing: .1em;
@@ -370,8 +370,8 @@
 
 .rastreio-editor-motorista-campo input:focus {
     outline: none;
-    border-color: var(--verde, #3ecf8e);
-    box-shadow: 0 0 0 3px rgba(62, 207, 142, .12);
+    border-color: var(--pm-acento, #d7d7d7);
+    box-shadow: 0 0 0 3px rgba(215, 215, 215, .12);
 }
 
 .rastreio-editor-motorista-campo small {
@@ -820,7 +820,7 @@
 .rastreio-importacao-online-linha input:focus {
     outline: none;
     border-color: var(--verde);
-    box-shadow: 0 0 0 3px rgba(62, 207, 142, .14);
+    box-shadow: 0 0 0 3px rgba(215, 215, 215, .14);
 }
 
 .rastreio-importacao-online-linha .botao-aba {
@@ -895,9 +895,9 @@
 }
 
 .rastreio-onedrive-indicador.ativo {
-    border-color: rgba(62, 207, 142, .28);
-    color: var(--verde, #3ecf8e);
-    background: rgba(62, 207, 142, .06);
+    border-color: rgba(215, 215, 215, .28);
+    color: var(--pm-acento, #d7d7d7);
+    background: rgba(215, 215, 215, .06);
 }
 
 .rastreio-onedrive-sync-controles {
@@ -924,7 +924,7 @@
 .rastreio-onedrive-sync-controles input:focus,
 .rastreio-onedrive-sync-controles select:focus {
     outline: none;
-    border-color: var(--verde, #3ecf8e);
+    border-color: var(--pm-acento, #d7d7d7);
 }
 
 .rastreio-onedrive-sync-acoes {
@@ -1002,7 +1002,7 @@
 }
 
 .rastreio-onedrive-indicador.conectado {
-    border-color: rgba(62, 207, 142, .28);
+    border-color: rgba(215, 215, 215, .28);
 }
 
 .rastreio-onedrive-indicador.erro {
