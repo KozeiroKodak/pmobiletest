@@ -631,13 +631,29 @@ async function sincronizarOneDriveRastreio(forcar = false) {
         }
 
         if (!forcar && estadoAnterior?.sha256 && hashAtual && estadoAnterior.sha256 === hashAtual) {
-            sincronizacaoOneDriveRastreioVerificada = true;
-            atualizarIndicadorOneDriveRastreio(true);
-            mostrarStatusOneDriveRastreio("🟢 OneDrive conectado · nenhuma alteração detectada · " + new Date().toLocaleTimeString("pt-BR"));
-            if (sincronizacaoOneDriveRastreioAtiva) {
-                agendarProximaSincronizacaoOneDriveRastreio();
+            // Mesmo com hash local igual, a base pode ter sido limpa no Supabase.
+            // Só declarar "sem alterações" após conferir a fonte e os registros remotos.
+            const sessaoVerificacao = obterSessaoRastreioImportacao();
+            const chaveVerificacao = await calcularChaveFonteOneDriveRastreio(url);
+            const verificacao = await window.clienteSupabase.rpc("pmobile_rastreio_verificar_fonte", {
+                p_usuario: sessaoVerificacao.usuario,
+                p_credencial: sessaoVerificacao.credencial,
+                p_chave: chaveVerificacao
+            });
+            if (verificacao.error) throw verificacao.error;
+            const fonteRemota = verificacao.data;
+            const fonteIntegra = fonteRemota?.presente === true &&
+                fonteRemota.sha256 === hashAtual &&
+                Number(fonteRemota.registros) > 0 &&
+                Number(fonteRemota.registros) === Number(fonteRemota.total_linhas);
+            if (fonteIntegra) {
+                sincronizacaoOneDriveRastreioVerificada = true;
+                atualizarIndicadorOneDriveRastreio(true);
+                mostrarStatusOneDriveRastreio("🟢 OneDrive conectado · fonte e rastreios confirmados · " + new Date().toLocaleTimeString("pt-BR"));
+                if (sincronizacaoOneDriveRastreioAtiva) agendarProximaSincronizacaoOneDriveRastreio();
+                return;
             }
-            return;
+            mostrarStatusOneDriveRastreio("🟡 A fonte no Supabase precisa ser recuperada. Reimportando do OneDrive com segurança...");
         }
 
         const tempoReal =
@@ -721,7 +737,11 @@ async function sincronizarOneDriveRastreio(forcar = false) {
         console.error("Erro na sincronização OneDrive do Rastreio:", erro);
         sincronizacaoOneDriveRastreioVerificada = false;
         atualizarIndicadorOneDriveRastreio(sincronizacaoOneDriveRastreioAtiva, "erro");
-        mostrarStatusOneDriveRastreio("🔴 Falha na sincronização: " + (erro.message || "erro desconhecido"));
+        const foiTimeout = String(erro?.code || "") === "57014" ||
+            /statement timeout|tempo limite|query timeout/i.test(String(erro?.message || ""));
+        mostrarStatusOneDriveRastreio(foiTimeout
+            ? "🔴 O Supabase atingiu o tempo limite. Nenhuma sincronização parcial foi confirmada; a próxima tentativa será automática. Não limpe os dados."
+            : "🔴 Falha na sincronização: " + (erro.message || "erro desconhecido"));
 
         // Falhas transitórias não podem matar a sincronização automática.
         // O próximo ciclo é agendado somente quando a sincronização continua ativa.
@@ -748,7 +768,13 @@ async function limparTodosDadosRastreio() {
         mostrarStatusOneDriveRastreio("🔒 Apenas administradores podem limpar os dados.");
         return;
     }
-    if (!window.confirm("ATENÇÃO! Isso apagará TODOS os rastreios, histórico, importações e fontes de sincronização. Esta ação não pode ser desfeita. Continuar?")) return;
+    // Evita a limpeza total acidental durante a correção de uma falha de sync.
+    const frase = window.prompt("EXCLUSÃO IRREVERSÍVEL: todos os rastreios, entregas, histórico e fontes serão apagados.\\n\\nPara confirmar, digite exatamente: APAGAR RASTREIOS");
+    if (frase !== "APAGAR RASTREIOS") {
+        mostrarStatusOneDriveRastreio("○ Limpeza cancelada. Os rastreios foram preservados.");
+        return;
+    }
+    if (!window.confirm("Última confirmação: apagar TODOS os rastreios e fontes? Não faça isso para corrigir erros de sincronização.")) return;
 
     try {
         const sessao = obterSessaoRastreioImportacao();
