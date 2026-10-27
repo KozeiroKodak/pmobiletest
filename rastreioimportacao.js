@@ -261,6 +261,9 @@ async function restaurarConfiguracaoOneDriveRastreio() {
         if (error) throw error;
         const campo = document.getElementById("linkOneDriveRastreio");
         if (campo && data) campo.value = data;
+        if (data && sincronizacaoOneDriveRastreioAtiva) {
+            sincronizacaoOneDriveRastreioUrl = data;
+        }
         const config = obterConfiguracaoOneDriveRastreio();
         if (data && config?.ativo && !sincronizacaoOneDriveRastreioAtiva) iniciarSincronizacaoOneDriveRastreio(true);
     } catch (erro) { console.warn("Não foi possível carregar link OneDrive do Supabase:", erro); }
@@ -274,6 +277,9 @@ async function salvarLinkOneDriveRastreioSupabase() {
         const sessao = obterSessaoRastreioImportacao();
         const {error} = await window.clienteSupabase.rpc("pmobile_rastreio_config_link",{p_usuario:sessao.usuario,p_credencial:sessao.credencial,p_url:url});
         if (error) throw error;
+        // Aplicar imediatamente o link que foi salvo; não continuar usando
+        // a URL anterior guardada quando a sincronização já está ativa.
+        sincronizacaoOneDriveRastreioUrl = url;
         salvarConfiguracaoOneDriveRastreio({...obterConfiguracaoOneDriveRastreio(),url,manterLink:true,intervalo:15000,tempoReal:true,ativo:sincronizacaoOneDriveRastreioAtiva});
         mostrarStatusOneDriveRastreio("🟢 Link salvo no Supabase. Disponível aos administradores.");
     } catch(erro) { mostrarStatusOneDriveRastreio("🔴 Falha ao salvar link: "+(erro.message||erro)); }
@@ -608,6 +614,9 @@ async function baixarPlanilhaOneDriveRastreio(url) {
 
 async function sincronizarOneDriveRastreio(forcar = false) {
     if (!usuarioRastreioEhAdmin() || sincronizacaoOneDriveRastreioExecutando) return;
+    // O botão Sincronizar agora deve utilizar o link visível na tela.
+    const linkInformado = document.getElementById("linkOneDriveRastreio")?.value?.trim();
+    if (forcar && linkInformado) sincronizacaoOneDriveRastreioUrl = linkInformado;
 
     if (!sincronizacaoOneDriveRastreioUrl) {
         const campo = document.getElementById("linkOneDriveRastreio");
