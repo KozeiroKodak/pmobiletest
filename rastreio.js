@@ -200,7 +200,7 @@ function filtrarRastreios() {
     if (!lista) return;
     const termo = String(document.getElementById("buscaRastreio")?.value || "").trim().toLowerCase();
     const filtro = document.getElementById("filtroStatusRastreio")?.value || "";
-    const notasEncontradas = /^\\d{3,40}$/.test(termo) ? rastreiosBuscaNFRapida : [];
+    const notasEncontradas = /^\d{3,40}$/.test(termo) ? rastreiosBuscaNFRapida : [];
     const idsBusca = new Set(notasEncontradas.map(item => String(item.id)));
     const fonte = notasEncontradas.length
         ? [...notasEncontradas, ...rastreiosPmobile.filter(item => !idsBusca.has(String(item.id)))]
