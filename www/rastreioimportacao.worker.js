@@ -71,6 +71,7 @@ function detectarModeloRastreio(colunas) {
         valorFrete: achar("Frete Transporte", "Valor Frete", "Frete Transportadora", "Valor do Frete", "Frete"),
         custoNunes: achar("Custo Nunes", "Custo Nunes:"),
         custoFinal: achar("Custo Final"),
+        percentualFinal: achar("% Final", "Percentual Final", "Porcentagem Final"),
         dataEnvio: achar("Data Envio", "Data de Envio"),
         turno: achar("Turno Envio", "Turno")
     };
