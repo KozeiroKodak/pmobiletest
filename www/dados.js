@@ -1143,6 +1143,38 @@ async function limparVersoesAntigasDoInventario(versaoAtual) {
     });
 }
 
+async function carregarMateriaisDoIndexedDB(versaoEsperada = null) {
+    const banco = await abrirBanco();
+
+    try {
+        const transacao = banco.transaction(nomeTabela, "readonly");
+        const tabela = transacao.objectStore(nomeTabela);
+        const dados = await new Promise(function(resolve, reject) {
+            const requisicao = tabela.getAll();
+            requisicao.onsuccess = function(evento) {
+                resolve(evento.target.result || []);
+            };
+            requisicao.onerror = function(evento) {
+                reject(evento.target.error);
+            };
+        });
+
+        const dadosValidos = versaoEsperada === null
+            ? dados
+            : dados.filter(function(item) {
+                return item?._pmobileSyncVersion === String(versaoEsperada);
+            });
+
+        return dadosValidos
+            .map(normalizarMaterialLocal)
+            .filter(function(material) {
+                return material !== null;
+            });
+    } finally {
+        banco.close();
+    }
+}
+
 async function sincronizarMateriaisLocaisComSupabase(forcar = false) {
     if (sincronizacaoEmAndamento) {
         return { sucesso: false, ignorada: true, motivo: "sincronizacao_em_andamento" };
@@ -1157,9 +1189,15 @@ async function sincronizarMateriaisLocaisComSupabase(forcar = false) {
         const localVersao = await obterConfiguracaoLocal(chaveVersaoInventarioLocal);
         const quantidadeLocal = await contarMateriaisLocais();
 
+        // Somente o inventário completo da versão oficial pode ser reutilizado.
         if (!forcar && quantidadeLocal > 0 && localVersao && String(localVersao) === remoto.versao) {
-            mostrarStatusSincronizacaoOffline("🟢 Offline OK — " + quantidadeLocal.toLocaleString("pt-BR") + " materiais disponíveis.");
-            return { sucesso: true, sincronizada: false, atualizada: false, existente: true, quantidade: quantidadeLocal, versao: remoto.versao };
+            const materiaisValidos = await carregarMateriaisDoIndexedDB(remoto.versao);
+            if (materiaisValidos.length === remoto.total) {
+                materiais = materiaisValidos;
+                mostrarStatusSincronizacaoOffline("🟢 Offline OK — " + materiais.length.toLocaleString("pt-BR") + " materiais disponíveis.");
+                return { sucesso: true, sincronizada: false, atualizada: false, existente: true, quantidade: materiais.length, versao: remoto.versao };
+            }
+            console.warn("Inventário local incompleto; retomando sincronização integral.", materiaisValidos.length, remoto.total);
         }
 
         if (remoto.total === 0) throw new Error("O PostgreSQL informou que o inventário oficial está vazio.");
@@ -1199,10 +1237,15 @@ async function sincronizarMateriaisLocaisComSupabase(forcar = false) {
             throw new Error("Quantidade sincronizada (" + totalRecebido + ") diferente da quantidade oficial (" + remoto.total + ").");
         }
 
+        // Validar os registros antes de marcar a versão como confirmada.
+        const materiaisBaixados = await carregarMateriaisDoIndexedDB(remoto.versao);
+        if (materiaisBaixados.length !== remoto.total) {
+            throw new Error("Inventário local incompleto: " + materiaisBaixados.length + " / " + remoto.total);
+        }
         await limparVersoesAntigasDoInventario(remoto.versao);
+        materiais = materiaisBaixados;
         const dataSincronizacao = await registrarSincronizacao();
         await salvarConfiguracaoLocal(chaveVersaoInventarioLocal, remoto.versao);
-        materiais = [];
 
         mostrarStatusSincronizacaoOffline("🟢 Offline OK — " + totalRecebido.toLocaleString("pt-BR") + " materiais sincronizados.");
         return { sucesso: true, sincronizada: true, atualizada: true, quantidade: totalRecebido, data: dataSincronizacao, versao: remoto.versao };
