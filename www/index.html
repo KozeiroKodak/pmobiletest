@@ -820,7 +820,7 @@
                     <div class="rastreio-onedrive-sync-cabecalho">
                         <div>
                             <h3>Sincronização automática — OneDrive</h3>
-                            <p>Deixe o arquivo Excel (.xlsx, .xls, .xlsm ou .xlsb) aberto no PC com salvamento automático. O PMobile verifica a planilha a cada 15 segundos enquanto estiver aberto. Com a sincronização de alterações ativada, novos lançamentos, alterações de campos e remoções são refletidos automaticamente.</p>
+                            <p id="descricaoSincronizacaoOneDriveRastreio">Deixe o arquivo Excel (.xlsx, .xls, .xlsm ou .xlsb) aberto no PC com salvamento automático. O PMobile verifica a planilha a cada 15 segundos enquanto estiver aberto. Com a sincronização de alterações ativada, novos lançamentos, alterações de campos e remoções são refletidos automaticamente.</p>
                         </div>
                         <span id="indicadorOneDriveRastreio" class="rastreio-onedrive-indicador">○ Sincronização parada</span>
                     </div>
@@ -834,7 +834,7 @@
                                 autocomplete="off"
                                 inputmode="url"
                             >
-                            <span class="rastreio-intervalo-fixo">Atualização automática: a cada 15 segundos</span>
+                            <span id="intervaloOneDriveRastreio" class="rastreio-intervalo-fixo">Atualização automática: a cada 15 segundos</span>
                         </div>
 
                         <div class="rastreio-onedrive-opcoes">
@@ -846,10 +846,10 @@
                         </div>
 
                         <div class="rastreio-onedrive-sync-acoes">
-                            <button type="button" class="botao-principal" onclick="iniciarSincronizacaoOneDriveRastreio()">Ativar sincronização</button>
-                            <button type="button" class="botao-secundario" onclick="sincronizarOneDriveRastreio(true)">Sincronizar agora</button>
+                            <button type="button" id="botaoAtivarSincronizacaoRastreio" class="botao-principal" onclick="iniciarSincronizacaoOneDriveRastreio()">Ativar sincronização</button>
+                            <button type="button" id="botaoSincronizarAgoraRastreio" class="botao-secundario" onclick="sincronizarOneDriveRastreio(true)">Sincronizar agora</button>
                             <button type="button" class="botao-secundario" onclick="pararSincronizacaoOneDriveRastreio()">Parar</button>
-                            <button type="button" class="botao-secundario" onclick="limparLinhaBaseOneDriveRastreio()">Forçar nova leitura da planilha</button>
+                            <button type="button" id="botaoForcarLeituraRastreio" class="botao-secundario" onclick="limparLinhaBaseOneDriveRastreio()">Forçar nova leitura da planilha</button>
                             <button type="button" class="botao-secundario botao-perigo" onclick="limparTodosDadosRastreio()">Limpar todos os dados</button>
                         </div>
 
