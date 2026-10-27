@@ -45,7 +45,7 @@ async function carregarRastreios() {
             const registros = [];
             const tamanhoPagina = 500;
             for (let deslocamento = 0; ; deslocamento += tamanhoPagina) {
-                const resposta = await window.clienteSupabase.rpc("pmobile_rastreio_listar_v3", {
+                const resposta = await window.clienteSupabase.rpc("pmobile_rastreio_listar_v4", {
                     p_usuario: sessao.usuario,
                     p_credencial: sessao.credencial,
                     p_limit: tamanhoPagina,
@@ -110,6 +110,14 @@ function filtrarRastreios() {
     }
 }
 
+function formatarPercentualFinalRastreio(valor) {
+    if (valor == null || valor === "") return "—";
+    const numero = Number(valor);
+    if (!Number.isFinite(numero)) return "—";
+    const percentual = Math.abs(numero) <= 1 ? numero * 100 : numero;
+    return percentual.toLocaleString("pt-BR", {maximumFractionDigits:2}) + "%";
+}
+
 function renderizarRastreio(item) {
     const status = statusVisualRastreio(item);
     const campo = (rotulo, valor) =>
@@ -126,6 +134,7 @@ function renderizarRastreio(item) {
           campo("Peso", formatarQuantidadeRastreio(item.peso)) +
           campo("Frete embutido", formatarMoedaRastreioSeguro(item.valor_frete_embutido)) +
           campo("Valor do frete", formatarMoedaRastreioSeguro(item.valor_frete)) +
+          campo("% Final", formatarPercentualFinalRastreio(item.percentual_final)) +
           (status === 'ENTREGUE' && item.entregue_em ? campo('Entregue em', formatarDataHoraEntregaRastreio(item.entregue_em)) : '') +
         '</div></article>';
 }
@@ -193,7 +202,8 @@ function abrirDetalhesRastreio(id) {
         '<div><small>Peso</small><strong>' + escaparHtmlRastreio(formatarValorRastreio(item.peso)) + '</strong></div>' +
         '<div><small>Valor da nota</small><strong>' + escaparHtmlRastreio(formatarMoedaRastreio(item.valor_nf)) + '</strong></div>' +
         '<div><small>Valor do frete embutido</small><strong>' + escaparHtmlRastreio(formatarMoedaRastreioSeguro(item.valor_frete_embutido)) + '</strong></div>' +
-        '<div><small>Valor do frete</small><strong>' + escaparHtmlRastreio(formatarMoedaRastreioSeguro(item.valor_frete)) + '</strong></div>';
+        '<div><small>Valor do frete</small><strong>' + escaparHtmlRastreio(formatarMoedaRastreioSeguro(item.valor_frete)) + '</strong></div>' +
+        '<div><small>% Final</small><strong>' + escaparHtmlRastreio(formatarPercentualFinalRastreio(item.percentual_final)) + '</strong></div>';
 
     modal.classList.add("aberto");
     modal.setAttribute("aria-hidden", "false");
