@@ -10,12 +10,30 @@ let buscaNFRastreioUltimoTermo = "";
 let buscaNFRastreioUltimaConsulta = 0;
 let buscaNFRastreioCarregando = false;
 let buscaNFRastreioRequisicao = 0;
+let rastreiosBuscaNFRapida = [];
+
+// A ordem da tela corresponde à posição física na aba LANÇAMENTOS.
+// Nova linha inserida no topo empurra as notas anteriores para baixo.
+function compararRastreiosPorLinha(a, b) {
+    const numeroLinha = item => {
+        const n = Number(item?.linha_origem);
+        return item?.linha_origem != null && Number.isInteger(n) && n > 0
+            ? n : Number.MAX_SAFE_INTEGER;
+    };
+    const diferenca = numeroLinha(a) - numeroLinha(b);
+    if (diferenca !== 0) return diferenca;
+    const dataA = String(a?.data_envio || "");
+    const dataB = String(b?.data_envio || "");
+    if (dataA !== dataB) return dataA < dataB ? 1 : -1;
+    return String(a?.id || "").localeCompare(String(b?.id || ""));
+}
 
 function agendarBuscaRastreioServidor() {
     const termo = String(document.getElementById("buscaRastreio")?.value || "").trim();
     if (!/^\d{3,40}$/.test(termo)) {
         clearTimeout(buscaNFRastreioTemporizador);
         buscaNFRastreioUltimoTermo = "";
+        rastreiosBuscaNFRapida = [];
         buscaNFRastreioCarregando = false;
         buscaNFRastreioRequisicao++;
         return;
@@ -37,13 +55,9 @@ function agendarBuscaRastreioServidor() {
             if (resposta.error) throw resposta.error;
             if (numeroDaBusca !== buscaNFRastreioRequisicao) return;
             const encontrados = Array.isArray(resposta.data) ? resposta.data : [];
-            if (encontrados.length) {
-                const ids = new Set(encontrados.map(item => String(item.id)));
-                rastreiosPmobile = [
-                    ...encontrados,
-                    ...rastreiosPmobile.filter(item => !ids.has(String(item.id)))
-                ];
-            }
+            // Manter a pesquisa rápida fora do cache paginado. Assim ela não
+            // desaparece quando a última página antiga termina de carregar.
+            rastreiosBuscaNFRapida = encontrados;
             buscaNFRastreioUltimoTermo = termo;
             buscaNFRastreioUltimaConsulta = Date.now();
         } catch (erro) {
@@ -64,6 +78,7 @@ function atualizarBuscaRastreio() {
 window.addEventListener("pmobile:rastreio-atualizado", () => {
     buscaNFRastreioUltimoTermo = "";
     buscaNFRastreioUltimaConsulta = 0;
+    rastreiosBuscaNFRapida = [];
     rastreiosUltimaConsulta = 0;
     if (document.getElementById("buscaRastreio")?.value.trim()) atualizarBuscaRastreio();
 });
@@ -109,7 +124,7 @@ async function carregarRastreios() {
             const registros = [];
             const tamanhoPagina = 500;
             const buscarPagina = async deslocamento => {
-                const resposta = await window.clienteSupabase.rpc("pmobile_rastreio_listar_v4", {
+                const resposta = await window.clienteSupabase.rpc("pmobile_rastreio_listar_v5", {
                     p_usuario: sessao.usuario,
                     p_credencial: sessao.credencial,
                     p_limit: tamanhoPagina,
@@ -185,11 +200,16 @@ function filtrarRastreios() {
     if (!lista) return;
     const termo = String(document.getElementById("buscaRastreio")?.value || "").trim().toLowerCase();
     const filtro = document.getElementById("filtroStatusRastreio")?.value || "";
-    const itens = rastreiosPmobile.filter(function(item) {
+    const notasEncontradas = /^\d{3,40}$/.test(termo) ? rastreiosBuscaNFRapida : [];
+    const idsBusca = new Set(notasEncontradas.map(item => String(item.id)));
+    const fonte = notasEncontradas.length
+        ? [...notasEncontradas, ...rastreiosPmobile.filter(item => !idsBusca.has(String(item.id)))]
+        : rastreiosPmobile;
+    const itens = fonte.filter(function(item) {
         const status = statusVisualRastreio(item);
         const texto = [item.cliente,item.notas_fiscais,item.motorista,item.transportadora,item.regiao].join(" ").toLowerCase();
         return (!termo || texto.includes(termo)) && (!filtro || status === filtro);
-    });
+    }).sort(compararRastreiosPorLinha);
     if (!itens.length) {
         lista.innerHTML = buscaNFRastreioCarregando
             ? '<div class="rastreio-vazio"><strong>Consultando nota fiscal no Supabase...</strong><span>Aguarde a busca rápida.</span></div>'
@@ -223,7 +243,9 @@ function renderizarRastreio(item) {
         '<div class="rastreio-dado"><small>' + rotulo + '</small><strong>' + escaparHtmlRastreio(valor) + '</strong></div>';
     return '<article class="rastreio-card" data-status="' + escaparAtributoRastreio(status) + '">' +
         '<div class="rastreio-card-topo"><strong>' + escaparHtmlRastreio(item.cliente || "Cliente não informado") + '</strong><span class="rastreio-etiqueta">' + escaparHtmlRastreio(status.replaceAll("_", " ")) + '</span></div>' +
-        '<div class="rastreio-resumo"><div class="rastreio-nf">NF <strong>' + escaparHtmlRastreio(item.notas_fiscais || "—") + '</strong></div>' +
+        '<div class="rastreio-resumo"><div class="rastreio-nf">NF <strong>' + escaparHtmlRastreio(item.notas_fiscais || "—") + '</strong>' +
+        (item.linha_origem != null ? '<small class="rastreio-linha-planilha">Linha ' +
+            escaparHtmlRastreio(item.linha_origem) + ' da planilha</small>' : '') + '</div>' +
         '<div class="rastreio-valor-nota"><small>Valor da nota</small><strong>' + escaparHtmlRastreio(formatarMoedaRastreioSeguro(item.valor_nf)) + '</strong></div></div>' +
         '<div class="rastreio-motorista"><small>Motorista</small><strong>' + escaparHtmlRastreio(item.motorista || "Não informado") + '</strong></div>' +
         '<div class="rastreio-grade">' +
@@ -266,7 +288,8 @@ function formatarMoedaRastreio(valor) {
 }
 
 function abrirDetalhesRastreio(id) {
-    const item = rastreiosPmobile.find(registro => String(registro.id) === String(id));
+    const item = [...rastreiosBuscaNFRapida, ...rastreiosPmobile]
+        .find(registro => String(registro.id) === String(id));
     if (!item) return;
 
     let modal = document.getElementById("rastreioDetalhesModal");
