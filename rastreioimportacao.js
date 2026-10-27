@@ -624,6 +624,11 @@ async function sincronizarOneDriveRastreio(forcar = false) {
         const url = sincronizacaoOneDriveRastreioUrl;
         const estadoAnterior = obterEstadoSincronizacaoOneDriveRastreio(url);
         const hashAtual = dadosImportacaoRastreio.sha256 || null;
+        // Se a rotina foi parada durante o download, não aplicar o resultado atrasado.
+        if (!forcar && !sincronizacaoOneDriveRastreioAtiva) {
+            mostrarStatusOneDriveRastreio("○ Sincronização interrompida antes do envio ao banco.");
+            return;
+        }
 
         if (!forcar && estadoAnterior?.sha256 && hashAtual && estadoAnterior.sha256 === hashAtual) {
             sincronizacaoOneDriveRastreioVerificada = true;
@@ -652,6 +657,19 @@ async function sincronizarOneDriveRastreio(forcar = false) {
         }
 
         const lotePreparado = prepararLinhasRastreioParaEnvio(0, dadosImportacaoRastreio.linhas.length, true);
+        const totalAnterior = Number(estadoAnterior?.totalLinhas || 0);
+        const totalNovo = lotePreparado.resultado.length;
+        if (!totalNovo) {
+            throw new Error("A planilha não contém lançamentos válidos. A base anterior foi preservada.");
+        }
+        if (totalAnterior >= 100 && totalNovo < totalAnterior) {
+            const removidos = totalAnterior - totalNovo;
+            const limiteSeguro = Math.max(25, Math.ceil(totalAnterior * 0.03));
+            if (removidos > limiteSeguro) {
+                throw new Error("A planilha perdeu " + removidos.toLocaleString("pt-BR") +
+                    " linhas desde a última sincronização. Alteração grande bloqueada para evitar perda de dados.");
+            }
+        }
         const sessao = obterSessaoRastreioImportacao();
         const chave = await calcularChaveFonteOneDriveRastreio(url);
 
@@ -673,6 +691,7 @@ async function sincronizarOneDriveRastreio(forcar = false) {
         const ultimaLinhaAtual = (Number(dadosImportacaoRastreio.deslocamentoLinha) || 2) + dadosImportacaoRastreio.linhas.length - 1;
         salvarEstadoSincronizacaoOneDriveRastreio(url, {
             ultimaLinha: ultimaLinhaAtual,
+            totalLinhas: totalNovo,
             sha256: hashAtual,
             atualizadoEm: new Date().toISOString()
         });
@@ -1452,6 +1471,9 @@ async function enviarImportacaoRastreio() {
 
     try {
         const sessao = obterSessaoRastreioImportacao();
+        if (sincronizacaoOneDriveRastreioAtiva) {
+            throw new Error("Há uma sincronização OneDrive ativa. Pare a importação manual e atualize pela fonte sincronizada para não duplicar registros.");
+        }
 
         // A importação é tolerante: campos ausentes, inválidos ou não
         // normalizáveis não bloqueiam o lote. A validação continua sendo
