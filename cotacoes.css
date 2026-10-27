@@ -1,20 +1,20 @@
 /* PMOBILE — Cotações | linguagem visual do lançador principal */
 #opcoesCotacoes,#cotacoesRegiao,#cotacoesDetalhe{
  min-height:calc(100dvh - var(--status-altura));
- background:radial-gradient(circle at 86% 8%,rgba(62,207,142,.075),transparent 25%),linear-gradient(180deg,#111 0%,var(--fundo) 38%,var(--fundo) 100%);
+ background:radial-gradient(circle at 86% 8%,rgba(215, 215, 215,.075),transparent 25%),linear-gradient(180deg,#111 0%,var(--fundo) 38%,var(--fundo) 100%);
 }
 .cot-wrap{position:relative;width:min(100%,1040px);margin:0 auto;padding:24px clamp(12px,4vw,56px) 100px;color:var(--texto)}
-.cot-wrap::before{content:"";position:absolute;right:-130px;top:-150px;width:360px;height:360px;border:1px solid rgba(62,207,142,.07);border-radius:50%;pointer-events:none}
+.cot-wrap::before{content:"";position:absolute;right:-130px;top:-150px;width:360px;height:360px;border:1px solid rgba(215, 215, 215,.07);border-radius:50%;pointer-events:none}
 .cot-back{display:inline-flex;align-items:center;min-height:44px;margin-bottom:14px;padding:8px 2px;background:none;border:0;color:var(--texto-secundario);font:inherit;font-weight:600;cursor:pointer}
 .cot-back:hover{color:var(--verde)}
 .cot-kicker{margin:0 0 12px;color:var(--verde);font-size:.68rem;font-weight:800;letter-spacing:.18em;line-height:1;text-transform:uppercase}
 .cot-wrap h1{margin:0;color:var(--texto);font-size:clamp(1.85rem,9vw,2.85rem);font-weight:650;line-height:1.08;letter-spacing:-.035em}
 .cot-sub{position:relative;margin:12px 0 26px;padding-bottom:22px;border-bottom:1px solid rgba(255,255,255,.08);color:var(--texto-secundario);font-size:.9rem;line-height:1.5}
-.cot-sub::after{content:"";position:absolute;left:0;bottom:-1px;width:58px;height:2px;border-radius:99px;background:var(--verde);box-shadow:0 0 14px rgba(62,207,142,.2)}
+.cot-sub::after{content:"";position:absolute;left:0;bottom:-1px;width:58px;height:2px;border-radius:99px;background:var(--verde);box-shadow:0 0 14px rgba(215, 215, 215,.2)}
 .cot-card,.cot-row{position:relative;width:100%;box-sizing:border-box;display:flex;align-items:center;gap:14px;text-align:left;background:linear-gradient(145deg,rgba(255,255,255,.035),transparent 58%),var(--fundo-painel);border:1px solid rgba(255,255,255,.085);border-radius:14px;color:var(--texto);cursor:pointer;box-shadow:0 8px 22px rgba(0,0,0,.14);transition:border-color .16s ease,transform .16s ease,background .16s ease}
 .cot-card{min-height:96px;padding:15px 16px}
-.cot-card:hover,.cot-row:hover{border-color:rgba(62,207,142,.22);transform:translateY(-1px);background:linear-gradient(145deg,rgba(62,207,142,.045),transparent 62%),var(--fundo-painel)}
-.cot-card:focus-visible,.cot-row:focus-visible,.cot-search:focus-visible{outline:2px solid rgba(62,207,142,.55);outline-offset:3px}
+.cot-card:hover,.cot-row:hover{border-color:rgba(215, 215, 215,.22);transform:translateY(-1px);background:linear-gradient(145deg,rgba(215, 215, 215,.045),transparent 62%),var(--fundo-painel)}
+.cot-card:focus-visible,.cot-row:focus-visible,.cot-search:focus-visible{outline:2px solid rgba(215, 215, 215,.55);outline-offset:3px}
 .cot-card strong{display:block;color:var(--texto);font-size:.92rem;font-weight:650;line-height:1.25}
 .cot-card small{display:block;margin-top:5px;color:var(--texto-secundario);font-size:.76rem;line-height:1.4}
 .cot-icon{display:grid;place-items:center;flex:none;width:46px;height:46px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.075);border-radius:12px;font-size:1.3rem;filter:saturate(.82)}
