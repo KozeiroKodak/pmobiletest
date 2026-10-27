@@ -36,13 +36,19 @@ function alternarImportacaoSemMotoristaRastreio(checkbox) {
         mapaMotoristasRastreio = {};
     }
     if (dadosImportacaoRastreio) {
-        renderizarPreviaImportacaoRastreio();
+        if (modoAutomatico) {
+            // Sincronização automática: não oferecer segunda importação manual.
+            const previa = document.getElementById("rastreioImportacaoPrevia");
+            if (previa) previa.replaceChildren();
+        } else {
+            renderizarPreviaImportacaoRastreio();
+        }
     } else {
         montarMapaMotoristasUI();
     }
 }
 
-async function prepararImportacaoRastreio(arquivoExterno = null) {
+async function prepararImportacaoRastreio(arquivoExterno = null, modoAutomatico = false) {
     const arquivo =
         arquivoExterno ||
         document.getElementById("arquivoRastreio")?.files?.[0];
@@ -175,7 +181,7 @@ async function prepararImportacaoRastreio(arquivoExterno = null) {
 
         renderizarPreviaImportacaoRastreio();
 
-        mostrarStatusImportacaoRastreio(
+        if (!modoAutomatico) mostrarStatusImportacaoRastreio(
             importarSemMotoristaRastreio
                 ? "🟢 Planilha analisada. A importação será feita sem selecionar motorista."
                 : "🟢 Planilha analisada. Revise os motoristas antes de enviar."
@@ -592,7 +598,7 @@ async function sincronizarOneDriveRastreio(forcar = false) {
     sincronizacaoOneDriveRastreioExecutando = true;
     try {
         const arquivo = await baixarPlanilhaOneDriveRastreio(sincronizacaoOneDriveRastreioUrl);
-        await prepararImportacaoRastreio(arquivo);
+        await prepararImportacaoRastreio(arquivo, true);
         if (!dadosImportacaoRastreio) throw new Error("A planilha não pôde ser analisada.");
 
         const url = sincronizacaoOneDriveRastreioUrl;
