@@ -450,9 +450,10 @@ async function mesclarContagensManuaisAtuais(base) {
     const mapa = new Map(base.map(item => [String(item.id), item]));
     for (const item of atuais) {
         const id = String(item.id);
-        if (!mapa.has(id)) mapa.set(id, item);
-        else if (!item.sincronizado && !mapa.get(id).sincronizado)
+        // Registros sincronizados ausentes no servidor não devem voltar ao cache.
+        if (!mapa.has(id) && !item.sincronizado && !item.bloqueadoPorLimpeza) {
             mapa.set(id, item);
+        }
     }
     return Array.from(mapa.values());
 }
