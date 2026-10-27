@@ -754,6 +754,33 @@
         </section>
 
 
+        <!-- IMPORTAÇÃO NF: módulo independente, acessível aos administradores -->
+        <section id="importacaoNF" class="tela-sistema" style="display:none;">
+            <div class="cabecalho-pagina">
+                <p class="cabecalho-caminho">PMOBILE / Configurações / Importação NF</p>
+                <h1>Importação de notas fiscais</h1>
+                <p>Armazena planilhas em uma área separada para consulta e validação. Não altera o Rastreio.</p>
+            </div>
+            <div class="painel">
+                <button type="button" class="botao-secundario" onclick="abrirConfiguracoes()">Voltar às configurações</button>
+                <h2>Planilha local</h2>
+                <input type="file" id="arquivoImportacaoNF" accept=".xlsx,.xls,.xlsm,.xlsb">
+                <div class="acoes-importacao">
+                    <button type="button" class="botao-principal" onclick="prepararImportacaoNF()">Analisar arquivo</button>
+                </div>
+                <h2>Planilha online</h2>
+                <input type="url" id="linkImportacaoNF" placeholder="Link compartilhado Google Drive / OneDrive / SharePoint" autocomplete="off">
+                <div class="acoes-importacao">
+                    <button type="button" class="botao-secundario" onclick="prepararImportacaoNFOnline()">Analisar link</button>
+                </div>
+                <p id="statusImportacaoNF" aria-live="polite"></p>
+                <div id="resultadoImportacaoNF" class="importacao-nf-resultado"></div>
+                <h2>Histórico de importações</h2>
+                <div id="listaImportacoesNF"></div>
+                <div id="visualizacaoImportacaoNF"></div>
+            </div>
+        </section>
+
         <!-- =================================================
              CONFIGURAÇÕES
              ================================================= -->
@@ -856,6 +883,14 @@
               </div></details>
             </div>
 
+            <div class="painel rastreio-admin-only" hidden>
+                <details class="configuracoes-accordion">
+                    <summary><span class="home-app-icone">📑</span><span class="home-app-conteudo"><strong>Importação NF</strong><small>Planilhas e histórico de notas fiscais</small></span><span class="home-app-seta">›</span></summary>
+                    <div class="configuracoes-conteudo">
+                        <button type="button" id="menuImportacaoNF" class="botao-aba" onclick="abrirImportacaoNF()">Abrir Importação NF</button>
+                    </div>
+                </details>
+            </div>
             <div class="painel configuracoes-painel-sistema">
                 <details class="configuracoes-accordion"><summary><span class="home-app-icone">⚙️</span><span class="home-app-conteudo"><strong>Sistema</strong><small>Atualizações do aplicativo</small></span><span class="home-app-seta">›</span></summary><div class="configuracoes-conteudo">
                 <div class="configuracoes-acoes">
@@ -1092,7 +1127,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script src="xlsx.full.min.js?v=local-20261027"></script>
 
 
 <!-- =========================================================
@@ -1106,7 +1141,7 @@
      NÚCLEO / DADOS
      ========================================================= -->
 
-<script src="dados.js?v=0.0.251-syncsession"></script>
+<script src="dados.js?v=0.0.333-unified"></script>
 <script src="popupescolha.js?v=0.0.248"></script>
 
 
@@ -1123,7 +1158,8 @@
 <script src="valorestotal.js?v=1"></script>
 <script src="rastreio.js?v=0.0.328-percentual"></script>
 
-<script src="rastreioimportacao.js?v=0.0.328-percentual"></script>
+<script src="rastreioimportacao.js?v=0.0.333-protecao"></script>
+<script src="importacaonf.js?v=0.0.333-reintegracao"></script>
 
 
 <!-- =========================================================
@@ -1137,7 +1173,7 @@
      CONTAGEM MANUAL
      ========================================================= -->
 
-<script src="contagemmanual.js?v=0.0.249-syncfix"></script>
+<script src="contagemmanual.js?v=0.0.333-cleanup"></script>
 
 <script src="locais.js?v=0.0.248"></script>
 <script src="reservas.js?v=0.0.248"></script>
@@ -1165,9 +1201,10 @@
      CONTROLE GERAL
      ========================================================= -->
 
-<script src="script.js?v=0.0.248"></script>        <!-- =================================================
+<script src="script.js?v=0.0.248"></script>
+<!-- Central de sincronização -->
 
-<script src="sync-center.js?v=1.0.0"></script>
+<script src="sync-center.js?v=1.0.3"></script>
 
 <script src="cotacoes.js?v=1"></script></body>
 
