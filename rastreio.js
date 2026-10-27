@@ -3,6 +3,70 @@ let rastreiosPmobile = [];
 let limiteExibicaoRastreios = 100;
 let carregamentoRastreiosAtual = null;
 let rastreiosUltimaConsulta = 0;
+// Busca de NF diretamente no Supabase para não depender das 19 páginas
+// carregadas nem do cache da lista durante a atualização OneDrive.
+let buscaNFRastreioTemporizador = null;
+let buscaNFRastreioUltimoTermo = "";
+let buscaNFRastreioUltimaConsulta = 0;
+let buscaNFRastreioCarregando = false;
+let buscaNFRastreioRequisicao = 0;
+
+function agendarBuscaRastreioServidor() {
+    const termo = String(document.getElementById("buscaRastreio")?.value || "").trim();
+    if (!/^\\d{3,40}$/.test(termo)) {
+        clearTimeout(buscaNFRastreioTemporizador);
+        buscaNFRastreioUltimoTermo = "";
+        buscaNFRastreioCarregando = false;
+        buscaNFRastreioRequisicao++;
+        return;
+    }
+    if (termo === buscaNFRastreioUltimoTermo &&
+        Date.now() - buscaNFRastreioUltimaConsulta < 5000) return;
+    clearTimeout(buscaNFRastreioTemporizador);
+    const numeroDaBusca = ++buscaNFRastreioRequisicao;
+    buscaNFRastreioCarregando = true;
+    buscaNFRastreioTemporizador = setTimeout(async () => {
+        if (numeroDaBusca !== buscaNFRastreioRequisicao) return;
+        try {
+            const sessao = obterSessaoRastreio();
+            const resposta = await window.clienteSupabase.rpc("pmobile_rastreio_buscar_nf", {
+                p_usuario: sessao.usuario,
+                p_credencial: sessao.credencial,
+                p_nota: termo
+            });
+            if (resposta.error) throw resposta.error;
+            if (numeroDaBusca !== buscaNFRastreioRequisicao) return;
+            const encontrados = Array.isArray(resposta.data) ? resposta.data : [];
+            if (encontrados.length) {
+                const ids = new Set(encontrados.map(item => String(item.id)));
+                rastreiosPmobile = [
+                    ...encontrados,
+                    ...rastreiosPmobile.filter(item => !ids.has(String(item.id)))
+                ];
+            }
+            buscaNFRastreioUltimoTermo = termo;
+            buscaNFRastreioUltimaConsulta = Date.now();
+        } catch (erro) {
+            console.warn("Pesquisa rápida de NF no Supabase:", erro);
+        } finally {
+            if (numeroDaBusca === buscaNFRastreioRequisicao) {
+                buscaNFRastreioCarregando = false;
+                filtrarRastreios();
+            }
+        }
+    }, 250);
+}
+
+function atualizarBuscaRastreio() {
+    agendarBuscaRastreioServidor();
+    filtrarRastreios();
+}
+window.addEventListener("pmobile:rastreio-atualizado", () => {
+    buscaNFRastreioUltimoTermo = "";
+    buscaNFRastreioUltimaConsulta = 0;
+    rastreiosUltimaConsulta = 0;
+    if (document.getElementById("buscaRastreio")?.value.trim()) atualizarBuscaRastreio();
+});
 
 function obterSessaoRastreio() {
     if (!window.usuarioPmobileAtual || !window.credencialPmobileAtual) {
@@ -27,7 +91,7 @@ async function abrirRastreio() {
     }
     if (rastreiosPmobile.length) {
         filtrarRastreios();
-        if (Date.now() - rastreiosUltimaConsulta < 30000) return;
+        if (Date.now() - rastreiosUltimaConsulta < 10000) return;
     }
     await carregarRastreios();
 }
@@ -44,7 +108,7 @@ async function carregarRastreios() {
             const sessao = obterSessaoRastreio();
             const registros = [];
             const tamanhoPagina = 500;
-            for (let deslocamento = 0; ; deslocamento += tamanhoPagina) {
+            const buscarPagina = async deslocamento => {
                 const resposta = await window.clienteSupabase.rpc("pmobile_rastreio_listar_v4", {
                     p_usuario: sessao.usuario,
                     p_credencial: sessao.credencial,
@@ -52,15 +116,48 @@ async function carregarRastreios() {
                     p_offset: deslocamento
                 });
                 if (resposta.error) throw resposta.error;
-                const pagina = Array.isArray(resposta.data) ? resposta.data : [];
-                registros.push(...pagina.filter(item => !/^TOTAL(?:\\s*GERAL)?$/i.test(String(item.transportadora || "").trim()) && !/^TOTAL(?:\\s*GERAL)?$/i.test(String(item.cliente || "").trim())));
-                if (status) status.textContent = "Carregando rastreios: " + registros.length.toLocaleString("pt-BR") + "...";
-                // Mostra resultados assim que chega a primeira página, sem esperar a última.
-                if (!possuiCache && (deslocamento === 0 || deslocamento % 2000 === 0)) {
-                    rastreiosPmobile = registros.slice();
-                    filtrarRastreios();
+                return Array.isArray(resposta.data) ? resposta.data : [];
+            };
+            const adicionarPagina = pagina => {
+                registros.push(...pagina.filter(item =>
+                    !/^TOTAL(?:\\s*GERAL)?$/i.test(String(item.transportadora || "").trim()) &&
+                    !/^TOTAL(?:\\s*GERAL)?$/i.test(String(item.cliente || "").trim())
+                ));
+                if (status) status.textContent = "Carregando rastreios: " +
+                    registros.length.toLocaleString("pt-BR") + "...";
+            };
+            // Priorizar a página recente: a NF nova pode ser exibida enquanto
+            // as páginas mais antigas ainda estão carregando.
+            const primeiraPagina = await buscarPagina(0);
+            adicionarPagina(primeiraPagina);
+            if (!possuiCache) {
+                rastreiosPmobile = registros.slice();
+            } else {
+                const ids = new Set(rastreiosPmobile.map(item => String(item.id)));
+                const recentes = primeiraPagina.filter(item => !ids.has(String(item.id)));
+                if (recentes.length) rastreiosPmobile = [...recentes, ...rastreiosPmobile];
+            }
+            filtrarRastreios();
+            if (primeiraPagina.length === tamanhoPagina) {
+                // Buscar quatro páginas simultaneamente (antes eram 19 consultas
+                // sequenciais). Preservar a ordem de cada página na listagem.
+                const paginasParalelas = 4;
+                for (let inicio = tamanhoPagina; ; inicio += paginasParalelas * tamanhoPagina) {
+                    const offsets = Array.from({length: paginasParalelas},
+                        (_, i) => inicio + i * tamanhoPagina);
+                    const paginas = await Promise.all(offsets.map(buscarPagina));
+                    let terminada = false;
+                    for (const pagina of paginas) {
+                        if (terminada) break;
+                        adicionarPagina(pagina);
+                        if (pagina.length < tamanhoPagina) terminada = true;
+                    }
+                    if (!possuiCache) {
+                        rastreiosPmobile = registros.slice();
+                        filtrarRastreios();
+                    }
+                    if (terminada) break;
                 }
-                if (pagina.length < tamanhoPagina) break;
             }
             rastreiosPmobile = registros;
             rastreiosUltimaConsulta = Date.now();
@@ -94,7 +191,9 @@ function filtrarRastreios() {
         return (!termo || texto.includes(termo)) && (!filtro || status === filtro);
     });
     if (!itens.length) {
-        lista.innerHTML = '<div class="rastreio-vazio"><strong>Nenhum rastreio encontrado.</strong><span>Os registros importados aparecerão aqui.</span></div>';
+        lista.innerHTML = buscaNFRastreioCarregando
+            ? '<div class="rastreio-vazio"><strong>Consultando nota fiscal no Supabase...</strong><span>Aguarde a busca rápida.</span></div>'
+            : '<div class="rastreio-vazio"><strong>Nenhum rastreio encontrado.</strong><span>Os registros importados aparecerão aqui.</span></div>';
         return;
     }
     const visiveis = itens.slice(0, limiteExibicaoRastreios);
