@@ -1731,7 +1731,6 @@ label {
         transition: none;
     }
 }
-\n
 
 /* Barra global de sincronizacao — padrao PMColetas / PMRomaneios. */
 :root { --pm-status-altura: 64px; }
