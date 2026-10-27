@@ -367,6 +367,7 @@ function iniciarSincronizacaoOneDriveRastreio(restaurando = false) {
     } catch (erro) { mostrarStatusOneDriveRastreio("🔴 " + (erro.message || "Link inválido.")); return; }
 
     sincronizacaoOneDriveRastreioUrl = url;
+    sincronizacaoOneDriveRastreioFalhasConsecutivas = 0;
     const estado = obterEstadoSincronizacaoOneDriveRastreio(url);
     sincronizacaoOneDriveRastreioUltimaLinha = Number(estado?.ultimaLinha || 0);
     sincronizacaoOneDriveRastreioVerificada = false;
@@ -462,7 +463,7 @@ async function baixarPlanilhaOneDriveRastreio(url) {
             // Erros de autorização/HTML não são falhas de rede: o fallback
             // nativo repetiria o mesmo acesso e esconderia o diagnóstico.
             if (!window.PMCOLETAS_ONEDRIVE?.iniciarDownload ||
-                /HTTP\\s*(401|403)|login|autentica|permiss/i.test(mensagem)) {
+                /HTTP\s*(401|403)|login|autentica|permiss/i.test(mensagem)) {
                 throw erro;
             }
             console.warn("Proxy OneDrive indisponível; tentando ponte nativa:", erro);
@@ -766,7 +767,7 @@ async function sincronizarOneDriveRastreio(forcar = false) {
         atualizarIndicadorOneDriveRastreio(sincronizacaoOneDriveRastreioAtiva, "erro");
         const foiTimeout = String(erro?.code || "") === "57014" ||
             /statement timeout|tempo limite|query timeout/i.test(String(erro?.message || ""));
-        const foiAcesso = /HTTP\\s*(401|403)|acesso negado|login.*onedrive|permiss/i.test(String(erro?.message || ""));
+        const foiAcesso = /HTTP\s*(401|403)|acesso negado|login.*onedrive|permiss/i.test(String(erro?.message || ""));
         mostrarStatusOneDriveRastreio(foiTimeout
             ? "🔴 O Supabase atingiu o tempo limite. Nenhuma sincronização parcial foi confirmada. Não limpe os dados."
             : foiAcesso
