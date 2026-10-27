@@ -421,7 +421,7 @@ function limparLinhaBaseOneDriveRastreio() {
 }
 
 async function baixarPlanilhaOneDriveRastreio(url) {
-    const nomePadrao = "rastreio.xlsx";
+    const nomePadrao = "Planilha de frete.xlsx";
 
     // OneDrive pessoal e empresarial: usar primeiro o proxy Supabase,
     // evitando CORS e diferenças entre WebView e navegador.
