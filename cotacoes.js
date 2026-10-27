@@ -3,12 +3,14 @@
 "use strict";
 let mapa = new Map();
 let regiaoAtual = "";
+let ultimaConsulta = 0;
+let consultaAtual = null;
 const $ = id => document.getElementById(id);
 const normal = v => String(v == null ? "" : v).trim().replace(/\s+/g," ");
 const chave = v => normal(v).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLocaleUpperCase("pt-BR");
 const html = v => normal(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function abrirOpcoesCotacoes(){mostrarTelaSistema("opcoesCotacoes","menuOpcoesCotacoes");}
-function abrirCotacoesRegiao(){mostrarTelaSistema("cotacoesRegiao","menuOpcoesCotacoes");$("cotBusca").value="";carregarCotacoesRegiao();}
+function abrirCotacoesRegiao(){mostrarTelaSistema("cotacoesRegiao","menuOpcoesCotacoes");$("cotBusca").value="";if(mapa.size){renderRegioes();if(Date.now()-ultimaConsulta<30000)return;}carregarCotacoesRegiao();}
 function voltarOpcoesCotacoes(){mostrarTelaSistema("opcoesCotacoes","menuOpcoesCotacoes");}
 function voltarListaCotacoes(){mostrarTelaSistema("cotacoesRegiao","menuOpcoesCotacoes");}
 function renderRegioes(){
@@ -25,6 +27,11 @@ function abrirDetalheCotacao(ch){
  mostrarTelaSistema("cotacoesDetalhe","menuOpcoesCotacoes");
 }
 async function carregarCotacoesRegiao(){
+ if(consultaAtual)return consultaAtual;
+ consultaAtual = executarConsultaCotacoes();
+ try{await consultaAtual;}finally{consultaAtual=null;}
+}
+async function executarConsultaCotacoes(){
  const status=$("cotStatus");status.textContent="Consultando registros sincronizados...";
  try{
   const usuario=window.usuarioPmobileAtual, credencial=window.credencialPmobileAtual;
@@ -42,11 +49,13 @@ async function carregarCotacoesRegiao(){
     if(transportadora&&!/^TOTAL(?:\s*GERAL)?$/i.test(transportadora)&&!/^[-–—]+$/.test(transportadora))novo.get(id).transportadoras.set(chave(transportadora),transportadora);
    }
    total+=pagina.length;
+   if(!mapa.size && total===pagina.length){mapa=novo;renderRegioes();}
+   if(total%2000===0){mapa=novo;renderRegioes();status.textContent="Carregando regiões: "+total.toLocaleString("pt-BR")+" registros...";}
    if(pagina.length<limite)break;
   }
-  mapa=novo;status.textContent=mapa.size+' região(ões) encontrada(s) em '+total.toLocaleString("pt-BR")+' registro(s).';
+  mapa=novo;ultimaConsulta=Date.now();status.textContent=mapa.size+' região(ões) encontrada(s) em '+total.toLocaleString("pt-BR")+' registro(s).';
   renderRegioes();
- }catch(e){console.error("Cotações por região:",e);status.textContent="Não foi possível consultar: "+(e.message||e);$("cotLista").innerHTML="";}
+ }catch(e){console.error("Cotações por região:",e);status.textContent="Não foi possível atualizar: "+(e.message||e);if(!mapa.size)$("cotLista").innerHTML="";}
 }
 document.addEventListener("click",e=>{const b=e.target.closest("[data-cot-regiao]");if(b)abrirDetalheCotacao(b.dataset.cotRegiao);});
 document.addEventListener("input",e=>{if(e.target?.id==="cotBusca")renderRegioes();});
