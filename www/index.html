@@ -849,6 +849,27 @@
               </div></details>
             </div>
 
+            <div class="painel configuracoes-painel-importacao" id="painelOneDriveWebTeste">
+              <details class="configuracoes-accordion">
+                <summary><span class="home-app-icone">☁️</span><span class="home-app-conteudo"><strong>OneDrive Web — Teste</strong><small>Abrir OneDrive e testar login e acesso ao Excel · sem Client ID</small></span><span class="home-app-seta">›</span></summary>
+                <div class="configuracoes-conteudo">
+                  <div class="rastreio-onedrive-sync">
+                    <h3>Laboratório OneDrive Web</h3>
+                    <p>Experimente abrir o OneDrive nesta área. A Microsoft pode impedir a exibição incorporada ou o login em WebView; nesse caso, use o botão de navegador.</p>
+                    <div class="rastreio-onedrive-sync-acoes">
+                      <button type="button" class="botao-principal" onclick="PMOneDriveWebTeste.abrir()">Testar nesta aba</button>
+                      <button type="button" class="botao-secundario" onclick="PMOneDriveWebTeste.navegador()">Abrir no navegador</button>
+                      <button type="button" class="botao-secundario" onclick="PMOneDriveWebTeste.fechar()">Fechar teste</button>
+                    </div>
+                    <p id="pmOneDriveWebTesteStatus" class="rastreio-onedrive-status" role="status" aria-live="polite">Aguardando teste.</p>
+                    <div id="pmOneDriveWebTesteArea" hidden style="margin-top:12px">
+                      <iframe id="pmOneDriveWebTesteFrame" title="OneDrive Web — ambiente de teste" referrerpolicy="no-referrer" style="display:block;width:100%;height:65vh;min-height:380px;border:1px solid #444;border-radius:10px;background:#fff"></iframe>
+                    </div>
+                    <p style="font-size:.85em;opacity:.8">Este teste não lê arquivos automaticamente nem altera a sincronização existente. Faça login apenas na página oficial da Microsoft.</p>
+                  </div>
+                </div>
+              </details>
+            </div>
             <div class="painel configuracoes-painel-importacao" id="painelMicrosoftOneDrive"><details class="configuracoes-accordion"><summary><span class="home-app-icone">🔐</span><span class="home-app-conteudo"><strong>Conta Microsoft — OneDrive</strong><small>Conectar conta pessoal ou corporativa e selecionar Excel</small></span><span class="home-app-seta">›</span></summary><div class="configuracoes-conteudo"><div class="rastreio-onedrive-sync"><h3>Conexão Microsoft segura</h3><p>Autenticação Microsoft OAuth 2.0 com PKCE. Não informe sua senha ao PMobile. É necessário registrar o aplicativo no Microsoft Entra e autorizar a URL de retorno.</p><label for="pmMsClientId">ID do aplicativo (Client ID)</label><input id="pmMsClientId" type="text" placeholder="ID do aplicativo registrado no Microsoft Entra" autocomplete="off" style="width:100%;padding:13px;background:#171717;color:white;border:1px solid #444;border-radius:10px"><p id="pmMsRedirect" style="font-size:.8em;overflow-wrap:anywhere"></p><div class="rastreio-onedrive-sync-acoes"><button type="button" class="botao-principal" onclick="PMMicrosoft.login()">Entrar com Microsoft</button><button type="button" class="botao-secundario" onclick="PMMicrosoft.listar()">Selecionar arquivo Excel</button><button type="button" class="botao-secundario" onclick="PMMicrosoft.sair()">Desconectar</button></div><p id="pmMsStatus" class="rastreio-onedrive-status" aria-live="polite">Conta desconectada.</p><div id="pmMsArquivos"></div><p style="font-size:.85em;opacity:.8">Etapa de conexão e seleção: a sincronização automática autenticada será habilitada após a integração do servidor. A sincronização atual por link permanece inalterada.</p></div></div></details></div>
             <div class="painel configuracoes-painel-sistema">
                 <details class="configuracoes-accordion"><summary><span class="home-app-icone">⚙️</span><span class="home-app-conteudo"><strong>Sistema</strong><small>Atualizações do aplicativo</small></span><span class="home-app-seta">›</span></summary><div class="configuracoes-conteudo">
@@ -1201,6 +1222,31 @@ window.PMMicrosoft=(()=>{
  function sair(){access=null;expires=0;sessionStorage.removeItem("pm_ms_selected_file");document.getElementById("pmMsArquivos")?.replaceChildren();status("Conta desconectada.");}
  document.addEventListener("DOMContentLoaded",()=>{const id=document.getElementById("pmMsClientId");if(id)id.value=localStorage.getItem(KEY)||"";const p=document.getElementById("pmMsRedirect");if(p)p.textContent="URL de retorno para cadastrar no Entra (SPA): "+REDIRECT;retorno();});
  return {login,listar,sair};
+})();
+</script>
+<script>
+window.PMOneDriveWebTeste=(()=>{
+  const URL_ONEDRIVE="https://onedrive.live.com/";
+  function status(msg){const el=document.getElementById("pmOneDriveWebTesteStatus");if(el)el.textContent=msg;}
+  function abrir(){
+    const area=document.getElementById("pmOneDriveWebTesteArea"),frame=document.getElementById("pmOneDriveWebTesteFrame");
+    if(!area||!frame)return;
+    area.hidden=false;
+    frame.src=URL_ONEDRIVE;
+    status("Tentando abrir OneDrive incorporado. Se ficar em branco ou bloquear o login, use Abrir no navegador.");
+  }
+  function navegador(){
+    const win=window.open(URL_ONEDRIVE,"_blank","noopener,noreferrer");
+    if(!win)status("Se o navegador não abrir, habilite a abertura de links externos no aplicativo.");
+    else status("OneDrive aberto em uma janela externa. Retorne ao PMobile após o teste.");
+  }
+  function fechar(){
+    const area=document.getElementById("pmOneDriveWebTesteArea"),frame=document.getElementById("pmOneDriveWebTesteFrame");
+    if(frame)frame.removeAttribute("src");
+    if(area)area.hidden=true;
+    status("Teste fechado.");
+  }
+  return {abrir,navegador,fechar};
 })();
 </script>
 </body>
