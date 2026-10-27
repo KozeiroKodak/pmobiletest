@@ -632,8 +632,15 @@ async function sincronizarOneDriveRastreio(forcar = false) {
 
     sincronizacaoOneDriveRastreioExecutando = true;
     try {
-        const arquivo = await baixarPlanilhaOneDriveRastreio(sincronizacaoOneDriveRastreioUrl);
+        // Congelar a URL no inicio do ciclo: se um administrador trocar o
+        // compartilhamento durante o download, não vincular arquivos antigos ao link novo.
         const url = sincronizacaoOneDriveRastreioUrl;
+        const arquivo = await baixarPlanilhaOneDriveRastreio(url);
+        if (url !== sincronizacaoOneDriveRastreioUrl) {
+            mostrarStatusOneDriveRastreio("🟡 Link alterado durante o download. Aguardando nova leitura segura...");
+            if (sincronizacaoOneDriveRastreioAtiva) agendarProximaSincronizacaoOneDriveRastreio();
+            return;
+        }
         if (!forcar && !sincronizacaoOneDriveRastreioAtiva) {
             mostrarStatusOneDriveRastreio("○ Sincronização interrompida após o download.");
             return;
