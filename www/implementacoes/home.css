@@ -25,7 +25,7 @@
     padding: clamp(28px, 5vw, 58px) clamp(16px, 4vw, 56px) 72px;
     overflow: hidden;
     background:
-        radial-gradient(circle at 86% 8%, rgba(62, 207, 142, .075), transparent 25%),
+        radial-gradient(circle at 86% 8%, rgba(215, 215, 215, .075), transparent 25%),
         linear-gradient(180deg, #111 0%, var(--fundo) 38%, var(--fundo) 100%);
 }
 
@@ -36,7 +36,7 @@
     right: -150px;
     width: 420px;
     height: 420px;
-    border: 1px solid rgba(62, 207, 142, .07);
+    border: 1px solid rgba(215, 215, 215, .07);
     border-radius: 50%;
     pointer-events: none;
 }
@@ -80,7 +80,7 @@
     height: 2px;
     border-radius: 99px;
     background: var(--verde);
-    box-shadow: 0 0 14px rgba(62,207,142,.20);
+    box-shadow: 0 0 14px rgba(215, 215, 215,.20);
 }
 
 .home-apps-kicker {
@@ -154,9 +154,9 @@
 
 .home-app-card:hover {
     transform: translateY(-2px);
-    border-color: rgba(62,207,142,.22);
+    border-color: rgba(215, 215, 215,.22);
     background:
-        linear-gradient(145deg, rgba(62,207,142,.045), transparent 62%),
+        linear-gradient(145deg, rgba(215, 215, 215,.045), transparent 62%),
         var(--fundo-painel);
     box-shadow: 0 12px 28px rgba(0,0,0,.20);
 }
@@ -170,7 +170,7 @@
 }
 
 .home-app-card:focus-visible {
-    outline: 2px solid rgba(62,207,142,.55);
+    outline: 2px solid rgba(215, 215, 215,.55);
     outline-offset: 3px;
 }
 
@@ -192,8 +192,8 @@
 }
 
 .home-app-card:hover .home-app-icone {
-    border-color: rgba(62,207,142,.18);
-    background: rgba(62,207,142,.075);
+    border-color: rgba(215, 215, 215,.18);
+    background: rgba(215, 215, 215,.075);
     transform: scale(1.035);
 }
 
