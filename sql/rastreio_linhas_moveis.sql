@@ -154,19 +154,23 @@ begin
   ) protegido
  from public.rastreios r where r.fonte_id=v_fonte.id;
 
- -- Pareamento exclusivo por identidade. Para chaves repetidas sem proteção,
- -- só reaproveita o registro quando a posição e a identidade coincidem.
+ -- Pareamento por identidade. Duplicatas não protegidas e com mesma quantidade
+ -- conservam a ordem de ocorrência relativa, mesmo se novas linhas deslocarem tudo.
+ -- Duplicatas protegidas são bloqueadas no preflight por falta de ID inequívoco.
  create temporary table tmp_pm_sync_map on commit drop as
  with old_rank as(
-  select o.*,count(*) over(partition by nfkey,clientkey,transkey) oc from pg_temp.tmp_pm_sync_old o
+  select o.*,count(*) over(partition by nfkey,clientkey,transkey) oc,
+   row_number() over(partition by nfkey,clientkey,transkey order by old_linha,id) ocorrencia
+  from pg_temp.tmp_pm_sync_old o
  ), new_rank as(
-  select n.*,count(*) over(partition by nfkey,clientkey,transkey) nc from pg_temp.tmp_pm_sync_new n
+  select n.*,count(*) over(partition by nfkey,clientkey,transkey) nc,
+   row_number() over(partition by nfkey,clientkey,transkey order by linha_origem) ocorrencia
+  from pg_temp.tmp_pm_sync_new n
  )
  select o.id,n.linha_origem as nova_linha,o.protegido
  from old_rank o join new_rank n
    on (o.nfkey,o.clientkey,o.transkey)=(n.nfkey,n.clientkey,n.transkey)
-   and ((o.oc=1 and n.nc=1) or
-        (o.old_linha=n.linha_origem and (o.oc>1 or n.nc>1)));
+   and o.oc=n.nc and o.ocorrencia=n.ocorrencia;
  create unique index on pg_temp.tmp_pm_sync_map(id);
  create unique index on pg_temp.tmp_pm_sync_map(nova_linha);
 
