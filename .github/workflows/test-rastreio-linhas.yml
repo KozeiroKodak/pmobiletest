@@ -1,0 +1,21 @@
+name: Verificar identidade movel de NFs
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'sql/rastreio_linhas_moveis.sql'
+      - 'tests/rastreio-linhas-moveis.test.cjs'
+      - '.github/workflows/test-rastreio-linhas.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Testar correspondência estável de NFs
+        run: node --test tests/rastreio-linhas-moveis.test.cjs
