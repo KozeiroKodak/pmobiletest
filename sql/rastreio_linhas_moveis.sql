@@ -98,9 +98,14 @@ begin
  if v_admin is null then raise exception 'Acesso restrito a administradores.' using errcode='42501';end if;
  if p_substituir then raise exception 'Substituicao destrutiva deve usar o fluxo administrativo separado.' using errcode='42501';end if;
  if btrim(coalesce(p_chave,''))='' or btrim(coalesce(p_url,''))='' then raise exception 'Fonte invalida.' using errcode='22023';end if;
- perform public.pmobile_rastreio_preflight_sincronizacao(p_usuario,p_credencial,p_chave,p_linhas);
 
+ -- Serializar por fonte e bloquear rastreios antes da validação. Uma entrega
+ -- confirmada simultaneamente não pode virar registro "desprotegido" no sync.
  select * into v_fonte from public.rastreio_fontes where chave=btrim(p_chave) for update;
+ if v_fonte.id is not null then
+   perform 1 from public.rastreios r where r.fonte_id=v_fonte.id order by r.id for update;
+ end if;
+ perform public.pmobile_rastreio_preflight_sincronizacao(p_usuario,p_credencial,p_chave,p_linhas);
  if v_fonte.id is null then
    if exists(select 1 from public.rastreios) then
      raise exception 'Fonte desconhecida, dados anteriores preservados.' using errcode='23505';end if;
