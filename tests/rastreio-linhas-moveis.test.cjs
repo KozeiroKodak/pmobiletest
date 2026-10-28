@@ -47,6 +47,7 @@ test("SQL do Supabase não utiliza a posição para definir identidade",()=>{
  const sql=fs.readFileSync(path.join(__dirname,"..","sql","rastreio_linhas_moveis.sql"),"utf8");
  assert.match(sql,/tmp_pm_sync_map/);
  assert.match(sql,/row_number\(\) over\(partition by nfkey,clientkey,transkey order by/);
+ assert.match(sql,/for update/);
  assert.match(sql,/set linha_origem=null/);
  assert.match(sql,/when m.protegido then r.notas_fiscais/);
  assert.match(sql,/v_removed>greatest\(25,ceil\(v_old\*0\.03\)/);
