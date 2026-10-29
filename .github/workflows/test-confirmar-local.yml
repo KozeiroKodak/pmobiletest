@@ -1,0 +1,21 @@
+name: Testar confirmação de alterações de local
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'sql/fix_confirmar_alteracao_local_id_ambiguo.sql'
+      - 'tests/confirmar-alteracao-local.test.cjs'
+      - '.github/workflows/test-confirmar-local.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  teste:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validar assinatura e SQL de confirmação
+        run: node --test tests/confirmar-alteracao-local.test.cjs
