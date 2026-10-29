@@ -1862,6 +1862,10 @@ function abrirConfiguracoes() {
             : "Nenhum usuário autenticado.";
     }
 
+    if (typeof window.mostrarInicioConfiguracoesV3 === "function") {
+        window.mostrarInicioConfiguracoesV3();
+    }
+
 }
 
 
