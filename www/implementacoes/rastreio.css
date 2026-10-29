@@ -1,6 +1,6 @@
 /* PMOBILE — Rastreio */
 
-.rastreio-card { --rastreio-atrasado: #e6a23c; --rastreio-cancelado: #e05d5d; --rastreio-transporte: #5ea7ff; }
+.rastreio-card { --rastreio-atrasado: #e6a23c; --rastreio-cancelado: #e05d5d; --rastreio-transporte: #5ea7ff; --rastreio-coletado: #4ade80; }
 
 /* ============================================================
    LISTAGEM E FILTROS
@@ -81,9 +81,12 @@
     box-shadow: 0 4px 16px rgba(0, 0, 0, .18);
 }
 
-.rastreio-card[data-status="ENTREGUE"],
-.rastreio-card[data-status="COLETADO"] {
+.rastreio-card[data-status="ENTREGUE"] {
     border-left: 3px solid var(--verde);
+}
+
+.rastreio-card[data-status="COLETADO"] {
+    border-left: 3px solid var(--rastreio-coletado);
 }
 
 .rastreio-card[data-status="ATRASADO"] {
@@ -133,8 +136,11 @@
     overflow-wrap: anywhere;
 }
 
-.rastreio-card[data-status="ENTREGUE"] .rastreio-etiqueta,
-.rastreio-card[data-status="COLETADO"] .rastreio-etiqueta { color: var(--verde); }
+.rastreio-card[data-status="ENTREGUE"] .rastreio-etiqueta { color: var(--verde); }
+.rastreio-card[data-status="COLETADO"] .rastreio-etiqueta {
+    color: var(--rastreio-coletado);
+    background: rgba(74, 222, 128, .08);
+}
 .rastreio-card[data-status="ATRASADO"] .rastreio-etiqueta { color: var(--rastreio-atrasado); }
 .rastreio-card[data-status="CANCELADO"] .rastreio-etiqueta { color: var(--rastreio-cancelado); }
 .rastreio-card[data-status="EM_TRANSPORTE"] .rastreio-etiqueta { color: var(--rastreio-transporte); }
