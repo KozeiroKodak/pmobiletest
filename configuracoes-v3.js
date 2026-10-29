@@ -125,7 +125,7 @@
         }
 
         // Evita manter a posição de rolagem de um módulo diferente.
-        window.scrollTo({ top: 0, behavior: "instant" });
+        window.scrollTo({ top: 0, behavior: "auto" });
     }
 
     function prepararPainelAdmin() {
