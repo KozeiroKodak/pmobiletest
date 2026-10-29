@@ -212,7 +212,7 @@ function renderizarListaVisualConferencias() {
                         '<small>' + tipoDiferenca + '</small></div>' +
                 '</div>' +
                 '<div class="registro-conferencia-responsavel">' +
-                    '<span class="registro-conferencia-icone" aria-hidden="true">♙</span>' +
+                    '<span class="registro-conferencia-icone" aria-hidden="true">👤</span>' +
                     '<div><span>Contagem realizada por</span><strong>' + textoVisualConferencia(item.usuarioNome) + '</strong></div>' +
                 '</div>' +
                 '<span class="registro-conferencia-expandir"><span class="rotulo-fechado">Ver mais detalhes</span>' +
