@@ -1,0 +1,266 @@
+/* PMobile • Identidade Ciano Industrial
+   Camada de cores global, carregada depois de monochrome.css.
+   Exclusivamente apresentação: não altera fluxos, permissões, layouts ou status operacionais.
+   Ciano = marca/ações/seleção. Verde = sucesso. Vermelho = erro. Amarelo = aviso. */
+
+:root {
+  color-scheme: dark;
+  --pm-acento: #57dceb;
+  --pm-acento-hover: #8cebf5;
+  --pm-acento-suave: rgba(87, 220, 235, .12);
+  --pm-brilho: rgba(87, 220, 235, .17);
+  --verde: #57dceb; /* compatibilidade com componentes legados de marca */
+  --verde-hover: #8cebf5;
+  --fundo: #09151a;
+  --fundo-sidebar: #0d1c22;
+  --fundo-painel: #14252b;
+  --fundo-hover: #1b343b;
+  --fundo-ativo: #20414a;
+  --borda: #29434b;
+  --borda-clara: #39606a;
+  --texto: #f1f7f8;
+  --texto-secundario: #a3bbc2;
+  --texto-fraco: #849da5;
+  --fundo-card: #14252b;
+  accent-color: var(--pm-acento);
+}
+
+/* Componentes base: campos e ações continuam com os mesmos tamanhos. */
+body, #aplicacao, #conteudoPrincipal, .tela-sistema {
+  background-color: var(--fundo);
+}
+#sistema { background-color: var(--fundo-sidebar); border-color: var(--borda); }
+.sidebar-logo { background: var(--pm-acento); color: #061c22; }
+.sidebar-item.ativo { background: var(--fundo-ativo); border-color: var(--pm-acento); color: var(--pm-acento); }
+.painel, .painel-reservas, .rastreio-painel, .configuracoes-painel-admin,
+.painel-solicitacoes, .painel-locais, .rastreio-importacao-painel,
+.arquivos-teste-painel { background-color: var(--fundo-painel); border-color: var(--borda); }
+input, select, textarea { accent-color: var(--pm-acento); }
+input:focus, select:focus, textarea:focus { border-color: var(--pm-acento); }
+:where(button, input, select, textarea, summary, a):focus-visible {
+  outline: 2px solid var(--pm-acento);
+  outline-offset: 2px;
+}
+.botao-principal { background: var(--pm-acento); border-color: var(--pm-acento); color: #061b21; }
+.botao-principal:hover { background: var(--pm-acento-hover); border-color: var(--pm-acento-hover); }
+.botao-secundario { border-color: var(--borda-clara); background: #183039; }
+.botao-secundario:hover { background: var(--fundo-hover); }
+.botao-perigo, .botao-perigo:hover { /* exclusão mantém o alerta vermelho */ }
+
+/* Início e menu de aplicativos. Sobrescreve a camada monocromática. */
+#homeSistema {
+  background: radial-gradient(circle at 78% 5%, rgba(87,220,235,.085),transparent 37%),
+              var(--fundo) !important;
+}
+#homeSistema::before { border-color: rgba(87,220,235,.14); }
+#homeSistema::after { border-color: rgba(87,220,235,.12) !important; }
+.home-apps-cabecalho::after { background: var(--pm-acento); box-shadow: 0 0 14px rgba(87,220,235,.26); }
+.home-apps-kicker { color: var(--pm-acento); }
+.home-app-card, .cot-card, .cot-row {
+  background: linear-gradient(145deg,rgba(87,220,235,.045),transparent 68%),var(--fundo-painel) !important;
+  border-color: rgba(87,220,235,.15) !important;
+}
+.home-app-card:hover, .cot-card:hover, .cot-row:hover {
+  background: linear-gradient(145deg,rgba(87,220,235,.09),transparent 69%),var(--fundo-painel) !important;
+  border-color: rgba(87,220,235,.5) !important;
+}
+.home-app-card:hover::before { border-left-color: var(--pm-acento) !important; }
+.home-app-card:hover .home-app-icone, .cot-icon {
+  background: rgba(87,220,235,.09) !important;
+  border-color: rgba(87,220,235,.23) !important;
+}
+.home-app-card:hover .home-app-seta, .cot-back:hover { color: var(--pm-acento) !important; }
+.home-app-card:focus-visible, .cot-card:focus-visible,
+.cot-row:focus-visible, .cot-search:focus-visible {
+  outline-color: var(--pm-acento) !important;
+}
+.home-app-card-config { background-color: var(--fundo-painel); }
+
+/* Cotações. */
+#opcoesCotacoes, #cotacoesRegiao, #cotacoesDetalhe {
+  background: radial-gradient(circle at 85% 5%,rgba(87,220,235,.075),transparent 29%),
+              var(--fundo) !important;
+}
+.cot-wrap::before { border-color: rgba(87,220,235,.11) !important; }
+.cot-kicker, .cot-back { color: var(--pm-acento) !important; }
+.cot-sub::after { background: var(--pm-acento) !important; box-shadow: 0 0 12px rgba(87,220,235,.25) !important; }
+.cot-search:focus { border-color: var(--pm-acento) !important; }
+
+/* Navegação, buscas, abas e seleção — sem recolorir avisos. */
+:is(.pesquisa-item,.reserva-item,.registro-conferencia,.rastreio-card,
+.solicitacao-facebook-card,.local-alterado-card,.local-vazio-area-card,.arquivo-teste-card) {
+  border-color: var(--borda) !important;
+  background-image: linear-gradient(145deg,rgba(87,220,235,.035),transparent 70%);
+}
+:is(.pesquisa-item,.reserva-item,.registro-conferencia,.rastreio-card,
+.solicitacao-facebook-card,.local-alterado-card,.local-vazio-area-card,.arquivo-teste-card):hover {
+  border-color: rgba(87,220,235,.29) !important;
+  background-color: var(--fundo-hover) !important;
+}
+:is(.rastreio-filtros input,.rastreio-filtros select,.pesquisa-filtros input,
+.pesquisa-filtros select,.seletor-contagem-manual,.solicitacao-filtro,.aba-locais,
+.pmobile-popup-escolha-opcao) {
+  background-color: #102329;
+  border-color: var(--borda-clara);
+  color: var(--texto);
+}
+:is(.rastreio-filtros input,.rastreio-filtros select,.pesquisa-filtros input,
+.pesquisa-filtros select,.seletor-contagem-manual):focus {
+  border-color: var(--pm-acento) !important;
+  box-shadow: 0 0 0 2px rgba(87,220,235,.11) !important;
+}
+:is(.aba-locais.ativo,.solicitacao-filtro.ativo,.pmobile-popup-escolha-opcao.selecionada) {
+  background-color: #16434d !important;
+  border-color: var(--pm-acento) !important;
+  color: var(--pm-acento) !important;
+}
+:is(.pmobile-popup-escolha-caixa,.menu-config-contagem-manual,
+.menu-tipo-busca-contagem-manual) {
+  background-color: var(--fundo-painel);
+  border-color: var(--borda);
+}
+:is(.pmobile-popup-escolha-opcao,.menu-config-contagem-manual button,
+.menu-tipo-busca-contagem-manual button):hover {
+  background-color: var(--fundo-hover) !important;
+}
+:is(.rastreio-importacao-painel,.rastreio-importacao-resumo,.rastreio-importacao-acoes,
+.arquivos-teste-painel) { --verde: #57dceb; --verde-hover: #8cebf5; }
+:is(.botao-importar-materiais,.botao-buscar-contagem-manual,.botao-config-contagem-manual) {
+  background-image: linear-gradient(135deg,rgba(87,220,235,.11),transparent 72%);
+}
+#pesquisa .pesquisa-v2-buscar { background: var(--pm-acento); color: #061b21; }
+#pesquisa .pesquisa-v2-vazio span { color: var(--pm-acento); }
+#locais .aba-locais.ativo { border-color: var(--pm-acento) !important; }
+#locais .aba-locais:focus-visible { outline-color: var(--pm-acento) !important; }
+
+/* Contagem manual: trocar acentos de marca, manter ERP OK e avisos semânticos. */
+#contagemManual .contagem-v2 { background: #0c1d23; border-color: var(--borda); }
+#contagemManual .contagem-v2-topo,
+#contagemManual .contagem-v2-resultados { border-color: var(--borda); }
+#contagemManual .contagem-v2-icone { background: #16414c; color: var(--pm-acento); }
+#contagemManual .contagem-v2-selo { background: #173941; color: var(--pm-acento); }
+#contagemManual .contagem-v2-campo { background: #122930; border-color: var(--borda-clara); }
+#contagemManual .contagem-v2-campo span { color: var(--pm-acento); }
+#contagemManual .contagem-v2-tipos button.ativo {
+  background: #126776; border-color: var(--pm-acento); color: #f6ffff;
+}
+#contagemManual .linha-contagem-manual-busca .botao-buscar-contagem-manual,
+#contagemManual .contagem-v2-salvar {
+  background: var(--pm-acento); color: #061b21;
+}
+#contagemManual .linha-contagem-manual-busca .botao-config-contagem-manual {
+  background: #173943; color: var(--pm-acento);
+}
+#contagemManual .contagem-v2-lista-titulo > span {
+  background: #173943; color: var(--pm-acento);
+}
+/* Etiquetas .erp-ok/.erp-analise: cores de estado mantidas. */
+
+/* Conferências realizadas: filtros e bordas ganham ciano.
+   Status OK permanece verde e divergência permanece vermelha. */
+#resultadoConferencias .conferencias-indicador,
+#resultadoConferencias details.registro-conferencia {
+  border-color: var(--borda);
+}
+#resultadoConferencias #buscaHistoricoConferencias:focus-visible,
+#resultadoConferencias .conferencias-filtros button:focus-visible,
+#resultadoConferencias .registro-conferencia summary:focus-visible {
+  outline-color: var(--pm-acento);
+}
+#resultadoConferencias .conferencias-filtros button.ativo {
+  background: var(--pm-acento); border-color: var(--pm-acento); color: #061b21;
+}
+#resultadoConferencias .registro-conferencia-endereco {
+  background: #1a343c;
+}
+#resultadoConferencias .registro-conferencia-seta { color: var(--pm-acento); }
+
+/* Configurações: mudar cores, não a disposição atual dos cartões. */
+#configuracoes .configuracoes-painel-sistema,
+#configuracoes .configuracoes-painel-admin,
+#configuracoes #painelConfiguracoesUsuario,
+#configuracoes .configuracoes-painel-importacao {
+  background: var(--fundo-painel); border-color: var(--borda);
+}
+#configuracoes .configuracoes-accordion summary:hover { background: rgba(87,220,235,.035); }
+#configuracoes .configuracoes-accordion[open] > summary {
+  background: rgba(87,220,235,.07);
+  box-shadow: inset 3px 0 0 var(--pm-acento);
+}
+#configuracoes .configuracoes-accordion summary:focus-visible { outline-color: var(--pm-acento); }
+
+/* Login e acesso: mesmo layout, novas cores. */
+.login-pmobile.login-pmobile {
+  --login-fundo: #09151a;
+  --login-painel: #14252b;
+  --login-painel-borda: #29434b;
+  --login-borda: #39606a;
+  --login-campo: #0e2026;
+  --login-destaque: #57dceb;
+}
+.login-pmobile .login-pmobile-topo { background: #0d1c22; border-color: var(--borda); }
+.login-pmobile .login-pmobile-logo {
+  background: #143841; border-color: #2e7280; color: var(--pm-acento);
+}
+.login-pmobile .login-pmobile-form > input:focus,
+.login-pmobile .login-senha-campo:focus-within {
+  background: #102a31; border-color: var(--pm-acento);
+}
+.login-pmobile .login-entrar { background: var(--pm-acento); border-color: var(--pm-acento); color: #061b21; }
+.login-pmobile .login-entrar:hover { background: var(--pm-acento-hover); }
+.login-pmobile .login-entrar:active { background: #33c3d4; }
+.login-pmobile input[type="checkbox"] { accent-color: var(--pm-acento); }
+#inicio { background: var(--fundo); }
+#inicio button { background: var(--pm-acento); color: #061b21; border-color: var(--pm-acento); }
+
+/* Importação de rastreio e de notas, mantendo indicadores de erro/sucesso. */
+.rastreio-importacao-painel, .rastreio-importacao-resumo,
+.rastreio-importacao-acoes { border-color: var(--borda); }
+.rastreio-importacao-painel input:focus, .rastreio-importacao-painel select:focus {
+  border-color: var(--pm-acento);
+}
+.rastreio-onedrive-opcoes input { accent-color: var(--pm-acento); }
+.rastreio-importacao-painel .botao-principal { background: var(--pm-acento); }
+#importacao :is(input,select,textarea):focus-visible { outline-color: var(--pm-acento); }
+
+/* Frete geral: substituir o verde decorativo por ciano, manter o ponto de
+   atualização verde porque informa uma condição operacional. */
+#valoresTotal .valores-hero {
+  background: radial-gradient(circle at 90% 0%,rgba(87,220,235,.16),transparent 48%),
+              linear-gradient(135deg,#113039,#0c191f 70%);
+  border-color: #2d7886;
+}
+#valoresTotal .valores-hero:after { border-color: rgba(87,220,235,.2); }
+#valoresTotal .valores-eyebrow { color: var(--pm-acento); }
+#valoresTotal .valores-hero p { color: #b5d0d7; }
+#valoresTotal .valores-painel {
+  background: linear-gradient(180deg,#15292f,#0d1a20);
+  border-color: var(--borda);
+}
+#valoresTotal .valores-kpi { background: #162b32; border-color: #35515a; }
+#valoresTotal .valores-kpi-label { color: #afc4ca; }
+#valoresTotal .valores-kpi.destaque {
+  background: linear-gradient(140deg,#153c47,#173039);
+  border-color: #3197a6;
+}
+#valoresTotal .valores-kpi.destaque strong { color: var(--pm-acento); }
+#valoresTotal #valoresTotalMensais > h3 { color: var(--pm-acento); }
+#valoresTotal #valoresTotalMensais details[open] { border-color: #389ba9 !important; }
+#valoresTotal .valores-atualizar,
+#valoresTotal button[onclick="carregarValoresTotal()"] {
+  border-color: #368d9c !important;
+  background: #153c46 !important;
+  color: #a7f3fa !important;
+}
+
+/* Sincronização: a interface recebe o fundo azul-petróleo, sem alterar
+   as cores dos LEDs ok/offline/busy/error. */
+.pm-sync-center { background: #0e1c22; border-top-color: var(--borda); }
+.pm-sync-center .sync-details { background: #0e1c22; border-color: var(--borda); }
+.pm-sync-center .sync-detail-row { border-bottom-color: var(--borda); }
+.pm-sync-center .sync-action { background: #1c3d46; border-color: #377b89; color: #d7f9fc; }
+
+/* Ênfase visual não deve suprimir o foco acessível. */
+@media (prefers-reduced-motion: reduce) {
+  .home-app-card, .cot-card, .cot-row { transition: none !important; }
+}
