@@ -35,7 +35,7 @@
 
     <link
         rel="stylesheet"
-        href="implementacoes/conferenciasrealizadas.css?v=0.0.248"
+        href="implementacoes/conferenciasrealizadas.css?v=0.0.251"
     >
 
     <link
@@ -581,14 +581,17 @@
 
             <div class="painel">
 
-                <button
-                    class="botao-perigo"
-                    onclick="limparConferenciasSupabase()"
-                >
-                    🗑️ Limpar conferências
-                </button>
-
                 <div id="resultadoConferencias"></div>
+
+                <div class="conferencias-acoes">
+                    <button
+                        type="button"
+                        class="botao-perigo"
+                        onclick="limparConferenciasSupabase()"
+                    >
+                        🗑️ Limpar conferências
+                    </button>
+                </div>
 
             </div>
 
@@ -1188,7 +1191,7 @@
 
 <script src="conferencias.js?v=0.0.248"></script>
 
-<script src="conferenciasrealizadas.js?v=0.0.250"></script>
+<script src="conferenciasrealizadas.js?v=0.0.251"></script>
 
 
 <!-- =========================================================
