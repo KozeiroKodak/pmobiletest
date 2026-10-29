@@ -36,8 +36,9 @@ test("cancelados e entregues oficiais não são reclassificados; transportadora 
 });
 test("filtro COLETADO existe e cor é verde nos cartões",()=>{
  assert.match(pagina,/<option value="COLETADO">Coletado<\/option>/);
- assert.match(css,/\.rastreio-card\[data-status="COLETADO"\]\s*\{\s*border-left:\s*3px solid var\(--verde\)/);
- assert.match(css,/\.rastreio-card\[data-status="COLETADO"\] \.rastreio-etiqueta\s*\{ color: var\(--verde\)/);
+ assert.match(css,/--rastreio-coletado:\s*#4ade80/);
+ assert.match(css,/\.rastreio-card\[data-status="COLETADO"\]\s*\{\s*border-left:\s*3px solid var\(--rastreio-coletado\)/);
+ assert.match(css,/\.rastreio-card\[data-status="COLETADO"\] \.rastreio-etiqueta\s*\{\s*color: var\(--rastreio-coletado\)/);
 });
 test("original e fallback Android usam as mesmas fontes",()=>{
  assert.equal(fs.readFileSync(path.join(root,"www/rastreio.js"),"utf8"),codigo);
