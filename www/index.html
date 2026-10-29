@@ -61,6 +61,7 @@
 <link rel="stylesheet" href="cotacoes.css?v=mono-2.2"><link rel="stylesheet" href="monochrome.css?v=3.0">
 <link rel="stylesheet" href="cyan-theme.css?v=1.1">
 <link rel="stylesheet" href="implementacoes/configuracoes-v3.css?v=1.0">
+<link rel="stylesheet" href="implementacoes/locais-v3.css?v=1.0">
 </head>
 
 <body>
@@ -516,9 +517,49 @@
                     <button type="button" id="abaLocaisVazios" class="aba-locais" onclick="alternarAbaLocais('vazios')" role="tab">🟩 Vazios</button>
                     <button type="button" id="abaLocaisDerivados" class="aba-locais" onclick="alternarAbaLocais('derivados')" role="tab">⚠️ Derivados</button>
                 </div>
-                <div id="painelLocaisAlterados"><div id="listaLocaisAlterados"></div></div>
-                <div id="painelLocaisVazios" style="display: none;"><div id="listaAreasVazias"></div></div>
-                <div id="painelLocaisDerivados" style="display: none;"><div id="listaLocaisDerivados"></div></div>
+                <div id="painelLocaisAlterados">
+                    <div class="locais-v3-resumo" aria-label="Resumo das alterações">
+                        <div class="locais-v3-indicador"><span>Total</span><strong data-contador-local="total">—</strong></div>
+                        <div class="locais-v3-indicador alerta"><span>Pendentes</span><strong data-contador-local="pendentes">—</strong></div>
+                        <div class="locais-v3-indicador sucesso"><span>Confirmados</span><strong data-contador-local="confirmados">—</strong></div>
+                    </div>
+                    <div class="locais-v3-ferramentas">
+                        <label for="locaisV3BuscarAlterados">Buscar alteração de local</label>
+                        <input type="search" id="locaisV3BuscarAlterados" placeholder="Produto, código, local ou responsável..." autocomplete="off">
+                        <div class="locais-v3-filtros" role="group" aria-label="Filtrar alterações">
+                            <button type="button" class="ativo" aria-pressed="true" data-filtro-local="todos" onclick="aplicarFiltroLocaisV3('todos')">Todas</button>
+                            <button type="button" aria-pressed="false" data-filtro-local="pendente" onclick="aplicarFiltroLocaisV3('pendente')">Pendentes</button>
+                            <button type="button" aria-pressed="false" data-filtro-local="confirmado" onclick="aplicarFiltroLocaisV3('confirmado')">Confirmadas</button>
+                        </div>
+                    </div>
+                    <div id="listaLocaisAlterados"></div>
+                    <p class="locais-v3-sem-resultado" id="locaisV3NenhumAlterado" hidden>Nenhuma alteração corresponde aos filtros.</p>
+                </div>
+                <div id="painelLocaisVazios" style="display: none;">
+                    <div class="locais-v3-resumo" aria-label="Resumo das posições">
+                        <div class="locais-v3-indicador"><span>Posições</span><strong data-contador-local="posicoes">—</strong></div>
+                        <div class="locais-v3-indicador"><span>Ocupadas</span><strong data-contador-local="ocupadas">—</strong></div>
+                        <div class="locais-v3-indicador sucesso"><span>Vazias</span><strong data-contador-local="vazias">—</strong></div>
+                    </div>
+                    <div class="locais-v3-ferramentas">
+                        <label for="locaisV3BuscarVazios">Buscar setor</label>
+                        <input type="search" id="locaisV3BuscarVazios" placeholder="Ex.: P01, J01..." autocomplete="off">
+                    </div>
+                    <div id="listaAreasVazias"></div>
+                    <p class="locais-v3-sem-resultado" id="locaisV3NenhumVazio" hidden>Nenhum setor encontrado.</p>
+                </div>
+                <div id="painelLocaisDerivados" style="display: none;">
+                    <div class="locais-v3-resumo" aria-label="Resumo dos derivados">
+                        <div class="locais-v3-indicador"><span>Fora do padrão</span><strong data-contador-local="derivados">—</strong></div>
+                    </div>
+                    <div class="locais-v3-ferramentas">
+                        <label for="locaisV3BuscarDerivados">Pesquisar materiais derivados</label>
+                        <input type="search" id="locaisV3BuscarDerivados" placeholder="Código, produto, referência ou local..." autocomplete="off">
+                        <span id="locaisV3BuscaPagina" class="locais-v3-ajuda">A pesquisa considera apenas a página exibida.</span>
+                    </div>
+                    <div id="listaLocaisDerivados"></div>
+                    <p class="locais-v3-sem-resultado" id="locaisV3NenhumDerivado" hidden>Nenhum material nesta página corresponde à pesquisa.</p>
+                </div>
             </div>
         </section>
 
@@ -1237,6 +1278,7 @@
 <script src="contagemmanual.js?v=0.0.333-cleanup"></script>
 
 <script src="locais.js?v=0.0.248"></script>
+<script src="locais-v3.js?v=1.0"></script>
 <script src="reservas.js?v=0.0.248"></script>
 
 
