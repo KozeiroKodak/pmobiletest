@@ -227,24 +227,24 @@ input:focus, select:focus, textarea:focus { border-color: var(--pm-acento); }
    atualização verde porque informa uma condição operacional. */
 #valoresTotal .valores-hero {
   background: radial-gradient(circle at 90% 0%,rgba(87,220,235,.16),transparent 48%),
-              linear-gradient(135deg,#113039,#0c191f 70%);
-  border-color: #2d7886;
+              linear-gradient(135deg,#113039,#0c191f 70%) !important;
+  border-color: #2d7886 !important;
 }
-#valoresTotal .valores-hero:after { border-color: rgba(87,220,235,.2); }
-#valoresTotal .valores-eyebrow { color: var(--pm-acento); }
-#valoresTotal .valores-hero p { color: #b5d0d7; }
+#valoresTotal .valores-hero:after { border-color: rgba(87,220,235,.2) !important; }
+#valoresTotal .valores-eyebrow { color: var(--pm-acento) !important; }
+#valoresTotal .valores-hero p { color: #b5d0d7 !important; }
 #valoresTotal .valores-painel {
-  background: linear-gradient(180deg,#15292f,#0d1a20);
+  background: linear-gradient(180deg,#15292f,#0d1a20) !important;
   border-color: var(--borda);
 }
-#valoresTotal .valores-kpi { background: #162b32; border-color: #35515a; }
-#valoresTotal .valores-kpi-label { color: #afc4ca; }
+#valoresTotal .valores-kpi { background: #162b32 !important; border-color: #35515a !important; }
+#valoresTotal .valores-kpi-label { color: #afc4ca !important; }
 #valoresTotal .valores-kpi.destaque {
-  background: linear-gradient(140deg,#153c47,#173039);
-  border-color: #3197a6;
+  background: linear-gradient(140deg,#153c47,#173039) !important;
+  border-color: #3197a6 !important;
 }
-#valoresTotal .valores-kpi.destaque strong { color: var(--pm-acento); }
-#valoresTotal #valoresTotalMensais > h3 { color: var(--pm-acento); }
+#valoresTotal .valores-kpi.destaque strong { color: var(--pm-acento) !important; }
+#valoresTotal #valoresTotalMensais > h3 { color: var(--pm-acento) !important; }
 #valoresTotal #valoresTotalMensais details[open] { border-color: #389ba9 !important; }
 #valoresTotal .valores-atualizar,
 #valoresTotal button[onclick="carregarValoresTotal()"] {
