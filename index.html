@@ -60,6 +60,7 @@
 <link rel="stylesheet" href="sync-center.css?v=mono-3.0">
 <link rel="stylesheet" href="cotacoes.css?v=mono-2.2"><link rel="stylesheet" href="monochrome.css?v=3.0">
 <link rel="stylesheet" href="cyan-theme.css?v=1.1">
+<link rel="stylesheet" href="implementacoes/configuracoes-v3.css?v=1.0">
 </head>
 
 <body>
@@ -809,6 +810,55 @@
             </div>
 
 
+
+            <!-- Menu central de Configurações 3.0: as ferramentas reais ficam abaixo -->
+            <div id="configuracoesV3Hub" class="configuracoes-v3-hub">
+                <div class="configuracoes-v3-grupo">
+                    <p class="configuracoes-v3-etiqueta">DADOS E INTEGRAÇÕES</p>
+                    <div class="configuracoes-v3-grade">
+                        <button type="button" class="configuracoes-v3-card" onclick="abrirAreaConfiguracoesV3('rastreios')">
+                            <span class="configuracoes-v3-icone" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10 6 4h12l3 6-9 5-9-5Z"/><path d="M3 10v8l9 4 9-4v-8M12 15v7"/></svg></span>
+                            <span class="configuracoes-v3-textos"><strong>Importação de rastreios</strong><small>Planilha, OneDrive e sincronização</small></span>
+                            <span class="configuracoes-v3-canto" aria-hidden="true">↗</span>
+                        </button>
+                        <button type="button" class="configuracoes-v3-card" id="configuracoesV3AbrirNF" data-config-v3="nf" onclick="abrirAreaConfiguracoesV3('nf')" hidden>
+                            <span class="configuracoes-v3-icone" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h8l5 5v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1Z"/><path d="M14 2v5h5M9 12h6M9 16h6M12 11v6"/></svg></span>
+                            <span class="configuracoes-v3-textos"><strong>Importação NF</strong><small>Planilhas e notas fiscais</small></span>
+                            <span class="configuracoes-v3-canto" aria-hidden="true">↗</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="configuracoes-v3-grupo">
+                    <p class="configuracoes-v3-etiqueta">APLICATIVO</p>
+                    <div class="configuracoes-v3-linhas">
+                        <button type="button" class="configuracoes-v3-linha" onclick="abrirAreaConfiguracoesV3('sistema')">
+                            <span class="configuracoes-v3-icone" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.6 5.6 7 7m10 10 1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="2"/></svg></span>
+                            <span class="configuracoes-v3-textos"><strong>Sistema</strong><small>Atualizações do aplicativo</small></span>
+                            <span class="configuracoes-v3-seta" aria-hidden="true">›</span>
+                        </button>
+                        <button type="button" class="configuracoes-v3-linha" onclick="abrirAreaConfiguracoesV3('conta')">
+                            <span class="configuracoes-v3-icone" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M5 21v-2c0-3 3-5 7-5s7 2 7 5v2"/></svg></span>
+                            <span class="configuracoes-v3-textos"><strong>Conta</strong><small>Informações da sessão</small></span>
+                            <span class="configuracoes-v3-seta" aria-hidden="true">›</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="configuracoes-v3-grupo">
+                    <p class="configuracoes-v3-etiqueta">GERENCIAMENTO</p>
+                    <button type="button" class="configuracoes-v3-linha configuracoes-v3-admin" id="configuracoesV3AbrirAdmin" data-config-v3="admin" onclick="abrirAreaConfiguracoesV3('admin')" hidden>
+                        <span class="configuracoes-v3-icone" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 8 4v5c0 5-3.4 8.7-8 11-4.6-2.3-8-6-8-11V6l8-4Z"/><path d="m9 12 2 2 4-4"/></svg></span>
+                        <span class="configuracoes-v3-textos"><strong>Administração</strong><small>Usuários e ferramentas administrativas · acesso restrito</small></span>
+                        <span class="configuracoes-v3-seta" aria-hidden="true">›</span>
+                    </button>
+                </div>
+            </div>
+            <div class="configuracoes-v3-cabecalho" id="configuracoesV3Cabecalho" hidden>
+                <button type="button" class="configuracoes-v3-voltar" onclick="voltarConfiguracoesV3()">← Voltar</button>
+                <p class="configuracoes-v3-caminho" id="configuracoesV3Caminho"></p>
+                <h2 class="configuracoes-v3-titulo" id="configuracoesV3Titulo"></h2>
+                <p class="configuracoes-v3-descricao" id="configuracoesV3Descricao"></p>
+            </div>
+
             <div class="configuracoes-modulos" role="group" aria-label="Módulos de configuração">
             <div class="painel configuracoes-painel-importacao configuracoes-modulo" id="painelConfiguracoesImportacao">
               <details class="configuracoes-accordion"><summary><span class="home-app-icone" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10 6 4h12l3 6-9 5-9-5Z"/><path d="M3 10v8l9 4 9-4v-8M12 15v7"/></svg></span><span class="home-app-conteudo"><strong>Importação de rastreios</strong><small>Planilha, OneDrive e sincronização</small></span><span class="home-app-seta">›</span></summary><div class="configuracoes-conteudo">
@@ -889,16 +939,18 @@
               </div></details>
             </div>
 
-            <div class="painel rastreio-admin-only configuracoes-modulo" hidden>
+            <div class="painel rastreio-admin-only configuracoes-modulo" id="painelConfiguracoesNF" hidden>
                 <details class="configuracoes-accordion">
                     <summary><span class="home-app-icone" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h8l5 5v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1Z"/><path d="M14 2v5h5M9 12h6M9 16h6M12 11v6"/></svg></span><span class="home-app-conteudo"><strong>Importação NF</strong><small>Planilhas e histórico de notas fiscais</small></span><span class="home-app-seta">›</span></summary>
                     <div class="configuracoes-conteudo">
+                        <div class="configuracoes-v3-info"><span class="configuracoes-v3-info-icone" aria-hidden="true">▣</span><span>Abra o módulo existente para importar e consultar notas fiscais.</span></div>
                         <button type="button" id="menuImportacaoNF" class="botao-aba" onclick="abrirImportacaoNF()">Abrir Importação NF</button>
                     </div>
                 </details>
             </div>
-            <div class="painel configuracoes-painel-sistema configuracoes-modulo">
+            <div class="painel configuracoes-painel-sistema configuracoes-modulo" id="painelConfiguracoesSistema">
                 <details class="configuracoes-accordion"><summary><span class="home-app-icone" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.6 5.6 7 7m10 10 1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="2"/></svg></span><span class="home-app-conteudo"><strong>Sistema</strong><small>Atualizações do aplicativo</small></span><span class="home-app-seta">›</span></summary><div class="configuracoes-conteudo">
+                <div class="configuracoes-v3-info"><span class="configuracoes-v3-info-icone" aria-hidden="true">↻</span><span>Verifique se há atualizações disponíveis para esta instalação do PMobile.</span></div>
                 <div class="configuracoes-acoes">
                     <button class="botao-aba" type="button" onclick="procurarAtualizacoesOta()">🔄 Procurar atualizações</button>
                 </div>
@@ -910,12 +962,12 @@
                 <details class="configuracoes-accordion"><summary><span class="home-app-icone" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 8 4v5c0 5-3.4 8.7-8 11-4.6-2.3-8-6-8-11V6l8-4Z"/><path d="m9 12 2 2 4-4"/></svg></span><span class="home-app-conteudo"><strong>Administração</strong><small>Usuários e ferramentas administrativas</small></span><span class="home-app-seta">›</span></summary><div class="configuracoes-conteudo">
 
                 <div class="configuracoes-acoes">
-                    <button class="botao-aba" onclick="abrirGerenciamentoUsuarios()">👥 Usuários</button>
-                    <button class="botao-aba" onclick="abrirLocais()">📍 Locais</button>
-                    <button class="botao-aba" onclick="abrirSolicitacoesResetToken()">🔑 Recuperação de tokens</button>
-                    <button class="botao-perigo" onclick="abrirManutencaoBanco()">🛠️ Manutenção</button>
-                    <button class="botao-aba" onclick="abrirArquivosTeste()">📁 Arquivos de teste</button>
-                    <button class="botao-aba" onclick="abrirDivergencias()">⚠️ Divergências</button>
+                    <button class="botao-aba" onclick="abrirSubareaConfiguracoesV3('usuarios')">👥 Usuários</button>
+                    <button class="botao-aba" onclick="abrirSubareaConfiguracoesV3('locais')">📍 Locais</button>
+                    <button class="botao-aba" onclick="abrirSubareaConfiguracoesV3('tokens')">🔑 Recuperação de tokens</button>
+                    <button class="botao-perigo" onclick="abrirSubareaConfiguracoesV3('manutencao')">🛠️ Manutenção</button>
+                    <button class="botao-aba" onclick="abrirSubareaConfiguracoesV3('arquivos')">📁 Arquivos de teste</button>
+                    <button class="botao-aba" onclick="abrirSubareaConfiguracoesV3('divergencias')">⚠️ Divergências</button>
                 </div>
 
                 </div></details>
@@ -924,7 +976,7 @@
 
             <div class="painel configuracoes-modulo" id="painelConfiguracoesUsuario" style="display: none;">
                 <details class="configuracoes-accordion"><summary><span class="home-app-icone" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M5 21v-2c0-3 3-5 7-5s7 2 7 5v2"/></svg></span><span class="home-app-conteudo"><strong>Conta</strong><small>Informações da sessão</small></span><span class="home-app-seta">›</span></summary><div class="configuracoes-conteudo">
-                <div id="resumoContaPmobile"></div>
+                <div class="configuracoes-v3-perfil"><div class="configuracoes-v3-avatar" aria-hidden="true">♙</div><div id="resumoContaPmobile"></div></div>
                 </div></details>
             </div>
             </div>
@@ -934,7 +986,7 @@
                     <button
                         type="button"
                         class="solicitacoes-voltar"
-                        onclick="fecharGerenciamentoUsuarios()"
+                        onclick="voltarConfiguracoesV3()"
                         aria-label="Voltar"
                     >‹</button>
 
@@ -974,6 +1026,7 @@
             </div>
 
             <div class="painel" id="painelConfiguracoesManutencao" style="display: none;">
+                <p class="configuracoes-v3-info configuracoes-v3-alerta"><span class="configuracoes-v3-info-icone" aria-hidden="true">⚠</span><span>Operações sensíveis. Revise cuidadosamente antes de excluir registros.</span></p>
                 <h2>🛠️ Manutenção</h2>
                 <p>Operações administrativas do banco de dados.</p>
                 <button class="botao-perigo" onclick="limparMateriaisSupabase()">🗑️ Materiais importados</button>
@@ -982,7 +1035,7 @@
             </div>
 
             <div class="painel arquivos-teste-painel" id="painelArquivosTeste" style="display: none;">
-                <button type="button" class="botao-secundario arquivos-teste-voltar" onclick="fecharArquivosTeste()">‹ Voltar</button>
+                <button type="button" class="botao-secundario arquivos-teste-voltar" onclick="voltarConfiguracoesV3()">‹ Voltar</button>
 
                 <h2>📁 Arquivos de teste</h2>
                 <p>Área administrativa para armazenar o arquivo original no Supabase, independentemente da extensão, para auditoria.</p>
@@ -1210,6 +1263,7 @@
      ========================================================= -->
 
 <script src="script.js?v=0.0.248"></script>
+<script src="configuracoes-v3.js?v=1.0"></script>
 <!-- Central de sincronização -->
 
 <script src="sync-center.js?v=1.0.3"></script>
