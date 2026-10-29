@@ -47,6 +47,8 @@
 
     let areaAtual = null;
     let subareaAtual = null;
+    // Rastreia somente subtelas externas realmente abertas pela Administração.
+    let origemSubtelaAdmin = null;
 
     function elemento(id) {
         return document.getElementById(id);
@@ -139,6 +141,7 @@
     window.mostrarInicioConfiguracoesV3 = function () {
         areaAtual = null;
         subareaAtual = null;
+        origemSubtelaAdmin = null;
         atualizarTela();
     };
 
@@ -181,12 +184,21 @@
             return;
         }
 
-        if (nome === "locais") {
-            if (typeof abrirLocais === "function") abrirLocais();
-            return;
-        }
-        if (nome === "divergencias") {
-            if (typeof abrirDivergencias === "function") abrirDivergencias();
+        if (nome === "locais" || nome === "divergencias") {
+            const abrir = nome === "locais" ? window.abrirLocais : window.abrirDivergencias;
+            if (typeof abrir !== "function") return;
+            const atualAntes = typeof obterTelaSistemaAtual === "function"
+                ? obterTelaSistemaAtual()
+                : null;
+            abrir();
+            const atualDepois = typeof obterTelaSistemaAtual === "function"
+                ? obterTelaSistemaAtual()
+                : null;
+            // Só arma o retorno se a função original realmente abriu a subtela.
+            if (atualAntes === "configuracoes" &&
+                atualDepois === (nome === "locais" ? "locais" : "divergencias")) {
+                origemSubtelaAdmin = atualDepois;
+            }
             return;
         }
         if (nome === "tokens") {
@@ -239,6 +251,26 @@
 
         areaAtual = null;
         atualizarTela();
+    };
+
+    // Consumidor de Voltar: respeita cada etapa interna das Configurações.
+    window.voltarUmNivelConfiguracoesV3 = function (telaAtual) {
+        if (telaAtual === "configuracoes" && (subareaAtual !== null || areaAtual !== null)) {
+            window.voltarConfiguracoesV3();
+            return true;
+        }
+
+        if ((telaAtual === "locais" || telaAtual === "divergencias") &&
+            origemSubtelaAdmin === telaAtual) {
+            origemSubtelaAdmin = null;
+            if (typeof mostrarTelaSistema === "function") {
+                mostrarTelaSistema("configuracoes", "menuConfiguracoes", true);
+            }
+            // A página pai é Administração, não o menu inicial do PMobile.
+            window.abrirAreaConfiguracoesV3("admin");
+            return true;
+        }
+        return false;
     };
 
     document.addEventListener("DOMContentLoaded", function () {
