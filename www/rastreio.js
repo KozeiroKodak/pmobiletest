@@ -193,11 +193,22 @@ async function carregarRastreios() {
     try { await carregamentoRastreiosAtual; } finally { carregamentoRastreiosAtual = null; }
 }
 
+// Somente RM Express tem acompanhamento de entrega. Para as demais
+// transportadoras, COLETADO é etiqueta operacional (sem gravação no Supabase).
+function ehRMExpressRastreio(item) {
+    return String(item?.transportadora || "")
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .toUpperCase().replace(/[^A-Z0-9]/g, "") === "RMEXPRESS";
+}
+
 function statusVisualRastreio(item) {
-    if (item.status !== "ENTREGUE" && item.status !== "CANCELADO" && item.previsao_entrega && new Date(item.previsao_entrega).getTime() < Date.now()) {
+    const status = String(item?.status || "PENDENTE").trim().toUpperCase();
+    if (status === "CANCELADO" || status === "ENTREGUE") return status;
+    if (!ehRMExpressRastreio(item)) return "COLETADO";
+    if (item.previsao_entrega && new Date(item.previsao_entrega).getTime() < Date.now()) {
         return "ATRASADO";
     }
-    return item.status || "PENDENTE";
+    return status;
 }
 
 function filtrarRastreios() {
