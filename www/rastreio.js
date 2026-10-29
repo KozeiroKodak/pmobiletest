@@ -204,7 +204,7 @@ function ehRMExpressRastreio(item) {
 function statusVisualRastreio(item) {
     const status = String(item?.status || "PENDENTE").trim().toUpperCase();
     if (status === "CANCELADO" || status === "ENTREGUE") return status;
-    if (!ehRMExpressRastreio(item)) return "COLETADO";
+    if (String(item?.transportadora || "").trim() && !ehRMExpressRastreio(item)) return "COLETADO";
     if (item.previsao_entrega && new Date(item.previsao_entrega).getTime() < Date.now()) {
         return "ATRASADO";
     }
