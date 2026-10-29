@@ -110,19 +110,32 @@ function obterTelaSistemaAtual() {
 
 function voltarTelaAnteriorPmobile() {
 
-    const anterior =
-        historicoTelasSistema.pop();
+    const telaAtual = obterTelaSistemaAtual();
+
+    // Configurações 3.0 possui uma hierarquia interna que não aparece
+    // no histórico de telas principais: Subárea → Administração →
+    // Configurações. Locais e Divergências também voltam ao pai.
+    if (typeof window.voltarUmNivelConfiguracoesV3 === "function" &&
+        window.voltarUmNivelConfiguracoesV3(telaAtual)) {
+
+        if (telaAtual === "locais" || telaAtual === "divergencias") {
+            // Remove a entrada consumida para não voltar novamente à
+            // mesma tela ao retornar do hub de Configurações.
+            const posicao = historicoTelasSistema.lastIndexOf("configuracoes");
+            if (posicao !== -1) {
+                historicoTelasSistema.splice(posicao, 1);
+            }
+        }
+        return true;
+    }
+
+    const anterior = historicoTelasSistema.pop();
 
     if (!anterior) {
         return false;
     }
 
-    mostrarTelaSistema(
-        anterior,
-        null,
-        true
-    );
-
+    mostrarTelaSistema(anterior, null, true);
     return true;
 
 }
@@ -1664,12 +1677,8 @@ function abrirDivergencias() {
 // ============================================================
 
 function voltarMenuDivergencias() {
-
-    mostrarTelaSistema(
-        "homeSistema",
-        null
-    );
-
+    if (voltarTelaAnteriorPmobile()) return;
+    voltarMenu();
 }
 
 
@@ -2200,10 +2209,9 @@ function abrirSolicitacoesResetToken() {
 
 function voltarMenuConfiguracoes() {
 
-    mostrarTelaSistema(
-        "homeSistema",
-        null
-    );
+    // Primeiro retorna um nível, inclusive dentro das Configurações.
+    if (voltarTelaAnteriorPmobile()) return;
+    voltarMenu();
 
 }
 
@@ -2662,6 +2670,15 @@ document.addEventListener(
 
         // Se algum controle local já consumiu o ESC, não navega.
         if (evento.defaultPrevented) {
+            return;
+        }
+
+        // Detalhes de posições vazias possuem um retorno próprio.
+        if (obterTelaSistemaAtual() === "detalhesLocaisVazios" &&
+            typeof fecharDetalhesLocaisVazios === "function") {
+            fecharDetalhesLocaisVazios();
+            evento.preventDefault();
+            evento.stopPropagation();
             return;
         }
 
