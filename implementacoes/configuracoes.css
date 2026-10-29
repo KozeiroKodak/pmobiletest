@@ -98,3 +98,194 @@
 #configuracoes .configuracoes-painel-importacao{padding:0;overflow:hidden;border:1px solid var(--borda,#343434);border-radius:18px;background:var(--fundo-card,#1a1a1a);margin-bottom:14px}
 #configuracoes .configuracoes-painel-importacao .rastreio-importacao-painel{margin:0;padding:0;border:0;background:transparent}
 #configuracoes .configuracoes-painel-importacao .configuracoes-conteudo{padding:0 18px 18px}
+
+
+/* ============================================================
+   CONFIGURAÇÕES — MODELO 2: GRADE DE MÓDULOS
+   Somente a interface do menu. As seções internas e os IDs de
+   permissão/ação continuam intactos. Expansão usa <details>.
+   ============================================================ */
+#configuracoes .configuracoes-modulos {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    align-items: stretch;
+    margin: 0 0 18px;
+}
+
+#configuracoes .configuracoes-modulos > .configuracoes-modulo {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: var(--fundo-painel, #14252b);
+    border: 1px solid var(--borda, #29434b);
+    border-radius: 17px;
+    box-shadow: none;
+}
+
+/* Conta é a faixa horizontal, como na prévia aprovada. */
+#configuracoes .configuracoes-modulos > #painelConfiguracoesUsuario {
+    grid-column: 1 / -1;
+}
+
+/* Quando aberto, o formulário ocupa as duas colunas. */
+#configuracoes .configuracoes-modulos > .configuracoes-modulo:has(> details[open]) {
+    grid-column: 1 / -1;
+    border-color: var(--pm-acento, #57dceb);
+}
+
+#configuracoes .configuracoes-modulos .configuracoes-accordion {
+    min-width: 0;
+}
+
+#configuracoes .configuracoes-modulos .configuracoes-accordion > summary {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 12px;
+    min-height: 149px;
+    padding: 16px;
+    position: relative;
+    background: transparent;
+    border: 0;
+    list-style: none;
+    cursor: pointer;
+}
+
+#configuracoes .configuracoes-modulos .configuracoes-accordion > summary::-webkit-details-marker {
+    display: none;
+}
+
+#configuracoes .configuracoes-modulos .configuracoes-accordion > summary::marker {
+    content: "";
+}
+
+#configuracoes .configuracoes-modulos .configuracoes-accordion .home-app-icone {
+    display: grid;
+    place-items: center;
+    flex: 0 0 46px;
+    width: 46px;
+    height: 46px;
+    margin: 0;
+    border: 1px solid rgba(87, 220, 235, .22);
+    border-radius: 13px;
+    background: #1c424c;
+    color: var(--pm-acento, #57dceb);
+    filter: none;
+}
+
+#configuracoes .configuracoes-modulos .configuracoes-accordion .home-app-icone svg {
+    display: block;
+    width: 24px;
+    height: 24px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+#configuracoes .configuracoes-modulos .configuracoes-accordion .home-app-conteudo {
+    flex: 0 1 auto;
+    width: 100%;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+#configuracoes .configuracoes-modulos .configuracoes-accordion .home-app-conteudo strong {
+    display: block;
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.32;
+    font-weight: 700;
+    color: var(--texto, #f1f7f8);
+    white-space: normal;
+    overflow: visible;
+    overflow-wrap: anywhere;
+}
+
+#configuracoes .configuracoes-modulos .configuracoes-accordion .home-app-conteudo small {
+    display: block;
+    font-size: 11px;
+    line-height: 1.45;
+    font-weight: 400;
+    color: var(--texto-secundario, #a3bbc2);
+    opacity: 1;
+    white-space: normal;
+    overflow: visible;
+    overflow-wrap: anywhere;
+}
+
+#configuracoes .configuracoes-modulos .configuracoes-accordion .home-app-seta {
+    position: absolute;
+    right: 14px;
+    top: 20px;
+    color: var(--pm-acento, #57dceb);
+    font-size: 22px;
+    line-height: 1;
+    opacity: .6;
+    transform: rotate(90deg);
+}
+
+#configuracoes .configuracoes-modulos .configuracoes-accordion[open] .home-app-seta {
+    transform: rotate(-90deg);
+    opacity: 1;
+}
+
+#configuracoes .configuracoes-modulos .configuracoes-accordion > summary:hover {
+    background: rgba(87, 220, 235, .045);
+}
+
+#configuracoes .configuracoes-modulos .configuracoes-accordion > summary:focus-visible {
+    outline: 2px solid var(--pm-acento, #57dceb);
+    outline-offset: -3px;
+}
+
+#configuracoes .configuracoes-modulos .configuracoes-accordion[open] > summary {
+    min-height: 95px;
+    display: grid;
+    grid-template-columns: 46px minmax(0, 1fr);
+    align-items: center;
+    gap: 14px;
+    border-bottom: 1px solid var(--borda, #29434b);
+    box-shadow: none;
+    background: rgba(87, 220, 235, .065);
+}
+
+#configuracoes .configuracoes-modulos .configuracoes-conteudo {
+    padding: 16px;
+    min-width: 0;
+}
+
+/* Importação possui formulário interno, que não deve ser achatado na grade. */
+#configuracoes .configuracoes-modulos .configuracoes-painel-importacao .configuracoes-conteudo {
+    padding: 16px;
+}
+
+/* Conta: quinto módulo ocupa as duas colunas em formato horizontal. */
+#configuracoes .configuracoes-modulos #painelConfiguracoesUsuario .configuracoes-accordion > summary {
+    display: grid;
+    grid-template-columns: 46px minmax(0, 1fr);
+    align-items: center;
+    gap: 15px;
+    min-height: 90px;
+    padding: 15px 16px;
+}
+
+@media (max-width: 360px) {
+    #configuracoes .configuracoes-modulos { gap: 9px; }
+    #configuracoes .configuracoes-modulos .configuracoes-accordion > summary {
+        padding: 12px;
+        min-height: 150px;
+    }
+    #configuracoes .configuracoes-modulos .configuracoes-accordion .home-app-conteudo strong {
+        font-size: 13px;
+    }
+    #configuracoes .configuracoes-modulos .configuracoes-accordion .home-app-conteudo small {
+        font-size: 10.5px;
+    }
+}
