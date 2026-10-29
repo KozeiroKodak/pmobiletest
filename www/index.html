@@ -49,7 +49,7 @@
 <link rel="stylesheet" href="implementacoes/popupescolha.css?v=mono-2.2">
     <link rel="stylesheet" href="implementacoes/login.css?v=0.0.248">
     <link rel="stylesheet" href="implementacoes/contagemmanual.css?v=mono-2.2">
-    <link rel="stylesheet" href="implementacoes/configuracoes.css?v=0.0.248">
+    <link rel="stylesheet" href="implementacoes/configuracoes.css?v=0.0.253">
     <link rel="stylesheet" href="implementacoes/solicitacoes.css?v=0.0.248">
     <link rel="stylesheet" href="implementacoes/importacao.css?v=mono-3.0">
 
@@ -809,8 +809,9 @@
             </div>
 
 
-            <div class="painel configuracoes-painel-importacao" id="painelConfiguracoesImportacao">
-              <details class="configuracoes-accordion"><summary><span class="home-app-icone">📥</span><span class="home-app-conteudo"><strong>Importação de rastreios</strong><small>Planilha, OneDrive e sincronização</small></span><span class="home-app-seta">›</span></summary><div class="configuracoes-conteudo">
+            <div class="configuracoes-modulos" role="group" aria-label="Módulos de configuração">
+            <div class="painel configuracoes-painel-importacao configuracoes-modulo" id="painelConfiguracoesImportacao">
+              <details class="configuracoes-accordion"><summary><span class="home-app-icone" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10 6 4h12l3 6-9 5-9-5Z"/><path d="M3 10v8l9 4 9-4v-8M12 15v7"/></svg></span><span class="home-app-conteudo"><strong>Importação de rastreios</strong><small>Planilha, OneDrive e sincronização</small></span><span class="home-app-seta">›</span></summary><div class="configuracoes-conteudo">
             <div class="painel rastreio-importacao-painel">
                 <div class="rastreio-importacao-cabecalho">
                     <div>
@@ -888,25 +889,25 @@
               </div></details>
             </div>
 
-            <div class="painel rastreio-admin-only" hidden>
+            <div class="painel rastreio-admin-only configuracoes-modulo" hidden>
                 <details class="configuracoes-accordion">
-                    <summary><span class="home-app-icone">📑</span><span class="home-app-conteudo"><strong>Importação NF</strong><small>Planilhas e histórico de notas fiscais</small></span><span class="home-app-seta">›</span></summary>
+                    <summary><span class="home-app-icone" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h8l5 5v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1Z"/><path d="M14 2v5h5M9 12h6M9 16h6M12 11v6"/></svg></span><span class="home-app-conteudo"><strong>Importação NF</strong><small>Planilhas e histórico de notas fiscais</small></span><span class="home-app-seta">›</span></summary>
                     <div class="configuracoes-conteudo">
                         <button type="button" id="menuImportacaoNF" class="botao-aba" onclick="abrirImportacaoNF()">Abrir Importação NF</button>
                     </div>
                 </details>
             </div>
-            <div class="painel configuracoes-painel-sistema">
-                <details class="configuracoes-accordion"><summary><span class="home-app-icone">⚙️</span><span class="home-app-conteudo"><strong>Sistema</strong><small>Atualizações do aplicativo</small></span><span class="home-app-seta">›</span></summary><div class="configuracoes-conteudo">
+            <div class="painel configuracoes-painel-sistema configuracoes-modulo">
+                <details class="configuracoes-accordion"><summary><span class="home-app-icone" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.6 5.6 7 7m10 10 1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="2"/></svg></span><span class="home-app-conteudo"><strong>Sistema</strong><small>Atualizações do aplicativo</small></span><span class="home-app-seta">›</span></summary><div class="configuracoes-conteudo">
                 <div class="configuracoes-acoes">
                     <button class="botao-aba" type="button" onclick="procurarAtualizacoesOta()">🔄 Procurar atualizações</button>
                 </div>
                 </div></details>
             </div>
 
-            <div class="painel configuracoes-painel-admin" id="painelConfiguracoesAdmin" style="display: none;">
+            <div class="painel configuracoes-painel-admin configuracoes-modulo" id="painelConfiguracoesAdmin" style="display: none;">
 
-                <details class="configuracoes-accordion"><summary><span class="home-app-icone">👑</span><span class="home-app-conteudo"><strong>Administração</strong><small>Usuários e ferramentas administrativas</small></span><span class="home-app-seta">›</span></summary><div class="configuracoes-conteudo">
+                <details class="configuracoes-accordion"><summary><span class="home-app-icone" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 8 4v5c0 5-3.4 8.7-8 11-4.6-2.3-8-6-8-11V6l8-4Z"/><path d="m9 12 2 2 4-4"/></svg></span><span class="home-app-conteudo"><strong>Administração</strong><small>Usuários e ferramentas administrativas</small></span><span class="home-app-seta">›</span></summary><div class="configuracoes-conteudo">
 
                 <div class="configuracoes-acoes">
                     <button class="botao-aba" onclick="abrirGerenciamentoUsuarios()">👥 Usuários</button>
@@ -918,6 +919,14 @@
                 </div>
 
                 </div></details>
+            </div>
+
+
+            <div class="painel configuracoes-modulo" id="painelConfiguracoesUsuario" style="display: none;">
+                <details class="configuracoes-accordion"><summary><span class="home-app-icone" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M5 21v-2c0-3 3-5 7-5s7 2 7 5v2"/></svg></span><span class="home-app-conteudo"><strong>Conta</strong><small>Informações da sessão</small></span><span class="home-app-seta">›</span></summary><div class="configuracoes-conteudo">
+                <div id="resumoContaPmobile"></div>
+                </div></details>
+            </div>
             </div>
 
             <div class="painel painel-solicitacoes" id="painelGerenciamentoUsuarios" style="display: none;">
@@ -998,12 +1007,6 @@
                 </p>
 
                 <div id="statusArquivosTeste" aria-live="polite"></div>
-            </div>
-
-            <div class="painel" id="painelConfiguracoesUsuario" style="display: none;">
-                <details class="configuracoes-accordion"><summary><span class="home-app-icone">👤</span><span class="home-app-conteudo"><strong>Conta</strong><small>Informações da sessão</small></span><span class="home-app-seta">›</span></summary><div class="configuracoes-conteudo">
-                <div id="resumoContaPmobile"></div>
-                </div></details>
             </div>
 
         </section>
