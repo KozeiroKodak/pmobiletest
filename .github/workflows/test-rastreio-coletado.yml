@@ -1,0 +1,28 @@
+name: Testar status Coletado no Rastreio
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'rastreio.js'
+      - 'www/rastreio.js'
+      - 'implementacoes/rastreio.css'
+      - 'www/implementacoes/rastreio.css'
+      - 'index.html'
+      - 'www/index.html'
+      - 'tests/rastreio-coletado.test.cjs'
+      - '.github/workflows/test-rastreio-coletado.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  status:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Conferir sintaxe e estados da operacao
+        run: |
+          node --check rastreio.js
+          node --test tests/rastreio-coletado.test.cjs
