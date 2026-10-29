@@ -1,123 +1,371 @@
 /* ============================================================
-   CONFERÊNCIAS REALIZADAS — layout de informações baseado em PESQUISA
+   PMOBILE — Conferências realizadas, cartões compactos expansíveis
+   Estilos isolados desta aba. Não altera formulários nem sincronização.
    ============================================================ */
 
 #conferencias .painel {
     max-width: 1180px;
     padding: 0;
     overflow: hidden;
-}
-
-#conferencias .botao-perigo {
-    margin: 16px;
+    display: flex;
+    flex-direction: column;
 }
 
 #resultadoConferencias {
-    margin-top: 0;
-}
-
-#resultadoConferencias > p {
     margin: 0;
-    padding: 7px 16px;
-    background: #1a1a1a;
-    color: #777;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: .07em;
-    line-height: 1.45;
-    text-transform: uppercase;
+    min-width: 0;
 }
 
-#resultadoConferencias > p:first-child {
-    padding-top: 16px;
+#resultadoConferencias .conferencias-conteudo {
+    padding: 16px;
+    color: #ecefed;
 }
 
-#resultadoConferencias > p:nth-child(3) {
-    padding-bottom: 14px;
-    border-bottom: 1px solid #303030;
-}
-
-#resultadoConferencias > hr {
-    display: none;
-}
-
-#resultadoConferencias .registro-conferencia {
+#resultadoConferencias .conferencias-resumo {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px 24px;
-    padding: 14px 16px;
-    border-bottom: 1px solid #292929;
-    background: #1b1b1b;
-    color: #e8e8e8;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+#resultadoConferencias .conferencias-indicador {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-width: 0;
+    padding: 13px 6px;
+    background: #212626;
+    border: 1px solid #353d3b;
+    border-radius: 12px;
+}
+
+#resultadoConferencias .conferencias-indicador span {
+    color: #aebbb5;
+    font-size: 11px;
+    text-align: center;
+}
+
+#resultadoConferencias .conferencias-indicador strong {
+    color: #f1f3f2;
+    font-size: 24px;
+    font-weight: 750;
+    line-height: 1.15;
+    font-variant-numeric: tabular-nums;
+}
+
+#resultadoConferencias .indicador-ok strong { color: #80e5b0; }
+#resultadoConferencias .indicador-divergencia strong { color: #fc8080; }
+
+#resultadoConferencias .conferencias-ferramentas { margin-bottom: 16px; }
+
+#resultadoConferencias .conferencias-ferramentas label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #b9c8c2;
+}
+
+#resultadoConferencias #buscaHistoricoConferencias {
+    display: block;
+    width: 100%;
+    min-height: 44px;
+    margin: 0 0 10px;
+    padding: 10px 13px;
+    background: #202525;
+    border: 1px solid #3d4743;
+    border-radius: 10px;
+    color: #f0f4f1;
+    font: inherit;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+#resultadoConferencias #buscaHistoricoConferencias::placeholder { color: #91a29a; }
+#resultadoConferencias #buscaHistoricoConferencias:focus-visible {
+    outline: 2px solid #81dfb2;
+    outline-offset: 2px;
+}
+
+#resultadoConferencias .conferencias-filtros {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+#resultadoConferencias .conferencias-filtros button {
+    min-width: 0;
+    min-height: 42px;
+    padding: 9px 4px;
+    background: #222625;
+    color: #e0e4e1;
+    border: 1px solid #444b48;
+    border-radius: 10px;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 650;
+    cursor: pointer;
+}
+
+#resultadoConferencias .conferencias-filtros button.ativo {
+    background: #dfe3e1;
+    border-color: #dfe3e1;
+    color: #151b18;
+}
+
+#resultadoConferencias .conferencias-filtros button:focus-visible,
+#resultadoConferencias .registro-conferencia summary:focus-visible {
+    outline: 2px solid #81dfb2;
+    outline-offset: 3px;
+}
+
+#resultadoConferencias .conferencias-lista {
+    display: grid;
+    gap: 11px;
+}
+
+#resultadoConferencias .conferencias-aviso:not([hidden]),
+#resultadoConferencias .conferencias-vazio {
+    display: block;
+    padding: 16px;
+    margin: 0 0 12px;
+    background: #252523;
+    border-radius: 10px;
+    color: #e2d6a4;
     font-size: 13px;
-    line-height: 1.45;
 }
 
-#resultadoConferencias .registro-conferencia:last-child {
-    border-bottom: 0;
+#resultadoConferencias .conferencias-vazio {
+    margin: 0;
+    color: #b4c1ba;
+    text-align: center;
 }
 
-#resultadoConferencias .registro-conferencia:hover {
-    background: #1f1f1f;
+#resultadoConferencias details.registro-conferencia {
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid #353d3a;
+    border-radius: 14px;
+    background: #1e2221;
+    color: #f0f1ef;
 }
+
+#resultadoConferencias .registro-conferencia summary {
+    display: block;
+    padding: 15px;
+    list-style: none;
+    cursor: pointer;
+}
+
+#resultadoConferencias .registro-conferencia summary::-webkit-details-marker { display: none; }
+#resultadoConferencias .registro-conferencia summary::marker { content: ""; }
+
+#resultadoConferencias .registro-conferencia-topo {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+#resultadoConferencias .registro-conferencia-produto { min-width: 0; }
 
 #resultadoConferencias .registro-conferencia h3 {
-    grid-column: 1 / -1;
-    margin: 0 0 2px;
-    color: #ededed;
-    font-size: 14px;
-    font-weight: 600;
-    line-height: 1.35;
-}
-
-#resultadoConferencias .registro-conferencia p {
-    display: grid;
-    grid-template-columns: minmax(120px, auto) minmax(0, 1fr);
-    gap: 10px;
-    align-items: baseline;
-    min-width: 0;
-    margin: 0;
-    padding: 4px 0;
-    color: #e8e8e8;
-}
-
-#resultadoConferencias .registro-conferencia p strong {
-    color: #777;
-    font-size: 10px;
+    margin: 0 0 5px;
+    color: #f2f4f2;
+    font-size: 15px;
     font-weight: 700;
-    letter-spacing: .07em;
-    text-transform: uppercase;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
 }
 
-#resultadoConferencias .registro-conferencia hr {
-    display: none;
+#resultadoConferencias .registro-conferencia-produto p {
+    margin: 0;
+    color: #b3beb8;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+#resultadoConferencias .registro-conferencia-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    flex-shrink: 0;
+    padding: 6px 8px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+#resultadoConferencias .status-ok { color: #91e9ba; background: #19362a; }
+#resultadoConferencias .status-divergencia { color: #ff9a9a; background: #3a2325; }
+
+#resultadoConferencias .registro-conferencia-local { margin-top: 16px; }
+
+#resultadoConferencias .registro-conferencia-rotulo {
+    display: block;
+    margin-bottom: 7px;
+    color: #9baea4;
+    font-size: 10px;
+    font-weight: 750;
+    letter-spacing: .1em;
+}
+
+#resultadoConferencias .registro-conferencia-trajeto {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 9px;
+}
+
+#resultadoConferencias .registro-conferencia-endereco {
+    min-width: 0;
+    padding: 10px;
+    border-radius: 10px;
+    background: #282e2b;
+    text-align: center;
+}
+
+#resultadoConferencias .registro-conferencia-endereco span,
+#resultadoConferencias .registro-conferencia-quantidades span,
+#resultadoConferencias .registro-conferencia-responsavel div span {
+    display: block;
+    color: #aebdb4;
+    font-size: 11px;
+}
+
+#resultadoConferencias .registro-conferencia-endereco strong {
+    display: block;
+    margin-top: 3px;
+    font-size: 13px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+#resultadoConferencias .registro-conferencia-seta { color: #a6b8ac; font-size: 19px; }
+
+#resultadoConferencias .registro-conferencia-quantidades {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin: 15px 0;
+}
+
+#resultadoConferencias .registro-conferencia-quantidades strong {
+    display: block;
+    margin-top: 4px;
+    color: #f2f4f2;
+    font-size: 18px;
+    font-weight: 750;
+    font-variant-numeric: tabular-nums;
+}
+
+#resultadoConferencias .registro-conferencia-quantidades strong.valor-ok { color: #80e5b0; }
+#resultadoConferencias .registro-conferencia-quantidades strong.valor-divergencia { color: #fa8585; }
+
+#resultadoConferencias .registro-conferencia-quantidades small {
+    display: block;
+    margin-top: 3px;
+    color: #adbbb3;
+    font-size: 10px;
+}
+
+#resultadoConferencias .registro-conferencia-responsavel {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 0 11px;
+    border-top: 1px solid #353d39;
+}
+
+#resultadoConferencias .registro-conferencia-icone {
+    display: grid;
+    place-items: center;
+    width: 31px;
+    height: 31px;
+    border: 1px solid #3f4a44;
+    border-radius: 50%;
+    color: #a9bcb0;
+    font-size: 17px;
+    flex-shrink: 0;
+}
+
+#resultadoConferencias .registro-conferencia-responsavel div { min-width: 0; }
+
+#resultadoConferencias .registro-conferencia-responsavel strong {
+    display: block;
+    margin-top: 3px;
+    font-size: 13px;
+    font-weight: 650;
+    overflow-wrap: anywhere;
+}
+
+#resultadoConferencias .registro-conferencia-expandir {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 7px;
+    color: #aabbb2;
+    font-size: 12px;
+}
+
+#resultadoConferencias .registro-conferencia-expandir .rotulo-aberto,
+#resultadoConferencias details[open] .rotulo-fechado { display: none; }
+#resultadoConferencias details[open] .rotulo-aberto { display: inline; }
+#resultadoConferencias details[open] .seta-expandir { transform: rotate(180deg); }
+#resultadoConferencias .seta-expandir { display: inline-block; font-size: 18px; line-height: 1; }
+
+#resultadoConferencias .registro-conferencia-detalhes {
+    padding: 12px 15px 15px;
+    border-top: 1px solid #353d39;
+    background: #202624;
+}
+
+#resultadoConferencias .registro-conferencia-detalhes dl { margin: 0; }
+#resultadoConferencias .registro-conferencia-detalhes dl > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 7px 0;
+    font-size: 12px;
+}
+
+#resultadoConferencias .registro-conferencia-detalhes dt { color: #adbab2; }
+#resultadoConferencias .registro-conferencia-detalhes dd {
+    margin: 0;
+    color: #f1f3f0;
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+#conferencias .conferencias-acoes {
+    margin: 5px 16px 16px;
+    padding-top: 14px;
+    border-top: 1px solid #323a35;
+}
+
+#conferencias .conferencias-acoes .botao-perigo {
+    width: auto;
+    max-width: 100%;
+    min-height: 42px;
+    margin: 0;
+    padding: 10px 14px;
+    font-size: 12px;
 }
 
 @media (max-width: 700px) {
-    #conferencias .painel {
-        max-width: 100%;
-    }
-
-    #conferencias .botao-perigo {
-        margin: 14px;
-    }
-
-    #resultadoConferencias > p,
-    #resultadoConferencias .registro-conferencia {
-        padding-left: 14px;
-        padding-right: 14px;
-    }
-
-    #resultadoConferencias .registro-conferencia {
-        grid-template-columns: 1fr;
-        gap: 6px;
-    }
-
-    #resultadoConferencias .registro-conferencia p {
-        grid-template-columns: minmax(105px, auto) minmax(0, 1fr);
-    }
+    #resultadoConferencias .conferencias-conteudo { padding: 14px; }
+    #resultadoConferencias .conferencias-lista { gap: 10px; }
+    #resultadoConferencias .registro-conferencia summary { padding: 13px; }
+    #resultadoConferencias .registro-conferencia-detalhes { padding: 11px 13px 13px; }
+    #conferencias .conferencias-acoes { margin: 4px 14px 14px; }
 }
 
-@media (max-width: 700px) { #resultadoConferencias .registro-conferencia { overflow-wrap: anywhere; } #conferencias .botao-perigo { width: 100%; } }
-
-@media (max-width:700px){#resultadoConferencias .registro-conferencia{overflow-wrap:anywhere}#conferencias .botao-perigo{width:100%}}
+@media (max-width: 380px) {
+    #resultadoConferencias .registro-conferencia-topo { flex-wrap: wrap; }
+    #resultadoConferencias .registro-conferencia-status { margin-left: auto; }
+    #resultadoConferencias .registro-conferencia-trajeto { gap: 6px; }
+    #resultadoConferencias .registro-conferencia-endereco { padding: 9px 5px; }
+}
