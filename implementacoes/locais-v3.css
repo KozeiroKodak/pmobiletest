@@ -1,0 +1,491 @@
+/* ==========================================================
+   PMOBILE — LOCAIS 3.0 / PADRÃO CONFERÊNCIAS
+   Preserva o tema ciano e as cores semânticas dos estados.
+   Nenhuma regra de dados, confirmação ou autenticação aqui.
+   ========================================================== */
+
+#locais .painel-locais {
+  max-width: 1180px;
+  border: 1px solid var(--borda, #29434b);
+  border-radius: 16px;
+  background: var(--fundo-painel,#14252b);
+  overflow: hidden;
+}
+#locais .abas-locais {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 12px 12px 0;
+  border-bottom: 1px solid var(--borda,#29434b);
+  background: #14252b;
+  overflow-x: visible;
+}
+#locais .aba-locais {
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  padding: 9px 6px;
+  border: 1px solid #35535b;
+  border-radius: 10px 10px 0 0;
+  background: #1c272b;
+  color: #c3d0d1;
+  font-size: 12px;
+  font-weight: 650;
+  text-align: center;
+}
+#locais .aba-locais.ativo {
+  background: #19505b !important;
+  border-color: #57dceb !important;
+  color: #b3f6fc !important;
+  box-shadow: inset 0 -3px 0 #57dceb;
+}
+#locais .aba-locais:hover { border-color: #3e8290; }
+#locais .aba-locais:focus-visible {
+  outline: 2px solid #57dceb;
+  outline-offset: 2px;
+}
+#locais #painelLocaisAlterados,
+#locais #painelLocaisVazios,
+#locais #painelLocaisDerivados { padding: 14px; }
+
+#locais .locais-v3-resumo {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: 8px;
+  margin: 0 0 16px;
+}
+#locais .locais-v3-indicador {
+  min-width: 0;
+  min-height: 75px;
+  padding: 11px 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid #36535d;
+  border-radius: 13px;
+  background: #202a2d;
+}
+#locais .locais-v3-indicador span {
+  color: #b0c4c8;
+  font-size: 11px;
+  text-align: center;
+}
+#locais .locais-v3-indicador strong {
+  color: #f0f6f7;
+  font-size: 23px;
+  font-weight: 750;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+#locais .locais-v3-indicador.alerta strong { color: #f3b45f; }
+#locais .locais-v3-indicador.sucesso strong { color: #80e5b0; }
+#locais .locais-v3-ferramentas { margin: 0 0 16px; }
+#locais .locais-v3-ferramentas label {
+  display: block;
+  margin: 0 0 7px;
+  color: #b9cdd2;
+  font-size: 12px;
+  font-weight: 650;
+}
+#locais .locais-v3-ferramentas input {
+  display: block;
+  width: 100%;
+  max-width: none;
+  min-height: 46px;
+  margin: 0;
+  padding: 11px 13px;
+  color: #eef5f6;
+  background: #202729;
+  border: 1px solid #3b565e;
+  border-radius: 12px;
+  font-size: 14px;
+}
+#locais .locais-v3-ferramentas input::placeholder {color: #9fb5bb;}
+#locais .locais-v3-ferramentas input:focus {
+  border-color: #57dceb;
+  outline: 2px solid rgba(87,220,235,.22);
+}
+#locais .locais-v3-filtros {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+#locais .locais-v3-filtros button {
+  min-width: 0;
+  min-height: 42px;
+  padding: 9px 4px;
+  border: 1px solid #3d535a;
+  border-radius: 10px;
+  background: #222a2b;
+  color: #eff3f4;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+#locais .locais-v3-filtros button.ativo {
+  background: #57dceb;
+  border-color: #57dceb;
+  color: #06212a;
+}
+#locais .locais-v3-filtros button:focus-visible {
+  outline: 2px solid #57dceb;
+  outline-offset: 2px;
+}
+#locais .locais-v3-ajuda {
+  display: block;
+  margin: 7px 0 0;
+  color: #98b0b8;
+  font-size: 11px;
+  line-height: 1.4;
+}
+#locais .locais-v3-sem-resultado:not([hidden]) {
+  margin: 12px 0;
+  padding: 17px 12px;
+  border: 1px solid #36515b;
+  border-radius: 10px;
+  color: #b5cbd0;
+  text-align: center;
+  font-size: 12px;
+}
+#locais .locais-v3-cartao[hidden],
+#locais .local-vazio-area-card[hidden] { display: none !important; }
+
+/* Alterados e derivados — mesmo padrão de cartões expansíveis. */
+#locais .locais-v3-cartao {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  margin: 0 0 11px;
+  border: 1px solid #35525c !important;
+  border-radius: 15px;
+  background: #1d2324 !important;
+  box-shadow: none;
+  color: #f0f4f5;
+  overflow: hidden;
+}
+#locais .locais-v3-cartao:hover {
+  border-color: #46747e !important;
+  background: #202a2c !important;
+}
+#locais .locais-v3-cartao[open] { border-color: #468d99 !important; }
+#locais .locais-v3-resumo-cartao {
+  display: block;
+  list-style: none;
+  padding: 17px;
+  cursor: pointer;
+}
+#locais .locais-v3-resumo-cartao::-webkit-details-marker { display: none; }
+#locais .locais-v3-resumo-cartao::marker { content: ""; }
+#locais .locais-v3-resumo-cartao:focus-visible {
+  outline: 2px solid #57dceb;
+  outline-offset: -3px;
+}
+#locais .locais-v3-topo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+#locais .locais-v3-produto {min-width: 0;flex: 1;}
+#locais .locais-v3-produto h3 {
+  margin: 0 0 5px;
+  font-size: 15px;
+  font-weight: 750;
+  line-height: 1.35;
+  color: #f1f5f5;
+  overflow-wrap: anywhere;
+}
+#locais .locais-v3-produto p {
+  margin: 0;
+  color: #b2c2c5;
+  font-size: 12px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+#locais .local-alterado-status {
+  flex-shrink: 0;
+  align-self: flex-start;
+  justify-self: auto;
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 9px;
+  text-transform: none;
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+#locais .local-alterado-status.pendente {
+  background: #40301d;
+  border-color: #755021;
+  color: #f3b45f;
+}
+#locais .local-alterado-status.confirmado {
+  background: #183c30;
+  border-color: #285b45;
+  color: #80e5b0;
+}
+#locais .locais-v3-local { margin-top: 17px; }
+#locais .locais-v3-rotulo {
+  display: block;
+  color: #aec2c6;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: .11em;
+  margin-bottom: 9px;
+}
+#locais .locais-v3-trajeto {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) 24px minmax(0,1fr);
+  align-items: center;
+  gap: 8px;
+}
+#locais .locais-v3-endereco {
+  min-width: 0;
+  padding: 11px 7px;
+  border-radius: 12px;
+  background: #1a3741;
+  text-align: center;
+}
+#locais .locais-v3-endereco span {
+  display: block;
+  color: #abc5ca;
+  font-size: 11px;
+}
+#locais .locais-v3-endereco strong {
+  display: block;
+  margin-top: 5px;
+  color: #f1f7f8;
+  font-size: 14px;
+  font-weight: 750;
+  overflow-wrap: anywhere;
+}
+#locais .locais-v3-seta {
+  color: #57dceb;
+  font-size: 20px;
+  text-align: center;
+}
+#locais .locais-v3-metricas {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 14px;
+  padding: 15px 0 14px;
+}
+#locais .locais-v3-metricas span {
+  display: block;
+  color: #acc0c5;
+  font-size: 11px;
+  line-height: 1.3;
+}
+#locais .locais-v3-metricas strong {
+  display: block;
+  margin-top: 5px;
+  color: #f2f6f6;
+  font-size: 18px;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+}
+#locais .locais-v3-responsavel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-top: 1px solid #354247;
+  padding: 13px 0 10px;
+}
+#locais .locais-v3-avatar {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  background: #18343d;
+  border: 1px solid #3f616a;
+  border-radius: 50%;
+  color: #57dceb;
+}
+#locais .locais-v3-avatar svg {
+  width: 19px;
+  height: 19px;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+#locais .locais-v3-responsavel div {min-width: 0;}
+#locais .locais-v3-responsavel div span {
+  display: block;
+  color: #b2c4c8;
+  font-size: 11px;
+}
+#locais .locais-v3-responsavel div strong {
+  display: block;
+  margin-top: 4px;
+  color: #eef5f5;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+#locais .locais-v3-expandir {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  margin-top: 5px;
+  color: #b3c5c9;
+  font-size: 12px;
+}
+#locais details .locais-v3-expandir .aberto,
+#locais details[open] .locais-v3-expandir .fechado {display: none;}
+#locais details[open] .locais-v3-expandir .aberto {display: inline;}
+#locais details[open] .locais-v3-chevron {transform: rotate(180deg);}
+#locais .locais-v3-chevron {display: inline-block;font-size: 18px;}
+#locais .locais-v3-detalhes {
+  display: grid;
+  gap: 13px;
+  border-top: 1px solid #374248;
+  background: #202a2d;
+  padding: 15px 17px;
+}
+#locais .locais-v3-detalhes > div:not(.locais-v3-confirmacao) {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+}
+#locais .locais-v3-detalhes span {
+  color: #a9bfc5;
+  font-size: 12px;
+}
+#locais .locais-v3-detalhes strong {
+  color: #f2f7f7;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+#locais .locais-v3-confirmacao {
+  padding-top: 13px;
+  border-top: 1px solid #3a4c53;
+}
+#locais .locais-v3-confirmacao button {
+  width: 100%;
+  min-height: 44px;
+  padding: 11px 13px;
+  background: #153c46;
+  border: 1px solid #438d9a;
+  border-radius: 10px;
+  color: #a6f0f6;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+#locais .locais-v3-confirmacao button:hover { background: #1a4a55; }
+#locais .locais-v3-confirmacao button:focus-visible {outline: 2px solid #57dceb;}
+
+/* Derivados: apenas o local cadastrado (não há movimentação nesta RPC). */
+#locais .locais-v3-derivado-tag {
+  padding: 6px 8px;
+  color: #f3b45f;
+  background: #40301d;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+#locais .locais-v3-trajeto-unico {
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  margin-top: 16px;
+}
+#locais .local-derivado-card .locais-v3-expandir { margin-top: 15px; }
+#locais .locais-derivados-cabecalho { display: none; }
+#locais .locais-resumo-derivados {
+  margin: 0 0 11px;
+  padding: 10px;
+  color: #bdcfd2;
+  background: #1c3036;
+  border: 1px solid #35535a;
+  border-radius: 9px;
+}
+#locais .locais-resumo-derivados strong {color: #f1f6f6;}
+
+/* Vazios: manter acesso à lista de posições de cada setor. */
+#locais .local-vazio-area-card {
+  display: grid;
+  grid-template-columns: minmax(0,1.25fr) repeat(3,minmax(0,1fr)) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 14px;
+  margin: 0 0 11px;
+  border: 1px solid #35525c !important;
+  border-radius: 15px;
+  background: #1d2324 !important;
+  box-shadow: none;
+}
+#locais .local-vazio-area-card:hover {
+  background: #202a2c !important;
+  border-color: #46747e !important;
+}
+#locais .local-vazio-area-info strong {color: #f1f7f8; font-size: 18px;}
+#locais .local-vazio-area-legenda,
+#locais .local-vazio-metrica span {color: #b1c4c8;font-size: 10px;}
+#locais .local-vazio-metrica strong {color: #f1f7f8;font-size: 16px;}
+#locais .local-vazio-metrica.destaque strong {color: #80e5b0;}
+#locais .botao-lupa-local {
+  min-width: 44px;
+  width: 44px;
+  height: 44px;
+  background: #183b45;
+  border: 1px solid #47808d;
+  border-radius: 10px;
+  color: #57dceb;
+  font-size: 21px;
+}
+#locais .botao-lupa-local:hover {background: #1d4b56;}
+#detalhesLocaisVazios .local-vazio-endereco {
+  background: #1c343c;
+  border-color: #35535b;
+  border-radius: 10px;
+  color: #e2f7f8;
+}
+#detalhesLocaisVazios .local-vazio-endereco:hover {
+  background: #21404a;
+  border-color: #44838f;
+}
+#locais .locais-paginacao-derivados {
+  border-top-color: #36525a;
+  background: transparent;
+}
+
+@media (max-width: 700px) {
+  #locais #painelLocaisAlterados,
+  #locais #painelLocaisVazios,
+  #locais #painelLocaisDerivados {padding: 12px;}
+  #locais .locais-v3-resumo-cartao {padding: 14px;}
+  #locais .local-vazio-area-card {
+    grid-template-columns: repeat(3,minmax(0,1fr));
+    gap: 11px;
+  }
+  #locais .local-vazio-area-info {grid-column: 1 / -1;}
+  #locais .botao-lupa-local {grid-column: 3;grid-row: auto;justify-self: end;}
+}
+@media (max-width: 380px) {
+  #locais .abas-locais {gap: 4px;padding: 8px 7px 0;}
+  #locais .aba-locais {font-size: 10px; padding: 8px 2px;}
+  #locais .locais-v3-indicador {padding: 10px 2px;}
+  #locais .locais-v3-indicador span {font-size: 10px;}
+  #locais .locais-v3-indicador strong {font-size: 19px;}
+  #locais .locais-v3-endereco {padding: 10px 5px;}
+  #locais .locais-v3-endereco strong {font-size: 12px;}
+  #locais .locais-v3-topo {flex-wrap: wrap;}
+  #locais .local-alterado-status, #locais .locais-v3-derivado-tag {margin-left: auto;}
+}
+@media (prefers-reduced-motion: reduce) {
+  #locais .locais-v3-cartao {transition: none;}
+}
