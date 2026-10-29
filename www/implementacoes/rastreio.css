@@ -81,7 +81,8 @@
     box-shadow: 0 4px 16px rgba(0, 0, 0, .18);
 }
 
-.rastreio-card[data-status="ENTREGUE"] {
+.rastreio-card[data-status="ENTREGUE"],
+.rastreio-card[data-status="COLETADO"] {
     border-left: 3px solid var(--verde);
 }
 
@@ -132,7 +133,8 @@
     overflow-wrap: anywhere;
 }
 
-.rastreio-card[data-status="ENTREGUE"] .rastreio-etiqueta { color: var(--verde); }
+.rastreio-card[data-status="ENTREGUE"] .rastreio-etiqueta,
+.rastreio-card[data-status="COLETADO"] .rastreio-etiqueta { color: var(--verde); }
 .rastreio-card[data-status="ATRASADO"] .rastreio-etiqueta { color: var(--rastreio-atrasado); }
 .rastreio-card[data-status="CANCELADO"] .rastreio-etiqueta { color: var(--rastreio-cancelado); }
 .rastreio-card[data-status="EM_TRANSPORTE"] .rastreio-etiqueta { color: var(--rastreio-transporte); }
