@@ -432,7 +432,15 @@ function abrirDetalhesLocaisVazios(areaNome) {
 
 function fecharDetalhesLocaisVazios() {
     localVaziosDetalheAtual = null;
-    mostrarTelaSistema("locais", "menuLocais");
+
+    // Consumir o histórico em vez de criar outra entrada que faria
+    // o botão Voltar reabrir os detalhes da posição vazia.
+    const retornou = typeof voltarTelaAnteriorPmobile === "function" &&
+        voltarTelaAnteriorPmobile();
+
+    if (!retornou || obterTelaSistemaAtual() !== "locais") {
+        mostrarTelaSistema("locais", "menuConfiguracoes", true);
+    }
     alternarAbaLocais("vazios");
 }
 
