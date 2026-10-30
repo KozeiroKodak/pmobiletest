@@ -1,5 +1,12 @@
 name: Validar Dados locais do PMobile
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'dados-locais.js'
+      - 'www/dados-locais.js'
+      - 'tests/dados-locais-importacao.test.cjs'
+      - '.github/workflows/test-dados-locais.yml'
   pull_request:
     paths:
       - 'dados-locais.js'
@@ -27,4 +34,4 @@ jobs:
           node --check dados-locais.js
           node --check reorganizacao-pmobile.js
           node --check script.js
-          node --test tests/dados-locais.test.cjs
+          node --test tests/dados-locais.test.cjs tests/dados-locais-importacao.test.cjs
