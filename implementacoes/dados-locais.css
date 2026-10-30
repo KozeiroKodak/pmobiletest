@@ -687,7 +687,7 @@
    Estilos isolados desta aba. Não altera formulários nem sincronização.
    ============================================================ */
 
-#dadosLocais .painel {
+#dadosLocais [data-dl-panel="conferencias"] > .painel {
     max-width: 1180px;
     padding: 0;
     overflow: hidden;
