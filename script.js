@@ -1832,12 +1832,16 @@ function atualizarVisibilidadeConfiguracoes() {
     const regras = {
         menuSair: !!usuario,
         menuConfiguracoes: isAdmin,
-        menuImportacao: isAdmin,
-        menuRastreio: isAdmin || isNivel2,
-        menuValoresTotal: isAdmin,
-        menuValoresTotal2: isAdmin,
+        // Entradas antigas realocadas para Configurações / Transportes.
+        // As funções continuam existentes, mas não voltam ao menu inicial no login.
+        menuImportacao: false,
+        menuRastreio: false,
+        menuValoresTotal: false,
+        menuValoresTotal2: false,
 
-        menuConferencias: isAdmin,
+        menuConferencias: false,
+        menuTransportes: isAdmin || isNivel2,
+        menuDadosLocais: isAdmin || isNivel2,
         menuReservas: isAdmin || isNivel2,
         menuPesquisa: isAdmin || isNivel2,
         menuContagemManual: isAdmin || isNivel2,
