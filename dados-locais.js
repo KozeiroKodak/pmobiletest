@@ -129,6 +129,12 @@
       if (!document.hidden && ativo() && ["comparar","divergencias","locais"].includes(estado.tela)
         && Date.now()-estado.ultimaComparacao>60000) consultar(estado.tela);
     });
+    // Atualização automática somente enquanto a tela comparativa estiver aberta.
+    // Não adiciona pesquisas periódicas às outras abas do PMobile.
+    setInterval(function(){
+      if (!document.hidden && ativo() && ["comparar","divergencias","locais"].includes(estado.tela)
+          && !estado.busy && Date.now()-estado.ultimaComparacao>=60000) consultar(estado.tela);
+    },60000);
   }
   function ativo() { return $("dadosLocais")?.style.display!=="none"; }
   function abrir() {
@@ -259,9 +265,19 @@
         p_quantidade_reservada:quantidade("dlQtdReservada"),
         p_local:$("dlLocal").value.trim()||null
       });
-      mensagem("Estoque local salvo. A base Dogo não foi alterada.");
+      mensagem("Estoque local salvo. Comparando automaticamente com a Dogo...");
       $("dlFormEstoque").hidden=true;estado.material=null;
       await consultar("estoque");
+      try {
+        const atual=await rpc("comparar",{p_termo:m.codigo,p_limite:50,p_offset:0,p_modo:"todos"});
+        const comparado=(Array.isArray(atual)?atual:[]).find((x)=>x.codigo===m.codigo);
+        const divergente=!!comparado && [comparado.diferenca_quantidade,comparado.diferenca_reserva,
+          comparado.diferenca_local,comparado.sem_dogo].some(Boolean);
+        mensagem("Estoque local salvo. "+(divergente?"Diferença identificada na comparação automática.":
+          comparado?"Comparação automática concluída.":"Comparação disponível na aba própria."));
+      } catch(erroComparacao) {
+        mensagem("Estoque salvo. Comparação pendente: "+erroComparacao.message,true);
+      }
     }finally{estado.busy=false;}
   }
   async function registrarConferencia() {
