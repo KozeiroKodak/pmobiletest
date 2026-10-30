@@ -759,6 +759,9 @@ async function consultarEstadoCentralRastreio(forcar = false) {
             if (visivel("valoresTotal") && typeof carregarValoresTotal === "function") {
                 await carregarValoresTotal();
             }
+            if (visivel("valoresTotal2") && typeof carregarValoresTotal2 === "function") {
+                await carregarValoresTotal2();
+            }
             window.dispatchEvent(new CustomEvent("pmobile:rastreio-atualizado", {
                 detail: {versao, quantidade, atualizadoEm: fonte.atualizado_em}
             }));
