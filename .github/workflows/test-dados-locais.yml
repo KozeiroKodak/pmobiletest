@@ -6,6 +6,7 @@ on:
       - 'dados-locais.js'
       - 'www/dados-locais.js'
       - 'tests/dados-locais-importacao.test.cjs'
+      - 'tests/dados-locais-visual.test.cjs'
       - '.github/workflows/test-dados-locais.yml'
   pull_request:
     paths:
@@ -17,6 +18,7 @@ on:
       - 'www/**'
       - 'sql/pmobile_dados_locais_isolados.sql'
       - 'tests/dados-locais.test.cjs'
+      - 'tests/dados-locais-visual.test.cjs'
       - '.github/workflows/test-dados-locais.yml'
   workflow_dispatch:
 permissions:
@@ -34,4 +36,4 @@ jobs:
           node --check dados-locais.js
           node --check reorganizacao-pmobile.js
           node --check script.js
-          node --test tests/dados-locais.test.cjs tests/dados-locais-importacao.test.cjs
+          node --test tests/dados-locais.test.cjs tests/dados-locais-importacao.test.cjs tests/dados-locais-visual.test.cjs
