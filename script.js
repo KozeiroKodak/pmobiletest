@@ -52,6 +52,7 @@ const telasSistema = [
 
     "rastreio",
     "valoresTotal",
+    "valoresTotal2",
 
     "contagemManual",
 
@@ -150,6 +151,7 @@ const itensMenuSistema = [
 
     "menuRastreio",
     "menuValoresTotal",
+    "menuValoresTotal2",
 
     "menuContagemManual",
 
@@ -1825,6 +1827,7 @@ function atualizarVisibilidadeConfiguracoes() {
         menuImportacao: isAdmin,
         menuRastreio: isAdmin || isNivel2,
         menuValoresTotal: isAdmin,
+        menuValoresTotal2: isAdmin,
 
         menuConferencias: isAdmin,
         menuReservas: isAdmin || isNivel2,
