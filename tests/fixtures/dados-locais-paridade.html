@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><title>Paridade CSS Dados locais</title>
+<link rel="stylesheet" href="../../style.css">
+<link rel="stylesheet" href="../../implementacoes/pesquisa.css">
+<link rel="stylesheet" href="../../implementacoes/contagemmanual.css">
+<link rel="stylesheet" href="../../implementacoes/locais.css">
+<link rel="stylesheet" href="../../implementacoes/locais-v3.css">
+<link rel="stylesheet" href="../../implementacoes/conferenciasrealizadas.css">
+<link rel="stylesheet" href="../../cyan-theme.css">
+<link rel="stylesheet" href="../../implementacoes/configuracoes-v3.css">
+<link rel="stylesheet" href="../../implementacoes/dados-locais.css">
+<style>body{margin:0}.qa{padding:10px}</style></head>
+<body>
+<section id="pesquisa" class="qa"><div class="painel pesquisa-v2">
+  <div class="pesquisa-v2-tipos"><button class="ativo">Código</button></div>
+  <button class="pesquisa-v2-buscar">Pesquisar material</button>
+  <details class="pesquisa-v2-card"><summary>Exemplo</summary></details>
+</div></section>
+<section id="contagemManual" class="qa"><div class="painel contagem-v2">
+  <button class="botao-aba contagem-v2-salvar">Salvar contagem</button>
+  <div class="contagem-v2-campo"><span>⌕</span><input placeholder="Código"></div>
+</div></section>
+<section id="locais" class="qa"><div class="painel painel-locais">
+  <details class="local-alterado-card locais-v3-cartao"><summary class="locais-v3-resumo-cartao">Local</summary></details>
+</div></section>
+<section id="configuracoes" class="qa"><button class="configuracoes-v3-card">Configurações</button></section>
+<section class="qa"><div id="resultadoConferencias">
+  <details class="registro-conferencia"><summary>Conferência</summary></details>
+</div></section>
+<section id="dadosLocais" class="qa">
+ <div class="painel pesquisa-v2">
+  <div class="pesquisa-v2-tipos"><button class="ativo">Código</button></div>
+  <button class="pesquisa-v2-buscar">Pesquisar material</button>
+  <details class="pesquisa-v2-card"><summary>Exemplo</summary></details>
+ </div>
+ <div class="painel contagem-v2">
+  <button class="botao-aba contagem-v2-salvar">Salvar contagem</button>
+  <div class="contagem-v2-campo"><span>⌕</span><input placeholder="Código"></div>
+ </div>
+ <div class="painel painel-locais">
+  <details class="local-alterado-card locais-v3-cartao"><summary class="locais-v3-resumo-cartao">Local</summary></details>
+ </div>
+ <button class="configuracoes-v3-card">Configurações</button>
+ <div id="dlHistorico"><details class="registro-conferencia"><summary>Conferência</summary></details></div>
+</section>
+<pre id="qa-status" data-qa-fail="pending">aguardando DOM</pre>
+<script>
+(function(){
+ const items=[
+ ["Pesquisa — painel","#pesquisa .pesquisa-v2","#dadosLocais .pesquisa-v2",["backgroundColor","borderRadius","paddingTop"]],
+ ["Pesquisa — botão","#pesquisa .pesquisa-v2-buscar","#dadosLocais .pesquisa-v2-buscar",["backgroundColor","borderRadius","minHeight"]],
+ ["Pesquisa — seleção","#pesquisa .pesquisa-v2-tipos button.ativo","#dadosLocais .pesquisa-v2-tipos button.ativo",["backgroundColor","borderRadius","color"]],
+ ["Pesquisa — resultado","#pesquisa .pesquisa-v2-card","#dadosLocais .pesquisa-v2-card",["backgroundColor","borderRadius","borderTopColor"]],
+ ["Contagem — painel","#contagemManual .contagem-v2","#dadosLocais .contagem-v2",["backgroundColor","borderRadius","paddingTop"]],
+ ["Contagem — botão","#contagemManual .contagem-v2-salvar","#dadosLocais .contagem-v2-salvar",["backgroundColor","borderRadius","color"]],
+ ["Contagem — campo","#contagemManual .contagem-v2-campo","#dadosLocais .contagem-v2-campo",["backgroundColor","borderRadius"]],
+ ["Locais — painel","#locais .painel-locais","#dadosLocais .painel-locais",["backgroundColor","borderRadius"]],
+ ["Locais — cartão","#locais .locais-v3-cartao","#dadosLocais .locais-v3-cartao",["backgroundColor","borderRadius","paddingTop"]],
+ ["Configurações — cartão","#configuracoes .configuracoes-v3-card","#dadosLocais .configuracoes-v3-card",["backgroundColor","borderRadius","minHeight"]],
+ ["Conferências — cartão","#resultadoConferencias .registro-conferencia","#dadosLocais #dlHistorico .registro-conferencia",["backgroundColor","borderRadius"]]
+ ];
+ let fails=0;
+ const lines=items.map(([titulo,a,b,props])=>{
+   const left=document.querySelector(a),right=document.querySelector(b);
+   if(!left||!right){fails++;return "FALHOU "+titulo+" elemento não encontrado";}
+   const x=getComputedStyle(left),y=getComputedStyle(right);
+   const diffs=props.filter(p=>x[p]!==y[p]).map(p=>p+": nativo "+x[p]+" / local "+y[p]);
+   if(diffs.length)fails++;
+   return (diffs.length?"FALHOU ":"OK ")+titulo+(diffs.length?" "+diffs.join("; "):"");
+ });
+ const result=document.getElementById("qa-status");
+ result.setAttribute("data-qa-fail",String(fails));
+ result.textContent=lines.join("\n");
+})();
+</script>
+</body></html>
