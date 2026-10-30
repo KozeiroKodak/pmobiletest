@@ -62,6 +62,7 @@
 <link rel="stylesheet" href="cyan-theme.css?v=1.1">
 <link rel="stylesheet" href="implementacoes/configuracoes-v3.css?v=1.0">
 <link rel="stylesheet" href="implementacoes/locais-v3.css?v=1.0">
+<link rel="stylesheet" href="implementacoes/valorestotal2.css?v=1.0">
 </head>
 
 <body>
@@ -276,6 +277,7 @@
 
 
                     <button id="menuValoresTotal" class="home-app-card" onclick="abrirValoresTotal()" title="Valores total"><span class="home-app-icone" aria-hidden="true">💰</span><span class="home-app-conteudo"><strong>Valores total</strong><small>Resumo financeiro da planilha online</small></span><span class="home-app-seta" aria-hidden="true">›</span></button>
+                    <button id="menuValoresTotal2" class="home-app-card" onclick="abrirValoresTotal2()" title="Frete geral 2"><span class="home-app-icone" aria-hidden="true">📊</span><span class="home-app-conteudo"><strong>Frete geral 2</strong><small>Versão analítica para comparação</small></span><span class="home-app-seta" aria-hidden="true">›</span></button>
                     <button id="menuImportacao" class="home-app-card" onclick="abrirImportacao()" title="Importar inventário">
                         <span class="home-app-icone" aria-hidden="true">📦</span>
                         <span class="home-app-conteudo">
@@ -406,6 +408,10 @@
 <section id="valoresTotal" class="tela-sistema" style="display:none">
           <div class="valores-hero"><div class="valores-eyebrow">PMOBILE</div><h1>Frete geral</h1><p>Totais consolidados e análises por período e transportadora.</p></div>
           <div class="painel valores-painel"><div id="valoresTotalStatus" style="color:#aaa;margin-bottom:18px">Consultando valores...</div><div id="valoresTotalCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px"></div><button type="button" class="botao-aba" style="margin-top:18px" onclick="carregarValoresTotal()" class="valores-atualizar">↻ Atualizar valores</button></div>
+        </section>
+        <section id="valoresTotal2" class="tela-sistema" style="display:none">
+          <div class="valores-hero"><div class="valores-eyebrow">PMOBILE</div><h1>Frete geral 2</h1><p>Totais consolidados e análises por período e transportadora.</p></div>
+          <div class="painel valores-painel"><div id="valoresTotal2Status" style="color:#aaa;margin-bottom:18px">Consultando valores...</div><div id="valoresTotal2Cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px"></div><button type="button" class="botao-aba" style="margin-top:18px" onclick="carregarValoresTotal2()" class="valores-atualizar">↻ Atualizar valores</button></div>
         </section>
         <section id="rastreio" class="tela-sistema" style="display: none;">
             <div class="cabecalho-pagina">
@@ -1258,6 +1264,7 @@
 <script src="arquivosteste.js?v=0.0.248"></script>
 
 <script src="valorestotal.js?v=0.0.354-financeiro"></script>
+<script src="valorestotal2.js?v=1.0"></script>
 <script src="rastreio.js?v=0.0.369-coletado"></script>
 
 <script src="rastreioimportacao.js?v=0.0.365-sync-rapida"></script>
