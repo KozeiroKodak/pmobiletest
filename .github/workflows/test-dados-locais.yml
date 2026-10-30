@@ -1,0 +1,30 @@
+name: Validar Dados locais do PMobile
+on:
+  pull_request:
+    paths:
+      - 'dados-locais.js'
+      - 'reorganizacao-pmobile.js'
+      - 'index.html'
+      - 'script.js'
+      - 'implementacoes/dados-locais.css'
+      - 'www/**'
+      - 'sql/pmobile_dados_locais_isolados.sql'
+      - 'tests/dados-locais.test.cjs'
+      - '.github/workflows/test-dados-locais.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Conferir sintaxe e isolamento das fontes
+        run: |
+          node --check dados-locais.js
+          node --check reorganizacao-pmobile.js
+          node --check script.js
+          node --test tests/dados-locais.test.cjs
