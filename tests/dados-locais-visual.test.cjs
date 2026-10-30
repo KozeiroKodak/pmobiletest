@@ -93,3 +93,17 @@ test("CSS está escopado, usa regras copiadas do nativo e espelha Android",()=>{
     assert.equal(fs.readFileSync(path.join(raiz,p),"utf8"),
                  fs.readFileSync(path.join(raiz,"www",p),"utf8"),p);
 });
+
+
+test("folhas de estilo da Pesquisa, Locais e Contagem são cópias das originais sob escopo local",()=>{
+  const css=fs.readFileSync(path.join(raiz,"implementacoes/dados-locais.css"),"utf8");
+  const search=fs.readFileSync(path.join(raiz,"implementacoes/pesquisa.css"),"utf8");
+  const count=fs.readFileSync(path.join(raiz,"implementacoes/contagemmanual.css"),"utf8");
+  const places=fs.readFileSync(path.join(raiz,"implementacoes/locais-v3.css"),"utf8");
+  const expectedSearch=search.slice(search.indexOf("/* PMobile Pesquisa 2.0")).replaceAll("#pesquisa","#dadosLocais");
+  const expectedCount=count.slice(count.indexOf("/* Contagem manual 2.0")).replaceAll("#contagemManual","#dadosLocais");
+  const expectedPlaces=places.replaceAll("#locais","#dadosLocais");
+  assert.ok(css.includes(expectedSearch),"CSS real da Pesquisa não foi reutilizado");
+  assert.ok(css.includes(expectedCount),"CSS real da Contagem não foi reutilizado");
+  assert.ok(css.includes(expectedPlaces),"CSS real dos Locais não foi reutilizado");
+});
