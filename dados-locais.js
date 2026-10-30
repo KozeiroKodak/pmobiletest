@@ -152,7 +152,8 @@
         '<form id="dlFormImportar" class="dl-editor">'+
         '<label>Planilha Dogo<input type="file" id="dlArquivo" accept=".xlsx,.xls,.xlsb,.xlsm,.csv,.html,.htm" required></label>'+
         '<button class="dl-primario" type="submit" id="dlBotaoImportar">Importar cadastro permanente</button></form>'+
-        '<p id="dlProgresso" role="status" aria-live="polite"></p></div>',
+        '<p id="dlProgresso" role="status" aria-live="polite"></p>'+
+        '<div class="dl-progresso-barra" id="dlProgressoBarra" role="progressbar" aria-label="Importação de materiais" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden><span id="dlProgressoPreenchimento" style="width:0%"></span></div></div>',
         "A importação cumulativa não apaga materiais nem sobrescreve os campos manuais.")+
       '</div>';
   }
@@ -556,6 +557,14 @@
       return [...mapa.values()];
     });
   }
+  function atualizarProgressoImportacao(indice,total) {
+    const barra=$("dlProgressoBarra"),preenchimento=$("dlProgressoPreenchimento");
+    if(!barra||!preenchimento)return;
+    barra.hidden=false;
+    const porcentagem=total>0?Math.max(0,Math.min(100,Math.round(indice/total*100))):0;
+    barra.setAttribute("aria-valuenow",String(porcentagem));
+    preenchimento.style.width=porcentagem+"%";
+  }
   async function importar() {
     if(estado.importando)return;
     const arquivo=$("dlArquivo").files?.[0];
@@ -578,6 +587,7 @@
         estado.importacaoAtual=contexto;
       }
       const {materiais,chave}=contexto;
+      atualizarProgressoImportacao(contexto.indice,materiais.length);
       if(contexto.indice>0)
         alvo.textContent="Retomando de "+contexto.indice.toLocaleString("pt-BR")+
           " / "+materiais.length.toLocaleString("pt-BR")+" registros confirmados...";
@@ -597,6 +607,7 @@
           throw erro;
         }
         contexto.indice=i+lote.length;
+        atualizarProgressoImportacao(contexto.indice,materiais.length);
         salvarCheckpointCatalogo(chave,contexto.indice,materiais.length);
         alvo.textContent="Importados "+contexto.indice.toLocaleString("pt-BR")+
           " / "+materiais.length.toLocaleString("pt-BR")+" cadastros.";
