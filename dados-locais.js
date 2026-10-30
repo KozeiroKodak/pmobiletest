@@ -194,6 +194,20 @@
     section.innerHTML=htmlPrincipal();conteudo.appendChild(section);
     section.addEventListener("click",onClick);
     section.addEventListener("submit",onSubmit);
+    // A busca de Locais acompanha o campo nativo e consulta sob demanda.
+    // Não existe botão obrigatório para comparar; mantém atualização automática.
+    let timerBusca=null;
+    section.addEventListener("input",e=>{
+      const input=e.target.closest('form[data-dl-comparar] input[name="termo"]');
+      if(!input)return;
+      const form=input.closest("form[data-dl-comparar]"),aba=form.dataset.dlComparar;
+      clearTimeout(timerBusca);
+      timerBusca=setTimeout(()=>{
+        if(estado.tela!==aba)return;
+        estado.offsets[aba]=0;
+        consultar(aba);
+      },450);
+    });
     // Arquivo diferente invalida somente o estado em memória; o cadastro já
     // gravado no Supabase permanece intacto.
     $("dlArquivo").addEventListener("change",()=>{
@@ -241,6 +255,23 @@
     const abrirBtn=e.target.closest("[data-dl-open]");
     if(abrirBtn){tela(abrirBtn.dataset.dlOpen);return;}
     if(e.target.closest("[data-dl-back]")){voltar();return;}
+    const tipoBtn=e.target.closest("[data-dl-tipo]");
+    if(tipoBtn){
+      const form=tipoBtn.closest("form[data-dl-busca]");
+      const tipo=tipoBtn.dataset.dlTipo;
+      if(!form||!["codigo","referencia","descricao"].includes(tipo))return;
+      const seletor=form.elements.tipo,campo=form.elements.termo;
+      seletor.value=tipo;
+      campo.placeholder={codigo:"Digite o código",referencia:"Digite a referência",
+        descricao:"Digite a descrição"}[tipo];
+      form.querySelectorAll("[data-dl-tipo]").forEach(btn=>{
+        const ativo=btn.dataset.dlTipo===tipo;
+        btn.classList.toggle("ativo",ativo);
+        btn.setAttribute("aria-pressed",String(ativo));
+      });
+      campo.focus();
+      return;
+    }
     const page=e.target.closest("[data-dl-page]");
     if(page){
       const aba=page.dataset.dlAba, delta=Number(page.dataset.dlPage);
