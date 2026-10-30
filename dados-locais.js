@@ -8,10 +8,19 @@
     divergencias:"Divergências locais", locais:"Locais do estoque local",
     importar:"Importar catálogo Dogo"
   };
+  // Mesmo padrão de pictogramas SVG utilizado nas Configurações 3.0.
+  // Ícones são decorativos, sem acesso a dados externos.
   const ICONES = {
-    pesquisa:"🔎",estoque:"✍️",reservas:"📦",conferencias:"🗂️",
-    comparar:"⚖️",divergencias:"⚠️",locais:"📍",importar:"📥"
+    pesquisa:'<circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/>',
+    estoque:'<path d="M4 7 12 3l8 4v10l-8 4-8-4z"/><path d="m4 7 8 4 8-4M12 11v10"/>',
+    reservas:'<path d="M3 8h18M5 8l2-4h10l2 4v12H5z"/><path d="M9 12h6"/>',
+    conferencias:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2h6v2m-7 7 2 2 4-4m-6 8h8"/>',
+    comparar:'<path d="M4 6h16M4 18h16M8 3v6m8 6v6"/><path d="m5 13 3-3 3 3m2-2 3 3 3-3"/>',
+    divergencias:'<path d="M12 3 2 20h20z"/><path d="M12 9v5m0 3h.01"/>',
+    locais:'<path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0z"/><circle cx="12" cy="10" r="2.5"/>',
+    importar:'<path d="M4 17v4h16v-4M12 3v13m-5-5 5 5 5-5"/><path d="M4 7V4h4"/>'
   };
+  const icone=(id)=>'<svg viewBox="0 0 24 24" aria-hidden="true">'+(ICONES[id]||ICONES.estoque)+'</svg>';
   const estado = { tela:"inicio",material:null,resultados:{},offsets:{},busy:false,
     ultimaComparacao:0,importando:false };
   const $ = (id) => document.getElementById(id);
@@ -46,72 +55,105 @@
     }
     return data;
   }
+  function paginacao(aba) {
+    return '<nav class="dl-paginacao" aria-label="Paginação de '+TITULOS[aba]+'">'+
+      '<button class="dl-secundario" type="button" data-dl-page="-1" data-dl-aba="'+aba+'">‹ Anterior</button>'+
+      '<span id="dlPagina-'+aba+'">Página 1</span>'+
+      '<button class="dl-secundario" type="button" data-dl-page="1" data-dl-aba="'+aba+'">Próxima ›</button></nav>';
+  }
+  function resumo(aba) {
+    return '<div class="dl-resumo" id="dlResumo-'+aba+'" aria-label="Indicadores da página"></div>';
+  }
   function pesquisarForm(aba) {
-    return '<form class="dl-search" data-dl-busca="'+aba+'">'+
-      '<label>Pesquisar <input name="termo" placeholder="Código, referência ou descrição" autocomplete="off"></label>'+
-      '<label>Campo <select name="tipo"><option value="todos">Todos</option>'+
+    const titulo=aba==="reservas"?"Reservas cadastradas":aba==="estoque"?"Consultar e editar estoque":"Consultar materiais";
+    return '<div class="dl-painel"><h3 class="dl-subtitulo">'+titulo+'</h3>'+
+      '<form class="dl-search" data-dl-busca="'+aba+'">'+
+      '<label>Material<input type="search" name="termo" placeholder="Código, referência ou descrição" autocomplete="off"></label>'+
+      '<label>Pesquisar por<select name="tipo"><option value="todos">Todos</option>'+
       '<option value="codigo">Código</option><option value="referencia">Referência</option>'+
       '<option value="descricao">Descrição</option></select></label>'+
-      '<button type="submit">Pesquisar</button></form>'+
-      '<div class="dl-resultados" id="dlResultados-'+aba+'"></div>'+
-      '<div class="dl-paginacao"><button data-dl-page="-1" data-dl-aba="'+aba+'">Anterior</button>'+
-      '<span id="dlPagina-'+aba+'">Página 1</span>'+
-      '<button data-dl-page="1" data-dl-aba="'+aba+'">Próxima</button></div>';
+      '<button class="dl-primario" type="submit">Pesquisar</button></form>'+
+      '</div><div class="dl-painel">'+resumo(aba)+
+      '<div class="dl-resultados" id="dlResultados-'+aba+'" aria-live="polite"></div>'+
+      paginacao(aba)+'</div>';
   }
   function compararForm(aba) {
-    return '<form class="dl-search" data-dl-comparar="'+aba+'"><label>Material'+
-      '<input name="termo" placeholder="Código ou descrição"></label>'+
-      '<button type="submit">Atualizar comparação</button></form>'+
-      '<div class="dl-resultados" id="dlResultados-'+aba+'"></div>'+
-      '<div class="dl-paginacao"><button data-dl-page="-1" data-dl-aba="'+aba+'">Anterior</button>'+
-      '<span id="dlPagina-'+aba+'">Página 1</span>'+
-      '<button data-dl-page="1" data-dl-aba="'+aba+'">Próxima</button></div>';
+    const titulo=aba==="locais"?"Conferir localizações":aba==="divergencias"?"Verificar diferenças":"Conferir bases de estoque";
+    return '<div class="dl-painel"><h3 class="dl-subtitulo">'+titulo+'</h3>'+
+      '<form class="dl-search" data-dl-comparar="'+aba+'"><label>Material'+
+      '<input type="search" name="termo" placeholder="Código ou descrição"></label>'+
+      '<button class="dl-primario" type="submit">Atualizar comparação</button></form>'+
+      '<p class="dl-atualizacao"><span aria-hidden="true"></span>Comparação automática ao abrir e durante o uso desta tela</p></div>'+
+      '<div class="dl-painel">'+resumo(aba)+
+      '<p class="dl-legenda">Os indicadores se referem apenas aos materiais exibidos nesta página.</p>'+
+      '<div class="dl-resultados" id="dlResultados-'+aba+'" aria-live="polite"></div>'+
+      paginacao(aba)+'</div>';
   }
   function painel(id,conteudo,nota) {
     return '<section class="dl-panel" data-dl-panel="'+id+'" hidden>'+
-      '<div class="dl-top"><button type="button" data-dl-back>‹ Voltar</button>'+
-      '<div><h2>'+TITULOS[id]+'</h2><p>'+escape(nota||"Base independente da Dogo.")+'</p></div></div>'+
+      '<div class="dl-top"><button type="button" class="dl-voltar" data-dl-back>‹ Voltar</button>'+
+      '<div><p>'+escape(nota||"Dados do estoque local, separados da Dogo.")+'</p></div></div>'+
       conteudo+'</section>';
   }
+  function cartaoMenu(id) {
+    const descricoes={
+      pesquisa:"Consultar códigos, referências e descrições",
+      estoque:"Preencher quantidades, reservas e local",
+      reservas:"Acompanhar reservas do estoque local",
+      conferencias:"Registrar e consultar contagens realizadas",
+      comparar:"Verificar automaticamente as duas bases",
+      divergencias:"Acompanhar diferenças de quantidades",
+      locais:"Ver locais anteriores e novos locais",
+      importar:"Atualizar cadastro sem alterar as contagens"
+    };
+    return '<button type="button" class="dl-card" data-dl-open="'+id+'">'+
+      '<span class="dl-card-icon">'+icone(id)+'</span>'+
+      '<span class="dl-card-texto"><strong>'+TITULOS[id]+'</strong><small>'+descricoes[id]+'</small></span>'+
+      '<span class="dl-card-seta" aria-hidden="true">↗</span></button>';
+  }
   function htmlPrincipal() {
-    const cards=IDS.map((id)=>'<button type="button" class="dl-card" data-dl-open="'+id+'">'+
-      '<span class="dl-card-icon">'+ICONES[id]+'</span><span><strong>'+TITULOS[id]+'</strong>'+
-      '<small>'+(id==="importar"?"Somente cadastro; não importa quantidades ou locais":
-        id==="comparar"?"Consulta automática entre as duas bases":"Dados exclusivos do estoque local")+
-      '</small></span><span>›</span></button>').join("");
-    return '<div class="dl-app"><header class="dl-cabecalho"><span class="dl-kicker">PMOBILE / ESTOQUE INDEPENDENTE</span>'+
-      '<h1>Dados locais</h1><p>Cadastro permanente, controle manual e comparação com a Dogo.</p></header>'+
-      '<div id="dlMensagem" role="status" aria-live="polite"></div>'+
-      '<section data-dl-panel="inicio"><div class="dl-grid">'+cards+'</div>'+
-      '<p class="dl-informacao">A base Dogo e as funcionalidades originais permanecem separadas.</p></section>'+
-      painel("pesquisa",pesquisarForm("pesquisa"),"Consulta somente o catálogo permanente.")+
+    return '<div class="dl-app"><header class="dl-cabecalho">'+
+      '<span class="dl-kicker" id="dlCabecalhoCaminho">PMOBILE / Dados locais</span>'+
+      '<h1 id="dlCabecalhoTitulo">Dados locais</h1>'+
+      '<p id="dlCabecalhoDescricao">Cadastro permanente, controle manual e comparação com a Dogo.</p>'+
+      '</header><div id="dlMensagem" role="status" aria-live="polite"></div>'+
+      '<section data-dl-panel="inicio">'+
+      '<div class="dl-secao-titulo"><strong>Estoque local</strong><span>Base independente</span></div>'+
+      '<div class="dl-grid">'+["pesquisa","estoque","reservas","conferencias"].map(cartaoMenu).join("")+'</div>'+
+      '<div class="dl-secao-titulo" style="margin-top:23px"><strong>Verificação e cadastro</strong></div>'+
+      '<div class="dl-grid">'+["comparar","divergencias","locais","importar"].map(cartaoMenu).join("")+'</div>'+
+      '<p class="dl-informacao">As funções originais da Dogo permanecem inalteradas.</p></section>'+
+      painel("pesquisa",pesquisarForm("pesquisa"),"Consulta exclusivamente o cadastro permanente da Contagem local.")+
       painel("estoque",pesquisarForm("estoque")+
         '<form id="dlFormEstoque" class="dl-editor" hidden><h3 id="dlEditorTitulo">Editar material</h3>'+
         '<div class="dl-campos">'+
-        '<label>Quantidade do item <input id="dlQtdItem" type="number" min="0" step="any" placeholder="Não preenchido"></label>'+
-        '<label>Quantidade total <input id="dlQtdTotal" type="number" min="0" step="any" placeholder="Não preenchido"></label>'+
-        '<label>Itens reservados <input id="dlQtdReservada" type="number" min="0" step="any" placeholder="Não preenchido"></label>'+
-        '<label>Local <input id="dlLocal" type="text" placeholder="Não preenchido"></label>'+
-        '</div><button type="submit">Salvar no estoque local</button></form>',
-        "As alterações nunca são gravadas em public.materiais (Dogo).")+
-      painel("reservas",pesquisarForm("reservas"),"Somente materiais com reservas locais informadas.")+
-      painel("conferencias",'<form id="dlFormConferencia" class="dl-editor">'+
-        '<div class="dl-campos"><label>Código do material <input id="dlConCodigo" required></label>'+
-        '<label>Quantidade física <input id="dlConQuantidade" type="number" min="0" step="any" required></label>'+
-        '<label>Local encontrado <input id="dlConLocal"></label></div>'+
-        '<button type="submit">Registrar conferência local</button></form>'+
-        '<h3>Histórico de conferências locais</h3><div id="dlHistorico"></div>',
-        "Histórico independente. Registrar conferência não sobrescreve o estoque manual.")+
-      painel("comparar",compararForm("comparar"),"A comparação é calculada automaticamente ao consultar ou atualizar os dados.")+
-      painel("divergencias",compararForm("divergencias"),"Divergências da nova base, sem alterar a aba original.")+
-      painel("locais",compararForm("locais"),"Diferenças de localização da nova base, sem confirmar mudanças na Dogo.")+
-      painel("importar",'<p>Selecione a planilha Dogo. Apenas código, referência, descrição e marca serão importados;'+
-        ' quantidades, reservas e locais continuam intocados.</p>'+
+        '<label>Quantidade do item<input id="dlQtdItem" type="number" min="0" step="any" placeholder="Não preenchido"></label>'+
+        '<label>Quantidade total<input id="dlQtdTotal" type="number" min="0" step="any" placeholder="Não preenchido"></label>'+
+        '<label>Itens reservados<input id="dlQtdReservada" type="number" min="0" step="any" placeholder="Não preenchido"></label>'+
+        '<label>Local<input id="dlLocal" type="text" placeholder="Não preenchido"></label>'+
+        '</div><button class="dl-primario" type="submit">Salvar no estoque local</button></form>',
+        "Atualize apenas os dados manuais; o estoque Dogo não será modificado.")+
+      painel("reservas",pesquisarForm("reservas"),"Exibe materiais com reservas registradas no estoque local.")+
+      painel("conferencias",'<div class="dl-painel"><h3 class="dl-subtitulo">Registrar conferência local</h3>'+
+        '<form id="dlFormConferencia" class="dl-editor">'+
+        '<div class="dl-campos"><label>Código do material<input id="dlConCodigo" required></label>'+
+        '<label>Quantidade física<input id="dlConQuantidade" type="number" min="0" step="any" required></label>'+
+        '<label>Local encontrado<input id="dlConLocal"></label></div>'+
+        '<button class="dl-primario" type="submit">Registrar conferência local</button></form></div>'+
+        '<div class="dl-painel"><h3 class="dl-subtitulo">Conferências registradas</h3>'+
+        '<p class="dl-historico-intro">Histórico separado do inventário Dogo.</p>'+
+        '<div class="dl-resultados" id="dlHistorico"></div></div>',
+        "Histórico próprio: registrar a conferência não sobrescreve as quantidades do estoque.")+
+      painel("comparar",compararForm("comparar"),"Comparação automática entre os materiais presentes nas duas bases.")+
+      painel("divergencias",compararForm("divergencias"),"Diferenças de quantidades e reservas identificadas nas bases, sem alterar a Dogo.")+
+      painel("locais",compararForm("locais"),"Comparação de local anterior (Dogo) e novo local (Contagem local), sem confirmar alterações na Dogo.")+
+      painel("importar",'<div class="dl-painel"><h3 class="dl-subtitulo">Cadastro permanente de materiais</h3>'+
+        '<div class="dl-importar-aviso"><strong>Importação segura</strong> · Somente código, referência, descrição e marca. Quantidades, reservas e locais manuais serão preservados.</div>'+
         '<form id="dlFormImportar" class="dl-editor">'+
-        '<label>Planilha Dogo <input type="file" id="dlArquivo" accept=".xlsx,.xls,.xlsb,.xlsm,.csv,.html,.htm" required></label>'+
-        '<button type="submit" id="dlBotaoImportar">Importar cadastro permanente</button></form>'+
-        '<p id="dlProgresso" role="status" aria-live="polite"></p>',
-        "A importação é cumulativa: não apaga materiais ou contagens anteriores.")+
+        '<label>Planilha Dogo<input type="file" id="dlArquivo" accept=".xlsx,.xls,.xlsb,.xlsm,.csv,.html,.htm" required></label>'+
+        '<button class="dl-primario" type="submit" id="dlBotaoImportar">Importar cadastro permanente</button></form>'+
+        '<p id="dlProgresso" role="status" aria-live="polite"></p></div>',
+        "A importação cumulativa não apaga materiais nem sobrescreve os campos manuais.")+
       '</div>';
   }
   function init() {
@@ -159,6 +201,12 @@
   function tela(nome) {
     if (nome!=="inicio" && !IDS.includes(nome))return;
     estado.tela=nome;mensagem("");
+    const cabTitulo=$("dlCabecalhoTitulo"),cabCaminho=$("dlCabecalhoCaminho"),cabDescricao=$("dlCabecalhoDescricao");
+    if(cabTitulo)cabTitulo.textContent=nome==="inicio"?"Dados locais":TITULOS[nome];
+    if(cabCaminho)cabCaminho.textContent=nome==="inicio"?"PMOBILE / Dados locais":"PMOBILE / Dados locais / "+TITULOS[nome];
+    if(cabDescricao)cabDescricao.textContent=nome==="inicio"?
+      "Cadastro permanente, controle manual e comparação com a Dogo.":
+      "Estoque independente da Dogo · Dados locais";
     document.querySelectorAll("#dadosLocais [data-dl-panel]").forEach((p)=>{
       p.hidden=p.dataset.dlPanel!==nome;
     });
