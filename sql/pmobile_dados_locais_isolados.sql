@@ -36,6 +36,7 @@ as $$
     select 1 from public.usuarios u
     where lower(u.usuario) = lower(btrim(p_usuario))
       and u.ativo = true
+      and u.nivel in ('ADMIN','NIVEL2')
       and u.senha_hash is not null
       and extensions.crypt(p_credencial, u.senha_hash) = u.senha_hash
   );
