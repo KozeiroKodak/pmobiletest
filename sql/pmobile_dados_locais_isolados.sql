@@ -87,7 +87,8 @@ $$;
 
 create or replace function public.pmobile_local_listar(
   p_usuario text, p_credencial text, p_termo text default '',
-  p_tipo text default 'codigo', p_limite integer default 50, p_offset integer default 0
+  p_tipo text default 'codigo', p_limite integer default 50, p_offset integer default 0,
+  p_somente_reservas boolean default false
 )
 returns table(codigo text,descricao text,referencia text,marca text,
               quantidade_item numeric,quantidade_total numeric,
@@ -110,6 +111,7 @@ begin
     or (p_tipo in ('codigo','todos') and m.codigo ilike '%'||btrim(p_termo)||'%')
     or (p_tipo in ('referencia','todos') and m.referencia ilike '%'||btrim(p_termo)||'%')
     or (p_tipo in ('descricao','todos') and m.descricao ilike '%'||btrim(p_termo)||'%')
+  and (not coalesce(p_somente_reservas,false) or coalesce(m.quantidade_reservada,0)>0)
   order by m.codigo
   limit least(greatest(coalesce(p_limite,50),1),100)
   offset greatest(coalesce(p_offset,0),0);
@@ -188,7 +190,8 @@ $$;
 -- Resultado independente para Divergências locais e Locais locais.
 create or replace function public.pmobile_local_comparar(
   p_usuario text,p_credencial text,p_termo text default '',
-  p_limite integer default 100,p_offset integer default 0
+  p_limite integer default 100,p_offset integer default 0,
+  p_modo text default 'todos'
 )
 returns table(codigo text,descricao text,dogo_quantidade numeric,local_quantidade numeric,
   dogo_reservada numeric,local_reservada numeric,dogo_local text,local_local text,
@@ -217,6 +220,14 @@ begin
   left join public.materiais d on d.codigo=l.codigo
   where coalesce(btrim(p_termo),'')='' or l.codigo ilike '%'||btrim(p_termo)||'%'
      or l.descricao ilike '%'||btrim(p_termo)||'%'
+  and (
+    p_modo='todos'
+    or (p_modo='divergencias' and (d.id is null
+      or (l.quantidade_total is not null and l.quantidade_total is distinct from d.quantidade)
+      or (l.quantidade_reservada is not null and l.quantidade_reservada is distinct from d.quantidade_reservada)))
+    or (p_modo='locais' and l.local is not null and btrim(l.local)<>''
+      and upper(btrim(l.local)) is distinct from upper(btrim(d.local)))
+  )
   order by l.codigo
   limit least(greatest(coalesce(p_limite,100),1),100)
   offset greatest(coalesce(p_offset,0),0);
@@ -224,14 +235,14 @@ end;
 $$;
 
 revoke all on function public.pmobile_local_importar_catalogo(text,text,jsonb) from public,authenticated;
-revoke all on function public.pmobile_local_listar(text,text,text,text,integer,integer) from public,authenticated;
+revoke all on function public.pmobile_local_listar(text,text,text,text,integer,integer,boolean) from public,authenticated;
 revoke all on function public.pmobile_local_salvar_estoque(text,text,text,numeric,numeric,numeric,text) from public,authenticated;
 revoke all on function public.pmobile_local_registrar_conferencia(text,text,text,numeric,text) from public,authenticated;
 revoke all on function public.pmobile_local_listar_conferencias(text,text,integer) from public,authenticated;
-revoke all on function public.pmobile_local_comparar(text,text,text,integer,integer) from public,authenticated;
+revoke all on function public.pmobile_local_comparar(text,text,text,integer,integer,text) from public,authenticated;
 grant execute on function public.pmobile_local_importar_catalogo(text,text,jsonb) to anon;
-grant execute on function public.pmobile_local_listar(text,text,text,text,integer,integer) to anon;
+grant execute on function public.pmobile_local_listar(text,text,text,text,integer,integer,boolean) to anon;
 grant execute on function public.pmobile_local_salvar_estoque(text,text,text,numeric,numeric,numeric,text) to anon;
 grant execute on function public.pmobile_local_registrar_conferencia(text,text,text,numeric,text) to anon;
 grant execute on function public.pmobile_local_listar_conferencias(text,text,integer) to anon;
-grant execute on function public.pmobile_local_comparar(text,text,text,integer,integer) to anon;
+grant execute on function public.pmobile_local_comparar(text,text,text,integer,integer,text) to anon;
