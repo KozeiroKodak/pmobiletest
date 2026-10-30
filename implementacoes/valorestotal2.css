@@ -84,7 +84,7 @@
 #valoresTotal2 #valoresTotal2Mensais > h3 { color: var(--pm-acento) !important; }
 #valoresTotal2 #valoresTotal2Mensais details[open] { border-color: #389ba9 !important; }
 #valoresTotal2 .valores-atualizar,
-#valoresTotal2 button[onclick="carregarValoresTotal()"] {
+#valoresTotal2 button[onclick="carregarValoresTotal2()"] {
   border-color: #368d9c !important;
   background: #153c46 !important;
   color: #a7f3fa !important;
