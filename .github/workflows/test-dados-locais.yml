@@ -7,6 +7,7 @@ on:
       - 'www/dados-locais.js'
       - 'tests/dados-locais-importacao.test.cjs'
       - 'tests/dados-locais-visual.test.cjs'
+      - 'tests/fixtures/dados-locais-paridade.html'
       - '.github/workflows/test-dados-locais.yml'
   pull_request:
     paths:
@@ -19,6 +20,7 @@ on:
       - 'sql/pmobile_dados_locais_isolados.sql'
       - 'tests/dados-locais.test.cjs'
       - 'tests/dados-locais-visual.test.cjs'
+      - 'tests/fixtures/dados-locais-paridade.html'
       - '.github/workflows/test-dados-locais.yml'
   workflow_dispatch:
 permissions:
@@ -37,3 +39,20 @@ jobs:
           node --check reorganizacao-pmobile.js
           node --check script.js
           node --test tests/dados-locais.test.cjs tests/dados-locais-importacao.test.cjs tests/dados-locais-visual.test.cjs
+      - name: Conferir paridade de estilos em navegador real
+        run: |
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME" || { echo "Chrome indisponível para validar CSS"; exit 1; }
+          mkdir -p artefatos-ui
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=430,1400 --virtual-time-budget=1200 --dump-dom "file://$PWD/tests/fixtures/dados-locais-paridade.html" > artefatos-ui/paridade-dom.html
+          if ! grep -q 'data-qa-fail="0"' artefatos-ui/paridade-dom.html; then
+            grep -A25 'id="qa-status"' artefatos-ui/paridade-dom.html || true
+            exit 1
+          fi
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=430,1400 --virtual-time-budget=1200 --screenshot="$PWD/artefatos-ui/paridade.png" "file://$PWD/tests/fixtures/dados-locais-paridade.html"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pmobile-paridade-nativa
+          path: artefatos-ui/
+          if-no-files-found: ignore
