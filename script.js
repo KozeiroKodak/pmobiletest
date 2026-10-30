@@ -116,6 +116,9 @@ function voltarTelaAnteriorPmobile() {
     if (typeof window.voltarUmNivelDadosLocais === "function" &&
         window.voltarUmNivelDadosLocais(telaAtual)) return true;
 
+    if (typeof window.voltarUmNivelTransportesPmobile === "function" &&
+        window.voltarUmNivelTransportesPmobile(telaAtual)) return true;
+
     // Configurações 3.0 possui uma hierarquia interna que não aparece
     // no histórico de telas principais: Subárea → Administração →
     // Configurações. Locais e Divergências também voltam ao pai.
@@ -161,7 +164,8 @@ const itensMenuSistema = [
     "menuConferencias",
 
     "menuConfiguracoes",
-    "menuDadosLocais"
+    "menuDadosLocais",
+    "menuTransportes"
 
 ];
 
