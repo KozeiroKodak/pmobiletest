@@ -1103,6 +1103,8 @@
 #dadosLocais .dl-compat-fonte{font-size:12px;color:var(--texto-secundario)}
 #dadosLocais .pesquisa-v2-buscar{background:var(--pm-acento,#57dceb);color:#061b21}
 #dadosLocais .contagem-v2{background:#0c1d23;border-color:var(--borda,#29434b)}
+/* O painel principal da Contagem usa a superfície nativa do PMobile. */
+#dadosLocais [data-dl-panel="estoque"] > .painel.contagem-v2{background-color:var(--fundo-painel,#14252b)}
 #dadosLocais .contagem-v2-icone{background:#16414c;color:var(--pm-acento,#57dceb)}
 #dadosLocais .contagem-v2-selo{background:#173941;color:var(--pm-acento,#57dceb)}
 #dadosLocais .contagem-v2-campo{background:#122930;border-color:var(--borda-clara)}
