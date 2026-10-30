@@ -1,11 +1,17 @@
 /* PMobile — reorganização por pontos de acesso, sem duplicar módulos antigos. */
 (function() {
  "use strict";
+ const iconesConfiguracoes={
+   valores:'<circle cx="12" cy="12" r="9"/><path d="M12 6v12m3-9c-1-1-5-1-6 1-.8 1.5 1 2.3 3 2.6 3 .4 4 2 2.3 3.7-1.1 1-4.1 1.2-5.3-.2"/>',
+   frete:'<path d="M4 20V11m5 9V6m5 14V9m5 11V3"/><path d="M2 21h20"/>',
+   estoque:'<path d="M4 7 12 3l8 4v11l-8 4-8-4z"/><path d="m4 7 8 4 8-4M12 11v11"/>',
+   conferencias:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2h6v2m-7 7 2 2 4-4m-6 8h8"/>'
+ };
  const itensConfig=[
-   ["💰","Valores Total","abrirValoresTotal","Resumo financeiro atual"],
-   ["📊","Frete Geral 2","abrirValoresTotal2","Versão analítica existente"],
-   ["📦","Importar Estoque","abrirImportacao","Importação Dogo original"],
-   ["🗂️","Conferências","abrirConferencias","Histórico existente"]
+   ["valores","Valores Total","abrirValoresTotal","Resumo financeiro atual"],
+   ["frete","Frete Geral 2","abrirValoresTotal2","Versão analítica existente"],
+   ["estoque","Importar Estoque","abrirImportacao","Importação Dogo original"],
+   ["conferencias","Conferências","abrirConferencias","Histórico existente"]
  ];
  const $=(id)=>document.getElementById(id);
  function executar(nome) {
@@ -22,7 +28,7 @@
      const grade=document.createElement("div");grade.className="configuracoes-v3-grade";
      itensConfig.forEach(([icone,nome,funcao,sub])=>{
        const botao=document.createElement("button");botao.type="button";botao.className="configuracoes-v3-card";
-       const ic=document.createElement("span");ic.className="configuracoes-v3-icone";ic.textContent=icone;
+       const ic=document.createElement("span");ic.className="configuracoes-v3-icone";ic.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true">'+(iconesConfiguracoes[icone]||"")+'</svg>';
        const conteudo=document.createElement("span");conteudo.className="configuracoes-v3-textos";
        const strong=document.createElement("strong");strong.textContent=nome;
        const pequeno=document.createElement("small");pequeno.textContent=sub;
