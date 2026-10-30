@@ -107,10 +107,10 @@ begin
          m.quantidade_item,m.quantidade_total,m.quantidade_reservada,
          m.local,m.atualizado_em
   from public.pmobile_local_materiais m
-  where coalesce(btrim(p_termo),'') = ''
+  where (coalesce(btrim(p_termo),'') = ''
     or (p_tipo in ('codigo','todos') and m.codigo ilike '%'||btrim(p_termo)||'%')
     or (p_tipo in ('referencia','todos') and m.referencia ilike '%'||btrim(p_termo)||'%')
-    or (p_tipo in ('descricao','todos') and m.descricao ilike '%'||btrim(p_termo)||'%')
+    or (p_tipo in ('descricao','todos') and m.descricao ilike '%'||btrim(p_termo)||'%'))
   and (not coalesce(p_somente_reservas,false) or coalesce(m.quantidade_reservada,0)>0)
   order by m.codigo
   limit least(greatest(coalesce(p_limite,50),1),100)
@@ -218,8 +218,8 @@ begin
     (nullif(btrim(l.local),'') is null)
   from public.pmobile_local_materiais l
   left join public.materiais d on d.codigo=l.codigo
-  where coalesce(btrim(p_termo),'')='' or l.codigo ilike '%'||btrim(p_termo)||'%'
-     or l.descricao ilike '%'||btrim(p_termo)||'%'
+  where (coalesce(btrim(p_termo),'')='' or l.codigo ilike '%'||btrim(p_termo)||'%'
+     or l.descricao ilike '%'||btrim(p_termo)||'%')
   and (
     p_modo='todos'
     or (p_modo='divergencias' and (d.id is null
