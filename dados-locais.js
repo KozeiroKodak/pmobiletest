@@ -270,32 +270,102 @@
       const pag=$("dlPagina-"+aba);if(pag)pag.textContent="Página "+(Math.floor(offset/(["comparar","divergencias","locais"].includes(aba)?100:50))+1);
     }catch(e){lista.textContent=e.message;mensagem(e.message,true);}
   }
+  function indicador(rotulo,numero,tipo) {
+    return '<div class="dl-indicador '+(tipo||"")+'"><span>'+rotulo+'</span><strong>'+
+      Number(numero).toLocaleString("pt-BR")+'</strong></div>';
+  }
+  function detalhe(rotulo,v) {
+    return '<div class="dl-dado"><span>'+rotulo+'</span><strong>'+escape(valor(v))+'</strong></div>';
+  }
+  function atualizarResumo(aba,itens,comparacao) {
+    const area=$("dlResumo-"+aba);if(!area)return;
+    if(comparacao){
+      const diferentes=itens.filter(m=>m.diferenca_quantidade||m.diferenca_reserva||m.diferenca_local).length;
+      const semDogo=itens.filter(m=>m.sem_dogo).length;
+      const pendentes=itens.filter(m=>m.pendente_quantidade||m.pendente_reserva||m.pendente_local).length;
+      area.innerHTML=indicador("Diferentes",diferentes,"erro")+
+        indicador("Sem Dogo",semDogo,"alerta")+indicador("Pendentes",pendentes);
+    }else{
+      area.innerHTML=indicador("Nesta página",itens.length)+
+        indicador("Contados",itens.filter(m=>m.quantidade_total!==null).length,"ok")+
+        indicador("Com reservas",itens.filter(m=>m.quantidade_reservada!==null&&Number(m.quantidade_reservada)>0).length,"alerta");
+    }
+  }
   function desenharMateriais(aba,itens) {
     const el=$("dlResultados-"+aba);el.replaceChildren();
-    if(!itens.length){el.textContent="Nenhum material encontrado.";return;}
-    el.innerHTML=itens.map((m)=>'<article class="dl-item">'+
-      '<div><strong>'+escape(m.codigo)+' — '+escape(m.descricao)+'</strong>'+
-      '<small>Ref.: '+escape(valor(m.referencia))+' · Local: '+escape(valor(m.local))+'</small>'+
-      '<small>Quantidade total: '+num(m.quantidade_total)+' · Reservados: '+num(m.quantidade_reservada)+
-      ' · Qtd. item: '+num(m.quantidade_item)+'</small></div>'+
-      '<div class="dl-item-acoes"><button type="button" data-dl-edit="'+escape(m.codigo)+'" data-dl-source="'+aba+'">Editar local</button>'+
-      '<button type="button" data-dl-conferir="'+escape(m.codigo)+'">Conferir</button></div></article>').join("");
+    atualizarResumo(aba,itens,false);
+    if(!itens.length){
+      el.innerHTML='<div class="dl-vazio"><strong>Nenhum material encontrado</strong>'+
+        'Experimente outro código ou descrição. Na área Reservas locais aparecem apenas materiais com reserva preenchida.</div>';
+      return;
+    }
+    el.innerHTML=itens.map((m)=>{
+      const cadastrado=m.quantidade_total!==null||m.quantidade_item!==null||
+        m.quantidade_reservada!==null||Boolean(m.local);
+      const tipo=cadastrado?"ok":"alerta";
+      return '<details class="dl-item"><summary class="dl-item-summary">'+
+        '<div class="dl-item-topo"><div><h3 class="dl-item-titulo">'+escape(m.descricao)+'</h3>'+
+        '<div class="dl-item-codigo">Cód. '+escape(m.codigo)+
+        (m.referencia?' · Ref. '+escape(m.referencia):"")+'</div></div>'+
+        '<span class="dl-selo '+tipo+'">'+(cadastrado?"Dados preenchidos":"Pendente")+'</span></div>'+
+        '<div class="dl-item-rodape"><span>Total: '+num(m.quantidade_total)+
+        ' · Local: '+escape(valor(m.local))+'</span><span>Ver detalhes <b class="dl-item-chevron">⌄</b></span></div>'+
+        '</summary><div class="dl-detalhes"><div class="dl-detalhes-grid">'+
+        detalhe("Quantidade do item",m.quantidade_item)+
+        detalhe("Quantidade total",m.quantidade_total)+
+        detalhe("Itens reservados",m.quantidade_reservada)+
+        detalhe("Localização",m.local)+
+        detalhe("Marca",m.marca)+detalhe("Referência",m.referencia)+
+        '</div><div class="dl-item-acoes">'+
+        '<button type="button" class="dl-secundario" data-dl-edit="'+escape(m.codigo)+
+        '" data-dl-source="'+aba+'">Editar estoque local</button>'+
+        '<button type="button" class="dl-secundario" data-dl-conferir="'+escape(m.codigo)+
+        '">Conferir material</button></div></div></details>';
+    }).join("");
   }
   function desenharComparacao(aba,itens) {
     const el=$("dlResultados-"+aba);el.replaceChildren();
-    if(!itens.length){el.textContent="Nenhuma ocorrência encontrada nesta página.";return;}
+    atualizarResumo(aba,itens,true);
+    if(!itens.length){
+      const texto=aba==="locais"?
+        "Nenhuma diferença de localização encontrada. Locais ainda vazios na Contagem local são pendentes, não divergências.":
+        aba==="divergencias"?
+        "Nenhuma divergência de quantidade ou reserva identificada nesta página.":
+        "Nenhum material encontrado para esta consulta.";
+      el.innerHTML='<div class="dl-vazio"><strong>Nenhuma ocorrência encontrada</strong>'+texto+'</div>';
+      return;
+    }
     el.innerHTML=itens.map((m)=>{
-      const difer=[m.diferenca_quantidade,m.diferenca_reserva,m.diferenca_local,m.sem_dogo].some(Boolean);
-      const pend=[m.pendente_quantidade,m.pendente_reserva,m.pendente_local].some(Boolean);
-      const estadoTexto=m.sem_dogo?"Não encontrado na Dogo":difer?"Divergente":pend?"Pendente de preenchimento":"Conferido";
-      return '<article class="dl-item"><div><strong>'+escape(m.codigo)+' — '+escape(m.descricao)+'</strong>'+
-        '<small><b>'+estadoTexto+'</b></small>'+
-        '<small>Quantidade total: Dogo '+num(m.dogo_quantidade)+' / Local '+num(m.local_quantidade)+
-        (m.diferenca_quantidade?' · DIFERENTE':'')+'</small>'+
-        '<small>Reservas: Dogo '+num(m.dogo_reservada)+' / Local '+num(m.local_reservada)+
-        (m.diferenca_reserva?' · DIFERENTE':'')+'</small>'+
-        '<small>Localização: Dogo '+escape(valor(m.dogo_local))+' / Local '+escape(valor(m.local_local))+
-        (m.diferenca_local?' · DIFERENTE':'')+'</small></div></article>';
+      const diferenca=m.diferenca_quantidade||m.diferenca_reserva||m.diferenca_local;
+      const pendencia=m.pendente_quantidade||m.pendente_reserva||m.pendente_local;
+      const st=m.sem_dogo?"alerta":diferenca?"erro":pendencia?"alerta":"ok";
+      const situacao=m.sem_dogo?"Não cadastrado na Dogo":diferenca?"Divergente":
+        pendencia?"Pendente":"Conferido";
+      const localizacao='<div class="dl-trajeto">'+
+        '<div class="dl-endereco"><span>Local anterior · Dogo</span>'+
+        '<strong>'+escape(valor(m.dogo_local))+'</strong></div>'+
+        '<span class="dl-trajeto-seta" aria-hidden="true">→</span>'+
+        '<div class="dl-endereco"><span>Novo local · Contagem local</span>'+
+        '<strong>'+escape(valor(m.local_local))+'</strong></div></div>';
+      return '<details class="dl-item"><summary class="dl-item-summary">'+
+        '<div class="dl-item-topo"><div><h3 class="dl-item-titulo">'+escape(m.descricao)+'</h3>'+
+        '<div class="dl-item-codigo">Cód. '+escape(m.codigo)+'</div></div>'+
+        '<span class="dl-selo '+st+'">'+situacao+'</span></div>'+
+        (aba==="locais"?localizacao:
+          '<div class="dl-item-rodape"><span>Estoque: Dogo '+num(m.dogo_quantidade)+
+          ' / Local '+num(m.local_quantidade)+'</span><span>Ver detalhes <b class="dl-item-chevron">⌄</b></span></div>')+
+        '</summary><div class="dl-detalhes">'+
+        (aba==="locais"?"":localizacao)+
+        '<div class="dl-detalhes-grid" style="margin-top:15px">'+
+        detalhe("Estoque Dogo",m.dogo_quantidade)+
+        detalhe("Estoque local",m.local_quantidade)+
+        detalhe("Reservas Dogo",m.dogo_reservada)+
+        detalhe("Reservas locais",m.local_reservada)+
+        '</div><p class="dl-legenda" style="margin-top:12px">'+
+        (m.sem_dogo?"Material ainda não cadastrado na base Dogo atual. ":
+        m.diferenca_local?"Localização divergente. ":"")+
+        (pendencia?"Campos não informados permanecem pendentes, sem assumir valor zero.":"")+
+        '</p></div></details>';
     }).join("");
   }
   function selecionar(m) {
@@ -353,15 +423,25 @@
     }finally{estado.busy=false;}
   }
   async function listarConferencias() {
-    const el=$("dlHistorico");if(!el)return;el.textContent="Carregando...";
+    const el=$("dlHistorico");if(!el)return;el.textContent="Carregando conferências...";
     try{
       const data=await rpc("listar_conferencias",{p_limite:50});
       const itens=Array.isArray(data)?data:[];
-      el.innerHTML=itens.length?itens.map((m)=>'<article class="dl-item"><div>'+
-        '<strong>'+escape(m.codigo)+' — '+escape(m.descricao)+'</strong>'+
-        '<small>Físico: '+num(m.quantidade_fisica)+' · Local: '+escape(valor(m.local_encontrado))+
-        '</small><small>'+escape(m.usuario_nome)+' · '+escape(new Date(m.criado_em).toLocaleString("pt-BR"))+
-        '</small></div></article>').join(""):"Nenhuma conferência local registrada.";
+      el.innerHTML=itens.length?itens.map((m)=>
+        '<details class="dl-item"><summary class="dl-item-summary">'+
+        '<div class="dl-item-topo"><div><h3 class="dl-item-titulo">'+escape(m.descricao)+'</h3>'+
+        '<div class="dl-item-codigo">Cód. '+escape(m.codigo)+'</div></div>'+
+        '<span class="dl-selo ok">Registrada</span></div>'+
+        '<div class="dl-item-rodape"><span>Físico: '+num(m.quantidade_fisica)+
+        ' · Local: '+escape(valor(m.local_encontrado))+'</span>'+
+        '<span>Ver detalhes <b class="dl-item-chevron">⌄</b></span></div></summary>'+
+        '<div class="dl-detalhes"><div class="dl-detalhes-grid">'+
+        detalhe("Quantidade física",m.quantidade_fisica)+
+        detalhe("Local encontrado",m.local_encontrado)+
+        detalhe("Responsável",m.usuario_nome)+
+        detalhe("Data",m.criado_em?new Date(m.criado_em).toLocaleString("pt-BR"):"")+
+        '</div></div></details>').join(""):
+        '<div class="dl-vazio"><strong>Sem conferências locais</strong>Os registros realizados aparecerão aqui.</div>';
     }catch(e){el.textContent=e.message;mensagem(e.message,true);}
   }
   // Os arquivos XLS legados podem conter controles e surrogates isolados.
