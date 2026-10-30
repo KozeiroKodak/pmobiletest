@@ -113,6 +113,12 @@ function voltarTelaAnteriorPmobile() {
 
     const telaAtual = obterTelaSistemaAtual();
 
+    if (typeof window.voltarUmNivelDadosLocais === "function" &&
+        window.voltarUmNivelDadosLocais(telaAtual)) return true;
+
+    if (typeof window.voltarUmNivelTransportesPmobile === "function" &&
+        window.voltarUmNivelTransportesPmobile(telaAtual)) return true;
+
     // Configurações 3.0 possui uma hierarquia interna que não aparece
     // no histórico de telas principais: Subárea → Administração →
     // Configurações. Locais e Divergências também voltam ao pai.
@@ -157,7 +163,9 @@ const itensMenuSistema = [
 
     "menuConferencias",
 
-    "menuConfiguracoes"
+    "menuConfiguracoes",
+    "menuDadosLocais",
+    "menuTransportes"
 
 ];
 
@@ -1824,12 +1832,16 @@ function atualizarVisibilidadeConfiguracoes() {
     const regras = {
         menuSair: !!usuario,
         menuConfiguracoes: isAdmin,
-        menuImportacao: isAdmin,
-        menuRastreio: isAdmin || isNivel2,
-        menuValoresTotal: isAdmin,
-        menuValoresTotal2: isAdmin,
+        // Entradas antigas realocadas para Configurações / Transportes.
+        // As funções continuam existentes, mas não voltam ao menu inicial no login.
+        menuImportacao: false,
+        menuRastreio: false,
+        menuValoresTotal: false,
+        menuValoresTotal2: false,
 
-        menuConferencias: isAdmin,
+        menuConferencias: false,
+        menuTransportes: isAdmin || isNivel2,
+        menuDadosLocais: isAdmin || isNivel2,
         menuReservas: isAdmin || isNivel2,
         menuPesquisa: isAdmin || isNivel2,
         menuContagemManual: isAdmin || isNivel2,
