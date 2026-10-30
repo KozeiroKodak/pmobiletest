@@ -1118,6 +1118,8 @@
 #dadosLocais .linha-contagem-manual-busca .contagem-v2-tipos button{cursor:pointer}
 #dadosLocais [data-dl-tipo]:focus-visible{outline:2px solid var(--pm-acento,#57dceb);outline-offset:2px}
 @media(max-width:700px){
+  /* O primeiro painel de Contagem segue o mesmo padding da busca nativa. */
+  #dadosLocais [data-dl-panel="estoque"] > .painel.contagem-v2{padding:12px}
   #dadosLocais .dl-app{padding:17px 12px 68px}
   #dadosLocais .locais-v3-cartao .locais-v3-detalhes{grid-template-columns:1fr}
 }
