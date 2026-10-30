@@ -56,43 +56,61 @@
     return data;
   }
   function paginacao(aba) {
-    return '<nav class="dl-paginacao" aria-label="Paginação de '+TITULOS[aba]+'">'+
-      '<button class="dl-secundario" type="button" data-dl-page="-1" data-dl-aba="'+aba+'">‹ Anterior</button>'+
+    return '<nav class="reservas-paginacao" aria-label="Páginas de '+TITULOS[aba]+'">'+
+      '<button class="botao-secundario" type="button" data-dl-page="-1" data-dl-aba="'+aba+'">‹ Anterior</button>'+
       '<span id="dlPagina-'+aba+'">Página 1</span>'+
-      '<button class="dl-secundario" type="button" data-dl-page="1" data-dl-aba="'+aba+'">Próxima ›</button></nav>';
+      '<button class="botao-secundario" type="button" data-dl-page="1" data-dl-aba="'+aba+'">Próxima ›</button></nav>';
   }
   function resumo(aba) {
-    return '<div class="dl-resumo" id="dlResumo-'+aba+'" aria-label="Indicadores da página"></div>';
+    const classe=aba==="locais"?"locais-v3-resumo":"conferencias-resumo";
+    return '<div class="'+classe+'" id="dlResumo-'+aba+'" aria-label="Indicadores da página"></div>';
   }
   function pesquisarForm(aba) {
-    const titulo=aba==="reservas"?"Reservas cadastradas":aba==="estoque"?"Consultar e editar estoque":"Consultar materiais";
-    return '<div class="dl-painel"><h3 class="dl-subtitulo">'+titulo+'</h3>'+
-      '<form class="dl-search" data-dl-busca="'+aba+'">'+
-      '<label>Material<input type="search" name="termo" placeholder="Código, referência ou descrição" autocomplete="off"></label>'+
-      '<label>Pesquisar por<select name="tipo"><option value="todos">Todos</option>'+
-      '<option value="codigo">Código</option><option value="referencia">Referência</option>'+
-      '<option value="descricao">Descrição</option></select></label>'+
-      '<button class="dl-primario" type="submit">Pesquisar</button></form>'+
-      '</div><div class="dl-painel">'+resumo(aba)+
-      '<div class="dl-resultados" id="dlResultados-'+aba+'" aria-live="polite"></div>'+
-      paginacao(aba)+'</div>';
+    const titulo=aba==="reservas"?"Reservas locais":aba==="estoque"?"Contagem e estoque local":"Encontrar material";
+    const contagem=aba==="estoque";
+    const classe=contagem?"contagem-v2":"pesquisa-v2";
+    const prefix=contagem?"contagem-v2":"pesquisa-v2";
+    const status=contagem?"<span class=\"contagem-v2-selo\">● Registro local</span>":"<span class=\"pesquisa-v2-status\">● Dados locais</span>";
+    return '<div class="painel '+classe+'">'+
+      '<div class="'+prefix+'-topo"><div class="'+prefix+'-marca"><span class="'+prefix+'-icone">'+
+      (contagem?'▤':'⌕')+'</span><div><strong>PMobile</strong><small>'+
+      (contagem?'Inventário / Estoque manual':'Catálogo de materiais')+'</small></div></div>'+status+'</div>'+
+      '<div class="'+prefix+'-intro"><h2>'+titulo+'</h2><p>Pesquise por código, referência ou descrição.</p></div>'+
+      (contagem?'<h3 class="contagem-v2-etapa">01 · Localizar material</h3>':'')+
+      '<form data-dl-busca="'+aba+'" class="'+(contagem?'linha-contagem-manual-busca':'dl-pesquisa-original')+'">'+
+      '<div class="'+prefix+'-campo"><span class="'+(contagem?'':'pesquisa-v2-lupa')+'" aria-hidden="true">⌕</span>'+
+      '<input type="search" name="termo" placeholder="Digite o código" autocomplete="off" aria-label="Termo de pesquisa"></div>'+
+      '<select class="'+(contagem?'seletor-contagem-manual-nativo':'pesquisa-v2-select')+'" name="tipo" aria-label="Tipo de pesquisa">'+
+      '<option value="codigo">Código</option><option value="referencia">Referência</option><option value="descricao">Descrição</option></select>'+
+      '<div class="'+prefix+'-tipos" role="group" aria-label="Pesquisar por">'+
+      ['codigo','referencia','descricao'].map(function(tipo){
+        const rotulo={codigo:'Código',referencia:'Referência',descricao:'Descrição'}[tipo];
+        return '<button type="button" data-dl-tipo="'+tipo+'" class="'+(tipo==='codigo'?'ativo':'')+
+          '" aria-pressed="'+(tipo==='codigo'?'true':'false')+'">'+rotulo+'</button>';
+      }).join('')+'</div>'+
+      '<button class="'+(contagem?'botao-aba botao-buscar-contagem-manual':'pesquisa-v2-buscar')+
+      '" type="submit">⌕ &nbsp; '+(contagem?'Buscar material':'Pesquisar material')+'</button></form>'+
+      '<div class="'+prefix+'-resultados" id="dlResultados-'+aba+'" aria-live="polite">'+
+      '<div class="pesquisa-v2-vazio"><strong>Encontre o que precisa</strong>'+
+      '<p>Informe o material para consultar a Contagem local.</p></div></div>'+
+      paginacao(aba)+
+      '<div class="pesquisa-v2-rodape">◉ <span>Fonte: Contagem local (Supabase)</span></div></div>';
   }
   function compararForm(aba) {
-    const titulo=aba==="locais"?"Conferir localizações":aba==="divergencias"?"Verificar diferenças":"Conferir bases de estoque";
-    return '<div class="dl-painel"><h3 class="dl-subtitulo">'+titulo+'</h3>'+
-      '<form class="dl-search" data-dl-comparar="'+aba+'"><label>Material'+
-      '<input type="search" name="termo" placeholder="Código ou descrição"></label>'+
-      '<button class="dl-primario" type="submit">Atualizar comparação</button></form>'+
-      '<p class="dl-atualizacao"><span aria-hidden="true"></span>Comparação automática ao abrir e durante o uso desta tela</p></div>'+
-      '<div class="dl-painel">'+resumo(aba)+
-      '<p class="dl-legenda">Os indicadores se referem apenas aos materiais exibidos nesta página.</p>'+
-      '<div class="dl-resultados" id="dlResultados-'+aba+'" aria-live="polite"></div>'+
-      paginacao(aba)+'</div>';
+    const titulo=aba==="locais"?"Buscar alteração de local":aba==="divergencias"?
+      "Pesquisar divergências":"Pesquisar material";
+    return '<div class="painel painel-locais"><div class="dl-nativo-comparador">'+
+      resumo(aba)+
+      '<form class="locais-v3-ferramentas" data-dl-comparar="'+aba+'">'+
+      '<label> '+titulo+'<input type="search" name="termo" placeholder="Código, produto ou local..." autocomplete="off"></label>'+
+      '<span class="locais-v3-ajuda">Comparação automática ao abrir a tela e ao pesquisar. Indicadores da página atual.</span>'+
+      '</form><div id="dlResultados-'+aba+'" aria-live="polite"></div>'+
+      paginacao(aba)+'</div></div>';
   }
   function painel(id,conteudo,nota) {
-    return '<section class="dl-panel" data-dl-panel="'+id+'" hidden>'+
-      '<div class="dl-top"><button type="button" class="dl-voltar" data-dl-back>‹ Voltar</button>'+
-      '<div><p>'+escape(nota||"Dados do estoque local, separados da Dogo.")+'</p></div></div>'+
+    return '<section data-dl-panel="'+id+'" hidden>'+
+      '<div class="dl-retorno"><button type="button" class="botao-voltar-tela" data-dl-back aria-label="Voltar">‹</button>'+
+      '<span>'+escape(nota||"Contagem local, independente da Dogo.")+'</span></div>'+
       conteudo+'</section>';
   }
   function cartaoMenu(id) {
@@ -104,57 +122,59 @@
       comparar:"Verificar automaticamente as duas bases",
       divergencias:"Acompanhar diferenças de quantidades",
       locais:"Ver locais anteriores e novos locais",
-      importar:"Atualizar cadastro sem alterar as contagens"
+      importar:"Atualizar cadastro sem alterar contagens"
     };
-    return '<button type="button" class="dl-card" data-dl-open="'+id+'">'+
-      '<span class="dl-card-icon">'+icone(id)+'</span>'+
-      '<span class="dl-card-texto"><strong>'+TITULOS[id]+'</strong><small>'+descricoes[id]+'</small></span>'+
-      '<span class="dl-card-seta" aria-hidden="true">↗</span></button>';
+    return '<button type="button" class="configuracoes-v3-card" data-dl-open="'+id+'">'+
+      '<span class="configuracoes-v3-icone">'+icone(id)+'</span>'+
+      '<span class="configuracoes-v3-textos"><strong>'+TITULOS[id]+'</strong>'+
+      '<small>'+descricoes[id]+'</small></span>'+
+      '<span class="configuracoes-v3-canto" aria-hidden="true">↗</span></button>';
   }
   function htmlPrincipal() {
-    return '<div class="dl-app"><header class="dl-cabecalho">'+
-      '<span class="dl-kicker" id="dlCabecalhoCaminho">PMOBILE / Dados locais</span>'+
+    return '<div class="dl-app"><div class="cabecalho-pagina">'+
+      '<p class="cabecalho-caminho" id="dlCabecalhoCaminho">PMOBILE / Dados locais</p>'+
       '<h1 id="dlCabecalhoTitulo">Dados locais</h1>'+
       '<p id="dlCabecalhoDescricao">Cadastro permanente, controle manual e comparação com a Dogo.</p>'+
-      '</header><div id="dlMensagem" role="status" aria-live="polite"></div>'+
-      '<section data-dl-panel="inicio">'+
-      '<div class="dl-secao-titulo"><strong>Estoque local</strong><span>Base independente</span></div>'+
-      '<div class="dl-grid">'+["pesquisa","estoque","reservas","conferencias"].map(cartaoMenu).join("")+'</div>'+
-      '<div class="dl-secao-titulo" style="margin-top:23px"><strong>Verificação e cadastro</strong></div>'+
-      '<div class="dl-grid">'+["comparar","divergencias","locais","importar"].map(cartaoMenu).join("")+'</div>'+
+      '</div><div id="dlMensagem" role="status" aria-live="polite"></div>'+
+      '<section data-dl-panel="inicio" class="configuracoes-v3-hub">'+
+      '<div class="configuracoes-v3-grupo"><p class="configuracoes-v3-etiqueta">ESTOQUE LOCAL</p>'+
+      '<div class="configuracoes-v3-grade">'+["pesquisa","estoque","reservas","conferencias"].map(cartaoMenu).join("")+'</div></div>'+
+      '<div class="configuracoes-v3-grupo"><p class="configuracoes-v3-etiqueta">VERIFICAÇÃO E CADASTRO</p>'+
+      '<div class="configuracoes-v3-grade">'+["comparar","divergencias","locais","importar"].map(cartaoMenu).join("")+'</div></div>'+
       '<p class="dl-informacao">As funções originais da Dogo permanecem inalteradas.</p></section>'+
-      painel("pesquisa",pesquisarForm("pesquisa"),"Consulta exclusivamente o cadastro permanente da Contagem local.")+
+      painel("pesquisa",pesquisarForm("pesquisa"),"Pesquisa na base independente da Dogo.")+
       painel("estoque",pesquisarForm("estoque")+
-        '<form id="dlFormEstoque" class="dl-editor" hidden><h3 id="dlEditorTitulo">Editar material</h3>'+
-        '<div class="dl-campos">'+
-        '<label>Quantidade do item<input id="dlQtdItem" type="number" min="0" step="any" placeholder="Não preenchido"></label>'+
-        '<label>Quantidade total<input id="dlQtdTotal" type="number" min="0" step="any" placeholder="Não preenchido"></label>'+
-        '<label>Itens reservados<input id="dlQtdReservada" type="number" min="0" step="any" placeholder="Não preenchido"></label>'+
-        '<label>Local<input id="dlLocal" type="text" placeholder="Não preenchido"></label>'+
-        '</div><button class="dl-primario" type="submit">Salvar no estoque local</button></form>',
-        "Atualize apenas os dados manuais; o estoque Dogo não será modificado.")+
-      painel("reservas",pesquisarForm("reservas"),"Exibe materiais com reservas registradas no estoque local.")+
-      painel("conferencias",'<div class="dl-painel"><h3 class="dl-subtitulo">Registrar conferência local</h3>'+
-        '<form id="dlFormConferencia" class="dl-editor">'+
-        '<div class="dl-campos"><label>Código do material<input id="dlConCodigo" required></label>'+
-        '<label>Quantidade física<input id="dlConQuantidade" type="number" min="0" step="any" required></label>'+
-        '<label>Local encontrado<input id="dlConLocal"></label></div>'+
-        '<button class="dl-primario" type="submit">Registrar conferência local</button></form></div>'+
-        '<div class="dl-painel"><h3 class="dl-subtitulo">Conferências registradas</h3>'+
-        '<p class="dl-historico-intro">Histórico separado do inventário Dogo.</p>'+
-        '<div class="dl-resultados" id="dlHistorico"></div></div>',
-        "Histórico próprio: registrar a conferência não sobrescreve as quantidades do estoque.")+
-      painel("comparar",compararForm("comparar"),"Comparação automática entre os materiais presentes nas duas bases.")+
-      painel("divergencias",compararForm("divergencias"),"Diferenças de quantidades e reservas identificadas nas bases, sem alterar a Dogo.")+
-      painel("locais",compararForm("locais"),"Comparação de local anterior (Dogo) e novo local (Contagem local), sem confirmar alterações na Dogo.")+
-      painel("importar",'<div class="dl-painel"><h3 class="dl-subtitulo">Cadastro permanente de materiais</h3>'+
-        '<div class="dl-importar-aviso"><strong>Importação segura</strong> · Somente código, referência, descrição e marca. Quantidades, reservas e locais manuais serão preservados.</div>'+
-        '<form id="dlFormImportar" class="dl-editor">'+
-        '<label>Planilha Dogo<input type="file" id="dlArquivo" accept=".xlsx,.xls,.xlsb,.xlsm,.csv,.html,.htm" required></label>'+
-        '<button class="dl-primario" type="submit" id="dlBotaoImportar">Importar cadastro permanente</button></form>'+
+        '<form id="dlFormEstoque" class="painel contagem-v2 contagem-v2-registro" hidden>'+
+        '<h3 class="contagem-v2-etapa" id="dlEditorTitulo">02 · Registrar estoque local</h3>'+
+        '<div class="linha-formulario">'+
+        '<label class="contagem-v2-label">Quantidade do item<input id="dlQtdItem" type="number" min="0" step="any" placeholder="Não preenchido"></label>'+
+        '<label class="contagem-v2-label">Quantidade total<input id="dlQtdTotal" type="number" min="0" step="any" placeholder="Não preenchido"></label>'+
+        '<label class="contagem-v2-label">Itens reservados<input id="dlQtdReservada" type="number" min="0" step="any" placeholder="Não preenchido"></label>'+
+        '<label class="contagem-v2-label">Local<input id="dlLocal" type="text" placeholder="Não preenchido"></label>'+
+        '<button class="botao-aba contagem-v2-salvar" type="submit">✓ &nbsp; Salvar estoque local</button></div></form>',
+        "Altere somente o estoque manual; a Dogo permanece intacta.")+
+      painel("reservas",pesquisarForm("reservas"),"Materiais com reservas preenchidas no estoque local.")+
+      painel("conferencias",'<div class="painel contagem-v2 contagem-v2-registro">'+
+        '<h3 class="contagem-v2-etapa">Registrar conferência local</h3>'+
+        '<form id="dlFormConferencia" class="linha-formulario">'+
+        '<label class="contagem-v2-label">Código do material<input id="dlConCodigo" required></label>'+
+        '<label class="contagem-v2-label">Quantidade física<input id="dlConQuantidade" type="number" min="0" step="any" required></label>'+
+        '<label class="contagem-v2-label">Local encontrado<input id="dlConLocal"></label>'+
+        '<button class="botao-aba contagem-v2-salvar" type="submit">✓ &nbsp; Registrar conferência local</button>'+
+        '</form></div><div class="painel"><div id="dlHistorico" class="conferencias-conteudo"></div></div>',
+        "Conferências locais são separadas do histórico original.")+
+      painel("comparar",compararForm("comparar"),"Comparação automática entre Dogo e Contagem local.")+
+      painel("divergencias",compararForm("divergencias"),"Diferenças entre as duas bases, sem alterar os registros.")+
+      painel("locais",compararForm("locais"),"Local anterior (Dogo) e novo local (Contagem local).")+
+      painel("importar",'<div class="painel contagem-v2"><h3 class="contagem-v2-etapa">Importar cadastro permanente</h3>'+
+        '<p class="dl-informacao">Apenas código, referência, descrição e marca. Quantidades e locais manuais serão preservados.</p>'+
+        '<form id="dlFormImportar" class="linha-formulario">'+
+        '<label class="contagem-v2-label">Planilha Dogo<input type="file" id="dlArquivo" accept=".xlsx,.xls,.xlsb,.xlsm,.csv,.html,.htm" required></label>'+
+        '<button class="botao-aba contagem-v2-salvar" type="submit" id="dlBotaoImportar">✓ &nbsp; Importar cadastro permanente</button></form>'+
         '<p id="dlProgresso" role="status" aria-live="polite"></p>'+
-        '<div class="dl-progresso-barra" id="dlProgressoBarra" role="progressbar" aria-label="Importação de materiais" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden><span id="dlProgressoPreenchimento" style="width:0%"></span></div></div>',
-        "A importação cumulativa não apaga materiais nem sobrescreve os campos manuais.")+
+        '<div id="dlProgressoBarra" role="progressbar" aria-label="Importação" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden>'+
+        '<span id="dlProgressoPreenchimento" style="width:0%"></span></div></div>',
+        "Importação cumulativa: não elimina os materiais já cadastrados.")+
       '</div>';
   }
   function init() {
