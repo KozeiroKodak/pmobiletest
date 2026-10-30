@@ -149,7 +149,7 @@
       estado.offsets[nome]=0;consultar(nome);
     }else if(nome==="conferencias"){listarConferencias();}
   }
-  function voltar() {if(estado.tela!=="inicio"){tela("inicio");return true;}return false;}
+  function voltar() {if(estado.tela!=="inicio"){tela("inicio");return true;}if(typeof window.mostrarTelaSistema==="function"){window.mostrarTelaSistema("homeSistema",null,true);return true;}return false;}
   function onClick(e) {
     const abrirBtn=e.target.closest("[data-dl-open]");
     if(abrirBtn){tela(abrirBtn.dataset.dlOpen);return;}
