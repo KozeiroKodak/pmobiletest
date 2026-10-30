@@ -1,0 +1,222 @@
+
+/* FRETE GERAL 2 — Replica o visual do Frete Geral 1, isolado neste ID.
+   Somente a análise por transportadora utiliza os novos estilos abaixo. */
+
+#valoresTotal2 .valores-hero{position:relative;overflow:hidden;border:1px solid #315e50;border-radius:20px;padding:25px 22px;background:radial-gradient(circle at 90% 0%,rgba(49,201,144,.22),transparent 48%),linear-gradient(135deg,#152b26,#121716 70%);margin-bottom:20px}
+#valoresTotal2 .valores-hero:after{content:"";position:absolute;width:190px;height:190px;border:1px solid rgba(68,219,159,.17);border-radius:50%;right:-65px;top:-85px;pointer-events:none}
+#valoresTotal2 .valores-eyebrow{color:#8be3bb;font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase}
+#valoresTotal2 .valores-hero h1{font-size:clamp(27px,5vw,38px);margin:9px 0 8px;letter-spacing:-1px}
+#valoresTotal2 .valores-hero p{color:#aec3b8;margin:0;font-size:14px;max-width:460px;line-height:1.6}
+#valoresTotal2 .valores-painel{background:linear-gradient(180deg,#191d1b,#151515);border:1px solid #2c3731;border-radius:20px;padding:clamp(15px,3vw,26px)}
+#valoresTotal2 #valoresTotal2Status{display:flex;align-items:center;gap:9px;flex-wrap:wrap;color:#a5b8ad!important;font-size:12px;padding:0 0 16px;border-bottom:1px solid #2a342e;margin-bottom:20px!important}
+#valoresTotal2 #valoresTotal2Status:before{content:"";width:8px;height:8px;background:#37d79a;border-radius:50%;box-shadow:0 0 0 4px rgba(55,215,154,.1)}
+#valoresTotal2 #valoresTotal2Cards{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important}
+#valoresTotal2 .valores-kpi{position:relative;overflow:hidden;min-width:0;min-height:105px;background:#1b211e;border:1px solid #35413a;border-radius:16px;padding:17px}
+#valoresTotal2 .valores-kpi:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--kpi-accent,#64796e)}
+#valoresTotal2 .valores-kpi-label{font-size:12px;color:#a7b8ae;line-height:1.45;margin-bottom:12px}
+#valoresTotal2 .valores-kpi strong{font-size:clamp(17px,3vw,25px);letter-spacing:-.5px;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+#valoresTotal2 .valores-kpi.destaque{background:linear-gradient(140deg,#193d31,#1b2722);border-color:#368965}
+#valoresTotal2 .valores-kpi.destaque strong{color:#81f1b8}
+#valoresTotal2 .valores-kpi.percentual strong{color:#91d5ff}
+#valoresTotal2 #valoresTotal2Mensais{border-top:1px solid #303b34;padding-top:24px}
+#valoresTotal2 #valoresTotal2Mensais>h3{font-size:12px!important;letter-spacing:1.8px;text-transform:uppercase;color:#91b9a4;margin-bottom:14px!important}
+#valoresTotal2 #valoresTotal2Mensais button{flex:1;min-width:90px;font-weight:700;transition:background .15s,border-color .15s}
+#valoresTotal2 #valoresTotal2Mensais details{transition:border-color .15s}
+#valoresTotal2 #valoresTotal2Mensais details[open]{border-color:#4a8067!important}
+#valoresTotal2 #valoresTotal2Mensais summary{line-height:1.5}
+#valoresTotal2 .valores-atualizar{margin-top:20px!important;border:1px solid #376b52!important;border-radius:12px!important;color:#b8f6d2!important;background:#20392d!important;padding:11px 16px!important}
+@media(min-width:700px){#valoresTotal2 #valoresTotal2Cards{grid-template-columns:repeat(3,minmax(0,1fr))!important}#valoresTotal2 .valores-kpi{min-height:130px}}
+@media(max-width:380px){#valoresTotal2 .valores-kpi{padding:12px}#valoresTotal2 .valores-kpi strong{font-size:16px}}
+
+/* Reaproveita a escala responsiva global do PMobile para o painel financeiro. */
+@media(max-width:700px){
+ #valoresTotal2{padding:12px 10px}
+ #valoresTotal2 .valores-hero{padding:16px 15px;border-radius:14px;margin-bottom:12px}
+ #valoresTotal2 .valores-hero:after{width:120px;height:120px;right:-50px;top:-55px}
+ #valoresTotal2 .valores-hero h1{font-size:24px;margin:6px 0}
+ #valoresTotal2 .valores-hero p{font-size:12px;line-height:1.4}
+ #valoresTotal2 .valores-painel{padding:12px;border-radius:14px}
+ #valoresTotal2 #valoresTotal2Status{font-size:11px;padding-bottom:12px;margin-bottom:12px!important}
+ #valoresTotal2 #valoresTotal2Cards{gap:8px!important}
+ #valoresTotal2 .valores-kpi{min-height:82px;padding:11px;border-radius:11px}
+ #valoresTotal2 .valores-kpi-label{font-size:11px;line-height:1.3;margin-bottom:8px}
+ #valoresTotal2 .valores-kpi strong{font-size:clamp(14px,3.8vw,18px);letter-spacing:-.3px}
+ #valoresTotal2 #valoresTotal2Mensais{padding-top:14px;margin-top:16px!important}
+ #valoresTotal2 #valoresTotal2Mensais>h3{font-size:11px!important;margin-bottom:10px!important}
+ #valoresTotal2 #valoresTotal2Mensais button{min-width:0!important;padding:9px 7px!important;font-size:12px}
+ #valoresTotal2 #valoresTotal2Mensais details{padding:11px!important;border-radius:11px!important;margin-bottom:9px!important}
+ #valoresTotal2 #valoresTotal2Mensais summary{font-size:13px}
+ #valoresTotal2 #valoresTotal2Mensais details div[style*="grid-template-columns"]{gap:8px!important;margin:9px 0 12px!important;grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ #valoresTotal2 #valoresTotal2Mensais details div[style*="grid-template-columns"]>div{padding:10px!important;min-width:0;border-radius:10px!important}
+ #valoresTotal2 #valoresTotal2Mensais details div[style*="grid-template-columns"] strong{font-size:clamp(13px,3.6vw,17px)!important;overflow-wrap:anywhere}
+ #valoresTotal2 #valoresTotal2Mensais details div[style*="grid-template-columns"]>div>div{font-size:11px!important;line-height:1.3}
+
+ #valoresTotal2 #valoresTotal2Mensais select{min-width:0;max-width:100%;font-size:14px}
+ #valoresTotal2 .valores-atualizar{margin-top:12px!important}
+}
+@media(max-width:360px){
+ #valoresTotal2 #valoresTotal2Cards{grid-template-columns:1fr!important}
+ #valoresTotal2 .valores-kpi{min-height:68px}
+}
+
+
+/* Frete geral: substituir o verde decorativo por ciano, manter o ponto de
+   atualização verde porque informa uma condição operacional. */
+#valoresTotal2 .valores-hero {
+  background: radial-gradient(circle at 90% 0%,rgba(87,220,235,.16),transparent 48%),
+              linear-gradient(135deg,#113039,#0c191f 70%) !important;
+  border-color: #2d7886 !important;
+}
+#valoresTotal2 .valores-hero:after { border-color: rgba(87,220,235,.2) !important; }
+#valoresTotal2 .valores-eyebrow { color: var(--pm-acento) !important; }
+#valoresTotal2 .valores-hero p { color: #b5d0d7 !important; }
+#valoresTotal2 .valores-painel {
+  background: linear-gradient(180deg,#15292f,#0d1a20) !important;
+  border-color: var(--borda);
+}
+#valoresTotal2 .valores-kpi { background: #162b32 !important; border-color: #35515a !important; }
+#valoresTotal2 .valores-kpi-label { color: #afc4ca !important; }
+#valoresTotal2 .valores-kpi.destaque {
+  background: linear-gradient(140deg,#153c47,#173039) !important;
+  border-color: #3197a6 !important;
+}
+#valoresTotal2 .valores-kpi.destaque strong { color: var(--pm-acento) !important; }
+#valoresTotal2 #valoresTotal2Mensais > h3 { color: var(--pm-acento) !important; }
+#valoresTotal2 #valoresTotal2Mensais details[open] { border-color: #389ba9 !important; }
+#valoresTotal2 .valores-atualizar,
+#valoresTotal2 button[onclick="carregarValoresTotal()"] {
+  border-color: #368d9c !important;
+  background: #153c46 !important;
+  color: #a7f3fa !important;
+}
+
+
+#valoresTotal2 .frete2-analise{
+  padding:14px;
+  border:1px solid #2e7785;
+  border-radius:16px;
+  background:linear-gradient(160deg,#12343e,#0d242d);
+  color:#f0f7f8;
+}
+#valoresTotal2 .frete2-cabecalho{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+  padding-bottom:12px;
+}
+#valoresTotal2 .frete2-cabecalho h4{
+  margin:0;font-size:18px;color:#f3f9fa;
+}
+#valoresTotal2 .frete2-cabecalho p{
+  margin:6px 0 0;color:#a6bec6;font-size:12px;line-height:1.45;
+}
+#valoresTotal2 .frete2-contador{
+  flex-shrink:0;display:inline-block;padding:6px 9px;
+  border:1px solid #357d8b;border-radius:10px;color:#92e6ef;
+  font-size:11px;white-space:nowrap;background:#163640;
+}
+#valoresTotal2 .frete2-filtros{
+  display:grid;gap:10px;margin:5px 0 15px;padding:12px;
+  border:1px solid #2d5360;border-radius:12px;background:#122b34;
+}
+#valoresTotal2 .frete2-filtros-linha{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;
+}
+#valoresTotal2 .frete2-busca-linha{
+  display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:8px;
+}
+#valoresTotal2 .frete2-campo{display:grid;gap:5px;min-width:0;}
+#valoresTotal2 .frete2-campo>span{
+  font-size:10px;font-weight:650;color:#a5c1c9;
+}
+#valoresTotal2 .frete2-campo select,
+#valoresTotal2 .frete2-campo input{
+  min-height:42px;width:100%;min-width:0;max-width:100%;box-sizing:border-box;
+  padding:9px 11px;border:1px solid #3b6671;border-radius:9px;
+  background:#1a282e;color:#eef6f8;font:inherit;font-size:12px;
+}
+#valoresTotal2 .frete2-campo input::placeholder{color:#a2b7bf;}
+#valoresTotal2 .frete2-campo select:focus-visible,
+#valoresTotal2 .frete2-campo input:focus-visible{
+  outline:2px solid #57dceb;outline-offset:2px;
+}
+#valoresTotal2 .frete2-aviso:not([hidden]){
+  font-size:12px;color:#ecd29b;background:#332b20;
+  padding:10px 12px;border-radius:9px;
+}
+#valoresTotal2 .frete2-lista{display:grid;gap:8px;}
+#valoresTotal2 .frete2-item{
+  display:block;margin:0;padding:0!important;
+  background:#14262e!important;border:1px solid #32525d!important;
+  border-radius:12px!important;overflow:hidden;
+}
+#valoresTotal2 .frete2-item[open]{border-color:#57dceb!important;}
+#valoresTotal2 .frete2-item-resumo{
+  display:grid;
+  grid-template-columns:27px minmax(0,1fr) minmax(100px,.8fr) minmax(55px,.45fr) 14px;
+  align-items:center;gap:9px;
+  padding:13px 11px;list-style:none;cursor:pointer;
+}
+#valoresTotal2 .frete2-item-resumo::-webkit-details-marker{display:none;}
+#valoresTotal2 .frete2-item-resumo::marker{content:"";}
+#valoresTotal2 .frete2-posicao{
+  display:grid;place-items:center;width:26px;height:26px;border-radius:50%;
+  background:#226b82;color:#e9fdff;font-size:11px;font-weight:700;
+}
+#valoresTotal2 .frete2-info{display:grid;gap:4px;min-width:0;}
+#valoresTotal2 .frete2-info>strong{font-size:12px;overflow-wrap:anywhere;}
+#valoresTotal2 .frete2-info>small{font-size:10px;color:#aec6cb;}
+#valoresTotal2 .frete2-barra-fundo{
+  height:5px;margin-top:3px;background:#294751;border-radius:10px;overflow:hidden;
+}
+#valoresTotal2 .frete2-barra-valor{height:100%;background:#57dceb;border-radius:inherit;}
+#valoresTotal2 .frete2-valor,#valoresTotal2 .frete2-percentual{
+  display:grid;gap:5px;min-width:0;
+}
+#valoresTotal2 .frete2-valor>span,
+#valoresTotal2 .frete2-percentual>span{font-size:10px;color:#9fb7bf;}
+#valoresTotal2 .frete2-valor>strong,
+#valoresTotal2 .frete2-percentual>strong{
+  font-size:12px;overflow-wrap:anywhere;font-variant-numeric:tabular-nums;
+}
+#valoresTotal2 .frete2-percentual>strong{color:#82d9ec;}
+#valoresTotal2 .frete2-seta{color:#57dceb;font-size:17px;transition:transform .15s;}
+#valoresTotal2 .frete2-item[open] .frete2-seta{transform:rotate(180deg);}
+#valoresTotal2 .frete2-detalhes{
+  padding:12px;border-top:1px solid #37545e;background:#1a333c;
+}
+#valoresTotal2 .frete2-detalhes>p{font-size:12px;font-weight:700;color:#cde7ed;margin:0 0 12px;}
+#valoresTotal2 .frete2-detalhes-grade{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;
+}
+#valoresTotal2 .frete2-detalhes-grade>div{
+  display:grid;gap:5px;min-width:0;padding:11px;
+  background:#142730;border:1px solid #31515d;border-radius:9px;
+}
+#valoresTotal2 .frete2-detalhes-grade span{font-size:10px;color:#a8bec4;}
+#valoresTotal2 .frete2-detalhes-grade strong{
+  font-size:13px;color:#edf7f8;overflow-wrap:anywhere;
+}
+#valoresTotal2 .frete2-vazio{
+  padding:18px 10px;color:#b1c5ca;text-align:center;font-size:12px;
+}
+@media(max-width:700px){
+  #valoresTotal2 .frete2-analise{padding:10px;}
+  #valoresTotal2 .frete2-filtros-linha{grid-template-columns:repeat(2,minmax(0,1fr));}
+  #valoresTotal2 .frete2-filtros-linha .frete2-campo:last-child{grid-column:1/-1;}
+  #valoresTotal2 .frete2-item-resumo{
+    grid-template-columns:24px minmax(0,1.15fr) minmax(75px,.9fr) minmax(46px,.5fr) 11px;
+    gap:5px;padding:11px 7px;
+  }
+  #valoresTotal2 .frete2-posicao{width:23px;height:23px;font-size:10px;}
+  #valoresTotal2 .frete2-info>strong{font-size:11px;}
+  #valoresTotal2 .frete2-valor>strong,
+  #valoresTotal2 .frete2-percentual>strong{font-size:11px;}
+  #valoresTotal2 .frete2-cabecalho h4{font-size:16px;}
+}
+@media(max-width:375px){
+  #valoresTotal2 .frete2-busca-linha{grid-template-columns:1fr;}
+  #valoresTotal2 .frete2-item-resumo{
+    grid-template-columns:25px minmax(0,1fr) minmax(85px,.7fr) 14px;
+  }
+  #valoresTotal2 .frete2-percentual{grid-column:3;grid-row:2;}
+  #valoresTotal2 .frete2-valor{grid-column:3;}
+}
