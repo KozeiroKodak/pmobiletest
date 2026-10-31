@@ -1125,3 +1125,91 @@
   #dadosLocais .dl-app{padding:17px 12px 68px}
   #dadosLocais .locais-v3-cartao .locais-v3-detalhes{grid-template-columns:1fr}
 }
+
+/* Paridade visual efetiva: estes estilos vêm da camada Ciano Industrial,
+   CARREGADA APÓS as folhas originais. Copiar apenas pesquisa.css e
+   contagemmanual.css não reproduzia a aparência atual do PMobile. */
+#dadosLocais .pesquisa-v2-buscar { background: var(--pm-acento); color: #061b21; }
+#dadosLocais .pesquisa-v2-vazio span { color: var(--pm-acento); }
+#dadosLocais .aba-locais.ativo { border-color: var(--pm-acento) !important; }
+#dadosLocais .aba-locais:focus-visible { outline-color: var(--pm-acento) !important; }
+
+/* Contagem manual: trocar acentos de marca, manter ERP OK e avisos semânticos. */
+#dadosLocais .contagem-v2 { background: #0c1d23; border-color: var(--borda); }
+#dadosLocais .contagem-v2-topo,
+#dadosLocais .contagem-v2-resultados { border-color: var(--borda); }
+#dadosLocais .contagem-v2-icone { background: #16414c; color: var(--pm-acento); }
+#dadosLocais .contagem-v2-selo { background: #173941; color: var(--pm-acento); }
+#dadosLocais .contagem-v2-campo { background: #122930; border-color: var(--borda-clara); }
+#dadosLocais .contagem-v2-campo span { color: var(--pm-acento); }
+#dadosLocais .contagem-v2-tipos button.ativo {
+  background: #126776; border-color: var(--pm-acento); color: #f6ffff;
+}
+#dadosLocais .linha-contagem-manual-busca .botao-buscar-contagem-manual,
+#dadosLocais .contagem-v2-salvar {
+  background: var(--pm-acento); color: #061b21;
+}
+#dadosLocais .linha-contagem-manual-busca .botao-config-contagem-manual {
+  background: #173943; color: var(--pm-acento);
+}
+#dadosLocais .contagem-v2-lista-titulo > span {
+  background: #173943; color: var(--pm-acento);
+}
+/* Etiquetas .erp-ok/.erp-analise: cores de estado mantidas. */
+
+/* Conferências realizadas: filtros e bordas ganham ciano.
+   Status OK permanece verde e divergência permanece vermelha. */
+#dadosLocais #dlHistorico .conferencias-indicador,
+#dadosLocais #dlHistorico details.registro-conferencia {
+  border-color: var(--borda);
+}
+#dadosLocais #dlHistorico #buscaHistoricoConferencias:focus-visible,
+#dadosLocais #dlHistorico .conferencias-filtros button:focus-visible,
+#dadosLocais #dlHistorico .registro-conferencia summary:focus-visible {
+  outline-color: var(--pm-acento);
+}
+#dadosLocais #dlHistorico .conferencias-filtros button.ativo {
+  background: var(--pm-acento); border-color: var(--pm-acento); color: #061b21;
+}
+#dadosLocais #dlHistorico .registro-conferencia-endereco {
+  background: #1a343c;
+}
+#dadosLocais #dlHistorico .registro-conferencia-seta { color: var(--pm-acento); }
+
+
+/* Diferenças antigas removidas: não personalizar o comportamento visual
+   de componentes originais quando também são usados em Dados locais. */
+#dadosLocais .dl-app{
+  max-width:none;
+  margin:0;
+  padding:0;
+}
+#dadosLocais .pesquisa-v2-card .pesquisa-v2-disponivel{
+  float:right;
+  display:inline;
+  margin-left:0;
+}
+#dadosLocais .pesquisa-v2-rodape{
+  border-top:0;
+  margin-top:0;
+}
+#dadosLocais .contagem-v2-tipos button.ativo{
+  background:#126776;
+  border-color:var(--pm-acento,#57dceb);
+  color:#f6ffff;
+}
+/* Os cartões de Configurações mudam de dimensões no celular pequeno;
+   a cópia anterior truncava essa media query. */
+@media(max-width:380px){
+  #dadosLocais .configuracoes-v3-grade{gap:9px}
+  #dadosLocais .configuracoes-v3-card{min-height:160px;padding:12px;border-radius:14px}
+  #dadosLocais .configuracoes-v3-textos strong{font-size:13px}
+}
+#dadosLocais [data-dl-panel="reservas"] > .painel-reservas{
+  max-width:1180px;
+  padding:0;
+  overflow:hidden;
+}
+#dadosLocais [data-dl-panel="importar"] .arquivo-importacao{display:block;width:100%;margin:10px 0 14px}
+#dadosLocais [data-dl-panel="importar"] .acoes-importacao{display:flex;gap:10px;flex-wrap:wrap}
+#dadosLocais [data-dl-panel="importar"] .acoes-importacao button{min-height:44px}
