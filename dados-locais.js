@@ -417,6 +417,26 @@
       el.innerHTML='<div class="pesquisa-v2-vazio"><strong>Nenhum material encontrado</strong>'+
         '<p>Confira o material e tente novamente.</p></div>';return;
     }
+    if(aba==="estoque"||aba==="conferencias"){
+      itens.forEach(m=>{
+        const bloco=document.createElement("div");
+        bloco.className="resultado-contagem-manual";
+        const titulo=document.createElement("h3");
+        titulo.textContent=m.codigo+" — "+(m.descricao||"Material");
+        const detalhes=document.createElement("p");
+        detalhes.textContent="Referência: "+valor(m.referencia)+" | Local: "+valor(m.local)+
+          " | Estoque local: "+num(m.quantidade_total);
+        const btn=document.createElement("button");
+        btn.type="button";btn.className="botao-principal";
+        btn.textContent=aba==="conferencias"?"Selecionar para conferência":"Editar estoque local";
+        if(aba==="conferencias"){
+          btn.dataset.dlConferir=m.codigo;btn.dataset.dlSource=aba;
+        }else{btn.dataset.dlEdit=m.codigo;btn.dataset.dlSource=aba;}
+        bloco.append(titulo,detalhes,btn);
+        el.appendChild(bloco);
+      });
+      return;
+    }
     const cont=document.createElement("p");cont.className="pesquisa-v2-contagem";
     cont.textContent=itens.length+" material(is) nesta página";el.appendChild(cont);
     itens.forEach((m)=>{
@@ -552,29 +572,33 @@
     }finally{estado.busy=false;}
   }
   async function listarConferencias() {
-    const el=$("dlHistorico");if(!el)return;el.textContent="Carregando conferências...";
-    try {
+    const el=$("dlHistorico");if(!el)return;
+    el.textContent="Carregando contagens...";
+    try{
       const data=await rpc("listar_conferencias",{p_limite:50});
       const itens=Array.isArray(data)?data:[];
-      el.innerHTML='<div class="conferencias-resumo">'+
-        '<div class="conferencias-indicador"><span>Conferências</span><strong>'+itens.length+'</strong></div>'+
-        '<div class="conferencias-indicador indicador-ok"><span>Registradas</span><strong>'+itens.length+'</strong></div>'+
-        '<div class="conferencias-indicador"><span>Nesta página</span><strong>'+itens.length+'</strong></div></div>'+
-        '<div class="conferencias-lista">'+
-        (itens.length?itens.map(m=>'<details class="registro-conferencia"><summary>'+
-          '<div class="registro-conferencia-topo"><div class="registro-conferencia-produto">'+
-          '<h3>'+escape(m.descricao)+'</h3><p>Cód. '+escape(m.codigo)+'</p></div>'+
-          '<span class="registro-conferencia-status status-ok">Registrada</span></div>'+
-          '<div class="registro-conferencia-local"><span>Local encontrado: </span><strong>'+
-          escape(valor(m.local_encontrado))+'</strong></div>'+
-          '<p class="dl-compat-fonte">Quantidade física: '+num(m.quantidade_fisica)+'</p>'+
-          '</summary><div class="registro-conferencia-detalhes">'+
-          '<div><span>Responsável</span><strong>'+escape(m.usuario_nome)+'</strong></div>'+
-          '<div><span>Data</span><strong>'+
-          escape(m.criado_em?new Date(m.criado_em).toLocaleString("pt-BR"):"-")+'</strong></div>'+
-          '</div></details>').join(""):
-          '<div class="conferencias-vazio">Nenhuma conferência local registrada.</div>')+
-        '</div>';
+      el.replaceChildren();
+      if(!itens.length){
+        const vazio=document.createElement("p");
+        vazio.textContent="Nenhuma conferência local registrada.";
+        el.appendChild(vazio);return;
+      }
+      itens.forEach(m=>{
+        const card=document.createElement("div");
+        card.className="registro-contagem-manual";
+        const titulo=document.createElement("h3");
+        titulo.textContent=m.codigo+" — "+(m.descricao||"Material");
+        const detalhes=document.createElement("p");
+        detalhes.textContent="Local: "+valor(m.local_encontrado)+
+          " | Físico: "+num(m.quantidade_fisica);
+        const responsavel=document.createElement("p");
+        responsavel.textContent="Realizado por: "+(m.usuario_nome||"Não identificado");
+        const data=document.createElement("p");
+        data.textContent="Data/hora: "+(m.criado_em?new Date(m.criado_em).toLocaleString("pt-BR"):"—");
+        const status=document.createElement("p");
+        status.textContent="REGISTRO LOCAL";
+        card.append(titulo,detalhes,responsavel,data,status);el.appendChild(card);
+      });
     }catch(e){el.textContent=e.message;mensagem(e.message,true);}
   }
   // Os arquivos XLS legados podem conter controles e surrogates isolados.
