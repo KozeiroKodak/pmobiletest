@@ -107,3 +107,34 @@ test("folhas de estilo da Pesquisa, Locais e Contagem são cópias das originais
   assert.ok(css.includes(expectedCount),"CSS real da Contagem não foi reutilizado");
   assert.ok(css.includes(expectedPlaces),"CSS real dos Locais não foi reutilizado");
 });
+
+
+test("Reservas locais usa a grade original em vez da tela Pesquisa",()=>{
+  const {api,elemento}=compilar(),html=api.htmlPrincipal();
+  assert.ok(html.includes('class="painel painel-reservas"'));
+  assert.ok(html.includes('id="dlResultados-reservas"'));
+  const el=elemento("dlResultados-reservas");
+  api.desenharMateriais("reservas",[{codigo:"101",descricao:"Parafuso",referencia:"R1",
+    marca:"M",quantidade_reservada:5}]);
+  assert.ok(el.innerHTML.includes('class="reservas-cabecalho"'));
+  assert.ok(el.innerHTML.includes('class="reserva-item"'));
+  assert.ok(el.innerHTML.includes('class="reserva-celula reserva-quantidade"'));
+  assert.ok(!el.innerHTML.includes('class="pesquisa-v2-card"'));
+});
+test("Importação local utiliza botão e input nativos sem zerar o catálogo",()=>{
+  const {api}=compilar(),html=api.htmlPrincipal();
+  assert.ok(html.includes('class="arquivo-importacao"'));
+  assert.ok(html.includes('class="acoes-importacao"'));
+  assert.ok(html.includes('class="botao-aba botao-importar-materiais"'));
+  assert.ok(!html.includes("Zerar inventário"));
+});
+test("CSS inclui tema Ciano Industrial efetivo e não adiciona espaçamento duplo",()=>{
+  const css=fs.readFileSync(path.join(raiz,"implementacoes/dados-locais.css"),"utf8");
+  const theme=fs.readFileSync(path.join(raiz,"cyan-theme.css"),"utf8");
+  assert.ok(theme.includes('#contagemManual .contagem-v2-tipos button.ativo'));
+  assert.ok(css.includes('background:#126776'));
+  assert.ok(css.includes('#dadosLocais .dl-app{'));
+  assert.ok(css.includes('max-width:none;'));
+  assert.ok(css.includes('padding:0;'));
+  assert.ok(css.includes('@media(max-width:380px)'));
+});
