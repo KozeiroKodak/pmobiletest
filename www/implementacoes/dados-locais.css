@@ -1421,3 +1421,34 @@
     border-radius:19px;
   }
 }
+
+/* Divergências segue os registros e resumo da tela original, mantendo
+   as categorias calculadas sobre a fonte Contagem local. */
+#dadosLocais .dl-divergencias-resumo{
+  margin:0 0 15px;
+  padding:12px 14px;
+  border-bottom:1px solid var(--borda,#36545c);
+}
+#dadosLocais .dl-divergencias-resumo p{
+  margin:6px 0;
+  color:var(--texto-secundario,#bdcdd0);
+  font-size:13px;
+}
+#dadosLocais .registro-divergencia{
+  margin:10px 0;
+  padding:14px;
+  border:1px solid var(--borda,#36545c);
+  border-radius:12px;
+  background:var(--fundo-painel,#172b31);
+}
+#dadosLocais .registro-divergencia h3{
+  margin:0 0 10px;
+  color:var(--texto,#f1f7f8);
+  font-size:15px;
+}
+#dadosLocais .registro-divergencia p{
+  margin:6px 0;
+  font-size:13px;
+  color:var(--texto-secundario,#b9cdd2);
+  overflow-wrap:anywhere;
+}
