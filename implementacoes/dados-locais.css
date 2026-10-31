@@ -1283,7 +1283,7 @@
   padding:22px;
   margin:0 auto 16px;
   border-radius:23px;
-  border:1px solid var(--borda,#2d4951);
+  border:1px solid rgba(215,215,215,.18);
   background:linear-gradient(180deg,rgba(87,220,235,.055),transparent 58%),var(--fundo-painel,#10252a);
   overflow:visible;
 }
