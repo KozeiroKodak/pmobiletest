@@ -42,7 +42,7 @@ test("Pesquisa local e estoque utilizam campos, seletores e botões originais",(
   assert.ok(h.includes('class="pesquisa-v2-campo"'));
   assert.ok(h.includes('class="pesquisa-v2-tipos"'));
   assert.ok(h.includes('class="pesquisa-v2-buscar"'));
-  assert.ok(h.includes('class="painel contagem-v2"'));
+  assert.ok(h.includes('class="painel contagem-v2 dl-contagem-principal"'));
   assert.ok(h.includes('class="botao-aba contagem-v2-salvar"'));
   assert.ok(h.includes('data-dl-tipo="codigo"'));
   assert.ok(h.includes('data-dl-tipo="referencia"'));
@@ -77,12 +77,18 @@ test("Locais locais reaproveita mesmo cartão, local anterior e novo local",()=>
   assert.ok(el.innerHTML.includes("B-02"));
   assert.ok(!el.innerHTML.includes("Confirmar alteração no ERP"));
 });
-test("Conferências locais reproduz o padrão nativo de cartões",()=>{
+test("Conferências locais reproduz estrutura de Contagem manual, não formulário isolado",()=>{
   const {api}=compilar(),h=api.htmlPrincipal();
-  assert.ok(h.includes('class="conferencias-conteudo"'));
+  assert.ok(h.includes('data-dl-busca="conferencias"'));
+  assert.ok(h.includes('class="painel contagem-v2 dl-contagem-principal"'));
+  assert.ok(h.includes('class="contagem-v2-topo"'));
+  assert.ok(h.includes('class="contagem-v2-tipos"'));
+  assert.ok(h.includes('class="botao-aba botao-buscar-contagem-manual"'));
+  assert.ok(h.includes('id="dlFormConferencia" class="painel contagem-v2 contagem-v2-registro" hidden'));
+  assert.ok(h.includes('class="contagem-v2-lista-titulo"'));
   assert.ok(h.includes('id="dlHistorico"'));
-  assert.ok(source.includes('class="registro-conferencia"'));
-  assert.ok(source.includes('class="conferencias-resumo"'));
+  assert.ok(source.includes('card.className="registro-contagem-manual"'));
+  assert.ok(!source.includes('ERP - OK')); // status ERP pertence ao módulo original
 });
 test("CSS está escopado, usa regras copiadas do nativo e espelha Android",()=>{
   const css=fs.readFileSync(path.join(raiz,"implementacoes/dados-locais.css"),"utf8");
@@ -137,4 +143,16 @@ test("CSS inclui tema Ciano Industrial efetivo e não adiciona espaçamento dupl
   assert.ok(css.includes('max-width:none;'));
   assert.ok(css.includes('padding:0;'));
   assert.ok(css.includes('@media(max-width:380px)'));
+});
+
+test("Conferência local exige escolha de material antes de abrir registro",()=>{
+ const {api}=compilar(),html=api.htmlPrincipal();
+ assert.ok(html.includes('id="dlConCodigo" readonly required'));
+ assert.ok(html.includes('id="dlConSelecionado"'));
+ assert.ok(source.includes('function selecionarConferencia(material)'));
+ assert.ok(source.includes('data-dl-conferir'));
+ assert.ok(source.includes('["pesquisa","estoque","reservas","conferencias"].includes(aba)'));
+});
+test("contagem local não carrega 94 mil materiais automaticamente ao abrir",()=>{
+ assert.ok(source.includes('if (["reservas","comparar","divergencias","locais"].includes(nome))'));
 });
