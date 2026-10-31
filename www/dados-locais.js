@@ -65,42 +65,58 @@
     const classe=aba==="locais"?"locais-v3-resumo":"conferencias-resumo";
     return '<div class="'+classe+'" id="dlResumo-'+aba+'" aria-label="Indicadores da página"></div>';
   }
+  // Pesquisa continua usando o próprio template; os dois módulos de contagem
+  // compartilham a estrutura e o comportamento VISUAL nativos de Contagem manual.
   function pesquisarForm(aba) {
-    // Reservas possui uma grade nativa própria: não reutilizar a tela de Pesquisa.
     if(aba==="reservas"){
       return '<div class="painel painel-reservas">'+
         '<div id="dlResultados-reservas" aria-live="polite"></div>'+
         paginacao("reservas")+'</div>';
     }
-    const titulo=aba==="reservas"?"Reservas locais":aba==="estoque"?"Contagem e estoque local":"Encontrar material";
-    const contagem=aba==="estoque";
+    const contagem=aba==="estoque"||aba==="conferencias";
+    const nome=aba==="conferencias"?"Conferências locais":aba==="estoque"?
+      "Estoque manual":"Pesquisa local";
+    const etapa=aba==="conferencias"?"Encontre um material para registrar uma conferência.":
+      aba==="estoque"?"Encontre um material para atualizar o estoque.":"Encontre um material no cadastro local.";
     const classe=contagem?"contagem-v2":"pesquisa-v2";
-    const prefix=contagem?"contagem-v2":"pesquisa-v2";
-    const status=contagem?"<span class=\"contagem-v2-selo\">● Registro local</span>":"<span class=\"pesquisa-v2-status\">● Dados locais</span>";
-    return '<div class="painel '+classe+'">'+
-      '<div class="'+prefix+'-topo"><div class="'+prefix+'-marca"><span class="'+prefix+'-icone">'+
-      (contagem?'▤':'⌕')+'</span><div><strong>PMobile</strong><small>'+
-      (contagem?'Inventário / Estoque manual':'Catálogo de materiais')+'</small></div></div>'+status+'</div>'+
-      '<div class="'+prefix+'-intro"><h2>'+titulo+'</h2><p>Pesquise por código, referência ou descrição.</p></div>'+
+    const prefix=classe;
+    const subtitulo=contagem?"Inventário / "+nome:"Catálogo / Pesquisa local";
+    const selector=contagem?'<div class="seletor-contagem-manual-wrapper">'+
+      '<select class="seletor-contagem-manual-nativo" aria-hidden="true" tabindex="-1" name="tipo">'+
+      '<option value="codigo">CÓD</option><option value="referencia">REF</option>'+
+      '<option value="descricao">DESC</option></select>'+
+      '<button type="button" class="seletor-contagem-manual" data-dl-seletor aria-label="Alternar tipo de pesquisa">CÓD</button></div>':
+      '<select class="pesquisa-v2-select" name="tipo" aria-label="Tipo de pesquisa">'+
+      '<option value="codigo">Código</option><option value="referencia">Referência</option>'+
+      '<option value="descricao">Descrição</option></select>';
+    const buttons=['codigo','referencia','descricao'].map(tipo=>{
+      const label={codigo:"Código",referencia:"Referência",descricao:"Descrição"}[tipo];
+      return '<button type="button" data-dl-tipo="'+tipo+'" class="'+(tipo==="codigo"?"ativo":"")+
+        '" aria-pressed="'+(tipo==="codigo"?"true":"false")+'">'+label+'</button>';
+    }).join('');
+    const controls=contagem?
+      '<div class="acoes-contagem-manual-config"><button type="button" class="botao-aba botao-config-contagem-manual"'+
+      ' data-dl-config="'+aba+'" aria-label="Informações do estoque local">⚙</button></div>':'';
+    const panel='<div class="painel '+classe+(contagem?' dl-contagem-principal':'')+'">'+
+      '<div class="'+prefix+'-topo"><div class="'+prefix+'-marca">'+
+      '<span class="'+prefix+'-icone">'+(contagem?'▤':'⌕')+'</span>'+
+      '<div><strong>PMobile</strong><small>'+subtitulo+'</small></div></div>'+
+      '<span class="'+prefix+'-selo">● '+(contagem?'Registro local':'Dados locais')+'</span></div>'+
+      '<div class="'+prefix+'-intro"><h2>'+nome+'</h2><p>'+etapa+'</p></div>'+
       (contagem?'<h3 class="contagem-v2-etapa">01 · Localizar material</h3>':'')+
-      '<form data-dl-busca="'+aba+'" class="'+(contagem?'linha-contagem-manual-busca':'dl-pesquisa-original')+'">'+
-      '<div class="'+prefix+'-campo"><span class="'+(contagem?'':'pesquisa-v2-lupa')+'" aria-hidden="true">⌕</span>'+
-      '<input type="search" name="termo" placeholder="Digite o código" autocomplete="off" aria-label="Termo de pesquisa"></div>'+
-      '<select class="'+(contagem?'seletor-contagem-manual-nativo':'pesquisa-v2-select')+'" name="tipo" aria-label="Tipo de pesquisa">'+
-      '<option value="codigo">Código</option><option value="referencia">Referência</option><option value="descricao">Descrição</option></select>'+
-      '<div class="'+prefix+'-tipos" role="group" aria-label="Pesquisar por">'+
-      ['codigo','referencia','descricao'].map(function(tipo){
-        const rotulo={codigo:'Código',referencia:'Referência',descricao:'Descrição'}[tipo];
-        return '<button type="button" data-dl-tipo="'+tipo+'" class="'+(tipo==='codigo'?'ativo':'')+
-          '" aria-pressed="'+(tipo==='codigo'?'true':'false')+'">'+rotulo+'</button>';
-      }).join('')+'</div>'+
-      '<button class="'+(contagem?'botao-aba botao-buscar-contagem-manual':'pesquisa-v2-buscar')+
-      '" type="submit">⌕ &nbsp; '+(contagem?'Buscar material':'Pesquisar material')+'</button></form>'+
-      '<div class="'+prefix+'-resultados" id="dlResultados-'+aba+'" aria-live="polite">'+
-      '<div class="pesquisa-v2-vazio"><strong>Encontre o que precisa</strong>'+
-      '<p>Informe o material para consultar a Contagem local.</p></div></div>'+
-      paginacao(aba)+
-      '<div class="pesquisa-v2-rodape">◉ <span>Fonte: Contagem local (Supabase)</span></div></div>';
+      '<form class="'+(contagem?'linha-formulario linha-contagem-manual-busca':'dl-pesquisa-original')+
+      '" data-dl-busca="'+aba+'">'+
+      '<div class="'+prefix+'-campo"><span aria-hidden="true">⌕</span>'+
+      '<input type="search" name="termo" placeholder="Digite o código" autocomplete="off" aria-label="Buscar material"></div>'+
+      selector+
+      '<div class="'+prefix+'-tipos" role="group" aria-label="Pesquisar por">'+buttons+'</div>'+
+      '<button type="submit" class="'+(contagem?'botao-aba botao-buscar-contagem-manual':'pesquisa-v2-buscar')+
+      '">⌕ &nbsp; Buscar material</button>'+controls+'</form>'+
+      '<div class="'+prefix+'-resultados" id="dlResultados-'+aba+'" aria-live="polite"></div>'+
+      (contagem?'<p class="dl-informacao" id="dlConfig-'+aba+'" hidden>'+
+        'Base independente: somente o catálogo e o histórico de Dados locais são utilizados.</p>':'')+
+      '</div>';
+    return panel+(contagem?'':paginacao(aba));
   }
   function compararForm(aba) {
     const titulo=aba==="locais"?"Buscar alteração de local":aba==="divergencias"?
@@ -160,14 +176,20 @@
         '<button class="botao-aba contagem-v2-salvar" type="submit">✓ &nbsp; Salvar estoque local</button></div></form>',
         "Altere somente o estoque manual; a Dogo permanece intacta.")+
       painel("reservas",pesquisarForm("reservas"),"Materiais com reservas preenchidas no estoque local.")+
-      painel("conferencias",'<div class="painel contagem-v2 contagem-v2-registro">'+
-        '<h3 class="contagem-v2-etapa">Registrar conferência local</h3>'+
-        '<form id="dlFormConferencia" class="linha-formulario">'+
-        '<label class="contagem-v2-label">Código do material<input id="dlConCodigo" required></label>'+
+      painel("conferencias",pesquisarForm("conferencias")+
+        '<form id="dlFormConferencia" class="painel contagem-v2 contagem-v2-registro" hidden>'+
+        '<h3 class="contagem-v2-etapa">02 · Registrar conferência local</h3>'+
+        '<div id="dlConSelecionado" class="dl-material-selecionado"></div>'+
+        '<div class="linha-formulario">'+
+        '<label class="contagem-v2-label">Código do material<input id="dlConCodigo" readonly required></label>'+
+        '<label class="contagem-v2-label">Local encontrado<input id="dlConLocal" placeholder="Ex.: A-03-12"></label>'+
         '<label class="contagem-v2-label">Quantidade física<input id="dlConQuantidade" type="number" min="0" step="any" required></label>'+
-        '<label class="contagem-v2-label">Local encontrado<input id="dlConLocal"></label>'+
-        '<button class="botao-aba contagem-v2-salvar" type="submit">✓ &nbsp; Registrar conferência local</button>'+
-        '</form></div><div class="painel"><div id="dlHistorico" class="conferencias-conteudo"></div></div>',
+        '<button class="botao-aba contagem-v2-salvar" type="submit">✓ &nbsp; Salvar conferência</button>'+
+        '</div></form>'+
+        '<div class="painel contagem-v2 contagem-v2-lista">'+
+        '<div class="contagem-v2-lista-titulo"><div><h3>Contagens registradas</h3>'+
+        '<p>Histórico local independente</p></div><span aria-hidden="true">▤</span></div>'+
+        '<div id="dlHistorico"></div></div>',
         "Conferências locais são separadas do histórico original.")+
       painel("comparar",compararForm("comparar"),"Comparação automática entre Dogo e Contagem local.")+
       painel("divergencias",compararForm("divergencias"),"Diferenças entre as duas bases, sem alterar os registros.")+
@@ -253,15 +275,28 @@
       p.hidden=p.dataset.dlPanel!==nome;
     });
     const menu=$("menuDadosLocais");if(menu)menu.classList.add("ativo");
-    if (["pesquisa","estoque","reservas","comparar","divergencias","locais"].includes(nome)){
+    if (["reservas","comparar","divergencias","locais"].includes(nome)){
       estado.offsets[nome]=0;consultar(nome);
-    }else if(nome==="conferencias"){listarConferencias();}
+    }else if(nome==="conferencias"){
+      $("dlFormConferencia").hidden=true;
+      listarConferencias();
+    }
   }
   function voltar() {if(estado.tela!=="inicio"){tela("inicio");return true;}if(typeof window.mostrarTelaSistema==="function"){window.mostrarTelaSistema("homeSistema",null,true);return true;}return false;}
   function onClick(e) {
     const abrirBtn=e.target.closest("[data-dl-open]");
     if(abrirBtn){tela(abrirBtn.dataset.dlOpen);return;}
     if(e.target.closest("[data-dl-back]")){voltar();return;}
+    const config=e.target.closest("[data-dl-config]");
+    if(config){const el=$("dlConfig-"+config.dataset.dlConfig);if(el)el.hidden=!el.hidden;return;}
+    const seletor=e.target.closest("[data-dl-seletor]");
+    if(seletor){
+      const form=seletor.closest("form"), tipos=["codigo","referencia","descricao"];
+      const atual=form.elements.tipo.value,proximo=tipos[(tipos.indexOf(atual)+1)%tipos.length];
+      const chip=form.querySelector('[data-dl-tipo="'+proximo+'"]');
+      if(chip)chip.click();
+      return;
+    }
     const tipoBtn=e.target.closest("[data-dl-tipo]");
     if(tipoBtn){
       const form=tipoBtn.closest("form[data-dl-busca]");
@@ -271,6 +306,8 @@
       seletor.value=tipo;
       campo.placeholder={codigo:"Digite o código",referencia:"Digite a referência",
         descricao:"Digite a descrição"}[tipo];
+      const rotulo=form.querySelector("[data-dl-seletor]");
+      if(rotulo)rotulo.textContent={codigo:"CÓD",referencia:"REF",descricao:"DESC"}[tipo];
       form.querySelectorAll("[data-dl-tipo]").forEach(btn=>{
         const ativo=btn.dataset.dlTipo===tipo;
         btn.classList.toggle("ativo",ativo);
@@ -294,7 +331,14 @@
       return;
     }
     const conferir=e.target.closest("[data-dl-conferir]");
-    if(conferir){const codigo=conferir.dataset.dlConferir;tela("conferencias");$("dlConCodigo").value=codigo;return;}
+    if(conferir){
+      const codigo=conferir.dataset.dlConferir;
+      const origem=conferir.dataset.dlSource||estado.tela;
+      const material=(estado.resultados[origem]||[]).find(m=>m.codigo===codigo);
+      if(estado.tela!=="conferencias")tela("conferencias");
+      selecionarConferencia(material||{codigo,descricao:"Material"});
+      return;
+    }
   }
   async function onSubmit(e) {
     const form=e.target;e.preventDefault();
@@ -316,7 +360,7 @@
     const {termo,tipo}=obterFiltros(aba);
     const offset=estado.offsets[aba]||0;
     try{
-      if(["pesquisa","estoque","reservas"].includes(aba)){
+      if(["pesquisa","estoque","reservas","conferencias"].includes(aba)){
         const data=await rpc("listar",{p_termo:termo,p_tipo:tipo,p_limite:aba==="reservas"?20:50,p_offset:offset,p_somente_reservas:aba==="reservas"});
         estado.resultados[aba]=Array.isArray(data)?data:[];
         desenharMateriais(aba,estado.resultados[aba]);
@@ -372,6 +416,26 @@
     if(!itens.length){
       el.innerHTML='<div class="pesquisa-v2-vazio"><strong>Nenhum material encontrado</strong>'+
         '<p>Confira o material e tente novamente.</p></div>';return;
+    }
+    if(aba==="estoque"||aba==="conferencias"){
+      itens.forEach(m=>{
+        const bloco=document.createElement("div");
+        bloco.className="resultado-contagem-manual";
+        const titulo=document.createElement("h3");
+        titulo.textContent=m.codigo+" — "+(m.descricao||"Material");
+        const detalhes=document.createElement("p");
+        detalhes.textContent="Referência: "+valor(m.referencia)+" | Local: "+valor(m.local)+
+          " | Estoque local: "+num(m.quantidade_total);
+        const btn=document.createElement("button");
+        btn.type="button";btn.className="botao-principal";
+        btn.textContent=aba==="conferencias"?"Selecionar para conferência":"Editar estoque local";
+        if(aba==="conferencias"){
+          btn.dataset.dlConferir=m.codigo;btn.dataset.dlSource=aba;
+        }else{btn.dataset.dlEdit=m.codigo;btn.dataset.dlSource=aba;}
+        bloco.append(titulo,detalhes,btn);
+        el.appendChild(bloco);
+      });
+      return;
     }
     const cont=document.createElement("p");cont.className="pesquisa-v2-contagem";
     cont.textContent=itens.length+" material(is) nesta página";el.appendChild(cont);
@@ -453,6 +517,15 @@
     $("dlFormEstoque").hidden=false;
     $("dlFormEstoque").scrollIntoView({block:"nearest",behavior:"smooth"});
   }
+  function selecionarConferencia(material) {
+    $("dlConCodigo").value=material.codigo;
+    $("dlConQuantidade").value="";
+    $("dlConLocal").value="";
+    $("dlConSelecionado").textContent=material.codigo+" — "+(material.descricao||"Material");
+    const form=$("dlFormConferencia");
+    form.hidden=false;
+    form.scrollIntoView({block:"nearest",behavior:"smooth"});
+  }
   function quantidade(id) {
     const texto=$(id).value.trim().replace(",",".");
     if(!texto)return null;
@@ -493,34 +566,39 @@
       await rpc("registrar_conferencia",{p_codigo:$("dlConCodigo").value.trim(),
         p_quantidade_fisica:q,p_local_encontrado:$("dlConLocal").value.trim()||null});
       $("dlFormConferencia").reset();
+      $("dlFormConferencia").hidden=true;
       mensagem("Conferência local registrada, sem alterar o estoque permanente.");
       await listarConferencias();
     }finally{estado.busy=false;}
   }
   async function listarConferencias() {
-    const el=$("dlHistorico");if(!el)return;el.textContent="Carregando conferências...";
-    try {
+    const el=$("dlHistorico");if(!el)return;
+    el.textContent="Carregando contagens...";
+    try{
       const data=await rpc("listar_conferencias",{p_limite:50});
       const itens=Array.isArray(data)?data:[];
-      el.innerHTML='<div class="conferencias-resumo">'+
-        '<div class="conferencias-indicador"><span>Conferências</span><strong>'+itens.length+'</strong></div>'+
-        '<div class="conferencias-indicador indicador-ok"><span>Registradas</span><strong>'+itens.length+'</strong></div>'+
-        '<div class="conferencias-indicador"><span>Nesta página</span><strong>'+itens.length+'</strong></div></div>'+
-        '<div class="conferencias-lista">'+
-        (itens.length?itens.map(m=>'<details class="registro-conferencia"><summary>'+
-          '<div class="registro-conferencia-topo"><div class="registro-conferencia-produto">'+
-          '<h3>'+escape(m.descricao)+'</h3><p>Cód. '+escape(m.codigo)+'</p></div>'+
-          '<span class="registro-conferencia-status status-ok">Registrada</span></div>'+
-          '<div class="registro-conferencia-local"><span>Local encontrado: </span><strong>'+
-          escape(valor(m.local_encontrado))+'</strong></div>'+
-          '<p class="dl-compat-fonte">Quantidade física: '+num(m.quantidade_fisica)+'</p>'+
-          '</summary><div class="registro-conferencia-detalhes">'+
-          '<div><span>Responsável</span><strong>'+escape(m.usuario_nome)+'</strong></div>'+
-          '<div><span>Data</span><strong>'+
-          escape(m.criado_em?new Date(m.criado_em).toLocaleString("pt-BR"):"-")+'</strong></div>'+
-          '</div></details>').join(""):
-          '<div class="conferencias-vazio">Nenhuma conferência local registrada.</div>')+
-        '</div>';
+      el.replaceChildren();
+      if(!itens.length){
+        const vazio=document.createElement("p");
+        vazio.textContent="Nenhuma conferência local registrada.";
+        el.appendChild(vazio);return;
+      }
+      itens.forEach(m=>{
+        const card=document.createElement("div");
+        card.className="registro-contagem-manual";
+        const titulo=document.createElement("h3");
+        titulo.textContent=m.codigo+" — "+(m.descricao||"Material");
+        const detalhes=document.createElement("p");
+        detalhes.textContent="Local: "+valor(m.local_encontrado)+
+          " | Físico: "+num(m.quantidade_fisica);
+        const responsavel=document.createElement("p");
+        responsavel.textContent="Realizado por: "+(m.usuario_nome||"Não identificado");
+        const data=document.createElement("p");
+        data.textContent="Data/hora: "+(m.criado_em?new Date(m.criado_em).toLocaleString("pt-BR"):"—");
+        const status=document.createElement("p");
+        status.textContent="REGISTRO LOCAL";
+        card.append(titulo,detalhes,responsavel,data,status);el.appendChild(card);
+      });
     }catch(e){el.textContent=e.message;mensagem(e.message,true);}
   }
   // Os arquivos XLS legados podem conter controles e surrogates isolados.
