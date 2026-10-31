@@ -1,11 +1,14 @@
 <!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8"><title>Paridade CSS Dados locais</title>
 <link rel="stylesheet" href="../../style.css">
+<link rel="stylesheet" href="../../implementacoes/reservas.css">
 <link rel="stylesheet" href="../../implementacoes/pesquisa.css">
 <link rel="stylesheet" href="../../implementacoes/contagemmanual.css">
 <link rel="stylesheet" href="../../implementacoes/locais.css">
 <link rel="stylesheet" href="../../implementacoes/locais-v3.css">
 <link rel="stylesheet" href="../../implementacoes/conferenciasrealizadas.css">
+<link rel="stylesheet" href="../../implementacoes/importacao.css">
+<link rel="stylesheet" href="../../monochrome.css">
 <link rel="stylesheet" href="../../cyan-theme.css">
 <link rel="stylesheet" href="../../implementacoes/configuracoes-v3.css">
 <link rel="stylesheet" href="../../implementacoes/dados-locais.css">
@@ -14,35 +17,39 @@
 <section id="pesquisa" class="qa"><div class="painel pesquisa-v2">
   <div class="pesquisa-v2-tipos"><button class="ativo">Código</button></div>
   <button class="pesquisa-v2-buscar">Pesquisar material</button>
-  <details class="pesquisa-v2-card"><summary>Exemplo</summary></details>
+  <details class="pesquisa-v2-card"><summary><span class="pesquisa-v2-disponivel">Disponível</span>Exemplo</summary></details>
 </div></section>
 <section id="contagemManual" class="qa"><div class="cabecalho-pagina"><h1>Contagem manual</h1></div><div class="painel contagem-v2">
   <button class="botao-aba contagem-v2-salvar">Salvar contagem</button>
-  <div class="contagem-v2-campo"><span>⌕</span><input placeholder="Código"></div>
+  <div class="contagem-v2-campo"><span>⌕</span><input placeholder="Código"></div><div class="contagem-v2-tipos"><button class="ativo">Código</button></div>
 </div><div class="painel contagem-v2 contagem-v2-lista">Contagens registradas</div></section>
 <section id="locais" class="qa"><div class="painel painel-locais">
   <details class="local-alterado-card locais-v3-cartao"><summary class="locais-v3-resumo-cartao">Local</summary></details>
 </div></section>
-<section id="configuracoes" class="qa"><button class="configuracoes-v3-card">Configurações</button></section>
+<section id="configuracoes" class="qa"><div class="configuracoes-v3-grade"><button class="configuracoes-v3-card">Configurações</button></div></section>
 <section class="qa"><div id="resultadoConferencias">
   <details class="registro-conferencia"><summary>Conferência</summary></details>
 </div></section>
-<section id="dadosLocais" class="qa">
+<section id="reservas" class="qa"><div class="painel painel-reservas"><article class="reserva-item"><div class="reserva-celula reserva-id" data-label="ID">1</div></article></div></section>
+<section id="importacao" class="qa"><div class="painel"><div class="acoes-importacao"><button class="botao-aba botao-importar-materiais">Importar planilha</button></div></div></section>
+<section id="dadosLocais" class="qa"><div class="dl-app">
  <div class="painel pesquisa-v2">
   <div class="pesquisa-v2-tipos"><button class="ativo">Código</button></div>
   <button class="pesquisa-v2-buscar">Pesquisar material</button>
-  <details class="pesquisa-v2-card"><summary>Exemplo</summary></details>
+  <details class="pesquisa-v2-card"><summary><span class="pesquisa-v2-disponivel">Disponível</span>Exemplo</summary></details>
  </div>
  <section data-dl-panel="estoque"><div class="dl-retorno"></div><div class="painel contagem-v2">
   <button class="botao-aba contagem-v2-salvar">Salvar contagem</button>
-  <div class="contagem-v2-campo"><span>⌕</span><input placeholder="Código"></div>
+  <div class="contagem-v2-campo"><span>⌕</span><input placeholder="Código"></div><div class="contagem-v2-tipos"><button class="ativo">Código</button></div>
  </div></section>
  <div class="painel painel-locais">
   <details class="local-alterado-card locais-v3-cartao"><summary class="locais-v3-resumo-cartao">Local</summary></details>
  </div>
- <button class="configuracoes-v3-card">Configurações</button>
+ <div class="configuracoes-v3-grade"><button class="configuracoes-v3-card">Configurações</button></div>
  <div id="dlHistorico"><details class="registro-conferencia"><summary>Conferência</summary></details></div>
-</section>
+ <section data-dl-panel="reservas"><div class="painel painel-reservas"><article class="reserva-item"><div class="reserva-celula reserva-id" data-label="ID">1</div></article></div></section>
+ <section data-dl-panel="importar"><div class="painel"><div class="acoes-importacao"><button class="botao-aba botao-importar-materiais">Importar planilha</button></div></div></section>
+</div></section>
 <pre id="qa-status" data-qa-fail="pending">aguardando DOM</pre>
 <script>
 (function(){
@@ -57,7 +64,13 @@
  ["Locais — painel","#locais .painel-locais","#dadosLocais .painel-locais",["backgroundColor","borderRadius"]],
  ["Locais — cartão","#locais .locais-v3-cartao","#dadosLocais .locais-v3-cartao",["backgroundColor","borderRadius","paddingTop"]],
  ["Configurações — cartão","#configuracoes .configuracoes-v3-card","#dadosLocais .configuracoes-v3-card",["backgroundColor","borderRadius","minHeight"]],
- ["Conferências — cartão","#resultadoConferencias .registro-conferencia","#dadosLocais #dlHistorico .registro-conferencia",["backgroundColor","borderRadius"]]
+ ["Conferências — cartão","#resultadoConferencias .registro-conferencia","#dadosLocais #dlHistorico .registro-conferencia",["backgroundColor","borderRadius"]],
+ ["Contagem — botão ativo","#contagemManual .contagem-v2-tipos button.ativo","#dadosLocais .contagem-v2-tipos button.ativo",["backgroundColor","color","borderColor","borderRadius"]],
+ ["Pesquisa — marcador","#pesquisa .pesquisa-v2-disponivel","#dadosLocais .pesquisa-v2-disponivel",["float","display","color"]],
+ ["Configurações — grade","#configuracoes .configuracoes-v3-grade","#dadosLocais .configuracoes-v3-grade",["display","gridTemplateColumns","columnGap"]],
+ ["Reservas — painel","#reservas .painel-reservas","#dadosLocais .painel-reservas",["backgroundColor","paddingTop","borderRadius"]],
+ ["Reservas — item","#reservas .reserva-item","#dadosLocais .reserva-item",["backgroundColor","gridTemplateColumns","paddingTop"]],
+ ["Importação — botão","#importacao .botao-importar-materiais","#dadosLocais .botao-importar-materiais",["backgroundColor","color","borderRadius","minHeight"]]
  ];
  let fails=0;
  const lines=items.map(([titulo,a,b,props])=>{

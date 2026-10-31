@@ -66,6 +66,12 @@
     return '<div class="'+classe+'" id="dlResumo-'+aba+'" aria-label="Indicadores da página"></div>';
   }
   function pesquisarForm(aba) {
+    // Reservas possui uma grade nativa própria: não reutilizar a tela de Pesquisa.
+    if(aba==="reservas"){
+      return '<div class="painel painel-reservas">'+
+        '<div id="dlResultados-reservas" aria-live="polite"></div>'+
+        paginacao("reservas")+'</div>';
+    }
     const titulo=aba==="reservas"?"Reservas locais":aba==="estoque"?"Contagem e estoque local":"Encontrar material";
     const contagem=aba==="estoque";
     const classe=contagem?"contagem-v2":"pesquisa-v2";
@@ -166,11 +172,12 @@
       painel("comparar",compararForm("comparar"),"Comparação automática entre Dogo e Contagem local.")+
       painel("divergencias",compararForm("divergencias"),"Diferenças entre as duas bases, sem alterar os registros.")+
       painel("locais",compararForm("locais"),"Local anterior (Dogo) e novo local (Contagem local).")+
-      painel("importar",'<div class="painel contagem-v2"><h3 class="contagem-v2-etapa">Importar cadastro permanente</h3>'+
+      painel("importar",'<div class="painel"><h3>Importar cadastro permanente</h3>'+
         '<p class="dl-informacao">Apenas código, referência, descrição e marca. Quantidades e locais manuais serão preservados.</p>'+
-        '<form id="dlFormImportar" class="linha-formulario">'+
-        '<label class="contagem-v2-label">Planilha Dogo<input type="file" id="dlArquivo" accept=".xlsx,.xls,.xlsb,.xlsm,.csv,.html,.htm" required></label>'+
-        '<button class="botao-aba contagem-v2-salvar" type="submit" id="dlBotaoImportar">✓ &nbsp; Importar cadastro permanente</button></form>'+
+        '<form id="dlFormImportar">'+
+        '<label for="dlArquivo">Planilha Dogo</label>'+
+        '<input class="arquivo-importacao" type="file" id="dlArquivo" accept=".xlsx,.xls,.xlsb,.xlsm,.csv,.html,.htm" required>'+
+        '<div class="acoes-importacao"><button class="botao-aba botao-importar-materiais" type="submit" id="dlBotaoImportar">Importar planilha</button></div></form>'+
         '<p id="dlProgresso" role="status" aria-live="polite"></p>'+
         '<div id="dlProgressoBarra" role="progressbar" aria-label="Importação" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden>'+
         '<span id="dlProgressoPreenchimento" style="width:0%"></span></div></div>',
@@ -275,7 +282,8 @@
     const page=e.target.closest("[data-dl-page]");
     if(page){
       const aba=page.dataset.dlAba, delta=Number(page.dataset.dlPage);
-      estado.offsets[aba]=Math.max(0,(estado.offsets[aba]||0)+delta*(["comparar","divergencias","locais"].includes(aba)?100:50));
+      const tamanho=["comparar","divergencias","locais"].includes(aba)?100:aba==="reservas"?20:50;
+      estado.offsets[aba]=Math.max(0,(estado.offsets[aba]||0)+delta*tamanho);
       consultar(aba);return;
     }
     const edit=e.target.closest("[data-dl-edit]");
@@ -309,7 +317,7 @@
     const offset=estado.offsets[aba]||0;
     try{
       if(["pesquisa","estoque","reservas"].includes(aba)){
-        const data=await rpc("listar",{p_termo:termo,p_tipo:tipo,p_limite:50,p_offset:offset,p_somente_reservas:aba==="reservas"});
+        const data=await rpc("listar",{p_termo:termo,p_tipo:tipo,p_limite:aba==="reservas"?20:50,p_offset:offset,p_somente_reservas:aba==="reservas"});
         estado.resultados[aba]=Array.isArray(data)?data:[];
         desenharMateriais(aba,estado.resultados[aba]);
       }else{
@@ -319,7 +327,8 @@
         estado.ultimaComparacao=Date.now();
         desenharComparacao(aba,estado.resultados[aba]);
       }
-      const pag=$("dlPagina-"+aba);if(pag)pag.textContent="Página "+(Math.floor(offset/(["comparar","divergencias","locais"].includes(aba)?100:50))+1);
+      const pag=$("dlPagina-"+aba);
+      if(pag)pag.textContent="Página "+(Math.floor(offset/(["comparar","divergencias","locais"].includes(aba)?100:aba==="reservas"?20:50))+1);
     }catch(e){lista.textContent=e.message;mensagem(e.message,true);}
   }
   function indicador(rotulo,numero,tipo) {
@@ -341,6 +350,25 @@
   }
   function desenharMateriais(aba,itens) {
     const el=$("dlResultados-"+aba);el.replaceChildren();
+    if(aba==="reservas"){
+      if(!itens.length){
+        el.innerHTML='<div class="reservas-vazio"><strong>Nenhum item em reserva</strong>'+
+          '<span>Materiais com reserva local maior que zero aparecerão aqui.</span></div>';
+        return;
+      }
+      const dados=(v)=>escape(v===null||v===undefined||v===""?"—":v);
+      const headers=["ID","Descrição","Referência","Marca","Quantidade","Solicitante"];
+      el.innerHTML='<div class="reservas-cabecalho">'+headers.map(t=>'<span>'+t+'</span>').join("")+'</div>'+
+        itens.map(m=>'<article class="reserva-item">'+
+          '<div class="reserva-celula reserva-id" data-label="ID">'+dados(m.codigo)+'</div>'+
+          '<div class="reserva-celula reserva-descricao" data-label="Descrição">'+dados(m.descricao)+'</div>'+
+          '<div class="reserva-celula reserva-referencia" data-label="Referência">'+dados(m.referencia)+'</div>'+
+          '<div class="reserva-celula reserva-marca" data-label="Marca">'+dados(m.marca)+'</div>'+
+          '<div class="reserva-celula reserva-quantidade" data-label="Quantidade">'+num(m.quantidade_reservada)+'</div>'+
+          '<div class="reserva-celula reserva-solicitante" data-label="Solicitante">—</div>'+
+          '</article>').join("");
+      return;
+    }
     if(!itens.length){
       el.innerHTML='<div class="pesquisa-v2-vazio"><strong>Nenhum material encontrado</strong>'+
         '<p>Confira o material e tente novamente.</p></div>';return;
