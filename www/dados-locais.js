@@ -478,6 +478,33 @@
         (aba==="locais"?"Locais vazios na Contagem local continuam pendentes, não divergentes.":"")+
         '</p>';return;
     }
+    // Divergências originais usam um resumo Faltantes/Sobras e cartões
+    // registro-divergencia — não os cartões de movimentação de Locais.
+    if(aba==="divergencias"){
+      const validos=itens.filter(m=>m.dogo_quantidade!==null&&
+        m.local_quantidade!==null&&!m.sem_dogo);
+      const faltantes=validos.filter(m=>Number(m.local_quantidade)<Number(m.dogo_quantidade));
+      const sobras=validos.filter(m=>Number(m.local_quantidade)>Number(m.dogo_quantidade));
+      const sum=arr=>arr.reduce((total,m)=>total+
+        Math.abs(Number(m.local_quantidade)-Number(m.dogo_quantidade)),0);
+      el.innerHTML='<div class="dl-divergencias-resumo">'+
+        '<p>🔴 <strong>Faltantes:</strong> '+faltantes.length+' produtos / '+
+        num(sum(faltantes))+' unidades</p>'+
+        '<p>🟢 <strong>Sobras:</strong> '+sobras.length+' produtos / '+
+        num(sum(sobras))+' unidades</p></div>'+
+        itens.map(m=>{
+          const tipo=m.sem_dogo?"NÃO CADASTRADO NA DOGO":
+            m.local_quantidade===null?"PENDENTE":
+            m.diferenca_quantidade?(Number(m.local_quantidade)<Number(m.dogo_quantidade)?"🔴 FALTANTE":"🟢 SOBRA"):
+            m.diferenca_reserva?"RESERVA DIVERGENTE":"VERIFICAR";
+          return '<div class="registro-divergencia"><h3>'+escape(m.descricao)+'</h3>'+
+            '<p><strong>Código:</strong> '+escape(m.codigo)+'</p>'+
+            '<p><strong>Dogo:</strong> '+num(m.dogo_quantidade)+
+            ' · <strong>Local:</strong> '+num(m.local_quantidade)+'</p>'+
+            '<p><strong>Classificação:</strong> '+tipo+'</p></div>';
+        }).join("");
+      return;
+    }
     el.innerHTML=itens.map(m=>{
       const difer=m.diferenca_quantidade||m.diferenca_reserva||m.diferenca_local;
       const pend=m.pendente_quantidade||m.pendente_reserva||m.pendente_local;
