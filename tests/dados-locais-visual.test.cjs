@@ -156,3 +156,24 @@ test("Conferência local exige escolha de material antes de abrir registro",()=>
 test("contagem local não carrega 94 mil materiais automaticamente ao abrir",()=>{
  assert.ok(source.includes('if (["reservas","comparar","divergencias","locais"].includes(nome))'));
 });
+
+test("Divergências locais usa cartões e classificação nativos sem tratar NULL como zero",()=>{
+  const {api,elemento}=compilar();
+  const el=elemento("dlResultados-divergencias");
+  elemento("dlResumo-divergencias");
+  api.desenharComparacao("divergencias",[
+    {codigo:"A01",descricao:"Material",dogo_quantidade:8,local_quantidade:3,
+     dogo_reservada:0,local_reservada:null,diferenca_quantidade:true,
+     diferenca_reserva:false,diferenca_local:false,sem_dogo:false,
+     pendente_quantidade:false,pendente_reserva:true,pendente_local:true},
+    {codigo:"A02",descricao:"Pendente",dogo_quantidade:2,local_quantidade:null,
+     dogo_reservada:0,local_reservada:null,diferenca_quantidade:false,
+     diferenca_reserva:false,diferenca_local:false,sem_dogo:false,
+     pendente_quantidade:true,pendente_reserva:true,pendente_local:true}
+  ]);
+  assert.ok(el.innerHTML.includes('class="registro-divergencia"'));
+  assert.ok(el.innerHTML.includes("Faltantes:"));
+  assert.ok(el.innerHTML.includes("FALTANTE"));
+  assert.ok(!el.innerHTML.includes("7 unidades")); // pendente não soma faltas
+  assert.ok(el.innerHTML.includes("PENDENTE"));
+});
