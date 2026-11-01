@@ -2615,23 +2615,94 @@ if (document.readyState === "loading") {
 // ============================================================
 
 function procurarAtualizacoesOta() {
-    const ota =
-        window.PMOBILE_OTA;
-
-    if (
-        ota &&
-        typeof ota.procurarAtualizacoes === "function"
-    ) {
-        ota.procurarAtualizacoes();
-        return;
-    }
-
-    if (typeof alert === "function") {
-        alert(
-            "A verificação manual de atualizações está disponível no aplicativo Android."
-        );
-    }
+    window.PMobileAtualizacoes?.executar("procurarAtualizacoes");
 }
+
+// Central de atualizações: usa a ponte nativa quando disponível e mantém
+// compatibilidade com APKs anteriores. Não grava inventário ou dados de sessão.
+(function configurarAtualizacoes() {
+    "use strict";
+    let ultimo = "", estado = {}, ciclos = 0, bootConfirmado = false, primeiraPintura = false;
+    const $ = id => document.getElementById(id);
+    const ocupados = ["checking", "downloading", "verifying", "preparing", "applying"];
+    const titulos = {idle:"Pronto para verificar",checking:"Procurando novidades",available:"Tem novidade para você",updated:"Você está em dia",downloading:"Atualização a caminho",verifying:"Conferindo os arquivos",preparing:"Quase pronto",ready:"Pronto para aplicar",applying:"Até já!",error:"Vamos tentar novamente?",incompatible:"Atualize o aplicativo",legacy:"Seu aplicativo usa o atualizador anterior",unsupported:"Disponível no aplicativo Android"};
+    const formatarBytes = n => Number.isFinite(Number(n)) && Number(n) >= 0 ? (n / 1048576).toLocaleString("pt-BR", {maximumFractionDigits:1}) + " MB" : "";
+    function renderizar(dados) {
+        if (!$('otaPainel')) return;
+        estado = dados || {};
+        const status = estado.state || "idle", ocupado = ocupados.includes(status);
+        $('otaPainel').dataset.estado = status;
+        $('otaEstadoTitulo').textContent = titulos[status] || titulos.idle;
+        $('otaMensagem').textContent = estado.message || "Consulte as atualizações disponíveis para seu PMobile.";
+        $('otaAtual').textContent = estado.currentVersion || "—";
+        $('otaDisponivel').textContent = estado.availableVersion || (status === "updated" ? estado.currentVersion : "—") || "—";
+        $('otaNativa').textContent = estado.nativeVersion || "—";
+        $('otaSelo').textContent = status === "ready" ? "Download concluído" : status === "updated" ? "Tudo atualizado" : status === "available" ? "Nova versão disponível" : "PMobile sempre em dia";
+        $('otaVerificar').hidden = ["available", "ready"].includes(status);
+        $('otaVerificar').disabled = ocupado || status === "unsupported";
+        $('otaVerificar').textContent = ocupado ? "Aguarde…" : status === "error" ? "Tentar novamente" : "Verificar atualizações";
+        $('otaBaixar').hidden = status !== "available";
+        $('otaAplicar').hidden = status !== "ready";
+        $('otaProgresso').hidden = !ocupado && status !== "ready";
+        $('otaEtapa').textContent = ({checking:"Verificando",downloading:"Baixando",verifying:"Conferindo integridade",preparing:"Preparando arquivos",ready:"Download concluído",applying:"Aplicando"})[status] || "Preparando";
+        const percentual = Number(estado.percent);
+        if (Number.isFinite(percentual) && percentual >= 0) {
+            $('otaBarra').value = Math.min(100, percentual);
+            $('otaPorcentagem').textContent = Math.min(100, percentual) + "%";
+        } else { $('otaBarra').removeAttribute("value"); $('otaPorcentagem').textContent = ""; }
+        $('otaBytes').textContent = estado.downloadedBytes > 0 || status === "downloading" ? formatarBytes(estado.downloadedBytes || 0) + (estado.totalBytes > 0 ? " de " + formatarBytes(estado.totalBytes) : "") : "";
+        const notas = String(estado.releaseNotes || "").trim();
+        $('otaNovidades').hidden = !notas;
+        $('otaNotas').textContent = notas;
+        $('otaRecuperacao').hidden = !estado.recovery;
+        $('otaRecuperacao').textContent = estado.recovery || "";
+        $('otaUltima').textContent = estado.checkedAt ? "Última verificação: " + new Date(estado.checkedAt).toLocaleString("pt-BR") : "";
+        $('otaRodape').textContent = status === "legacy" ? "Instale o APK atualizado para acompanhar o progresso neste painel. A verificação atual continua disponível." : status === "unsupported" ? "No computador você pode desenvolver e testar as telas. A atualização instalada é gerenciada pelo aplicativo Android." : "O download acontece em segundo plano. Salve suas operações antes de reiniciar e aplicar.";
+        const indice = ({checking:0,available:0,downloading:1,verifying:2,preparing:2,ready:3,applying:3,updated:4})[status];
+        document.querySelectorAll('[data-ota-etapa]').forEach((el,i) => {
+            el.dataset.situacao = indice === i ? "atual" : indice > i ? "concluida" : "pendente";
+        });
+    }
+    function atualizar() {
+        const ponte = window.PMOBILE_OTA;
+        let dados;
+        try {
+            dados = ponte && typeof ponte.obterEstado === "function" ? JSON.parse(ponte.obterEstado()) : ponte ? {state:"legacy",message:"Você pode procurar atualizações usando o mecanismo já instalado."} : {state:"unsupported",message:"Abra este painel no PMobile do seu celular para atualizar."};
+        } catch(e) { dados = {state:"error",message:"Não foi possível consultar o atualizador. Tente novamente."}; }
+        const atual = JSON.stringify(dados);
+        if (atual !== ultimo) { ultimo = atual; renderizar(dados); }
+        confirmarBoot();
+    }
+    function executar(metodo) {
+        const ponte = window.PMOBILE_OTA;
+        if (ponte && typeof ponte[metodo] === "function") { ponte[metodo](); atualizar(); }
+    }
+    window.baixarAtualizacaoOta = () => executar("baixarAtualizacao");
+    window.aplicarAtualizacaoOta = () => executar("aplicarAtualizacao");
+    window.PMobileAtualizacoes = {renderizar, atualizar, executar};
+    function confirmarBoot() {
+        const ponte = window.PMOBILE_OTA;
+        const requisitos = [window.mostrarTelaSistema, window.abrirDadosLocaisPmobile, window.mostrarInicioConfiguracoes, window.abrirValoresTotal];
+        if (primeiraPintura && !bootConfirmado && window.PMOBILE_OK && requisitos.every(fn=>typeof fn === "function")
+                && $('conteudoPrincipal') && ponte && typeof ponte.confirmarInicializacao === "function" && estado.currentVersion) {
+            ponte.confirmarInicializacao(estado.currentVersion); bootConfirmado = true;
+        }
+    }
+    function iniciar() {
+        atualizar();
+        // Confirmar somente depois dos listeners de inicialização e da primeira pintura.
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+            primeiraPintura = true; confirmarBoot();
+        }));
+        setInterval(() => {
+            if (document.hidden) return;
+            ciclos++;
+            if (ocupados.includes(estado.state) || $('otaPainel')?.getClientRects().length || ciclos % 10 === 0) atualizar();
+        }, 1000);
+    }
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", iniciar);
+    else iniciar();
+})();
 
 window.PMOBILE_OK = true;
 
