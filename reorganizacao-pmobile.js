@@ -9,7 +9,6 @@
  };
  const itensConfig=[
    ["valores","Valores Total","abrirValoresTotal","Resumo financeiro atual"],
-   ["frete","Frete Geral 2","abrirValoresTotal2","Versão analítica existente"],
    ["estoque","Importar Estoque","abrirImportacao","Importação Dogo original"],
    ["conferencias","Conferências","abrirConferencias","Histórico existente"]
  ];
@@ -19,26 +18,26 @@
    window[nome]();
  }
  function init(){
-   const hub=$("configuracoesV3Hub");
+   const hub=$("configuracoesHub");
    if(hub&&!$("pmConfigFerramentas")){
      const grupo=document.createElement("div");
-     grupo.className="configuracoes-v3-grupo";grupo.id="pmConfigFerramentas";
+     grupo.className="configuracoes-grupo";grupo.id="pmConfigFerramentas";
      const titulo=document.createElement("p");
-     titulo.className="configuracoes-v3-etiqueta";titulo.textContent="FERRAMENTAS DO PMOBILE";
-     const grade=document.createElement("div");grade.className="configuracoes-v3-grade";
+     titulo.className="configuracoes-etiqueta";titulo.textContent="FERRAMENTAS DO PMOBILE";
+     const grade=document.createElement("div");grade.className="configuracoes-grade";
      itensConfig.forEach(([icone,nome,funcao,sub])=>{
-       const botao=document.createElement("button");botao.type="button";botao.className="configuracoes-v3-card";
-       const ic=document.createElement("span");ic.className="configuracoes-v3-icone";ic.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true">'+(iconesConfiguracoes[icone]||"")+'</svg>';
-       const conteudo=document.createElement("span");conteudo.className="configuracoes-v3-textos";
+       const botao=document.createElement("button");botao.type="button";botao.className="configuracoes-card";
+       const ic=document.createElement("span");ic.className="configuracoes-icone";ic.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true">'+(iconesConfiguracoes[icone]||"")+'</svg>';
+       const conteudo=document.createElement("span");conteudo.className="configuracoes-textos";
        const strong=document.createElement("strong");strong.textContent=nome;
        const pequeno=document.createElement("small");pequeno.textContent=sub;
        conteudo.append(strong,pequeno);
-       const canto=document.createElement("span");canto.className="configuracoes-v3-canto";canto.textContent="›";
+       const canto=document.createElement("span");canto.className="configuracoes-canto";canto.textContent="›";
        botao.append(ic,conteudo,canto);botao.addEventListener("click",()=>executar(funcao));
        grade.appendChild(botao);
      });
      grupo.append(titulo,grade);
-     const primeiro=hub.querySelector(".configuracoes-v3-grupo");
+     const primeiro=hub.querySelector(".configuracoes-grupo");
      if(primeiro)primeiro.insertAdjacentElement("afterend",grupo);else hub.appendChild(grupo);
    }
    const rastreio=$("menuRastreio");
@@ -72,7 +71,7 @@
    }
    // Apenas os pontos de entrada do menu mudam; os elementos originais
    // continuam no DOM para não comprometer IDs, funções e listeners.
-   ["menuValoresTotal","menuValoresTotal2","menuImportacao",
+   ["menuValoresTotal","menuImportacao",
     "menuConferencias","menuRastreio","menuOpcoesCotacoes"].forEach((id)=>{
       const el=$(id);if(el)el.style.display="none";
     });
