@@ -3,24 +3,24 @@
    a #dadosLocais; atualizar essas cópias quando o padrão nativo mudar.
    Não contém regras globais nem substitui JS legado. */
 
-/* CONFIGURACOES 3.0 */
+/* CONFIGURACOES */
 /* ============================================================
-   PMOBILE — Configurações 3.0
+   PMOBILE — Configurações
    Hub de navegação + páginas internas, tema Ciano Industrial.
    Escopo limitado ao #dadosLocais.
    ============================================================ */
-#dadosLocais .configuracoes-v3-hub[hidden],
-#dadosLocais .configuracoes-v3-cabecalho[hidden],
-#dadosLocais [data-config-v3][hidden] { display: none !important; }
+#dadosLocais .configuracoes-hub[hidden],
+#dadosLocais .configuracoes-cabecalho[hidden],
+#dadosLocais [data-config][hidden] { display: none !important; }
 
-#dadosLocais .configuracoes-v3-hub {
+#dadosLocais .configuracoes-hub {
     max-width: 1000px;
     margin: 0 auto;
     padding-bottom: 30px;
 }
 
-#dadosLocais .configuracoes-v3-grupo { margin-bottom: 24px; }
-#dadosLocais .configuracoes-v3-etiqueta {
+#dadosLocais .configuracoes-grupo { margin-bottom: 24px; }
+#dadosLocais .configuracoes-etiqueta {
     margin: 0 0 10px;
     color: var(--pm-acento, #57dceb);
     font-size: 11px;
@@ -28,12 +28,12 @@
     letter-spacing: .11em;
 }
 
-#dadosLocais .configuracoes-v3-grade {
+#dadosLocais .configuracoes-grade {
     display: grid;
     grid-template-columns: repeat(2,minmax(0,1fr));
     gap: 12px;
 }
-#dadosLocais .configuracoes-v3-card {
+#dadosLocais .configuracoes-card {
     display: flex;
     position: relative;
     flex-direction: column;
@@ -53,15 +53,15 @@
     background: #142a32;
     cursor: pointer;
 }
-#dadosLocais .configuracoes-v3-card:hover {
+#dadosLocais .configuracoes-card:hover {
     border-color: #3d8997;
     background: #17333d;
 }
-#dadosLocais .configuracoes-v3-card:focus-visible {
+#dadosLocais .configuracoes-card:focus-visible {
     outline: 2px solid var(--pm-acento, #57dceb);
     outline-offset: 3px;
 }
-#dadosLocais .configuracoes-v3-icone {
+#dadosLocais .configuracoes-icone {
     display: grid;
     place-items: center;
     flex: 0 0 46px;
@@ -72,7 +72,7 @@
     background: #1c424c;
     color: var(--pm-acento, #57dceb);
 }
-#dadosLocais .configuracoes-v3-icone svg {
+#dadosLocais .configuracoes-icone svg {
     width: 24px;
     height: 24px;
     display: block;
@@ -82,21 +82,21 @@
     stroke-linecap: round;
     stroke-linejoin: round;
 }
-#dadosLocais .configuracoes-v3-textos { display: grid; gap: 6px; min-width: 0; }
-#dadosLocais .configuracoes-v3-textos strong {
+#dadosLocais .configuracoes-textos { display: grid; gap: 6px; min-width: 0; }
+#dadosLocais .configuracoes-textos strong {
     font-size: 14px;
     line-height: 1.34;
     color: var(--texto, #f1f7f8);
     overflow-wrap: anywhere;
 }
-#dadosLocais .configuracoes-v3-textos small {
+#dadosLocais .configuracoes-textos small {
     font-size: 11px;
     font-weight: 400;
     line-height: 1.45;
     color: var(--texto-secundario, #a3bbc2);
     overflow-wrap: anywhere;
 }
-#dadosLocais .configuracoes-v3-canto {
+#dadosLocais .configuracoes-canto {
     position: absolute;
     right: 14px;
     top: 18px;
@@ -107,89 +107,89 @@
 
 /* PESQUISA 2.0 */
 /* PMobile Pesquisa 2.0 — escopo exclusivo da aba Pesquisa */
-#dadosLocais .pesquisa-v2{max-width:820px;margin:0 auto;padding:22px;border:1px solid #393939;border-radius:24px;background:#151515;overflow:visible}
-#dadosLocais .pesquisa-v2-topo,#dadosLocais .pesquisa-v2-marca{display:flex;align-items:center;gap:12px}
-#dadosLocais .pesquisa-v2-topo{justify-content:space-between;padding-bottom:22px;border-bottom:1px solid #3b3b3b}
-#dadosLocais .pesquisa-v2-marca strong,#dadosLocais .pesquisa-v2-marca small{display:block}
-#dadosLocais .pesquisa-v2-marca strong{font-size:17px;color:#f1f1f1}
-#dadosLocais .pesquisa-v2-marca small{font-size:12px;color:#aaaaaa;margin-top:3px}
-#dadosLocais .pesquisa-v2-icone{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;background:#303030;color:#dedede;font-size:34px}
-#dadosLocais .pesquisa-v2-status{border-radius:99px;background:#292929;color:#dedede;font-size:11px;padding:8px 10px;white-space:nowrap}
-#dadosLocais .pesquisa-v2-status.offline{background:#3b3020;color:#efc18a}
-#dadosLocais .pesquisa-v2-intro{padding:25px 0 17px}
-#dadosLocais .pesquisa-v2-intro h2{margin:0 0 8px;font-size:25px;color:#f3f3f3}
-#dadosLocais .pesquisa-v2-intro p{margin:0;color:#adadad;font-size:14px}
-#dadosLocais .pesquisa-v2-campo{display:flex;align-items:center;gap:10px;padding:7px 13px;border:1px solid #515151;border-radius:16px;background:#242424}
-#dadosLocais .pesquisa-v2-lupa{font-size:28px;color:#dedede}
-#dadosLocais .pesquisa-v2-campo input{border:0!important;box-shadow:none!important;background:transparent!important;min-height:43px;font-size:16px}
-#dadosLocais .pesquisa-v2-select{display:none}
-#dadosLocais .pesquisa-v2-tipos{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0}
-#dadosLocais .pesquisa-v2-tipos button{padding:10px 18px;border:1px solid #565656;border-radius:99px;background:transparent;color:#c0c0c0;font-size:13px}
-#dadosLocais .pesquisa-v2-tipos button.ativo{background:#a0a0a0;border-color:#a0a0a0;color:#fff;font-weight:700}
-#dadosLocais .pesquisa-v2-buscar{width:100%;min-height:52px;background:#d7d7d7;border:0;border-radius:13px;color:#151515;font-size:15px;font-weight:700}
-#dadosLocais .pesquisa-v2-buscar:hover{background:#f0f0f0}
-#dadosLocais .pesquisa-v2-resultados{margin-top:24px;padding-top:18px;border-top:1px solid #393939}
-#dadosLocais .pesquisa-v2-vazio{text-align:center;padding:30px 10px;color:#b8b8b8}
-#dadosLocais .pesquisa-v2-vazio span{display:block;font-size:40px;color:#d7d7d7}
-#dadosLocais .pesquisa-v2-vazio strong{display:block;color:#eeeeee;margin:8px 0}
-#dadosLocais .pesquisa-v2-vazio p{margin:0;font-size:13px}
-#dadosLocais .pesquisa-v2-contagem{margin:0 0 13px;color:#b7b7b7;font-size:13px}
-#dadosLocais .pesquisa-v2-card{margin:10px 0;border:1px solid #484848;border-radius:15px;background:#242424;overflow:hidden}
-#dadosLocais .pesquisa-v2-card summary{cursor:pointer;padding:16px;list-style:none}
-#dadosLocais .pesquisa-v2-card summary::-webkit-details-marker{display:none}
-#dadosLocais .pesquisa-v2-card summary strong{display:block;color:#f2f2f2;font-size:15px;margin:8px 0}
-#dadosLocais .pesquisa-v2-card summary small{color:#b7b7b7}
-#dadosLocais .pesquisa-v2-codigo{color:#dedede;font-size:12px;font-weight:700}
-#dadosLocais .pesquisa-v2-disponivel{float:right;color:#dedede;font-size:12px}
-#dadosLocais .pesquisa-v2-disponivel.zero{color:#efbd87}
-#dadosLocais .pesquisa-v2-detalhes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:16px;border-top:1px solid #464646}
-#dadosLocais .pesquisa-v2-detalhes div{min-width:0;overflow-wrap:anywhere}
-#dadosLocais .pesquisa-v2-detalhes small{display:block;color:#a7a7a7;margin-bottom:4px}
-#dadosLocais .pesquisa-v2-detalhes b{color:#f5f5f5}
-#dadosLocais .pesquisa-v2-rodape{display:flex;justify-content:center;gap:8px;padding:20px 0 0;color:#acacac;font-size:12px}
-@media(max-width:700px){#dadosLocais .pesquisa-v2{padding:15px;border-radius:19px}#dadosLocais .pesquisa-v2-intro h2{font-size:22px}#dadosLocais .pesquisa-v2-status{font-size:10px}#dadosLocais .pesquisa-v2-tipos button{padding:9px 13px}}
+#dadosLocais .pesquisa{max-width:820px;margin:0 auto;padding:22px;border:1px solid #393939;border-radius:24px;background:#151515;overflow:visible}
+#dadosLocais .pesquisa-topo,#dadosLocais .pesquisa-marca{display:flex;align-items:center;gap:12px}
+#dadosLocais .pesquisa-topo{justify-content:space-between;padding-bottom:22px;border-bottom:1px solid #3b3b3b}
+#dadosLocais .pesquisa-marca strong,#dadosLocais .pesquisa-marca small{display:block}
+#dadosLocais .pesquisa-marca strong{font-size:17px;color:#f1f1f1}
+#dadosLocais .pesquisa-marca small{font-size:12px;color:#aaaaaa;margin-top:3px}
+#dadosLocais .pesquisa-icone{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;background:#303030;color:#dedede;font-size:34px}
+#dadosLocais .pesquisa-status{border-radius:99px;background:#292929;color:#dedede;font-size:11px;padding:8px 10px;white-space:nowrap}
+#dadosLocais .pesquisa-status.offline{background:#3b3020;color:#efc18a}
+#dadosLocais .pesquisa-intro{padding:25px 0 17px}
+#dadosLocais .pesquisa-intro h2{margin:0 0 8px;font-size:25px;color:#f3f3f3}
+#dadosLocais .pesquisa-intro p{margin:0;color:#adadad;font-size:14px}
+#dadosLocais .pesquisa-campo{display:flex;align-items:center;gap:10px;padding:7px 13px;border:1px solid #515151;border-radius:16px;background:#242424}
+#dadosLocais .pesquisa-lupa{font-size:28px;color:#dedede}
+#dadosLocais .pesquisa-campo input{border:0!important;box-shadow:none!important;background:transparent!important;min-height:43px;font-size:16px}
+#dadosLocais .pesquisa-select{display:none}
+#dadosLocais .pesquisa-tipos{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0}
+#dadosLocais .pesquisa-tipos button{padding:10px 18px;border:1px solid #565656;border-radius:99px;background:transparent;color:#c0c0c0;font-size:13px}
+#dadosLocais .pesquisa-tipos button.ativo{background:#a0a0a0;border-color:#a0a0a0;color:#fff;font-weight:700}
+#dadosLocais .pesquisa-buscar{width:100%;min-height:52px;background:#d7d7d7;border:0;border-radius:13px;color:#151515;font-size:15px;font-weight:700}
+#dadosLocais .pesquisa-buscar:hover{background:#f0f0f0}
+#dadosLocais .pesquisa-resultados{margin-top:24px;padding-top:18px;border-top:1px solid #393939}
+#dadosLocais .pesquisa-vazio{text-align:center;padding:30px 10px;color:#b8b8b8}
+#dadosLocais .pesquisa-vazio span{display:block;font-size:40px;color:#d7d7d7}
+#dadosLocais .pesquisa-vazio strong{display:block;color:#eeeeee;margin:8px 0}
+#dadosLocais .pesquisa-vazio p{margin:0;font-size:13px}
+#dadosLocais .pesquisa-contagem{margin:0 0 13px;color:#b7b7b7;font-size:13px}
+#dadosLocais .pesquisa-card{margin:10px 0;border:1px solid #484848;border-radius:15px;background:#242424;overflow:hidden}
+#dadosLocais .pesquisa-card summary{cursor:pointer;padding:16px;list-style:none}
+#dadosLocais .pesquisa-card summary::-webkit-details-marker{display:none}
+#dadosLocais .pesquisa-card summary strong{display:block;color:#f2f2f2;font-size:15px;margin:8px 0}
+#dadosLocais .pesquisa-card summary small{color:#b7b7b7}
+#dadosLocais .pesquisa-codigo{color:#dedede;font-size:12px;font-weight:700}
+#dadosLocais .pesquisa-disponivel{float:right;color:#dedede;font-size:12px}
+#dadosLocais .pesquisa-disponivel.zero{color:#efbd87}
+#dadosLocais .pesquisa-detalhes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:16px;border-top:1px solid #464646}
+#dadosLocais .pesquisa-detalhes div{min-width:0;overflow-wrap:anywhere}
+#dadosLocais .pesquisa-detalhes small{display:block;color:#a7a7a7;margin-bottom:4px}
+#dadosLocais .pesquisa-detalhes b{color:#f5f5f5}
+#dadosLocais .pesquisa-rodape{display:flex;justify-content:center;gap:8px;padding:20px 0 0;color:#acacac;font-size:12px}
+@media(max-width:700px){#dadosLocais .pesquisa{padding:15px;border-radius:19px}#dadosLocais .pesquisa-intro h2{font-size:22px}#dadosLocais .pesquisa-status{font-size:10px}#dadosLocais .pesquisa-tipos button{padding:9px 13px}}
 
 
 /* CONTAGEM 2.0 */
 /* Contagem manual 2.0 — apenas apresentação; lógica existente preservada */
-#dadosLocais .contagem-v2{max-width:820px;margin:0 auto 16px;padding:22px;border:1px solid #293a31;border-radius:23px;background:#101512;overflow:visible}
-#dadosLocais .contagem-v2-topo,#dadosLocais .contagem-v2-marca{display:flex;align-items:center;gap:12px}
-#dadosLocais .contagem-v2-topo{justify-content:space-between;padding-bottom:20px;border-bottom:1px solid #2b3b32}
-#dadosLocais .contagem-v2-marca strong,#dadosLocais .contagem-v2-marca small{display:block}
-#dadosLocais .contagem-v2-marca strong{font-size:17px;color:#f1f6f3}
-#dadosLocais .contagem-v2-marca small{font-size:12px;color:#99a99f;margin-top:3px}
-#dadosLocais .contagem-v2-icone{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;background:#194333;color:#4bdaa0;font-size:28px}
-#dadosLocais .contagem-v2-selo{border-radius:99px;background:#1b3226;color:#a8e4c0;font-size:11px;padding:8px 10px;white-space:nowrap}
-#dadosLocais .contagem-v2-intro{padding:24px 0 18px}
-#dadosLocais .contagem-v2-intro h2{margin:0 0 8px;font-size:24px;color:#f3f7f4}
-#dadosLocais .contagem-v2-intro p{margin:0;color:#9eada3;font-size:14px}
-#dadosLocais .contagem-v2-etapa{font-size:15px;color:#e9f3eb;margin:0 0 14px}
+#dadosLocais .contagem{max-width:820px;margin:0 auto 16px;padding:22px;border:1px solid #293a31;border-radius:23px;background:#101512;overflow:visible}
+#dadosLocais .contagem-topo,#dadosLocais .contagem-marca{display:flex;align-items:center;gap:12px}
+#dadosLocais .contagem-topo{justify-content:space-between;padding-bottom:20px;border-bottom:1px solid #2b3b32}
+#dadosLocais .contagem-marca strong,#dadosLocais .contagem-marca small{display:block}
+#dadosLocais .contagem-marca strong{font-size:17px;color:#f1f6f3}
+#dadosLocais .contagem-marca small{font-size:12px;color:#99a99f;margin-top:3px}
+#dadosLocais .contagem-icone{display:grid;place-items:center;flex-shrink:0;width:46px;height:46px;border-radius:14px;background:#194333;color:#4bdaa0;font-size:28px}
+#dadosLocais .contagem-selo{border-radius:99px;background:#1b3226;color:#a8e4c0;font-size:11px;padding:8px 10px;white-space:nowrap}
+#dadosLocais .contagem-intro{padding:24px 0 18px}
+#dadosLocais .contagem-intro h2{margin:0 0 8px;font-size:24px;color:#f3f7f4}
+#dadosLocais .contagem-intro p{margin:0;color:#9eada3;font-size:14px}
+#dadosLocais .contagem-etapa{font-size:15px;color:#e9f3eb;margin:0 0 14px}
 #dadosLocais .linha-contagem-manual-busca{display:flex;flex-direction:column;align-items:stretch;gap:12px}
-#dadosLocais .contagem-v2-campo{display:flex;align-items:center;gap:10px;padding:7px 13px;border:1px solid #365145;border-radius:16px;background:#1c2420}
-#dadosLocais .contagem-v2-campo span{color:#51dca0;font-size:28px}
-#dadosLocais .contagem-v2-campo input{flex:1;min-width:0;border:0!important;box-shadow:none!important;background:transparent!important;min-height:43px;font-size:16px}
+#dadosLocais .contagem-campo{display:flex;align-items:center;gap:10px;padding:7px 13px;border:1px solid #365145;border-radius:16px;background:#1c2420}
+#dadosLocais .contagem-campo span{color:#51dca0;font-size:28px}
+#dadosLocais .contagem-campo input{flex:1;min-width:0;border:0!important;box-shadow:none!important;background:transparent!important;min-height:43px;font-size:16px}
 #dadosLocais .seletor-contagem-manual-wrapper{position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none}
-#dadosLocais .contagem-v2-tipos{display:flex;gap:8px;flex-wrap:wrap}
-#dadosLocais .contagem-v2-tipos button{width:auto;min-width:0;padding:10px 17px;border:1px solid #45564b;border-radius:99px;background:transparent;color:#b5c0b9;font-size:13px}
-#dadosLocais .contagem-v2-tipos button.ativo{background:#11965a;border-color:#11965a;color:#fff;font-weight:700}
+#dadosLocais .contagem-tipos{display:flex;gap:8px;flex-wrap:wrap}
+#dadosLocais .contagem-tipos button{width:auto;min-width:0;padding:10px 17px;border:1px solid #45564b;border-radius:99px;background:transparent;color:#b5c0b9;font-size:13px}
+#dadosLocais .contagem-tipos button.ativo{background:#11965a;border-color:#11965a;color:#fff;font-weight:700}
 #dadosLocais .linha-contagem-manual-busca .botao-buscar-contagem-manual{width:100%;min-width:0;flex:auto;min-height:52px;border:0;border-radius:13px;background:#3dcb92;color:#071c12;font-size:15px;font-weight:700}
 #dadosLocais .linha-contagem-manual-busca .acoes-contagem-manual-config{align-self:flex-end;flex:none}
 #dadosLocais .linha-contagem-manual-busca .botao-config-contagem-manual{width:auto;min-width:42px;min-height:42px;border-radius:12px;background:#1e3025;color:#9cdbb6}
-#dadosLocais .contagem-v2-resultados{margin-top:12px;border-top:1px solid #293b30;padding-top:14px}
-#dadosLocais .contagem-v2-registro .linha-formulario{display:flex;flex-direction:column;align-items:stretch;gap:13px}
-#dadosLocais .contagem-v2-label{display:block;color:#b6c8bb;font-size:13px;width:100%}
-#dadosLocais .contagem-v2-label input{display:block;width:100%;margin-top:7px;min-height:48px;border-radius:12px}
-#dadosLocais .contagem-v2-salvar{width:100%;min-height:52px;border:0;border-radius:13px;background:#3dcb92;color:#071c12;font-weight:700}
-#dadosLocais .contagem-v2-lista-titulo{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
-#dadosLocais .contagem-v2-lista-titulo h3{margin:0;color:#f1f6f2;font-size:17px}
-#dadosLocais .contagem-v2-lista-titulo p{margin:4px 0 0;color:#98aa9e;font-size:12px}
-#dadosLocais .contagem-v2-lista-titulo>span{color:#6de2a5;background:#1e3c2b;border-radius:10px;padding:10px}
-@media(max-width:700px){#dadosLocais .contagem-v2{padding:15px;border-radius:19px}#dadosLocais .contagem-v2-intro h2{font-size:22px}#dadosLocais .contagem-v2-selo{font-size:10px}#dadosLocais .contagem-v2-tipos button{padding:9px 13px}}
+#dadosLocais .contagem-resultados{margin-top:12px;border-top:1px solid #293b30;padding-top:14px}
+#dadosLocais .contagem-registro .linha-formulario{display:flex;flex-direction:column;align-items:stretch;gap:13px}
+#dadosLocais .contagem-label{display:block;color:#b6c8bb;font-size:13px;width:100%}
+#dadosLocais .contagem-label input{display:block;width:100%;margin-top:7px;min-height:48px;border-radius:12px}
+#dadosLocais .contagem-salvar{width:100%;min-height:52px;border:0;border-radius:13px;background:#3dcb92;color:#071c12;font-weight:700}
+#dadosLocais .contagem-lista-titulo{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+#dadosLocais .contagem-lista-titulo h3{margin:0;color:#f1f6f2;font-size:17px}
+#dadosLocais .contagem-lista-titulo p{margin:4px 0 0;color:#98aa9e;font-size:12px}
+#dadosLocais .contagem-lista-titulo>span{color:#6de2a5;background:#1e3c2b;border-radius:10px;padding:10px}
+@media(max-width:700px){#dadosLocais .contagem{padding:15px;border-radius:19px}#dadosLocais .contagem-intro h2{font-size:22px}#dadosLocais .contagem-selo{font-size:10px}#dadosLocais .contagem-tipos button{padding:9px 13px}}
 
 
-/* LOCAIS 3.0 */
+/* LOCAIS */
 /* ==========================================================
-   PMOBILE — LOCAIS 3.0 / PADRÃO CONFERÊNCIAS
+   PMOBILE — LOCAIS / PADRÃO CONFERÊNCIAS
    Preserva o tema ciano e as cores semânticas dos estados.
    Nenhuma regra de dados, confirmação ou autenticação aqui.
    ========================================================== */
@@ -239,13 +239,13 @@
 #dadosLocais #painelLocaisVazios,
 #dadosLocais #painelLocaisDerivados { padding: 14px; }
 
-#dadosLocais .locais-v3-resumo {
+#dadosLocais .locais-resumo {
   display: grid;
   grid-template-columns: repeat(3,minmax(0,1fr));
   gap: 8px;
   margin: 0 0 16px;
 }
-#dadosLocais .locais-v3-indicador {
+#dadosLocais .locais-indicador {
   min-width: 0;
   min-height: 75px;
   padding: 11px 5px;
@@ -258,29 +258,29 @@
   border-radius: 13px;
   background: #202a2d;
 }
-#dadosLocais .locais-v3-indicador span {
+#dadosLocais .locais-indicador span {
   color: #b0c4c8;
   font-size: 11px;
   text-align: center;
 }
-#dadosLocais .locais-v3-indicador strong {
+#dadosLocais .locais-indicador strong {
   color: #f0f6f7;
   font-size: 23px;
   font-weight: 750;
   line-height: 1.15;
   font-variant-numeric: tabular-nums;
 }
-#dadosLocais .locais-v3-indicador.alerta strong { color: #f3b45f; }
-#dadosLocais .locais-v3-indicador.sucesso strong { color: #80e5b0; }
-#dadosLocais .locais-v3-ferramentas { margin: 0 0 16px; }
-#dadosLocais .locais-v3-ferramentas label {
+#dadosLocais .locais-indicador.alerta strong { color: #f3b45f; }
+#dadosLocais .locais-indicador.sucesso strong { color: #80e5b0; }
+#dadosLocais .locais-ferramentas { margin: 0 0 16px; }
+#dadosLocais .locais-ferramentas label {
   display: block;
   margin: 0 0 7px;
   color: #b9cdd2;
   font-size: 12px;
   font-weight: 650;
 }
-#dadosLocais .locais-v3-ferramentas input {
+#dadosLocais .locais-ferramentas input {
   display: block;
   width: 100%;
   max-width: none;
@@ -293,18 +293,18 @@
   border-radius: 12px;
   font-size: 14px;
 }
-#dadosLocais .locais-v3-ferramentas input::placeholder {color: #9fb5bb;}
-#dadosLocais .locais-v3-ferramentas input:focus {
+#dadosLocais .locais-ferramentas input::placeholder {color: #9fb5bb;}
+#dadosLocais .locais-ferramentas input:focus {
   border-color: #57dceb;
   outline: 2px solid rgba(87,220,235,.22);
 }
-#dadosLocais .locais-v3-filtros {
+#dadosLocais .locais-filtros {
   display: grid;
   grid-template-columns: repeat(3,minmax(0,1fr));
   gap: 8px;
   margin-top: 10px;
 }
-#dadosLocais .locais-v3-filtros button {
+#dadosLocais .locais-filtros button {
   min-width: 0;
   min-height: 42px;
   padding: 9px 4px;
@@ -317,23 +317,23 @@
   font-weight: 650;
   cursor: pointer;
 }
-#dadosLocais .locais-v3-filtros button.ativo {
+#dadosLocais .locais-filtros button.ativo {
   background: #57dceb;
   border-color: #57dceb;
   color: #06212a;
 }
-#dadosLocais .locais-v3-filtros button:focus-visible {
+#dadosLocais .locais-filtros button:focus-visible {
   outline: 2px solid #57dceb;
   outline-offset: 2px;
 }
-#dadosLocais .locais-v3-ajuda {
+#dadosLocais .locais-ajuda {
   display: block;
   margin: 7px 0 0;
   color: #98b0b8;
   font-size: 11px;
   line-height: 1.4;
 }
-#dadosLocais .locais-v3-sem-resultado:not([hidden]) {
+#dadosLocais .locais-sem-resultado:not([hidden]) {
   margin: 12px 0;
   padding: 17px 12px;
   border: 1px solid #36515b;
@@ -342,11 +342,11 @@
   text-align: center;
   font-size: 12px;
 }
-#dadosLocais .locais-v3-cartao[hidden],
+#dadosLocais .locais-cartao[hidden],
 #dadosLocais .local-vazio-area-card[hidden] { display: none !important; }
 
 /* Alterados e derivados — mesmo padrão de cartões expansíveis. */
-#dadosLocais .locais-v3-cartao {
+#dadosLocais .locais-cartao {
   display: block;
   width: 100%;
   min-width: 0;
@@ -359,31 +359,31 @@
   color: #f0f4f5;
   overflow: hidden;
 }
-#dadosLocais .locais-v3-cartao:hover {
+#dadosLocais .locais-cartao:hover {
   border-color: #46747e !important;
   background: #202a2c !important;
 }
-#dadosLocais .locais-v3-cartao[open] { border-color: #468d99 !important; }
-#dadosLocais .locais-v3-resumo-cartao {
+#dadosLocais .locais-cartao[open] { border-color: #468d99 !important; }
+#dadosLocais .locais-resumo-cartao {
   display: block;
   list-style: none;
   padding: 17px;
   cursor: pointer;
 }
-#dadosLocais .locais-v3-resumo-cartao::-webkit-details-marker { display: none; }
-#dadosLocais .locais-v3-resumo-cartao::marker { content: ""; }
-#dadosLocais .locais-v3-resumo-cartao:focus-visible {
+#dadosLocais .locais-resumo-cartao::-webkit-details-marker { display: none; }
+#dadosLocais .locais-resumo-cartao::marker { content: ""; }
+#dadosLocais .locais-resumo-cartao:focus-visible {
   outline: 2px solid #57dceb;
   outline-offset: -3px;
 }
-#dadosLocais .locais-v3-topo {
+#dadosLocais .locais-topo {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 10px;
 }
-#dadosLocais .locais-v3-produto {min-width: 0;flex: 1;}
-#dadosLocais .locais-v3-produto h3 {
+#dadosLocais .locais-produto {min-width: 0;flex: 1;}
+#dadosLocais .locais-produto h3 {
   margin: 0 0 5px;
   font-size: 15px;
   font-weight: 750;
@@ -391,7 +391,7 @@
   color: #f1f5f5;
   overflow-wrap: anywhere;
 }
-#dadosLocais .locais-v3-produto p {
+#dadosLocais .locais-produto p {
   margin: 0;
   color: #b2c2c5;
   font-size: 12px;
@@ -422,8 +422,8 @@
   border-color: #285b45;
   color: #80e5b0;
 }
-#dadosLocais .locais-v3-local { margin-top: 17px; }
-#dadosLocais .locais-v3-rotulo {
+#dadosLocais .locais-local { margin-top: 17px; }
+#dadosLocais .locais-rotulo {
   display: block;
   color: #aec2c6;
   font-size: 10px;
@@ -431,25 +431,25 @@
   letter-spacing: .11em;
   margin-bottom: 9px;
 }
-#dadosLocais .locais-v3-trajeto {
+#dadosLocais .locais-trajeto {
   display: grid;
   grid-template-columns: minmax(0,1fr) 24px minmax(0,1fr);
   align-items: center;
   gap: 8px;
 }
-#dadosLocais .locais-v3-endereco {
+#dadosLocais .locais-endereco {
   min-width: 0;
   padding: 11px 7px;
   border-radius: 12px;
   background: #1a3741;
   text-align: center;
 }
-#dadosLocais .locais-v3-endereco span {
+#dadosLocais .locais-endereco span {
   display: block;
   color: #abc5ca;
   font-size: 11px;
 }
-#dadosLocais .locais-v3-endereco strong {
+#dadosLocais .locais-endereco strong {
   display: block;
   margin-top: 5px;
   color: #f1f7f8;
@@ -457,24 +457,24 @@
   font-weight: 750;
   overflow-wrap: anywhere;
 }
-#dadosLocais .locais-v3-seta {
+#dadosLocais .locais-seta {
   color: #57dceb;
   font-size: 20px;
   text-align: center;
 }
-#dadosLocais .locais-v3-metricas {
+#dadosLocais .locais-metricas {
   display: grid;
   grid-template-columns: repeat(2,minmax(0,1fr));
   gap: 14px;
   padding: 15px 0 14px;
 }
-#dadosLocais .locais-v3-metricas span {
+#dadosLocais .locais-metricas span {
   display: block;
   color: #acc0c5;
   font-size: 11px;
   line-height: 1.3;
 }
-#dadosLocais .locais-v3-metricas strong {
+#dadosLocais .locais-metricas strong {
   display: block;
   margin-top: 5px;
   color: #f2f6f6;
@@ -482,14 +482,14 @@
   font-weight: 750;
   font-variant-numeric: tabular-nums;
 }
-#dadosLocais .locais-v3-responsavel {
+#dadosLocais .locais-responsavel {
   display: flex;
   align-items: center;
   gap: 10px;
   border-top: 1px solid #354247;
   padding: 13px 0 10px;
 }
-#dadosLocais .locais-v3-avatar {
+#dadosLocais .locais-avatar {
   display: grid;
   place-items: center;
   width: 34px;
@@ -500,7 +500,7 @@
   border-radius: 50%;
   color: #57dceb;
 }
-#dadosLocais .locais-v3-avatar svg {
+#dadosLocais .locais-avatar svg {
   width: 19px;
   height: 19px;
   stroke: currentColor;
@@ -509,20 +509,20 @@
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-#dadosLocais .locais-v3-responsavel div {min-width: 0;}
-#dadosLocais .locais-v3-responsavel div span {
+#dadosLocais .locais-responsavel div {min-width: 0;}
+#dadosLocais .locais-responsavel div span {
   display: block;
   color: #b2c4c8;
   font-size: 11px;
 }
-#dadosLocais .locais-v3-responsavel div strong {
+#dadosLocais .locais-responsavel div strong {
   display: block;
   margin-top: 4px;
   color: #eef5f5;
   font-size: 13px;
   overflow-wrap: anywhere;
 }
-#dadosLocais .locais-v3-expandir {
+#dadosLocais .locais-expandir {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -531,40 +531,40 @@
   color: #b3c5c9;
   font-size: 12px;
 }
-#dadosLocais details .locais-v3-expandir .aberto,
-#dadosLocais details[open] .locais-v3-expandir .fechado {display: none;}
-#dadosLocais details[open] .locais-v3-expandir .aberto {display: inline;}
-#dadosLocais details[open] .locais-v3-chevron {transform: rotate(180deg);}
-#dadosLocais .locais-v3-chevron {display: inline-block;font-size: 18px;}
-#dadosLocais .locais-v3-detalhes {
+#dadosLocais details .locais-expandir .aberto,
+#dadosLocais details[open] .locais-expandir .fechado {display: none;}
+#dadosLocais details[open] .locais-expandir .aberto {display: inline;}
+#dadosLocais details[open] .locais-chevron {transform: rotate(180deg);}
+#dadosLocais .locais-chevron {display: inline-block;font-size: 18px;}
+#dadosLocais .locais-detalhes {
   display: grid;
   gap: 13px;
   border-top: 1px solid #374248;
   background: #202a2d;
   padding: 15px 17px;
 }
-#dadosLocais .locais-v3-detalhes > div:not(.locais-v3-confirmacao) {
+#dadosLocais .locais-detalhes > div:not(.locais-confirmacao) {
   display: flex;
   justify-content: space-between;
   gap: 12px;
   align-items: baseline;
 }
-#dadosLocais .locais-v3-detalhes span {
+#dadosLocais .locais-detalhes span {
   color: #a9bfc5;
   font-size: 12px;
 }
-#dadosLocais .locais-v3-detalhes strong {
+#dadosLocais .locais-detalhes strong {
   color: #f2f7f7;
   font-size: 12px;
   font-weight: 600;
   text-align: right;
   overflow-wrap: anywhere;
 }
-#dadosLocais .locais-v3-confirmacao {
+#dadosLocais .locais-confirmacao {
   padding-top: 13px;
   border-top: 1px solid #3a4c53;
 }
-#dadosLocais .locais-v3-confirmacao button {
+#dadosLocais .locais-confirmacao button {
   width: 100%;
   min-height: 44px;
   padding: 11px 13px;
@@ -576,11 +576,11 @@
   font-weight: 700;
   cursor: pointer;
 }
-#dadosLocais .locais-v3-confirmacao button:hover { background: #1a4a55; }
-#dadosLocais .locais-v3-confirmacao button:focus-visible {outline: 2px solid #57dceb;}
+#dadosLocais .locais-confirmacao button:hover { background: #1a4a55; }
+#dadosLocais .locais-confirmacao button:focus-visible {outline: 2px solid #57dceb;}
 
 /* Derivados: apenas o local cadastrado (não há movimentação nesta RPC). */
-#dadosLocais .locais-v3-derivado-tag {
+#dadosLocais .locais-derivado-tag {
   padding: 6px 8px;
   color: #f3b45f;
   background: #40301d;
@@ -589,11 +589,11 @@
   font-weight: 700;
   flex-shrink: 0;
 }
-#dadosLocais .locais-v3-trajeto-unico {
+#dadosLocais .locais-trajeto-unico {
   grid-template-columns: repeat(2,minmax(0,1fr));
   margin-top: 16px;
 }
-#dadosLocais .local-derivado-card .locais-v3-expandir { margin-top: 15px; }
+#dadosLocais .local-derivado-card .locais-expandir { margin-top: 15px; }
 #dadosLocais .locais-derivados-cabecalho { display: none; }
 #dadosLocais .locais-resumo-derivados {
   margin: 0 0 11px;
@@ -657,7 +657,7 @@
   #dadosLocais #painelLocaisAlterados,
   #dadosLocais #painelLocaisVazios,
   #dadosLocais #painelLocaisDerivados {padding: 12px;}
-  #dadosLocais .locais-v3-resumo-cartao {padding: 14px;}
+  #dadosLocais .locais-resumo-cartao {padding: 14px;}
   #dadosLocais .local-vazio-area-card {
     grid-template-columns: repeat(3,minmax(0,1fr));
     gap: 11px;
@@ -668,16 +668,16 @@
 @media (max-width: 380px) {
   #dadosLocais .abas-locais {gap: 4px;padding: 8px 7px 0;}
   #dadosLocais .aba-locais {font-size: 10px; padding: 8px 2px;}
-  #dadosLocais .locais-v3-indicador {padding: 10px 2px;}
-  #dadosLocais .locais-v3-indicador span {font-size: 10px;}
-  #dadosLocais .locais-v3-indicador strong {font-size: 19px;}
-  #dadosLocais .locais-v3-endereco {padding: 10px 5px;}
-  #dadosLocais .locais-v3-endereco strong {font-size: 12px;}
-  #dadosLocais .locais-v3-topo {flex-wrap: wrap;}
-  #dadosLocais .local-alterado-status, #dadosLocais .locais-v3-derivado-tag {margin-left: auto;}
+  #dadosLocais .locais-indicador {padding: 10px 2px;}
+  #dadosLocais .locais-indicador span {font-size: 10px;}
+  #dadosLocais .locais-indicador strong {font-size: 19px;}
+  #dadosLocais .locais-endereco {padding: 10px 5px;}
+  #dadosLocais .locais-endereco strong {font-size: 12px;}
+  #dadosLocais .locais-topo {flex-wrap: wrap;}
+  #dadosLocais .local-alterado-status, #dadosLocais .locais-derivado-tag {margin-left: auto;}
 }
 @media (prefers-reduced-motion: reduce) {
-  #dadosLocais .locais-v3-cartao {transition: none;}
+  #dadosLocais .locais-cartao {transition: none;}
 }
 
 
@@ -1062,32 +1062,32 @@
 #dadosLocais .dl-app{max-width:1180px;margin:0 auto;padding:24px 12px 74px}
 #dadosLocais [hidden]{display:none!important}
 #dadosLocais .cabecalho-pagina{max-width:1180px}
-#dadosLocais .configuracoes-v3-hub{max-width:1000px;margin:0 auto}
+#dadosLocais .configuracoes-hub{max-width:1000px;margin:0 auto}
 #dadosLocais .dl-informacao{font-size:12px;line-height:1.5;color:var(--texto-secundario);margin:13px 0}
 #dadosLocais .dl-retorno{display:flex;gap:12px;align-items:center;margin:0 0 18px;color:var(--texto-secundario);font-size:12px}
 #dadosLocais .dl-retorno .botao-voltar-tela{flex:0 0 44px;min-height:44px}
 #dadosLocais #dlMensagem:not(:empty){padding:12px 15px;margin:0 0 15px;border:1px solid #285c47;border-radius:12px;color:#a8eac3;background:#15372a}
 #dadosLocais #dlMensagem[data-erro="true"]{background:#392326;border-color:#774144;color:#ffaaaa}
 #dadosLocais .dl-nativo-comparador{padding:13px}
-#dadosLocais .locais-v3-ferramentas{margin-top:13px}
-#dadosLocais .locais-v3-ferramentas input{min-height:46px}
+#dadosLocais .locais-ferramentas{margin-top:13px}
+#dadosLocais .locais-ferramentas input{min-height:46px}
 #dadosLocais .reservas-paginacao{gap:9px;flex-wrap:wrap}
-#dadosLocais .pesquisa-v2-resultados{min-height:50px}
-#dadosLocais .pesquisa-v2-rodape{border-top:1px solid var(--borda,#29434b);margin-top:10px}
-#dadosLocais .pesquisa-v2-card .dl-local-acoes{display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid #464646;padding:12px 16px}
+#dadosLocais .pesquisa-resultados{min-height:50px}
+#dadosLocais .pesquisa-rodape{border-top:1px solid var(--borda,#29434b);margin-top:10px}
+#dadosLocais .pesquisa-card .dl-local-acoes{display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid #464646;padding:12px 16px}
 #dadosLocais .dl-local-acoes .botao-aba{min-height:42px;border-radius:10px;padding:8px 13px}
 #dadosLocais .dl-vazio{padding:24px 12px;border:1px solid #3d555c;border-radius:10px;color:var(--texto-secundario);text-align:center}
 #dadosLocais .dl-vazio strong{display:block;color:var(--texto);margin-bottom:8px}
-#dadosLocais .contagem-v2-registro{margin-top:14px}
-#dadosLocais .contagem-v2-registro .linha-formulario,
+#dadosLocais .contagem-registro{margin-top:14px}
+#dadosLocais .contagem-registro .linha-formulario,
 #dadosLocais #dlFormConferencia.linha-formulario,
 #dadosLocais #dlFormImportar.linha-formulario{display:flex;flex-direction:column;align-items:stretch;gap:12px}
-#dadosLocais .contagem-v2-registro .contagem-v2-label input,
-#dadosLocais #dlFormConferencia .contagem-v2-label input,
-#dadosLocais #dlFormImportar .contagem-v2-label input{display:block;width:100%;margin-top:7px;min-height:48px;border-radius:12px}
-#dadosLocais .contagem-v2-registro .contagem-v2-salvar,
-#dadosLocais #dlFormConferencia .contagem-v2-salvar,
-#dadosLocais #dlFormImportar .contagem-v2-salvar{width:100%;min-height:52px;border-radius:13px}
+#dadosLocais .contagem-registro .contagem-label input,
+#dadosLocais #dlFormConferencia .contagem-label input,
+#dadosLocais #dlFormImportar .contagem-label input{display:block;width:100%;margin-top:7px;min-height:48px;border-radius:12px}
+#dadosLocais .contagem-registro .contagem-salvar,
+#dadosLocais #dlFormConferencia .contagem-salvar,
+#dadosLocais #dlFormImportar .contagem-salvar{width:100%;min-height:52px;border-radius:13px}
 #dadosLocais #dlProgressoBarra{height:8px;margin-top:10px;overflow:hidden;background:#284148;border-radius:999px}
 #dadosLocais #dlProgressoPreenchimento{display:block;height:100%;background:var(--pm-acento,#57dceb)}
 #dadosLocais .dl-metricas-pagina{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px}
@@ -1097,62 +1097,62 @@
 #dadosLocais #dlHistorico{padding:13px}
 #dadosLocais .conferencias-conteudo{padding:13px!important}
 #dadosLocais .conferencias-vazio{padding:20px;text-align:center;color:var(--texto-secundario)}
-#dadosLocais .locais-v3-cartao .locais-v3-detalhes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-#dadosLocais .locais-v3-cartao .locais-v3-detalhes span{display:block;color:#abc1c5;font-size:11px}
-#dadosLocais .locais-v3-cartao .locais-v3-detalhes strong{display:block;font-size:13px;margin-top:4px}
+#dadosLocais .locais-cartao .locais-detalhes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#dadosLocais .locais-cartao .locais-detalhes span{display:block;color:#abc1c5;font-size:11px}
+#dadosLocais .locais-cartao .locais-detalhes strong{display:block;font-size:13px;margin-top:4px}
 #dadosLocais .dl-compat-fonte{font-size:12px;color:var(--texto-secundario)}
-#dadosLocais .pesquisa-v2-buscar{background:var(--pm-acento,#57dceb);color:#061b21}
-#dadosLocais .contagem-v2{background:#0c1d23;border-color:var(--borda,#29434b)}
+#dadosLocais .pesquisa-buscar{background:var(--pm-acento,#57dceb);color:#061b21}
+#dadosLocais .contagem{background:#0c1d23;border-color:var(--borda,#29434b)}
 /* O painel principal da Contagem usa a superfície nativa do PMobile. */
-#dadosLocais [data-dl-panel="estoque"] > .painel.contagem-v2{background-color:var(--fundo-painel,#14252b)}
-#dadosLocais .contagem-v2-icone{background:#16414c;color:var(--pm-acento,#57dceb)}
-#dadosLocais .contagem-v2-selo{background:#173941;color:var(--pm-acento,#57dceb)}
-#dadosLocais .contagem-v2-campo{background:#122930;border-color:var(--borda-clara)}
-#dadosLocais .contagem-v2-campo span{color:var(--pm-acento,#57dceb)}
-#dadosLocais .contagem-v2-tipos button.ativo{background:var(--pm-acento,#57dceb);color:#071c21;border-color:var(--pm-acento,#57dceb)}
-#dadosLocais .contagem-v2-salvar,
+#dadosLocais [data-dl-panel="estoque"] > .painel.contagem{background-color:var(--fundo-painel,#14252b)}
+#dadosLocais .contagem-icone{background:#16414c;color:var(--pm-acento,#57dceb)}
+#dadosLocais .contagem-selo{background:#173941;color:var(--pm-acento,#57dceb)}
+#dadosLocais .contagem-campo{background:#122930;border-color:var(--borda-clara)}
+#dadosLocais .contagem-campo span{color:var(--pm-acento,#57dceb)}
+#dadosLocais .contagem-tipos button.ativo{background:var(--pm-acento,#57dceb);color:#071c21;border-color:var(--pm-acento,#57dceb)}
+#dadosLocais .contagem-salvar,
 #dadosLocais .botao-buscar-contagem-manual{background:var(--pm-acento,#57dceb);color:#061b21}
-#dadosLocais .pesquisa-v2-resultados .pesquisa-v2-contagem{margin-bottom:9px}
-#dadosLocais .pesquisa-v2-card .pesquisa-v2-disponivel{float:none;display:inline-block;margin-left:8px}
-#dadosLocais .dl-busca-original .pesquisa-v2-tipos,
-#dadosLocais .linha-contagem-manual-busca .contagem-v2-tipos{margin:15px 0}
-#dadosLocais .dl-busca-original .pesquisa-v2-tipos button,
-#dadosLocais .linha-contagem-manual-busca .contagem-v2-tipos button{cursor:pointer}
+#dadosLocais .pesquisa-resultados .pesquisa-contagem{margin-bottom:9px}
+#dadosLocais .pesquisa-card .pesquisa-disponivel{float:none;display:inline-block;margin-left:8px}
+#dadosLocais .dl-busca-original .pesquisa-tipos,
+#dadosLocais .linha-contagem-manual-busca .contagem-tipos{margin:15px 0}
+#dadosLocais .dl-busca-original .pesquisa-tipos button,
+#dadosLocais .linha-contagem-manual-busca .contagem-tipos button{cursor:pointer}
 #dadosLocais [data-dl-tipo]:focus-visible{outline:2px solid var(--pm-acento,#57dceb);outline-offset:2px}
 @media(max-width:700px){
   /* O primeiro painel de Contagem segue o mesmo padding da busca nativa. */
-  #dadosLocais [data-dl-panel="estoque"] > .painel.contagem-v2{padding:12px}
+  #dadosLocais [data-dl-panel="estoque"] > .painel.contagem{padding:12px}
   #dadosLocais .dl-app{padding:17px 12px 68px}
-  #dadosLocais .locais-v3-cartao .locais-v3-detalhes{grid-template-columns:1fr}
+  #dadosLocais .locais-cartao .locais-detalhes{grid-template-columns:1fr}
 }
 
 /* Paridade visual efetiva: estes estilos vêm da camada Ciano Industrial,
    CARREGADA APÓS as folhas originais. Copiar apenas pesquisa.css e
    contagemmanual.css não reproduzia a aparência atual do PMobile. */
-#dadosLocais .pesquisa-v2-buscar { background: var(--pm-acento); color: #061b21; }
-#dadosLocais .pesquisa-v2-vazio span { color: var(--pm-acento); }
+#dadosLocais .pesquisa-buscar { background: var(--pm-acento); color: #061b21; }
+#dadosLocais .pesquisa-vazio span { color: var(--pm-acento); }
 #dadosLocais .aba-locais.ativo { border-color: var(--pm-acento) !important; }
 #dadosLocais .aba-locais:focus-visible { outline-color: var(--pm-acento) !important; }
 
 /* Contagem manual: trocar acentos de marca, manter ERP OK e avisos semânticos. */
-#dadosLocais .contagem-v2 { background: #0c1d23; border-color: var(--borda); }
-#dadosLocais .contagem-v2-topo,
-#dadosLocais .contagem-v2-resultados { border-color: var(--borda); }
-#dadosLocais .contagem-v2-icone { background: #16414c; color: var(--pm-acento); }
-#dadosLocais .contagem-v2-selo { background: #173941; color: var(--pm-acento); }
-#dadosLocais .contagem-v2-campo { background: #122930; border-color: var(--borda-clara); }
-#dadosLocais .contagem-v2-campo span { color: var(--pm-acento); }
-#dadosLocais .contagem-v2-tipos button.ativo {
+#dadosLocais .contagem { background: #0c1d23; border-color: var(--borda); }
+#dadosLocais .contagem-topo,
+#dadosLocais .contagem-resultados { border-color: var(--borda); }
+#dadosLocais .contagem-icone { background: #16414c; color: var(--pm-acento); }
+#dadosLocais .contagem-selo { background: #173941; color: var(--pm-acento); }
+#dadosLocais .contagem-campo { background: #122930; border-color: var(--borda-clara); }
+#dadosLocais .contagem-campo span { color: var(--pm-acento); }
+#dadosLocais .contagem-tipos button.ativo {
   background: #126776; border-color: var(--pm-acento); color: #f6ffff;
 }
 #dadosLocais .linha-contagem-manual-busca .botao-buscar-contagem-manual,
-#dadosLocais .contagem-v2-salvar {
+#dadosLocais .contagem-salvar {
   background: var(--pm-acento); color: #061b21;
 }
 #dadosLocais .linha-contagem-manual-busca .botao-config-contagem-manual {
   background: #173943; color: var(--pm-acento);
 }
-#dadosLocais .contagem-v2-lista-titulo > span {
+#dadosLocais .contagem-lista-titulo > span {
   background: #173943; color: var(--pm-acento);
 }
 /* Etiquetas .erp-ok/.erp-analise: cores de estado mantidas. */
@@ -1184,16 +1184,16 @@
   margin:0;
   padding:0;
 }
-#dadosLocais .pesquisa-v2-card .pesquisa-v2-disponivel{
+#dadosLocais .pesquisa-card .pesquisa-disponivel{
   float:right;
   display:inline;
   margin-left:0;
 }
-#dadosLocais .pesquisa-v2-rodape{
+#dadosLocais .pesquisa-rodape{
   border-top:0;
   margin-top:0;
 }
-#dadosLocais .contagem-v2-tipos button.ativo{
+#dadosLocais .contagem-tipos button.ativo{
   background:#126776;
   border-color:var(--pm-acento,#57dceb);
   color:#f6ffff;
@@ -1201,9 +1201,9 @@
 /* Os cartões de Configurações mudam de dimensões no celular pequeno;
    a cópia anterior truncava essa media query. */
 @media(max-width:380px){
-  #dadosLocais .configuracoes-v3-grade{gap:9px}
-  #dadosLocais .configuracoes-v3-card{min-height:160px;padding:12px;border-radius:14px}
-  #dadosLocais .configuracoes-v3-textos strong{font-size:13px}
+  #dadosLocais .configuracoes-grade{gap:9px}
+  #dadosLocais .configuracoes-card{min-height:160px;padding:12px;border-radius:14px}
+  #dadosLocais .configuracoes-textos strong{font-size:13px}
 }
 #dadosLocais [data-dl-panel="reservas"] > .painel-reservas{
   max-width:1180px;
@@ -1216,59 +1216,59 @@
 
 /* Bloco final do CSS nativo da Contagem manual, atualizado na mesma revisão */
 /* Contagem manual 2.0 — apenas apresentação; lógica existente preservada */
-#dadosLocais .contagem-v2{max-width:820px;margin:0 auto 16px;padding:22px;border:1px solid #293a31;border-radius:23px;background:#101512;overflow:visible}
-#dadosLocais .contagem-v2-topo,#dadosLocais .contagem-v2-marca{display:flex;align-items:center;gap:12px}
-#dadosLocais .contagem-v2-topo{justify-content:space-between;padding-bottom:20px;border-bottom:1px solid #2b3b32}
-#dadosLocais .contagem-v2-marca strong,#dadosLocais .contagem-v2-marca small{display:block}
-#dadosLocais .contagem-v2-marca strong{font-size:17px;color:#f1f6f3}
-#dadosLocais .contagem-v2-marca small{font-size:12px;color:#99a99f;margin-top:3px}
-#dadosLocais .contagem-v2-icone{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;background:#194333;color:#4bdaa0;font-size:28px}
-#dadosLocais .contagem-v2-selo{border-radius:99px;background:#1b3226;color:#a8e4c0;font-size:11px;padding:8px 10px;white-space:nowrap}
-#dadosLocais .contagem-v2-intro{padding:24px 0 18px}
-#dadosLocais .contagem-v2-intro h2{margin:0 0 8px;font-size:24px;color:#f3f7f4}
-#dadosLocais .contagem-v2-intro p{margin:0;color:#9eada3;font-size:14px}
-#dadosLocais .contagem-v2-etapa{font-size:15px;color:#e9f3eb;margin:0 0 14px}
+#dadosLocais .contagem{max-width:820px;margin:0 auto 16px;padding:22px;border:1px solid #293a31;border-radius:23px;background:#101512;overflow:visible}
+#dadosLocais .contagem-topo,#dadosLocais .contagem-marca{display:flex;align-items:center;gap:12px}
+#dadosLocais .contagem-topo{justify-content:space-between;padding-bottom:20px;border-bottom:1px solid #2b3b32}
+#dadosLocais .contagem-marca strong,#dadosLocais .contagem-marca small{display:block}
+#dadosLocais .contagem-marca strong{font-size:17px;color:#f1f6f3}
+#dadosLocais .contagem-marca small{font-size:12px;color:#99a99f;margin-top:3px}
+#dadosLocais .contagem-icone{display:grid;place-items:center;flex-shrink:0;width:46px;height:46px;border-radius:14px;background:#194333;color:#4bdaa0;font-size:28px}
+#dadosLocais .contagem-selo{border-radius:99px;background:#1b3226;color:#a8e4c0;font-size:11px;padding:8px 10px;white-space:nowrap}
+#dadosLocais .contagem-intro{padding:24px 0 18px}
+#dadosLocais .contagem-intro h2{margin:0 0 8px;font-size:24px;color:#f3f7f4}
+#dadosLocais .contagem-intro p{margin:0;color:#9eada3;font-size:14px}
+#dadosLocais .contagem-etapa{font-size:15px;color:#e9f3eb;margin:0 0 14px}
 #dadosLocais .linha-contagem-manual-busca{display:flex;flex-direction:column;align-items:stretch;gap:12px}
-#dadosLocais .contagem-v2-campo{display:flex;align-items:center;gap:10px;padding:7px 13px;border:1px solid #365145;border-radius:16px;background:#1c2420}
-#dadosLocais .contagem-v2-campo span{color:#51dca0;font-size:28px}
-#dadosLocais .contagem-v2-campo input{flex:1;min-width:0;border:0!important;box-shadow:none!important;background:transparent!important;min-height:43px;font-size:16px}
+#dadosLocais .contagem-campo{display:flex;align-items:center;gap:10px;padding:7px 13px;border:1px solid #365145;border-radius:16px;background:#1c2420}
+#dadosLocais .contagem-campo span{color:#51dca0;font-size:28px}
+#dadosLocais .contagem-campo input{flex:1;min-width:0;border:0!important;box-shadow:none!important;background:transparent!important;min-height:43px;font-size:16px}
 #dadosLocais .seletor-contagem-manual-wrapper{position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none}
-#dadosLocais .contagem-v2-tipos{display:flex;gap:8px;flex-wrap:wrap}
-#dadosLocais .contagem-v2-tipos button{width:auto;min-width:0;padding:10px 17px;border:1px solid #45564b;border-radius:99px;background:transparent;color:#b5c0b9;font-size:13px}
-#dadosLocais .contagem-v2-tipos button.ativo{background:#11965a;border-color:#11965a;color:#fff;font-weight:700}
+#dadosLocais .contagem-tipos{display:flex;gap:8px;flex-wrap:wrap}
+#dadosLocais .contagem-tipos button{width:auto;min-width:0;padding:10px 17px;border:1px solid #45564b;border-radius:99px;background:transparent;color:#b5c0b9;font-size:13px}
+#dadosLocais .contagem-tipos button.ativo{background:#11965a;border-color:#11965a;color:#fff;font-weight:700}
 #dadosLocais .linha-contagem-manual-busca .botao-buscar-contagem-manual{width:100%;min-width:0;flex:auto;min-height:52px;border:0;border-radius:13px;background:#3dcb92;color:#071c12;font-size:15px;font-weight:700}
 #dadosLocais .linha-contagem-manual-busca .acoes-contagem-manual-config{align-self:flex-end;flex:none}
 #dadosLocais .linha-contagem-manual-busca .botao-config-contagem-manual{width:auto;min-width:42px;min-height:42px;border-radius:12px;background:#1e3025;color:#9cdbb6}
-#dadosLocais .contagem-v2-resultados{margin-top:12px;border-top:1px solid #293b30;padding-top:14px}
-#dadosLocais .contagem-v2-registro .linha-formulario{display:flex;flex-direction:column;align-items:stretch;gap:13px}
-#dadosLocais .contagem-v2-label{display:block;color:#b6c8bb;font-size:13px;width:100%}
-#dadosLocais .contagem-v2-label input{display:block;width:100%;margin-top:7px;min-height:48px;border-radius:12px}
-#dadosLocais .contagem-v2-salvar{width:100%;min-height:52px;border:0;border-radius:13px;background:#3dcb92;color:#071c12;font-weight:700}
-#dadosLocais .contagem-v2-lista-titulo{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
-#dadosLocais .contagem-v2-lista-titulo h3{margin:0;color:#f1f6f2;font-size:17px}
-#dadosLocais .contagem-v2-lista-titulo p{margin:4px 0 0;color:#98aa9e;font-size:12px}
-#dadosLocais .contagem-v2-lista-titulo>span{color:#6de2a5;background:#1e3c2b;border-radius:10px;padding:10px}
-@media(max-width:700px){#dadosLocais .contagem-v2{padding:15px;border-radius:19px}#dadosLocais .contagem-v2-intro h2{font-size:22px}#dadosLocais .contagem-v2-selo{font-size:10px}#dadosLocais .contagem-v2-tipos button{padding:9px 13px}}
+#dadosLocais .contagem-resultados{margin-top:12px;border-top:1px solid #293b30;padding-top:14px}
+#dadosLocais .contagem-registro .linha-formulario{display:flex;flex-direction:column;align-items:stretch;gap:13px}
+#dadosLocais .contagem-label{display:block;color:#b6c8bb;font-size:13px;width:100%}
+#dadosLocais .contagem-label input{display:block;width:100%;margin-top:7px;min-height:48px;border-radius:12px}
+#dadosLocais .contagem-salvar{width:100%;min-height:52px;border:0;border-radius:13px;background:#3dcb92;color:#071c12;font-weight:700}
+#dadosLocais .contagem-lista-titulo{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+#dadosLocais .contagem-lista-titulo h3{margin:0;color:#f1f6f2;font-size:17px}
+#dadosLocais .contagem-lista-titulo p{margin:4px 0 0;color:#98aa9e;font-size:12px}
+#dadosLocais .contagem-lista-titulo>span{color:#6de2a5;background:#1e3c2b;border-radius:10px;padding:10px}
+@media(max-width:700px){#dadosLocais .contagem{padding:15px;border-radius:19px}#dadosLocais .contagem-intro h2{font-size:22px}#dadosLocais .contagem-selo{font-size:10px}#dadosLocais .contagem-tipos button{padding:9px 13px}}
 
 /* Camada ciano original aplicada depois do CSS nativo */
-#dadosLocais .contagem-v2 { background: #0c1d23; border-color: var(--borda); }
-#dadosLocais .contagem-v2-topo,
-#dadosLocais .contagem-v2-resultados { border-color: var(--borda); }
-#dadosLocais .contagem-v2-icone { background: #16414c; color: var(--pm-acento); }
-#dadosLocais .contagem-v2-selo { background: #173941; color: var(--pm-acento); }
-#dadosLocais .contagem-v2-campo { background: #122930; border-color: var(--borda-clara); }
-#dadosLocais .contagem-v2-campo span { color: var(--pm-acento); }
-#dadosLocais .contagem-v2-tipos button.ativo {
+#dadosLocais .contagem { background: #0c1d23; border-color: var(--borda); }
+#dadosLocais .contagem-topo,
+#dadosLocais .contagem-resultados { border-color: var(--borda); }
+#dadosLocais .contagem-icone { background: #16414c; color: var(--pm-acento); }
+#dadosLocais .contagem-selo { background: #173941; color: var(--pm-acento); }
+#dadosLocais .contagem-campo { background: #122930; border-color: var(--borda-clara); }
+#dadosLocais .contagem-campo span { color: var(--pm-acento); }
+#dadosLocais .contagem-tipos button.ativo {
   background: #126776; border-color: var(--pm-acento); color: #f6ffff;
 }
 #dadosLocais .linha-contagem-manual-busca .botao-buscar-contagem-manual,
-#dadosLocais .contagem-v2-salvar {
+#dadosLocais .contagem-salvar {
   background: var(--pm-acento); color: #061b21;
 }
 #dadosLocais .linha-contagem-manual-busca .botao-config-contagem-manual {
   background: #173943; color: var(--pm-acento);
 }
-#dadosLocais .contagem-v2-lista-titulo > span {
+#dadosLocais .contagem-lista-titulo > span {
   background: #173943; color: var(--pm-acento);
 }
 
@@ -1287,9 +1287,9 @@
   background:linear-gradient(180deg,rgba(87,220,235,.055),transparent 58%),var(--fundo-painel,#10252a);
   overflow:visible;
 }
-#dadosLocais [data-dl-panel="conferencias"] > .contagem-v2-registro,
-#dadosLocais [data-dl-panel="estoque"] > .contagem-v2-registro,
-#dadosLocais [data-dl-panel="conferencias"] > .contagem-v2-lista {
+#dadosLocais [data-dl-panel="conferencias"] > .contagem-registro,
+#dadosLocais [data-dl-panel="estoque"] > .contagem-registro,
+#dadosLocais [data-dl-panel="conferencias"] > .contagem-lista {
   max-width:820px;
   width:100%;
   margin:0 auto 16px;
@@ -1349,8 +1349,8 @@
   color:var(--texto,#f5f7f7);
   font-size:16px;
 }
-#dadosLocais [data-dl-panel="conferencias"] #dlFormConferencia .contagem-v2-salvar,
-#dadosLocais [data-dl-panel="estoque"] #dlFormEstoque .contagem-v2-salvar{
+#dadosLocais [data-dl-panel="conferencias"] #dlFormConferencia .contagem-salvar,
+#dadosLocais [data-dl-panel="estoque"] #dlFormEstoque .contagem-salvar{
   display:block;
   width:100%;
   min-height:52px;
@@ -1386,7 +1386,7 @@
   flex:0 0 44px;
 }
 #dadosLocais .dl-retorno span{font-size:12px;color:var(--texto-secundario,#a5bdc4)}
-#dadosLocais .contagem-v2-resultados .resultado-contagem-manual{
+#dadosLocais .contagem-resultados .resultado-contagem-manual{
   position:relative;
   background:var(--fundo-card,#14242a);
   border:1px solid var(--borda,#344c55);
@@ -1394,11 +1394,11 @@
   border-radius:10px;
   margin-bottom:9px;
 }
-#dadosLocais .contagem-v2-resultados .resultado-contagem-manual h3{
+#dadosLocais .contagem-resultados .resultado-contagem-manual h3{
   margin:0 0 9px;color:var(--texto,#eef4f5);font-size:14px}
-#dadosLocais .contagem-v2-resultados .resultado-contagem-manual p{
+#dadosLocais .contagem-resultados .resultado-contagem-manual p{
   font-size:12px;color:var(--texto-secundario,#a4b5ba);line-height:1.5}
-#dadosLocais .contagem-v2-resultados .resultado-contagem-manual .botao-principal{
+#dadosLocais .contagem-resultados .resultado-contagem-manual .botao-principal{
   display:block;
   min-height:44px;
   width:100%;
@@ -1414,9 +1414,9 @@
     padding:15px;
     border-radius:19px;
   }
-  #dadosLocais [data-dl-panel="conferencias"] > .contagem-v2-registro,
-  #dadosLocais [data-dl-panel="estoque"] > .contagem-v2-registro,
-  #dadosLocais [data-dl-panel="conferencias"] > .contagem-v2-lista{
+  #dadosLocais [data-dl-panel="conferencias"] > .contagem-registro,
+  #dadosLocais [data-dl-panel="estoque"] > .contagem-registro,
+  #dadosLocais [data-dl-panel="conferencias"] > .contagem-lista{
     padding:15px;
     border-radius:19px;
   }
