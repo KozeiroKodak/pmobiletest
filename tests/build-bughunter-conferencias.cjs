@@ -1,7 +1,7 @@
 const fs=require("node:fs"),path=require("node:path"),vm=require("node:vm");
 const root=path.resolve(__dirname,"..");
 const html=fs.readFileSync(path.join(root,"index.html"),"utf8");
-const injected=fs.readFileSync(path.join(root,"dados-locais.js"),"utf8").replace(
+const injected=["pesquisa-local.js","estoque-local.js","reservas-local.js","conferencias-local.js","comparar-verificar.js","divergencias-local.js","locais-local.js","importacao-local.js","dados-locais.js"].map(p=>fs.readFileSync(path.join(root,p),"utf8")).join("\n").replace(
  "  window.abrirDadosLocaisPmobile=abrir;",
  "  window.__bugHunterHtml=htmlPrincipal();\n  window.abrirDadosLocaisPmobile=abrir;");
 const sandbox={window:{},document:{readyState:"loading",addEventListener(){}},
