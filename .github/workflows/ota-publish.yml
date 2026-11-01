@@ -83,7 +83,7 @@ jobs:
 
   publish-ota:
     needs: ota-gate
-    if: false # Pausa temporaria durante atualizacao coordenada da main
+    if: needs.ota-gate.outputs.publish == 'true' && (github.event_name == 'workflow_dispatch' || github.actor != 'github-actions[bot]')
     runs-on: ubuntu-latest
 
     steps:
