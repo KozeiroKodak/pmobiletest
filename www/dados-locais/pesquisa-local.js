@@ -3,7 +3,7 @@
  "use strict";
  const registry=window.PMobileDadosLocaisModulos||(window.PMobileDadosLocaisModulos=Object.create(null));
  registry.pesquisa=function(ctx){
-  const {$,estado,escape,valor,num,norm,rpc,sessao,mensagem,consultar,paginacao,resumo,painel,pesquisarForm,compararForm,atualizarResumo,desenharMateriais,desenharComparacao,quantidade}=ctx;
+  const {$,valor,num,paginacao,painel}=ctx;
   function form(aba) {
 
     const contagem=aba==="estoque"||aba==="conferencias";

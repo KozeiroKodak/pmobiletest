@@ -3,7 +3,7 @@
  "use strict";
  const registry=window.PMobileDadosLocaisModulos||(window.PMobileDadosLocaisModulos=Object.create(null));
  registry.conferencias=function(ctx){
-  const {$,estado,escape,valor,num,norm,rpc,sessao,mensagem,consultar,paginacao,resumo,painel,pesquisarForm,compararForm,atualizarResumo,desenharMateriais,desenharComparacao,quantidade}=ctx;
+  const {$,estado,valor,num,rpc,mensagem,painel,pesquisarForm,quantidade}=ctx;
   function selecionarConferencia(material) {
     $("dlConCodigo").value=material.codigo;
     $("dlConQuantidade").value="";

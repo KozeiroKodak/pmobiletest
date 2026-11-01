@@ -3,7 +3,7 @@
  "use strict";
  const registry=window.PMobileDadosLocaisModulos||(window.PMobileDadosLocaisModulos=Object.create(null));
  registry.locais=function(ctx){
-  const {$,estado,escape,valor,num,norm,rpc,sessao,mensagem,consultar,paginacao,resumo,painel,pesquisarForm,compararForm,atualizarResumo,desenharMateriais,desenharComparacao,quantidade}=ctx;
+  const {$,escape,valor,num,painel,compararForm,atualizarResumo}=ctx;
   function render(aba,itens) {
     const el=$("dlResultados-"+aba);el.replaceChildren();
     atualizarResumo(aba,itens,true);
