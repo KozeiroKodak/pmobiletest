@@ -29,21 +29,21 @@ function compilar(){
 }
 test("o hub reaproveita exatamente as classes nativas de Configurações",()=>{
   const {api}=compilar(),html=api.htmlPrincipal();
-  assert.equal((html.match(/class="configuracoes-v3-card"/g)||[]).length,8);
-  assert.equal((html.match(/class="configuracoes-v3-icone"/g)||[]).length,8);
-  assert.ok(html.includes('class="configuracoes-v3-grade"'));
+  assert.equal((html.match(/class="configuracoes-card"/g)||[]).length,8);
+  assert.equal((html.match(/class="configuracoes-icone"/g)||[]).length,8);
+  assert.ok(html.includes('class="configuracoes-grade"'));
   assert.ok(html.includes('class="cabecalho-pagina"'));
   for(const aba of ["pesquisa","estoque","reservas","conferencias","comparar","divergencias","locais","importar"])
     assert.ok(html.includes('data-dl-panel="'+aba+'"'),aba);
 });
 test("Pesquisa local e estoque utilizam campos, seletores e botões originais",()=>{
   const {api}=compilar(),h=api.htmlPrincipal();
-  assert.ok(h.includes('class="painel pesquisa-v2"'));
-  assert.ok(h.includes('class="pesquisa-v2-campo"'));
-  assert.ok(h.includes('class="pesquisa-v2-tipos"'));
-  assert.ok(h.includes('class="pesquisa-v2-buscar"'));
-  assert.ok(h.includes('class="painel contagem-v2 dl-contagem-principal"'));
-  assert.ok(h.includes('class="botao-aba contagem-v2-salvar"'));
+  assert.ok(h.includes('class="painel pesquisa"'));
+  assert.ok(h.includes('class="pesquisa-campo"'));
+  assert.ok(h.includes('class="pesquisa-tipos"'));
+  assert.ok(h.includes('class="pesquisa-buscar"'));
+  assert.ok(h.includes('class="painel contagem dl-contagem-principal"'));
+  assert.ok(h.includes('class="botao-aba contagem-salvar"'));
   assert.ok(h.includes('data-dl-tipo="codigo"'));
   assert.ok(h.includes('data-dl-tipo="referencia"'));
   assert.ok(h.includes('data-dl-tipo="descricao"'));
@@ -54,9 +54,9 @@ test("resultados da Pesquisa local renderizam exatamente a hierarquia da Pesquis
     codigo:"001",descricao:"Parafuso",referencia:"ABC",marca:"Teste",local:null,
     quantidade_total:null,quantidade_item:null,quantidade_reservada:null
   }]);
-  assert.equal(el.children[1].className,"pesquisa-v2-card");
+  assert.equal(el.children[1].className,"pesquisa-card");
   assert.equal(el.children[1].children[0].tagName,"summary");
-  assert.equal(el.children[1].children[1].className,"pesquisa-v2-detalhes");
+  assert.equal(el.children[1].children[1].className,"pesquisa-detalhes");
   assert.equal(el.children[1].children[2].className,"dl-local-acoes");
 });
 test("Locais locais reaproveita mesmo cartão, local anterior e novo local",()=>{
@@ -68,9 +68,9 @@ test("Locais locais reaproveita mesmo cartão, local anterior e novo local",()=>
     diferenca_quantidade:false,diferenca_reserva:false,diferenca_local:true,
     sem_dogo:false,pendente_quantidade:true,pendente_reserva:true,pendente_local:false
   }]);
-  assert.ok(el.innerHTML.includes('class="local-alterado-card locais-v3-cartao"'));
-  assert.ok(el.innerHTML.includes('class="locais-v3-resumo-cartao"'));
-  assert.ok(el.innerHTML.includes('class="locais-v3-trajeto"'));
+  assert.ok(el.innerHTML.includes('class="local-alterado-card locais-cartao"'));
+  assert.ok(el.innerHTML.includes('class="locais-resumo-cartao"'));
+  assert.ok(el.innerHTML.includes('class="locais-trajeto"'));
   assert.ok(el.innerHTML.includes("Local anterior"));
   assert.ok(el.innerHTML.includes("Novo local"));
   assert.ok(el.innerHTML.includes("A-01"));
@@ -80,20 +80,20 @@ test("Locais locais reaproveita mesmo cartão, local anterior e novo local",()=>
 test("Conferências locais reproduz estrutura de Contagem manual, não formulário isolado",()=>{
   const {api}=compilar(),h=api.htmlPrincipal();
   assert.ok(h.includes('data-dl-busca="conferencias"'));
-  assert.ok(h.includes('class="painel contagem-v2 dl-contagem-principal"'));
-  assert.ok(h.includes('class="contagem-v2-topo"'));
-  assert.ok(h.includes('class="contagem-v2-tipos"'));
+  assert.ok(h.includes('class="painel contagem dl-contagem-principal"'));
+  assert.ok(h.includes('class="contagem-topo"'));
+  assert.ok(h.includes('class="contagem-tipos"'));
   assert.ok(h.includes('class="botao-aba botao-buscar-contagem-manual"'));
-  assert.ok(h.includes('id="dlFormConferencia" class="painel contagem-v2 contagem-v2-registro" hidden'));
-  assert.ok(h.includes('class="contagem-v2-lista-titulo"'));
+  assert.ok(h.includes('id="dlFormConferencia" class="painel contagem contagem-registro" hidden'));
+  assert.ok(h.includes('class="contagem-lista-titulo"'));
   assert.ok(h.includes('id="dlHistorico"'));
   assert.ok(source.includes('card.className="registro-contagem-manual"'));
   assert.ok(!source.includes('ERP - OK')); // status ERP pertence ao módulo original
 });
 test("CSS está escopado, usa regras copiadas do nativo e espelha Android",()=>{
   const css=fs.readFileSync(path.join(raiz,"implementacoes/dados-locais.css"),"utf8");
-  for(const token of ["#dadosLocais .pesquisa-v2","#dadosLocais .contagem-v2",
-    "#dadosLocais .locais-v3-cartao","#dadosLocais .configuracoes-v3-card",
+  for(const token of ["#dadosLocais .pesquisa","#dadosLocais .contagem",
+    "#dadosLocais .locais-cartao","#dadosLocais .configuracoes-card",
     "#dlHistorico details.registro-conferencia"])assert.ok(css.includes(token),token);
   for(const p of ["index.html","dados-locais.js","reorganizacao-pmobile.js","implementacoes/dados-locais.css",...["dados-locais/pesquisa-local.js","dados-locais/estoque-local.js","dados-locais/reservas-local.js","dados-locais/conferencias-local.js","dados-locais/comparar-verificar.js","dados-locais/divergencias-local.js","dados-locais/locais-local.js","dados-locais/importacao-local.js"]])
     assert.equal(fs.readFileSync(path.join(raiz,p),"utf8"),
@@ -105,10 +105,10 @@ test("folhas de estilo da Pesquisa, Locais e Contagem são cópias das originais
   const css=fs.readFileSync(path.join(raiz,"implementacoes/dados-locais.css"),"utf8");
   const search=fs.readFileSync(path.join(raiz,"implementacoes/pesquisa.css"),"utf8");
   const count=fs.readFileSync(path.join(raiz,"implementacoes/contagemmanual.css"),"utf8");
-  const places=fs.readFileSync(path.join(raiz,"implementacoes/locais-v3.css"),"utf8");
+  const places=fs.readFileSync(path.join(raiz,"implementacoes/locais.css"),"utf8");
   const expectedSearch=search.slice(search.indexOf("/* PMobile Pesquisa 2.0")).replaceAll("#pesquisa","#dadosLocais");
   const expectedCount=count.slice(count.indexOf("/* Contagem manual 2.0")).replaceAll("#contagemManual","#dadosLocais");
-  const expectedPlaces=places.replaceAll("#locais","#dadosLocais");
+  const expectedPlaces=places.slice(places.lastIndexOf("/*", places.indexOf("PMOBILE — LOCAIS / PADRÃO CONFERÊNCIAS"))).replaceAll("#locais","#dadosLocais");
   assert.ok(css.includes(expectedSearch),"CSS real da Pesquisa não foi reutilizado");
   assert.ok(css.includes(expectedCount),"CSS real da Contagem não foi reutilizado");
   assert.ok(css.includes(expectedPlaces),"CSS real dos Locais não foi reutilizado");
@@ -125,7 +125,7 @@ test("Reservas locais usa a grade original em vez da tela Pesquisa",()=>{
   assert.ok(el.innerHTML.includes('class="reservas-cabecalho"'));
   assert.ok(el.innerHTML.includes('class="reserva-item"'));
   assert.ok(el.innerHTML.includes('class="reserva-celula reserva-quantidade"'));
-  assert.ok(!el.innerHTML.includes('class="pesquisa-v2-card"'));
+  assert.ok(!el.innerHTML.includes('class="pesquisa-card"'));
 });
 test("Importação local utiliza botão e input nativos sem zerar o catálogo",()=>{
   const {api}=compilar(),html=api.htmlPrincipal();
@@ -137,7 +137,7 @@ test("Importação local utiliza botão e input nativos sem zerar o catálogo",(
 test("CSS inclui tema Ciano Industrial efetivo e não adiciona espaçamento duplo",()=>{
   const css=fs.readFileSync(path.join(raiz,"implementacoes/dados-locais.css"),"utf8");
   const theme=fs.readFileSync(path.join(raiz,"cyan-theme.css"),"utf8");
-  assert.ok(theme.includes('#contagemManual .contagem-v2-tipos button.ativo'));
+  assert.ok(theme.includes('#contagemManual .contagem-tipos button.ativo'));
   assert.ok(css.includes('background:#126776'));
   assert.ok(css.includes('#dadosLocais .dl-app{'));
   assert.ok(css.includes('max-width:none;'));
