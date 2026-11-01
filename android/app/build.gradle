@@ -1,15 +1,20 @@
 apply plugin: 'com.android.application'
+def bundledWebVersion = new groovy.json.JsonSlurper().parse(rootProject.file('../ota/manifest.json')).webVersion
+def otaPreview = project.hasProperty('otaPreview')
 
 android {
 buildToolsVersion = "35.0.0"
     namespace = "com.pmobile.app"
     compileSdk = rootProject.ext.compileSdkVersion
+    buildFeatures { buildConfig true }
     defaultConfig {
-        applicationId "com.pmobile.app"
+        applicationId otaPreview ? "com.pmobile.preview" : "com.pmobile.app"
+        manifestPlaceholders = [pmobileAppLabel: otaPreview ? "PMobile · Teste OTA" : "PMOBILE"]
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 120
-        versionName "1.02"
+        versionCode 121
+        versionName "1.03"
+        buildConfigField 'String', 'WEB_BUNDLE_VERSION', '"' + bundledWebVersion + '"'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
