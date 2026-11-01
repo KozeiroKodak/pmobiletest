@@ -1,12 +1,17 @@
-// Resumo financeiro calculado no Supabase diretamente dos rastreios operacionais ativos.
-// Faixas de custo percentual: até 4% verde, acima de 4% amarelo, acima de 4,5% vermelho.
 function corFaixaPercentual(valor) {
  const n=Number(valor);
  if(valor==null||!Number.isFinite(n)||n<0||n>1)return null;
  return n>0.045?"#ef6666":n>0.04?"#f0c35a":"#d7d7d7";
 }
 
-function abrirValoresTotal() { mostrarTelaSistema("valoresTotal","menuValoresTotal"); carregarValoresTotal(); }
+
+// Frete Geral: resumo financeiro e análise por transportadora.
+function abrirValoresTotal() {
+ if(!window.usuarioPmobileAtual || window.usuarioPmobileAtual.nivel !== "ADMIN"){
+  alert("Acesso administrativo negado."); return;
+ }
+ mostrarTelaSistema("valoresTotal","menuValoresTotal"); carregarValoresTotal();
+}
 async function carregarValoresTotal() {
  const status=document.getElementById("valoresTotalStatus"), cards=document.getElementById("valoresTotalCards"); if(!cards)return;
  try { const sessao=obterSessaoRastreioImportacao(); const r=await window.clienteSupabase.rpc("pmobile_valores_total_obter",{p_usuario:sessao.usuario,p_credencial:sessao.credencial}); if(r.error)throw r.error;
@@ -18,21 +23,6 @@ async function carregarValoresTotal() {
  await carregarValoresMensais(cards,sessao);
  }catch(e){status.textContent="Não foi possível carregar os valores: "+(e.message||e);}
 }
-// A linha TOTAL do Excel NÃO é fonte financeira segura: pode conter apenas
-// subtotal de uma região, agrupamento ou fórmula ainda não recalculada.
-// O RPC no Supabase recompõe o resumo a partir dos rastreios ativos.
-async function salvarValoresTotalPlanilha() {
- const sessao=obterSessaoRastreioImportacao();
- const r=await window.clienteSupabase.rpc("pmobile_valores_total_salvar",{
-  p_usuario:sessao.usuario,p_credencial:sessao.credencial,
-  p_valor_notas:null,p_fretes_embutidos:null,p_total_fretes:null,
-  p_custo_nunes:null,p_custo_final:null,p_percentual_final:null,
-  p_origem:"Lançamentos ativos do Rastreio"
- });
- if(r.error)throw r.error;
- if(document.getElementById("valoresTotal")?.style.display!=="none")await carregarValoresTotal();
-}
-
 // Consultas financeiras sempre derivadas dos lançamentos ativos, sem tabelas duplicadas.
 async function carregarValoresMensais(cards,sessao) {
  const anterior=document.getElementById("valoresTotalMensais");if(anterior)anterior.remove();
@@ -65,9 +55,225 @@ async function carregarValoresMensais(cards,sessao) {
    for(const b of abas.children){const ativo=b.textContent===(modo==="ano"?"Ano":modo==="mes"?"Mês":"Transportadora");b.style.background=ativo?"#d7d7d7":"#242424";b.style.color=ativo?"#111":"#eee";}
    if(modo==="ano"){cabecalho("Valores por ano");for(const ano of anos){const grupo=document.createElement("details");grupo.style.cssText="border:1px solid #333;border-radius:12px;padding:16px;margin-bottom:12px;background:#1b1b1b";const resumo=document.createElement("summary");resumo.textContent=ano+" · "+somar(linhas.filter(r=>Number(r.ano)===ano)).quantidade.toLocaleString("pt-BR")+" lançamentos";resumo.style.cssText="cursor:pointer;font-weight:700";grupo.append(resumo);conteudo.append(grupo);const area=document.createElement("div");grupo.append(area);const antes=conteudo;area.append(...[]);const v=somar(linhas.filter(r=>Number(r.ano)===ano));const temporario=document.createElement("div");conteudo.append(temporario);cartao(v);while(temporario.nextSibling)area.append(temporario.nextSibling);temporario.remove();}}
    if(modo==="mes"){cabecalho("Valores por mês");for(const ano of anos){for(let mes=12;mes>=1;mes--){const grupoLinhas=linhas.filter(r=>Number(r.ano)===ano&&Number(r.mes)===mes);if(!grupoLinhas.length)continue;const d=document.createElement("details");d.style.cssText="border:1px solid #333;border-radius:12px;padding:16px;margin-bottom:12px;background:#1b1b1b";const s=document.createElement("summary");s.textContent=meses[mes-1]+" de "+ano+" · "+somar(grupoLinhas).quantidade.toLocaleString("pt-BR")+" lançamentos";s.style.cssText="cursor:pointer;font-weight:700";d.append(s);conteudo.append(d);const marca=document.createElement("div");conteudo.append(marca);cartao(somar(grupoLinhas));while(marca.nextSibling)d.append(marca.nextSibling);marca.remove();}}}
-   if(modo==="transportadora"){cabecalho("Valores por transportadora");const filtros=document.createElement("div");filtros.style.cssText="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px";const escolha=(opcoes)=>{const sel=document.createElement("select");sel.style.cssText="background:#222;color:#fff;border:1px solid #555;border-radius:8px;padding:10px";for(const [valor,nome] of opcoes){const o=document.createElement("option");o.value=valor;o.textContent=nome;sel.append(o);}return sel;};const ano=escolha([["","Todos os anos"],...anos.map(a=>[String(a),String(a)])]);const mes=escolha([["","Todos os meses"],...meses.map((m,i)=>[String(i+1),m])]);filtros.append(ano,mes);conteudo.append(filtros);const lista=document.createElement("div");conteudo.append(lista);const render=()=>{lista.replaceChildren();for(const nome of transportadoras){const filtradas=linhas.filter(r=>r.transportadora===nome&&(!ano.value||String(r.ano)===ano.value)&&(!mes.value||String(r.mes)===mes.value));if(!filtradas.length)continue;const d=document.createElement("details");d.style.cssText="border:1px solid #333;border-radius:12px;padding:16px;margin-bottom:12px;background:#1b1b1b";const s=document.createElement("summary");s.textContent=nome+" · "+somar(filtradas).quantidade.toLocaleString("pt-BR")+" lançamentos";s.style.cssText="cursor:pointer;font-weight:700";d.append(s);lista.append(d);const marca=document.createElement("div");conteudo.append(marca);cartao(somar(filtradas));while(marca.nextSibling)d.append(marca.nextSibling);marca.remove();}};ano.addEventListener("change",render);mes.addEventListener("change",render);render();}
+   if(modo==="transportadora"){renderAnaliseTransportadoras({conteudo,linhas,anos,transportadoras,meses,somar,moeda,percent});}
   };
   abas.append(botao("Ano",()=>mostrar("ano")),botao("Mês",()=>mostrar("mes")),botao("Transportadora",()=>mostrar("transportadora")));
-  mostrar("ano");
+  mostrar("transportadora");
  }catch(e){conteudo.textContent="Não foi possível carregar os resultados: "+(e.message||e);conteudo.style.color="#f88";}
+}
+
+
+
+/* Nova análise por transportadora — exclusivamente no Frete Geral.
+ * Fontes: mesma RPC analítica da versão original. Sem valores inventados
+ * e sem cálculo de tendências históricas não disponibilizadas pela RPC.
+ */
+function renderAnaliseTransportadoras({conteudo,linhas,anos,transportadoras,meses,somar,moeda,percent}){
+  const painel=document.createElement("section");
+  painel.className="frete-analise";
+
+  const cab=document.createElement("div");
+  cab.className="frete-cabecalho";
+  const topo=document.createElement("div");
+  const titulo=document.createElement("h4");
+  titulo.textContent="Análise por transportadora";
+  const descricao=document.createElement("p");
+  descricao.textContent="Explore os valores e a composição dos fretes por transportadora.";
+  topo.append(titulo,descricao);
+  const total=document.createElement("span");
+  total.className="frete-contador";
+  total.textContent="Carregando...";
+  cab.append(topo,total);
+  painel.append(cab);
+
+  const filtros=document.createElement("div");
+  filtros.className="frete-filtros";
+  const criarCampo=(titulo,controle)=>{
+    const campo=document.createElement("label");
+    campo.className="frete-campo";
+    const label=document.createElement("span");
+    label.textContent=titulo;
+    campo.append(label,controle);
+    return campo;
+  };
+  const escolher=(itens)=>{
+    const sel=document.createElement("select");
+    for(const [valor,rotulo] of itens){
+      const option=document.createElement("option");
+      option.value=valor;option.textContent=rotulo;sel.append(option);
+    }
+    return sel;
+  };
+  const filtroAno=escolher([["","Todos os anos"],...anos.map(a=>[String(a),String(a)])]);
+  filtroAno.value=anos.length?String(anos[0]):"";
+  const filtroMes=escolher([["","Todos os meses"],...meses.map((nome,i)=>[String(i+1),nome[0].toUpperCase()+nome.slice(1)])]);
+  const nomes=transportadoras.filter(n=>String(n||"").trim()).map(String);
+  const filtroTransportadora=escolher([["","Todas as transportadoras"],...nomes.map(n=>[n,n])]);
+  const linha1=document.createElement("div");
+  linha1.className="frete-filtros-linha";
+  linha1.append(
+    criarCampo("Ano",filtroAno),criarCampo("Mês",filtroMes),
+    criarCampo("Transportadora",filtroTransportadora)
+  );
+  const pesquisa=document.createElement("input");
+  pesquisa.type="search";pesquisa.placeholder="Buscar transportadora...";
+  pesquisa.setAttribute("aria-label","Buscar transportadora");
+  pesquisa.autocomplete="off";
+  const ordem=escolher([
+    ["custo","Custo final (maior)"],
+    ["lancamentos","Mais lançamentos"],
+    ["percentual","Maior % final"],
+    ["nome","Nome (A–Z)"]
+  ]);
+  const linha2=document.createElement("div");
+  linha2.className="frete-busca-linha";
+  linha2.append(criarCampo("Pesquisar",pesquisa),criarCampo("Ordenar por",ordem));
+  filtros.append(linha1,linha2);
+  painel.append(filtros);
+
+  const aviso=document.createElement("p");
+  aviso.className="frete-aviso";
+  aviso.hidden=true;
+  painel.append(aviso);
+  const lista=document.createElement("div");
+  lista.className="frete-lista";
+  painel.append(lista);
+  conteudo.append(painel);
+
+  const formatarContagem=n=>Number(n||0).toLocaleString("pt-BR");
+  const resumoFin=(registros)=>somar(registros);
+  const statusNumero=n=>n==null||!Number.isFinite(Number(n))?null:Number(n);
+  const linhaDetalhes=(grade,rotulo,valor)=>{
+    const bloco=document.createElement("div");
+    const label=document.createElement("span");
+    label.textContent=rotulo;
+    const numero=document.createElement("strong");
+    numero.textContent=valor;
+    bloco.append(label,numero);grade.append(bloco);
+  };
+
+  function render(){
+    lista.replaceChildren();
+    const ano=filtroAno.value,mes=filtroMes.value,nome=filtroTransportadora.value;
+    const termo=pesquisa.value.trim().normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+    const filtradas=linhas.filter(r=>
+      (!ano||String(r.ano)===ano)&&
+      (!mes||String(r.mes)===mes)&&
+      (!nome||String(r.transportadora)===nome)
+    );
+    const porNome=new Map();
+    for(const r of filtradas){
+      const chave=String(r.transportadora||"").trim();
+      if(!chave)continue;
+      if(!porNome.has(chave))porNome.set(chave,[]);
+      porNome.get(chave).push(r);
+    }
+    const agrupadas=[...porNome.entries()]
+      .map(([nome,registros])=>({nome,resumo:resumoFin(registros)}))
+      .filter(item=>item.nome.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().includes(termo));
+    const valorCusto=item=>statusNumero(item.resumo.custo_final);
+    const valorPct=item=>statusNumero(item.resumo.percentual_final);
+    agrupadas.sort((a,b)=>{
+      const criterio=ordem.value;
+      if(criterio==="nome")return a.nome.localeCompare(b.nome,"pt-BR");
+      if(criterio==="lancamentos")return b.resumo.quantidade-a.resumo.quantidade||a.nome.localeCompare(b.nome,"pt-BR");
+      const valor=criterio==="percentual"?valorPct:valorCusto;
+      const nA=valor(a),nB=valor(b);
+      if(nA===null&&nB===null)return a.nome.localeCompare(b.nome,"pt-BR");
+      if(nA===null)return 1;
+      if(nB===null)return -1;
+      return nB-nA||a.nome.localeCompare(b.nome,"pt-BR");
+    });
+    const maxCusto=Math.max(0,...agrupadas.map(item=>valorCusto(item)||0));
+    total.textContent=agrupadas.length+" transportadora"+(agrupadas.length===1?"":"s");
+    aviso.hidden=agrupadas.every(item=>valorCusto(item)!==null);
+    if(!aviso.hidden)aviso.textContent="Algumas transportadoras não possuem custo final completo para o período. Esses valores aparecem como —.";
+    if(!agrupadas.length){
+      const vazio=document.createElement("p");
+      vazio.className="frete-vazio";
+      vazio.textContent="Nenhuma transportadora encontrada para os filtros selecionados.";
+      lista.append(vazio);return;
+    }
+    for(let i=0;i<agrupadas.length;i++){
+      const item=agrupadas[i],v=item.resumo,custo=valorCusto(item),pct=valorPct(item);
+      const details=document.createElement("details");
+      details.className="frete-item";
+      const summary=document.createElement("summary");
+      summary.className="frete-item-resumo";
+      const pos=document.createElement("span");
+      pos.className="frete-posicao";
+      pos.textContent=String(i+1);
+
+      const info=document.createElement("div");
+      info.className="frete-info";
+      const nomeEl=document.createElement("strong");
+      nomeEl.textContent=item.nome;
+      const contagem=document.createElement("small");
+      contagem.textContent=formatarContagem(v.quantidade)+" lançamentos";
+      const trilho=document.createElement("div");
+      trilho.className="frete-barra-fundo";
+      if(custo!==null && maxCusto>0){
+        const barra=document.createElement("div");
+        barra.className="frete-barra-valor";
+        barra.style.width=(100*custo/maxCusto).toFixed(2)+"%";
+        trilho.append(barra);
+      }
+      info.append(nomeEl,contagem,trilho);
+
+      const colunaCusto=document.createElement("div");
+      colunaCusto.className="frete-valor";
+      const custoLabel=document.createElement("span");
+      custoLabel.textContent="Custo final";
+      const custoNum=document.createElement("strong");
+      custoNum.textContent=moeda(custo);
+      colunaCusto.append(custoLabel,custoNum);
+      const colunaPct=document.createElement("div");
+      colunaPct.className="frete-percentual";
+      const pctLabel=document.createElement("span");
+      pctLabel.textContent="% Final";
+      const pctNum=document.createElement("strong");
+      pctNum.textContent=percent(pct);
+      colunaPct.append(pctLabel,pctNum);
+      const seta=document.createElement("span");
+      seta.className="frete-seta";
+      seta.setAttribute("aria-hidden","true");
+      seta.textContent="⌄";
+      summary.append(pos,info,colunaCusto,colunaPct,seta);
+      details.append(summary);
+
+      const detalhe=document.createElement("div");
+      detalhe.className="frete-detalhes";
+      const subtitulo=document.createElement("p");
+      subtitulo.textContent="Composição financeira de "+item.nome;
+      detalhe.append(subtitulo);
+      const grade=document.createElement("div");
+      grade.className="frete-detalhes-grade";
+      [
+        ["Total das notas fiscais",moeda(v.valor_notas)],
+        ["Fretes embutidos (cliente paga)",moeda(v.fretes_embutidos)],
+        ["Total dos fretes",moeda(v.total_fretes)],
+        ["Custo do frete Nunes",moeda(v.custo_nunes)],
+        ["Custo final",moeda(v.custo_final)],
+        ["% Final",percent(v.percentual_final)]
+      ].forEach(([rotulo,valor])=>linhaDetalhes(grade,rotulo,valor));
+      detalhe.append(grade);
+      details.append(detalhe);
+      lista.append(details);
+    }
+  }
+  [filtroAno,filtroMes,filtroTransportadora,ordem].forEach(x=>x.addEventListener("change",render));
+  pesquisa.addEventListener("input",render);
+  render();
+}
+
+async function salvarValoresTotalPlanilha() {
+ const sessao=obterSessaoRastreioImportacao();
+ const r=await window.clienteSupabase.rpc("pmobile_valores_total_salvar",{
+  p_usuario:sessao.usuario,p_credencial:sessao.credencial,
+  p_valor_notas:null,p_fretes_embutidos:null,p_total_fretes:null,
+  p_custo_nunes:null,p_custo_final:null,p_percentual_final:null,
+  p_origem:"Lançamentos ativos do Rastreio"
+ });
+ if(r.error)throw r.error;
+ if(document.getElementById("valoresTotal")?.style.display!=="none")await carregarValoresTotal();
 }
