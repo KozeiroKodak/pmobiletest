@@ -83,7 +83,7 @@ jobs:
 
   publish-ota:
     needs: ota-gate
-    if: needs.ota-gate.outputs.publish == 'true' && (github.event_name == 'workflow_dispatch' || github.actor != 'github-actions[bot]')
+    if: false # Pausa temporaria durante atualizacao coordenada da main
     runs-on: ubuntu-latest
 
     steps:
@@ -97,6 +97,7 @@ jobs:
         run: |
           set -euo pipefail
           echo "== PMOBILE OTA PREFLIGHT V2 =="
+          node --test tests/*.test.cjs
           test -f index.html
           test -f style.css
           test -f script.js
@@ -225,7 +226,7 @@ jobs:
           mkdir -p build/ota
           while IFS= read -r -d '' file; do
             case "$file" in *.html|*.css|*.js) ;; *) continue;; esac
-            case "$file" in www/*|android/*|.github/*|ota/*|build/*|node_modules/*|gradle/*) continue;; esac
+            case "$file" in www/*|android/*|.github/*|ota/*|build/*|node_modules/*|gradle/*|tests/*|docs/*) continue;; esac
             mkdir -p "build/ota/$(dirname "$file")"
             cp "$file" "build/ota/$file"
           done < <(git ls-files -z)
@@ -279,7 +280,7 @@ jobs:
             echo "Release $tag já existe. Publicação duplicada bloqueada."
             exit 1
           fi
-          gh release create "$tag" "$ZIP" --repo "${GITHUB_REPOSITORY}" --target "${GITHUB_SHA}" --title "OTA Web ${VERSION}" --notes "Automated PMOBILE web OTA release V2."
+          gh release create "$tag" "$ZIP" --repo "${GITHUB_REPOSITORY}" --target "${GITHUB_SHA}" --title "PMobile ${VERSION}" --notes-file ota/release-notes.md
           echo "release_created=true" >> "$GITHUB_ENV"
 
       - name: Update OTA manifest
@@ -290,10 +291,10 @@ jobs:
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import json,os
+          import json,os,datetime
           from pathlib import Path
           version=os.environ["VERSION"]; sha256=os.environ["SHA256"]; repo=os.environ["GITHUB_REPOSITORY"]
-          manifest={"webVersion":version,"nativeMinVersion":"1.0","package":f"https://github.com/{repo}/releases/download/ota-web-{version}/pmobile-web-{version}.zip","sha256":sha256,"mandatory":False}
+          manifest={"webVersion":version,"nativeMinVersion":"1.0","package":f"https://github.com/{repo}/releases/download/ota-web-{version}/pmobile-web-{version}.zip","sha256":sha256,"mandatory":False,"sizeBytes":Path(f"pmobile-web-{version}.zip").stat().st_size,"publishedAt":datetime.datetime.now(datetime.timezone.utc).isoformat(),"releaseNotes":Path("ota/release-notes.md").read_text(encoding="utf-8").strip()}
           path=Path("ota/manifest.json")
           path.write_text(json.dumps(manifest,indent=2,ensure_ascii=False)+"\n")
           json.loads(path.read_text())
