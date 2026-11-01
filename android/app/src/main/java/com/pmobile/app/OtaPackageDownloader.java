@@ -74,6 +74,9 @@ public final class OtaPackageDownloader {
             connection.setRequestProperty("Accept", "application/octet-stream");
 
             int status = connection.getResponseCode();
+            if (!"https".equalsIgnoreCase(connection.getURL().getProtocol())) {
+                throw new IOException("OTA package redirected outside HTTPS");
+            }
             if (status < HttpURLConnection.HTTP_OK || status >= HttpURLConnection.HTTP_MULT_CHOICE) {
                 throw new IOException("OTA package request failed with HTTP status " + status);
             }
