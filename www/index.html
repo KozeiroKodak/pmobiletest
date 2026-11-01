@@ -928,10 +928,19 @@
             </div>
             <div class="painel configuracoes-painel-sistema configuracoes-modulo" id="painelConfiguracoesSistema">
                 <details class="configuracoes-accordion"><summary><span class="home-app-icone" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.6 5.6 7 7m10 10 1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="2"/></svg></span><span class="home-app-conteudo"><strong>Sistema</strong><small>Atualizações do aplicativo</small></span><span class="home-app-seta">›</span></summary><div class="configuracoes-conteudo">
-                <div class="configuracoes-info"><span class="configuracoes-info-icone" aria-hidden="true">↻</span><span>Verifique se há atualizações disponíveis para esta instalação do PMobile.</span></div>
-                <div class="configuracoes-acoes">
-                    <button class="botao-aba" type="button" onclick="procurarAtualizacoesOta()">🔄 Procurar atualizações</button>
-                </div>
+                <section class="ota-painel" id="otaPainel" aria-labelledby="otaTitulo">
+                  <header class="ota-cabecalho"><span class="ota-simbolo" aria-hidden="true">↻</span><span class="ota-selo" id="otaSelo">PMobile sempre em dia</span></header>
+                  <h2 id="otaTitulo">Uma atualização.<br>Uma experiência melhor.</h2>
+                  <p class="ota-intro">Novidades e melhorias chegam por aqui, no seu tempo.</p>
+                  <dl class="ota-versoes"><div><dt>Instalada</dt><dd id="otaAtual">—</dd></div><div><dt>Disponível</dt><dd id="otaDisponivel">—</dd></div><div><dt>Aplicativo</dt><dd id="otaNativa">—</dd></div></dl>
+                  <div class="ota-situacao" role="status" aria-live="polite"><strong id="otaEstadoTitulo">Pronto para verificar</strong><p id="otaMensagem">Consulte as atualizações disponíveis para seu PMobile.</p></div>
+                  <div class="ota-progresso" id="otaProgresso" hidden><div><span id="otaEtapa">Preparando</span><span id="otaPorcentagem"></span></div><progress id="otaBarra" max="100" aria-label="Progresso da atualização"></progress><small id="otaBytes"></small></div>
+                  <ol class="ota-etapas" aria-label="Etapas da atualização"><li data-ota-etapa="checking">Verificar</li><li data-ota-etapa="downloading">Baixar</li><li data-ota-etapa="verifying">Conferir</li><li data-ota-etapa="ready">Aplicar</li></ol>
+                  <section class="ota-novidades" id="otaNovidades" hidden><h3>O que vem nesta atualização</h3><p id="otaNotas"></p></section>
+                  <p class="ota-recuperacao" id="otaRecuperacao" hidden></p>
+                  <div class="ota-acoes"><button class="botao-aba ota-primario" id="otaVerificar" type="button" onclick="procurarAtualizacoesOta()">Verificar atualizações</button><button class="botao-aba ota-primario" id="otaBaixar" type="button" onclick="baixarAtualizacaoOta()" hidden>Baixar atualização</button><button class="botao-aba ota-primario" id="otaAplicar" type="button" onclick="aplicarAtualizacaoOta()" hidden>Reiniciar e aplicar</button></div>
+                  <p class="ota-rodape" id="otaRodape">O download acontece em segundo plano. O aplicativo só reinicia quando você escolhe aplicar.</p><small class="ota-ultima" id="otaUltima"></small>
+                </section>
                 </div></details>
             </div>
 
