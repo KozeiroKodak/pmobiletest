@@ -44,6 +44,11 @@ public class OtaInstrumentedTest {
         assertTrue(manager.confirmWebBoot("0.0.2"));
         assertEquals("0.0.1", manager.getPreviousVersion());
         assertTrue(new File(manager.getVersionsDir(), "0.0.1/index.html").isFile());
+        candidate(manager);
+        try { manager.activateSoleCandidate("0.0.1"); fail("Fallback was replaced"); }
+        catch (java.io.IOException expected) { }
+        assertEquals("0.0.2", manager.getActiveVersion());
+        assertTrue(new File(manager.getVersionsDir(), "0.0.1/index.html").isFile());
     }
     @Test public void restoresFallbackAfterUnconfirmedBoot() throws Exception {
         OtaManager manager = new OtaManager(isolatedContext());
@@ -61,6 +66,9 @@ public class OtaInstrumentedTest {
         candidate(manager); manager.activateSoleCandidate("0.0.1");
         assertNotNull(manager.getBundleForStartup());
         assertNull(manager.getBundleForStartup()); assertNull(manager.getActiveVersion());
+        candidate(manager); manager.activateSoleCandidate("0.0.1");
+        assertNotNull(manager.getBundleForStartup());
+        assertTrue(manager.confirmWebBoot("0.0.1"));
     }
     @Test public void newerApkSupersedesOldOtaWithoutDeletingItsFiles() throws Exception {
         OtaManager manager = new OtaManager(isolatedContext());
@@ -105,6 +113,8 @@ public class OtaInstrumentedTest {
         org.junit.Assume.assumeTrue("true".equals(InstrumentationRegistry.getArguments().getString("otaNetworkTest")));
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         assertEquals("com.pmobile.preview", context.getPackageName());
+        assertFalse("Unlock the phone before this test", ((android.app.KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE)).isKeyguardLocked());
+        assertTrue("Keep the phone screen on", ((android.os.PowerManager) context.getSystemService(Context.POWER_SERVICE)).isInteractive());
         android.app.Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
         android.content.Intent intent = new android.content.Intent(context, MainActivity.class).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK);
         MainActivity activity = (MainActivity) instrumentation.startActivitySync(intent);
