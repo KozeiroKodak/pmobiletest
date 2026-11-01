@@ -14,15 +14,15 @@ const links=[...html.matchAll(/<link\b[^>]*rel="stylesheet"[^>]*>/g)].map(x=>
 const orig=original[0].replace('style="display: none;"','style="display: block;"');
 const local=sandbox.window.__bugHunterHtml;
 const checks=[
- ["Painel",".contagem-v2",["borderRadius","borderTopColor"]],
- ["Cabeçalho",".contagem-v2-topo",["display","alignItems","borderBottomColor"]],
- ["Ícone",".contagem-v2-icone",["width","height","borderRadius","backgroundColor"]],
- ["Selo",".contagem-v2-selo",["borderRadius","backgroundColor","color"]],
- ["Busca",".contagem-v2-campo",["display","borderRadius","backgroundColor"]],
- ["Tipo",".contagem-v2-tipos button.ativo",["borderRadius","backgroundColor","color"]],
+ ["Painel",".contagem",["borderRadius","borderTopColor"]],
+ ["Cabeçalho",".contagem-topo",["display","alignItems","borderBottomColor"]],
+ ["Ícone",".contagem-icone",["width","height","borderRadius","backgroundColor"]],
+ ["Selo",".contagem-selo",["borderRadius","backgroundColor","color"]],
+ ["Busca",".contagem-campo",["display","borderRadius","backgroundColor"]],
+ ["Tipo",".contagem-tipos button.ativo",["borderRadius","backgroundColor","color"]],
  ["Buscar",".botao-buscar-contagem-manual",["backgroundColor","color","borderRadius","minHeight"]],
  ["Engrenagem",".botao-config-contagem-manual",["backgroundColor","borderRadius"]],
- ["Histórico",".contagem-v2-lista",["borderRadius","borderTopColor"]]
+ ["Histórico",".contagem-lista",["borderRadius","borderTopColor"]]
 ];
 const evaluation=[
  "document.querySelector('#dadosLocais [data-dl-panel=conferencias]').hidden=false;",
