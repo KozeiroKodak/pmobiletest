@@ -233,7 +233,7 @@
     }
     const edit=e.target.closest("[data-dl-edit]");
     if(edit){
-      const origem=edit.dataset.dl-source;
+      const origem=edit.dataset.dlSource;
       const item=(estado.resultados[origem]||[]).find((m)=>m.codigo===edit.dataset.dlEdit);
       if(item){tela("estoque"); selecionar(item);}
       return;

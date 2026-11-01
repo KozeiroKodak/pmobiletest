@@ -11,6 +11,33 @@ const local=[...MODULOS,"dados-locais.js"].map(ler).join("\n");
 const mover=ler("reorganizacao-pmobile.js");
 const sql=ler("sql/pmobile_dados_locais_isolados.sql");
 
+test("clique em Editar abre o material da origem sem consultar ou gravar no banco",()=>{
+ const vm=require("node:vm");
+ for(const origem of ["pesquisa","estoque"]){
+  const els=new Map();
+  for(const id of ["dlEditorTitulo","dlQtdItem","dlQtdTotal","dlQtdReservada","dlLocal","dlFormEstoque"])
+   els.set(id,{hidden:true,scrollIntoView(){}});
+  const sandbox={window:{mostrarTelaSistema(){}},document:{readyState:"loading",addEventListener(){},
+   getElementById:id=>els.get(id)||null,querySelectorAll:()=>[]},console};
+  const code=local.replace("  window.abrirDadosLocaisPmobile=abrir;",
+   "  window.__clickTeste={onClick,estado};\n  window.abrirDadosLocaisPmobile=abrir;");
+  vm.runInNewContext(code,sandbox);
+  const {onClick,estado}=sandbox.window.__clickTeste;
+  const material={codigo:"001",descricao:"Teste",quantidade_item:0,quantidade_total:12,
+   quantidade_reservada:null,local:"A-01"};
+  estado.resultados[origem]=[material];
+  const botao={dataset:{dlEdit:"001",dlSource:origem}};
+  onClick({target:{closest:selector=>selector==="[data-dl-edit]"?botao:null}});
+  assert.equal(estado.material,material);
+  assert.equal(estado.tela,"estoque");
+  assert.equal(els.get("dlFormEstoque").hidden,false);
+  assert.equal(els.get("dlQtdItem").value,0);
+  assert.equal(els.get("dlQtdTotal").value,12);
+  assert.equal(els.get("dlQtdReservada").value,"");
+  assert.equal(els.get("dlLocal").value,"A-01");
+ }
+});
+
 test("módulos novos e scripts alterados têm sintaxe válida",()=>{
  for(const source of [original,local,mover]) assert.doesNotThrow(()=>new Function(source));
 });
