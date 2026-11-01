@@ -3,7 +3,7 @@
  "use strict";
  const registry=window.PMobileDadosLocaisModulos||(window.PMobileDadosLocaisModulos=Object.create(null));
  registry.comparar=function(ctx){
-  const {$,estado,escape,valor,num,norm,rpc,sessao,mensagem,consultar,paginacao,resumo,painel,pesquisarForm,compararForm,desenharMateriais,desenharComparacao,quantidade}=ctx;
+  const {$,escape,valor,paginacao,resumo,painel,compararForm}=ctx;
   function form(aba) {
     const titulo=aba==="locais"?"Buscar alteração de local":aba==="divergencias"?
       "Pesquisar divergências":"Pesquisar material";
