@@ -634,3 +634,38 @@
     #configuracoes .configuracoes-textos strong { font-size: 13px; }
     #configuracoes.configuracoes-detalhe .configuracoes-modulos .configuracoes-conteudo { padding: 12px; }
 }
+/* Central de atualizações PMobile */
+#configuracoes .ota-painel{max-width:680px;margin:0 auto;padding:26px;border:1px solid #284b57;border-radius:24px;background:radial-gradient(ellipse at top right,#123845 0,transparent 58%),#0d1d24;color:#e8f4f6;overflow:hidden}
+#configuracoes .ota-painel [hidden]{display:none!important}
+#configuracoes .ota-cabecalho{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
+#configuracoes .ota-simbolo{display:grid;place-items:center;flex:0 0 48px;height:48px;border-radius:16px;color:#64dfed;border:1px solid #2f6571;background:#153b46;font-size:32px}
+#configuracoes .ota-selo{font-size:11px;font-weight:600;border:1px solid #34616b;border-radius:30px;padding:7px 10px;color:#a0e3e9;text-align:center}
+#configuracoes .ota-painel h2{font-size:clamp(25px,5vw,34px);line-height:1.15;letter-spacing:-1px;margin:0 0 12px;color:#f1fafb}
+#configuracoes .ota-intro{font-size:14px;line-height:1.6;color:#a5bec8;margin:0 0 24px}
+#configuracoes .ota-versoes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding:16px 0;margin:0 0 22px;border-top:1px solid #25434e;border-bottom:1px solid #25434e;gap:12px}
+#configuracoes .ota-versoes dt{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#94b3be;margin-bottom:8px}
+#configuracoes .ota-versoes dd{margin:0;font-size:18px;font-weight:700;color:#dff6fa;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+#configuracoes .ota-situacao strong{display:block;color:#e1f6f8;font-size:17px;margin-bottom:8px}
+#configuracoes .ota-situacao p{color:#aac2cb;line-height:1.6;font-size:13px;margin:0}
+#configuracoes .ota-progresso{margin:20px 0 0}
+#configuracoes .ota-progresso>div{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:#c4e8ee;margin-bottom:8px}
+#configuracoes .ota-progresso progress{width:100%;height:8px;display:block;border:0;border-radius:10px;overflow:hidden;accent-color:#53d6e5;background:#1b3c46}
+#configuracoes .ota-progresso progress::-webkit-progress-bar{background:#1b3c46;border-radius:10px}
+#configuracoes .ota-progresso progress::-webkit-progress-value{background:#53d6e5;border-radius:10px}
+#configuracoes .ota-progresso small{display:block;margin-top:8px;font-size:11px;color:#87aeba;font-variant-numeric:tabular-nums}
+#configuracoes .ota-etapas{list-style:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:0;margin:24px 0;color:#708f9b;font-size:10px}
+#configuracoes .ota-etapas li{border-top:2px solid #25414c;padding-top:8px}
+#configuracoes .ota-etapas li[data-situacao=atual]{color:#a4f1f5;border-color:#55d8e6}
+#configuracoes .ota-etapas li[data-situacao=concluida]{color:#9bd7c4;border-color:#4cae93}
+#configuracoes .ota-novidades{border-radius:14px;background:#102831;border:1px solid #244752;padding:16px;margin:18px 0}
+#configuracoes .ota-novidades h3{font-size:12px;margin:0 0 10px;color:#d0edf2}
+#configuracoes .ota-novidades p{font-size:12px;line-height:1.7;color:#a5c4ce;margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+#configuracoes .ota-acoes{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+#configuracoes .ota-acoes .ota-primario{width:100%;min-height:48px;border-radius:14px;background:#58d9e6;color:#062a33;font-size:14px;font-weight:750;border:1px solid #83e9f1;padding:12px 18px}
+#configuracoes .ota-acoes button:disabled{opacity:.5;cursor:wait}
+#configuracoes .ota-acoes button:focus-visible{outline:2px solid #d9fbff;outline-offset:4px}
+#configuracoes .ota-rodape{font-size:11px;color:#88aab7;line-height:1.7;margin:16px 0 0}
+#configuracoes .ota-ultima{display:block;color:#7698a5;font-size:10px;margin-top:12px}
+#configuracoes .ota-recuperacao{padding:12px;border-radius:12px;background:#173a32;color:#b1e4cf;font-size:12px;line-height:1.6}
+#configuracoes .ota-painel[data-estado=error] .ota-situacao strong{color:#ffcb9e}
+@media(max-width:480px){#configuracoes .ota-painel{padding:20px 16px;border-radius:20px}#configuracoes .ota-selo{max-width:170px}#configuracoes .ota-versoes{gap:8px}#configuracoes .ota-versoes dd{font-size:16px}}
