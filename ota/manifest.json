@@ -1,10 +1,10 @@
 {
-  "webVersion": "0.0.400",
+  "webVersion": "0.0.401",
   "nativeMinVersion": "1.0",
-  "package": "https://github.com/KozeiroKodak/pmobiletest/releases/download/ota-web-0.0.400/pmobile-web-0.0.400.zip",
-  "sha256": "f9584054dd95f8517c8b8d20a4180edc683316d49c4bbb2cae59bcbf43e28c8a",
+  "package": "https://github.com/KozeiroKodak/pmobiletest/releases/download/ota-web-0.0.401/pmobile-web-0.0.401.zip",
+  "sha256": "4ba887ad977701ea60ccac4f8cbaff2389edfe0c5894f0467843dbf904836b35",
   "mandatory": false,
-  "sizeBytes": 555492,
-  "publishedAt": "2026-11-01T21:08:20.891065+00:00",
+  "sizeBytes": 556081,
+  "publishedAt": "2026-11-01T22:34:49.510336+00:00",
   "releaseNotes": "Uma central de atualizações mais simples de acompanhar.\n\n• Acompanhe a versão instalada, a disponível e cada etapa do download.\n• Continue usando o PMobile enquanto a atualização é preparada.\n• Reinicie e aplique quando terminar suas operações.\n• O aplicativo confirma a abertura da nova versão antes de aprová-la.\n\nO painel completo e a recuperação de inicialização exigem o novo APK 1.03. APKs anteriores continuam usando o atualizador já instalado."
 }
