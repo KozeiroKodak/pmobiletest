@@ -90,3 +90,34 @@ No comparador, `pmobile_local_comparar` reúne as duas fontes, sem criar registr
 - A persistência de sessão e os controles de outras RPCs demandam auditoria própria; nenhuma alteração de senha, usuário ou privilégios foi feita aqui.
 - Dados locais ainda dependem de Supabase online; o comportamento de uso offline deste módulo não foi implementado.
 - Rotinas de importação temporária e limpeza de histórico demandam ciclo separado, sem exclusão automática de registros.
+
+## 7. Desacoplamento da navegação legada
+
+A ponte `pmobile-modulos.js` reúne somente **contratos de navegação**, não dados, autenticação ou regras de negócio.
+
+```text
+script.js (Voltar e histórico principal)
+  └── PMobileModulos.consumirRetorno(tela)
+        ├── Dados locais (sua própria navegação interna)
+        ├── Transportes (volta ao hub)
+        └── Configurações (subáreas e páginas administrativas)
+
+reorganizacao-pmobile.js (menus de Ferramentas e Transportes)
+  └── PMobileModulos.executarAcao(chave)
+        ├── valorestotal.js → valores-total
+        ├── script.js → importar-estoque / conferencias
+        ├── rastreio.js → rastreio
+        └── cotacoes.js → cotacoes
+```
+
+Cada área registra seu próprio ponto de entrada e/ou retorno. A interface não consulta `window[nome]`, e o controlador principal não precisa conhecer o nome de uma função interna de cada módulo. As antigas funções globais continuam presentes para compatibilidade com o HTML, o Android e integrações preexistentes.
+
+A ponte valida nomes de ações, proíbe registros conflitantes e isola erros de handlers de retorno. Ao consumir um retorno de Configurações em Locais ou Divergências, o histórico do hub ainda é limpo para impedir a volta duplicada.
+
+**Validação:**
+- `npm test` executa a suíte de regressão;
+- `tests/modulos-legados.test.cjs` cobre contratos, retornos, acessos e ordem dos scripts;
+- as fontes correspondentes de raiz e `www/` devem permanecer idênticas;
+- os testes em Chrome e Android precisam confirmar a navegação com os módulos completos.
+
+**Limites remanescentes:** funcionalidades antigas ainda usam funções globais nos elementos HTML e compartilham um arquivo de navegação amplo. A ponte reduz acoplamento entre módulos, mas **não** significa que todos os fluxos passaram a depender apenas de módulos ES. Manter essa distinção na avaliação BKP.
