@@ -5,7 +5,8 @@ const vm=require("node:vm");
 const path=require("node:path");
 
 function carregar(implementacao){
-  const code=implementacao||fs.readFileSync(path.join(__dirname,"..","dados-locais.js"),"utf8");
+  const partes=["dados-locais/pesquisa-local.js","dados-locais/estoque-local.js","dados-locais/reservas-local.js","dados-locais/conferencias-local.js","dados-locais/comparar-verificar.js","dados-locais/divergencias-local.js","dados-locais/locais-local.js","dados-locais/importacao-local.js"];
+  const code=implementacao||[...partes,"dados-locais.js"].map(f=>fs.readFileSync(path.join(__dirname,"..",f),"utf8")).join("\n");
   const instrumentado=code.replace("  window.abrirDadosLocaisPmobile=abrir;",
     "  window.__importacaoTeste={textoSeguroCatalogo,erroJsonImportacao,erroTemporarioImportacao,enviarLoteCatalogo,lerPlanilha,chaveArquivoCatalogo};\n"+
     "  window.abrirDadosLocaisPmobile=abrir;");

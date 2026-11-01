@@ -4,6 +4,8 @@ on:
     branches: [main]
     paths:
       - 'dados-locais.js'
+      - 'dados-locais/**'
+      - 'www/dados-locais/**'
       - 'www/dados-locais.js'
       - 'tests/dados-locais-importacao.test.cjs'
       - 'tests/dados-locais-visual.test.cjs'
@@ -14,6 +16,7 @@ on:
     paths:
       - 'dados-locais.js'
       - 'reorganizacao-pmobile.js'
+      - 'dados-locais/**'
       - 'index.html'
       - 'script.js'
       - 'implementacoes/dados-locais.css'
@@ -38,6 +41,7 @@ jobs:
       - name: Conferir sintaxe e isolamento das fontes
         run: |
           node --check dados-locais.js
+          for f in dados-locais/*.js; do node --check "$f"; done
           node --check reorganizacao-pmobile.js
           node --check script.js
           node --test tests/dados-locais.test.cjs tests/dados-locais-importacao.test.cjs tests/dados-locais-visual.test.cjs

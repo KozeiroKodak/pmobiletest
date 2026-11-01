@@ -6,7 +6,8 @@ const root=path.resolve(__dirname,"..");
 const ler=(f)=>fs.readFileSync(path.join(root,f),"utf8");
 const entry=ler("index.html");
 const original=ler("script.js");
-const local=ler("dados-locais.js");
+const MODULOS=["dados-locais/pesquisa-local.js","dados-locais/estoque-local.js","dados-locais/reservas-local.js","dados-locais/conferencias-local.js","dados-locais/comparar-verificar.js","dados-locais/divergencias-local.js","dados-locais/locais-local.js","dados-locais/importacao-local.js"];
+const local=[...MODULOS,"dados-locais.js"].map(ler).join("\n");
 const mover=ler("reorganizacao-pmobile.js");
 const sql=ler("sql/pmobile_dados_locais_isolados.sql");
 
@@ -43,6 +44,13 @@ test("banco original preservado pela migration isolada",()=>{
  assert.match(sql,/p_modo text default 'todos'/);
 });
 test("APK fallback espelha os arquivos da versão web",()=>{
- for(const file of ["index.html","script.js","dados-locais.js","reorganizacao-pmobile.js","implementacoes/dados-locais.css"])
+ for(const file of ["index.html","script.js","dados-locais.js","reorganizacao-pmobile.js","implementacoes/dados-locais.css",...MODULOS])
    assert.equal(ler(file),ler("www/"+file),file);
+});
+
+test("módulos independentes carregam antes do hub",()=>{
+ const scripts=[...entry.matchAll(/<script src="([^"]+)"/g)].map(x=>x[1]);
+ const hub=scripts.findIndex(s=>s.startsWith("dados-locais.js?"));
+ assert.ok(hub>0);
+ for(const f of MODULOS)assert.ok(scripts.some((s,i)=>s.startsWith(f+"?")&&i<hub),f);
 });
