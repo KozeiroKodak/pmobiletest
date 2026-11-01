@@ -81,3 +81,14 @@ test("módulos independentes carregam antes do hub",()=>{
  assert.ok(hub>0);
  for(const f of MODULOS)assert.ok(scripts.some((s,i)=>s.startsWith(f+"?")&&i<hub),f);
 });
+
+test("migração bidirecional preserva API, autorização e não altera as tabelas",()=>{
+ const novo=ler("sql/pmobile_local_comparar_bidirecional_bkp.sql");
+ assert.match(novo,/create or replace function public\.pmobile_local_comparar/i);
+ assert.match(novo,/private\.pmobile_local_autorizar\(p_usuario,p_credencial\)/i);
+ assert.match(novo,/full outer join public\.materiais d on d\.codigo=l\.codigo/i);
+ assert.match(novo,/coalesce\(l\.codigo,d\.codigo\)/i);
+ assert.match(novo,/l\.codigo is null or d\.id is null/i);
+ assert.match(novo,/set search_path to ''/i);
+ assert.doesNotMatch(novo,/\b(?:update|insert into|delete from|truncate|drop table)\b/i);
+});
