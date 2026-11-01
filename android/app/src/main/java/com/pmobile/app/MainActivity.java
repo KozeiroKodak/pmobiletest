@@ -17,9 +17,6 @@ import java.net.URL;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import com.getcapacitor.BridgeActivity;
 import com.getcapacitor.ServerPath;
@@ -31,7 +28,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class MainActivity extends BridgeActivity {
 
     private static final String TAG = "PMobileOta";
-    private static final String NATIVE_WEB_BUNDLE_VERSION = "0.0.262";
+    private static final String NATIVE_WEB_BUNDLE_VERSION = BuildConfig.WEB_BUNDLE_VERSION;
     private static final ExecutorService OTA_MANIFEST_EXECUTOR =
         Executors.newSingleThreadExecutor();
     private static final ExecutorService ONEDRIVE_EXECUTOR =
@@ -44,11 +41,10 @@ public class MainActivity extends BridgeActivity {
     private static final long OTA_CHECK_INTERVAL_MS = 5 * 60 * 1000L;
     private final Handler otaForegroundHandler = new Handler(Looper.getMainLooper());
     private long lastAutomaticOtaCheckMs = -OTA_CHECK_INTERVAL_MS;
-    private boolean otaUpdateDialogVisible = false;
     private final Runnable otaForegroundCheck = new Runnable() {
         @Override public void run() {
             long now = SystemClock.elapsedRealtime();
-            if (now - lastAutomaticOtaCheckMs >= OTA_CHECK_INTERVAL_MS && !otaUpdateDialogVisible) {
+            if (now - lastAutomaticOtaCheckMs >= OTA_CHECK_INTERVAL_MS) {
                 if (!otaCheckRunning.get()) {
                     lastAutomaticOtaCheckMs = now;
                     verificarOta(false);
@@ -59,22 +55,12 @@ public class MainActivity extends BridgeActivity {
     };
 
 
-    private AlertDialog otaProgressDialog;
-    private TextView otaStatusText;
-    private ProgressBar otaProgressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         try {
             OtaManager otaManager = new OtaManager(getApplicationContext());
-            try {
-                otaManager.healthCheckPendingCandidate();
-            } catch (Exception healthCheckFailure) {
-                Log.w(TAG, "Pending OTA candidate health check failed: "
-                    + healthCheckFailure.getClass().getSimpleName());
-            }
-
-            java.io.File activeBundle = otaManager.getHealthyActiveBundle();
+            java.io.File activeBundle = otaManager.getBundleForStartup(NATIVE_WEB_BUNDLE_VERSION);
             if (activeBundle != null) {
                 bridgeBuilder.setServerPath(new ServerPath(
                     ServerPath.PathType.BASE_PATH,
@@ -88,16 +74,25 @@ public class MainActivity extends BridgeActivity {
         }
 
         super.onCreate(savedInstanceState);
+        final String startupCandidate = new OtaManager(getApplicationContext()).getCandidateVersion();
+        new Handler(getMainLooper()).postDelayed(() -> {
+            if (isFinishing() || isDestroyed() || startupCandidate == null) return;
+            OtaManager manager = new OtaManager(getApplicationContext());
+            if (startupCandidate.equals(manager.getCandidateVersion()) && !manager.isCandidateHealthy()) {
+                try { manager.restorePreviousVersion(); recreate(); }
+                catch (Exception failure) { Log.e(TAG, "Unable to restore OTA fallback", failure); }
+            }
+        }, 60000L);
 
-        getBridge().getWebView().addJavascriptInterface(
-            new OtaJsBridge(),
-            "PMOBILE_OTA"
-        );
-        getBridge().getWebView().addJavascriptInterface(
-            new OneDriveJsBridge(),
-            "PMCOLETAS_ONEDRIVE"
-        );
+    }
 
+    @Override
+    protected void load() {
+        // Register before Capacitor starts loading the page, including OTA boots.
+        android.webkit.WebView webView = findViewById(com.getcapacitor.android.R.id.webview);
+        webView.addJavascriptInterface(new OtaJsBridge(), "PMOBILE_OTA");
+        webView.addJavascriptInterface(new OneDriveJsBridge(), "PMCOLETAS_ONEDRIVE");
+        super.load();
     }
 
 
@@ -319,338 +314,157 @@ public class MainActivity extends BridgeActivity {
             .replace("\n", " ");
     }
 
-    private final class OtaJsBridge {
-        @JavascriptInterface
-        public void procurarAtualizacoes() {
-            if (!otaCheckRunning.compareAndSet(false, true)) {
-                runOnUiThread(() -> new AlertDialog.Builder(MainActivity.this)
-                    .setTitle("Atualização")
-                    .setMessage("Já existe uma verificação de atualização em andamento.")
-                    .setPositiveButton("OK", null)
-                    .show()
-                );
-                return;
-            }
 
-            showOtaCheckProgress();
+    private volatile boolean otaModernClient;
+    private volatile OtaManifest availableManifest;
+    private volatile String otaState = "idle";
+    private String otaMessage = "Tudo pronto para verificar atualizações.";
+    private int otaPercent = -1;
+    private long otaDownloaded, otaTotal, otaCheckedAt;
+
+    private android.content.SharedPreferences otaUiPreferences() {
+        return getSharedPreferences("PMobileOtaUi", MODE_PRIVATE);
+    }
+
+    private String currentWebVersion() {
+        String active = new OtaManager(getApplicationContext()).getActiveWebVersion();
+        return active == null ? NATIVE_WEB_BUNDLE_VERSION : active;
+    }
+
+    private synchronized void setOtaState(String state, String message, int percent) {
+        otaState = state; otaMessage = message; otaPercent = percent;
+    }
+
+    private synchronized String otaSnapshot() {
+        try {
+            OtaManager manager = new OtaManager(getApplicationContext());
+            String ready = otaUiPreferences().getString("readyVersion", "");
+            if ("idle".equals(otaState) && !ready.isEmpty() && manager.hasPreparedCandidate()) {
+                setOtaState("ready", "Atualização pronta. Aplique quando terminar suas operações.", 100);
+            }
+            org.json.JSONObject json = new org.json.JSONObject();
+            json.put("state", otaState).put("message", otaMessage).put("percent", otaPercent)
+                .put("currentVersion", currentWebVersion()).put("nativeVersion", manager.getCurrentNativeVersion())
+                .put("availableVersion", "ready".equals(otaState) ? ready : availableManifest == null ? "" : availableManifest.getWebVersion())
+                .put("downloadedBytes", otaDownloaded).put("totalBytes", otaTotal)
+                .put("checkedAt", otaCheckedAt > 0 ? otaCheckedAt : otaUiPreferences().getLong("checkedAt", 0)).put("recovery", manager.getLastRecovery())
+                .put("releaseNotes", availableManifest == null ? "" : availableManifest.getReleaseNotes())
+                .put("publishedAt", availableManifest == null ? "" : availableManifest.getPublishedAt());
+            return json.toString();
+        } catch (Exception failure) { return "{\"state\":\"error\",\"message\":\"Não foi possível ler o estado da atualização.\"}"; }
+    }
+
+    private final class OtaJsBridge {
+        @JavascriptInterface public String obterEstado() { otaModernClient = true; return otaSnapshot(); }
+        @JavascriptInterface public void procurarAtualizacoes() { verificarOta(true); }
+        @JavascriptInterface public void baixarAtualizacao() { iniciarDownload(); }
+        @JavascriptInterface public void aplicarAtualizacao() { aplicarPreparada(); }
+        @JavascriptInterface public void confirmarInicializacao(String version) {
             OTA_MANIFEST_EXECUTOR.execute(() -> {
-                try {
-                    verificarOtaInterno(true);
-                } finally {
-                    otaCheckRunning.set(false);
-                }
+                try { new OtaManager(getApplicationContext()).confirmWebBoot(version); }
+                catch (Exception failure) { Log.w(TAG, "OTA boot confirmation failed", failure); }
             });
         }
     }
 
     private void verificarOta(boolean manual) {
-        if (!otaCheckRunning.compareAndSet(false, true)) {
-            return;
+        if (!otaUiPreferences().getString("readyVersion", "").isEmpty()
+                && new OtaManager(getApplicationContext()).hasPreparedCandidate()) {
+            setOtaState("ready", "Atualização pronta. Aplique quando terminar suas operações.", 100);
         }
-
-        if (manual) {
-            showOtaCheckProgress();
-        }
-
+        if ("ready".equals(otaState) || !otaCheckRunning.compareAndSet(false, true)) return;
+        setOtaState("checking", "Procurando a versão mais recente…", -1);
         OTA_MANIFEST_EXECUTOR.execute(() -> {
             try {
-                verificarOtaInterno(manual);
-            } finally {
-                otaCheckRunning.set(false);
-            }
-        });
-    }
-
-    private void verificarOtaInterno(boolean manual) {
-        try {
-            OtaManager otaManager = new OtaManager(getApplicationContext());
-
-            try {
-                if (otaManager.healthCheckPendingCandidate()) {
-                    Log.i(TAG, "Pending OTA candidate passed health check and was marked healthy");
+                OtaManager manager = new OtaManager(getApplicationContext());
+                OtaManifest manifest = manager.fetchRemoteManifest(OtaManager.REMOTE_MANIFEST_URL);
+                otaCheckedAt = System.currentTimeMillis();
+                otaUiPreferences().edit().putLong("checkedAt", otaCheckedAt).apply();
+                if (!manifest.isCompatibleWithNativeVersion(manager.getCurrentNativeVersion())) {
+                    setOtaState("incompatible", "Esta atualização precisa de um APK mais recente.", -1);
+                    return;
                 }
-            } catch (Exception healthCheckFailure) {
-                Log.w(TAG, "Pending OTA candidate health check failed: "
-                    + healthCheckFailure.getClass().getSimpleName());
-            }
-
-            OtaManifest manifest = otaManager.fetchRemoteManifest(
-                OtaManager.REMOTE_MANIFEST_URL
-            );
-
-            String nativeVersion = otaManager.getCurrentNativeVersion();
-            if (!manifest.isCompatibleWithNativeVersion(nativeVersion)) {
-                Log.i(TAG, "OTA manifest incompatible with native version; nativeVersion="
-                    + nativeVersion);
-                if (manual) {
-                    showOtaCheckResult("A atualização disponível é incompatível com esta versão do aplicativo.");
-                }
-                return;
-            }
-
-            String currentWebVersion = otaManager.getActiveWebVersion();
-            if (currentWebVersion == null || currentWebVersion.trim().isEmpty()) {
-                currentWebVersion = NATIVE_WEB_BUNDLE_VERSION;
-            }
-
-            if (manifest.isNewerThan(currentWebVersion)) {
-                final String updateFromVersion = currentWebVersion;
-                closeOtaCheckProgress();
-
-                showOtaUpdateDialog(
-                    updateFromVersion,
-                    manifest.getWebVersion(),
-                    () -> baixarEAtivarOta(otaManager, manifest)
-                );
-                return;
-            }
-
-            if (manual) {
-                closeOtaCheckProgress();
-                showOtaCheckResult(
-                    "Você já está usando a versão mais recente do PMOBILE."
-                        + "\n\nVersão atual: " + currentWebVersion
-                );
-            }
-
-        } catch (Exception exception) {
-            Log.w(TAG, "Remote OTA manifest check failed: "
-                + exception.getClass().getSimpleName());
-
-            if (manual) {
-                closeOtaCheckProgress();
-                showOtaCheckResult(
-                    "Não foi possível verificar atualizações agora."
-                        + "\n\n" + String.valueOf(exception.getMessage())
-                );
-            }
-        }
-    }
-
-    private void baixarEAtivarOta(OtaManager otaManager, OtaManifest manifest) {
-        String otaStage = "download";
-
-        try {
-            OtaPackageDownloader downloader = new OtaPackageDownloader(
-                otaManager.getStagingDir()
-            );
-            final int[] lastPercent = {-1};
-
-            java.io.File temporaryPackage = downloader.download(
-                manifest.getPackageLocation(),
-                (downloadedBytes, totalBytes) -> {
-                    int percent = -1;
-                    if (totalBytes > 0) {
-                        percent = (int) ((downloadedBytes * 100L) / totalBytes);
-                    }
-
-                    if (percent != lastPercent[0]) {
-                        lastPercent[0] = percent;
-                        updateOtaProgress(
-                            percent >= 0
-                                ? "Baixando atualização... " + percent + "%"
-                                : "Baixando atualização...",
-                            percent
-                        );
-                    }
-                }
-            );
-
-            otaStage = "verificação SHA-256";
-            updateOtaProgress("Verificando integridade da atualização...", 100);
-
-            if (!downloader.verifySha256(
-                    temporaryPackage,
-                    manifest.getSha256())) {
-                throw new java.io.IOException("A verificação SHA-256 falhou.");
-            }
-
-            java.io.File validatedPackage =
-                downloader.promoteVerifiedPackage(temporaryPackage);
-
-            updateOtaProgress("Preparando arquivos da atualização...", 100);
-            otaStage = "preparação";
-            java.io.File preparedPackage =
-                downloader.prepareValidatedPackage(validatedPackage);
-
-            updateOtaProgress("Validando arquivos da atualização...", 100);
-            otaStage = "validação estrutural";
-            java.io.File validatedPreparedPackage =
-                downloader.validatePreparedPackage(preparedPackage);
-
-            otaStage = "promoção para candidate";
-            java.io.File candidatePackage =
-                downloader.promoteValidatedPreparedPackage(validatedPreparedPackage);
-
-            Log.i(TAG, "OTA candidate staged: " + candidatePackage.getName());
-
-            updateOtaProgress("Ativando atualização...", 100);
-            otaStage = "ativação";
-            java.io.File activePackage =
-                otaManager.activateSoleCandidate(manifest.getWebVersion());
-
-            Log.i(TAG, "OTA candidate persisted as active bundle: "
-                + activePackage.getName());
-
-            updateOtaProgress("Finalizando atualização...", 100);
-
-            if (!otaManager.healthCheckPendingCandidate()) {
-                throw new java.io.IOException("A atualização não passou na validação final.");
-            }
-
-            updateOtaProgress(
-                "Atualização concluída! O aplicativo será reiniciado...",
-                100
-            );
-
-            runOnUiThread(() -> new android.os.Handler(getMainLooper()).postDelayed(() -> {
-                Intent restartIntent = new Intent(MainActivity.this, MainActivity.class);
-                restartIntent.addFlags(
-                    Intent.FLAG_ACTIVITY_NEW_TASK
-                        | Intent.FLAG_ACTIVITY_CLEAR_TASK
-                );
-                startActivity(restartIntent);
-                finish();
-            }, 1500));
-
-        } catch (Exception downloadFailure) {
-            final String failedOtaStage = otaStage;
-            Log.w(TAG, "OTA package download or integrity check failed: "
-                + downloadFailure.getClass().getSimpleName());
-
-            closeOtaProgressDialog();
-
-            runOnUiThread(() -> new AlertDialog.Builder(this)
-                .setTitle("Atualização não concluída")
-                .setMessage(
-                    "Não foi possível concluir a atualização. "
-                    + "A versão atual será mantida."
-                    + "\n\nEtapa: " + failedOtaStage
-                    + "\nErro: " + downloadFailure.getMessage()
-                )
-                .setPositiveButton("OK", null)
-                .show()
-            );
-        }
-    }
-
-    private void showOtaCheckProgress() {
-        runOnUiThread(() -> {
-            if (otaProgressDialog != null && otaProgressDialog.isShowing()) {
-                return;
-            }
-
-            LinearLayout layout = new LinearLayout(this);
-            layout.setOrientation(LinearLayout.VERTICAL);
-            layout.setPadding(48, 24, 48, 8);
-
-            otaStatusText = new TextView(this);
-            otaStatusText.setText("Procurando atualizações...");
-
-            otaProgressBar = new ProgressBar(this);
-            otaProgressBar.setIndeterminate(true);
-
-            layout.addView(otaStatusText);
-            layout.addView(otaProgressBar);
-
-            otaProgressDialog = new AlertDialog.Builder(this)
-                .setTitle("Atualizações")
-                .setView(layout)
-                .setCancelable(false)
-                .show();
-        });
-    }
-
-    private void showOtaCheckResult(String message) {
-        runOnUiThread(() -> new AlertDialog.Builder(this)
-            .setTitle("Atualizações")
-            .setMessage(message)
-            .setPositiveButton("OK", null)
-            .show()
-        );
-    }
-
-    private void showOtaProgressDialog(String newWebVersion) {
-        runOnUiThread(() -> {
-            LinearLayout layout = new LinearLayout(this);
-            layout.setOrientation(LinearLayout.VERTICAL);
-            layout.setPadding(48, 24, 48, 8);
-
-            otaStatusText = new TextView(this);
-            otaStatusText.setText("Preparando atualização...");
-
-            otaProgressBar = new ProgressBar(
-                this,
-                null,
-                android.R.attr.progressBarStyleHorizontal
-            );
-            otaProgressBar.setMax(100);
-            otaProgressBar.setIndeterminate(true);
-
-            layout.addView(otaStatusText);
-            layout.addView(otaProgressBar);
-
-            otaProgressDialog = new AlertDialog.Builder(this)
-                .setTitle("Atualizando PMOBILE")
-                .setView(layout)
-                .setCancelable(false)
-                .show();
-        });
-    }
-
-    private void updateOtaProgress(String status, int percent) {
-        runOnUiThread(() -> {
-            if (otaStatusText != null) {
-                otaStatusText.setText(status);
-            }
-            if (otaProgressBar != null) {
-                if (percent >= 0) {
-                    otaProgressBar.setIndeterminate(false);
-                    otaProgressBar.setProgress(percent);
+                if (manifest.isNewerThan(currentWebVersion())) {
+                    availableManifest = manifest;
+                    otaTotal = manifest.getSizeBytes();
+                    setOtaState("available", "Uma nova versão está disponível para o seu PMobile.", -1);
+                    if (!otaModernClient && manual) legacyDialog("Atualização disponível", "Versão " + manifest.getWebVersion(), "Baixar", this::iniciarDownload);
                 } else {
-                    otaProgressBar.setIndeterminate(true);
+                    availableManifest = null;
+                    setOtaState("updated", "Seu PMobile está atualizado.", 100);
+                    if (!otaModernClient && manual) legacyDialog("PMobile atualizado", "Versão " + currentWebVersion(), "OK", null);
                 }
-            }
+            } catch (Exception failure) {
+                setOtaState("error", "Não foi possível verificar agora. Confira a conexão e tente novamente.", -1);
+                if (!otaModernClient && manual) legacyDialog("Atualizações", otaMessage, "OK", null);
+                Log.w(TAG, "OTA check failed", failure);
+            } finally { otaCheckRunning.set(false); }
         });
     }
 
-    private void closeOtaProgressDialog() {
-        runOnUiThread(() -> {
-            if (otaProgressDialog != null && otaProgressDialog.isShowing()) {
-                otaProgressDialog.dismiss();
-            }
-            otaProgressDialog = null;
-            otaStatusText = null;
-            otaProgressBar = null;
+    private void iniciarDownload() {
+        final OtaManifest manifest = availableManifest;
+        if (manifest == null || "ready".equals(otaState) || !otaCheckRunning.compareAndSet(false, true)) return;
+        setOtaState("downloading", "Baixando em segundo plano. Você pode continuar usando o aplicativo.", 0);
+        otaDownloaded = 0;
+        OTA_MANIFEST_EXECUTOR.execute(() -> {
+            try {
+                OtaManager manager = new OtaManager(getApplicationContext());
+                manager.clearStaging();
+                otaUiPreferences().edit().remove("readyVersion").apply();
+                OtaPackageDownloader downloader = new OtaPackageDownloader(manager.getStagingDir());
+                File downloaded = downloader.download(manifest.getPackageLocation(), (bytes, total) -> {
+                    synchronized (MainActivity.this) {
+                        otaDownloaded = bytes; otaTotal = total > 0 ? total : manifest.getSizeBytes();
+                        otaPercent = otaTotal > 0 ? (int) Math.min(100, bytes * 100 / otaTotal) : -1;
+                    }
+                });
+                setOtaState("verifying", "Conferindo a integridade dos arquivos…", -1);
+                if (!downloader.verifySha256(downloaded, manifest.getSha256())) throw new java.io.IOException("SHA-256 mismatch");
+                File verified = downloader.promoteVerifiedPackage(downloaded);
+                setOtaState("preparing", "Preparando a atualização com segurança…", -1);
+                File prepared = downloader.prepareValidatedPackage(verified);
+                File validated = downloader.validatePreparedPackage(prepared);
+                downloader.promoteValidatedPreparedPackage(validated);
+                if (!otaUiPreferences().edit().putString("readyVersion", manifest.getWebVersion()).commit()) {
+                    throw new java.io.IOException("Unable to persist ready version");
+                }
+                setOtaState("ready", "Tudo pronto. Salve seu trabalho e aplique quando preferir.", 100);
+                if (!otaModernClient) legacyDialog("Atualização pronta", otaMessage, "Reiniciar e aplicar", this::aplicarPreparada);
+            } catch (Exception failure) {
+                setOtaState("error", "O download não foi concluído. A versão atual continua disponível. Tente novamente.", -1);
+                if (!otaModernClient) legacyDialog("Atualização não concluída", otaMessage, "OK", null);
+                Log.w(TAG, "OTA preparation failed", failure);
+            } finally { otaCheckRunning.set(false); }
         });
     }
 
-    private void closeOtaCheckProgress() {
-        closeOtaProgressDialog();
+    private void aplicarPreparada() {
+        if (!"ready".equals(otaState) || !otaCheckRunning.compareAndSet(false, true)) return;
+        setOtaState("applying", "Aplicando atualização e reiniciando…", -1);
+        OTA_MANIFEST_EXECUTOR.execute(() -> {
+            try {
+                String version = otaUiPreferences().getString("readyVersion", "");
+                new OtaManager(getApplicationContext()).activateSoleCandidate(version);
+                otaUiPreferences().edit().remove("readyVersion").apply();
+                runOnUiThread(() -> {
+                    Intent intent = new Intent(MainActivity.this, MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent); finish();
+                });
+            } catch (Exception failure) {
+                setOtaState("error", "Não foi possível aplicar a atualização. A versão anterior está preservada.", -1);
+                Log.w(TAG, "OTA activation failed", failure);
+            } finally { otaCheckRunning.set(false); }
+        });
     }
 
-    private void showOtaUpdateDialog(
-            String currentWebVersion,
-            String newWebVersion,
-            Runnable onConfirm) {
+    private void legacyDialog(String title, String message, String action, Runnable callback) {
         runOnUiThread(() -> {
-            if (otaUpdateDialogVisible || isFinishing() || isDestroyed()) return;
-            otaUpdateDialogVisible = true;
-            new AlertDialog.Builder(this)
-                .setTitle("Atualização disponível")
-                .setMessage(
-                    "Sua versão: " + currentWebVersion
-                    + "\nNova versão: " + newWebVersion
-                    + "\n\nDeseja atualizar agora?"
-                )
-                .setNegativeButton("Não", (dialog, which) -> otaUpdateDialogVisible = false)
-                .setPositiveButton("Sim", (dialog, which) -> {
-                    otaUpdateDialogVisible = false;
-                    showOtaProgressDialog(newWebVersion);
-                    OTA_MANIFEST_EXECUTOR.execute(onConfirm);
-                })
-                .setCancelable(false)
-                .show();
+            if (isFinishing() || isDestroyed()) return;
+            new AlertDialog.Builder(this).setTitle(title).setMessage(message)
+                .setNegativeButton("Fechar", null)
+                .setPositiveButton(action, (dialog, which) -> { if (callback != null) callback.run(); }).show();
         });
     }
 }
