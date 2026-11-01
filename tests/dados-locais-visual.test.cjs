@@ -4,7 +4,7 @@ const fs=require("node:fs");
 const path=require("node:path");
 const vm=require("node:vm");
 const raiz=path.resolve(__dirname,"..");
-const source=fs.readFileSync(path.join(raiz,"dados-locais.js"),"utf8");
+const source=["pesquisa-local.js","estoque-local.js","reservas-local.js","conferencias-local.js","comparar-verificar.js","divergencias-local.js","locais-local.js","importacao-local.js","dados-locais.js"].map(p=>fs.readFileSync(path.join(raiz,p),"utf8")).join("\n");
 function compilar(){
   const code=source.replace("  window.abrirDadosLocaisPmobile=abrir;",
     "  window.__visualTeste={htmlPrincipal,desenharMateriais,desenharComparacao,icone,atualizarResumo};\n"+
@@ -95,7 +95,7 @@ test("CSS está escopado, usa regras copiadas do nativo e espelha Android",()=>{
   for(const token of ["#dadosLocais .pesquisa-v2","#dadosLocais .contagem-v2",
     "#dadosLocais .locais-v3-cartao","#dadosLocais .configuracoes-v3-card",
     "#dlHistorico details.registro-conferencia"])assert.ok(css.includes(token),token);
-  for(const p of ["index.html","dados-locais.js","reorganizacao-pmobile.js","implementacoes/dados-locais.css"])
+  for(const p of ["index.html","dados-locais.js","reorganizacao-pmobile.js","implementacoes/dados-locais.css",...["pesquisa-local.js","estoque-local.js","reservas-local.js","conferencias-local.js","comparar-verificar.js","divergencias-local.js","locais-local.js","importacao-local.js"]])
     assert.equal(fs.readFileSync(path.join(raiz,p),"utf8"),
                  fs.readFileSync(path.join(raiz,"www",p),"utf8"),p);
 });
