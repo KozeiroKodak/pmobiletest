@@ -322,38 +322,78 @@
       );
     }
   }
-  function indicador(...a){return modulos.comparar.indicador(...a);}
-  function detalhe(...a){return modulos.comparar.detalhe(...a);}
-  function atualizarResumo(...a){return modulos.comparar.atualizarResumo(...a);}
+  // A coordenação publica somente operações efetivamente usadas pelo hub.
+  function atualizarResumo(...args){return modulos.comparar.atualizarResumo(...args);}
   function desenharMateriais(aba,itens){return aba==="reservas"?modulos.reservas.render(itens):modulos.pesquisa.render(aba,itens);}
   function desenharComparacao(aba,itens){return aba==="divergencias"?modulos.divergencias.render(itens):modulos.locais.render(aba,itens);}
-  function selecionar(...a){return modulos.estoque.selecionar(...a);}
-  function selecionarConferencia(...a){return modulos.conferencias.selecionarConferencia(...a);}
-  function quantidade(...a){return modulos.estoque.quantidade(...a);}
-  async function salvarEstoque(...a){return modulos.estoque.salvarEstoque(...a);}
-  async function registrarConferencia(...a){return modulos.conferencias.registrarConferencia(...a);}
-  async function listarConferencias(...a){return modulos.conferencias.listarConferencias(...a);}
-  function textoSeguroCatalogo(...a){return modulos.importacao.textoSeguroCatalogo(...a);}
-  function erroJsonImportacao(...a){return modulos.importacao.erroJsonImportacao(...a);}
-  function erroTemporarioImportacao(...a){return modulos.importacao.erroTemporarioImportacao(...a);}
-  function espera(...a){return modulos.importacao.espera(...a);}
-  async function enviarLoteCatalogo(...a){return modulos.importacao.enviarLoteCatalogo(...a);}
-  function chaveArquivoCatalogo(...a){return modulos.importacao.chaveArquivoCatalogo(...a);}
-  function lerCheckpointCatalogo(...a){return modulos.importacao.lerCheckpointCatalogo(...a);}
-  function salvarCheckpointCatalogo(...a){return modulos.importacao.salvarCheckpointCatalogo(...a);}
-  function removerCheckpointCatalogo(...a){return modulos.importacao.removerCheckpointCatalogo(...a);}
-  function lerPlanilha(...a){return modulos.importacao.lerPlanilha(...a);}
-  function atualizarProgressoImportacao(...a){return modulos.importacao.atualizarProgressoImportacao(...a);}
-  async function importar(...a){return modulos.importacao.importar(...a);}
-  // Módulos recebem somente a API comum; funções e estados próprios
-  // ficam encapsulados em cada arquivo, sem modificar o inventário Dogo.
-  const contexto=Object.freeze({$,estado,escape,valor,num,norm,rpc,sessao,mensagem,consultar,paginacao,resumo,painel,pesquisarForm,compararForm,atualizarResumo,desenharMateriais,desenharComparacao,quantidade});
+  function selecionar(...args){return modulos.estoque.selecionar(...args);}
+  function selecionarConferencia(...args){return modulos.conferencias.selecionarConferencia(...args);}
+  function quantidade(...args){return modulos.estoque.quantidade(...args);}
+  async function salvarEstoque(...args){return modulos.estoque.salvarEstoque(...args);}
+  async function registrarConferencia(...args){return modulos.conferencias.registrarConferencia(...args);}
+  async function listarConferencias(...args){return modulos.conferencias.listarConferencias(...args);}
+  async function importar(...args){return modulos.importacao.importar(...args);}
+  // Contrato arquitetural explícito: cada módulo possui uma API obrigatória.
+  // Uma versão parcialmente copiada/atualizada não pode iniciar Dados locais
+  // em estado inconsistente nem impedir a abertura dos demais módulos Dogo.
+  const CONTRATOS=Object.freeze({
+    pesquisa:["form","render"],
+    estoque:["selecionar","quantidade","salvarEstoque","template"],
+    reservas:["form","render","template"],
+    conferencias:["selecionarConferencia","registrarConferencia","listarConferencias","template"],
+    comparar:["form","atualizarResumo","template"],
+    divergencias:["render","template"],
+    locais:["render","template"],
+    importacao:["importar","template"]
+  });
+  const contexto=Object.freeze({
+    $,estado,escape,valor,num,norm,rpc,sessao,mensagem,consultar,
+    paginacao,resumo,painel,pesquisarForm,compararForm,atualizarResumo,quantidade
+  });
   const factories=window.PMobileDadosLocaisModulos||{};
-  const modulos={};
-  for(const key of ["pesquisa","estoque","reservas","conferencias","comparar","divergencias","locais","importacao"]){
-    if(typeof factories[key]!=="function")throw new Error("PMobile: módulo Dados locais ausente: "+key);
-    modulos[key]=factories[key](contexto);
+  const modulos=Object.create(null);
+  let erroInicializacao=null;
+  for(const [chave,metodos] of Object.entries(CONTRATOS)){
+    try{
+      const factory=factories[chave];
+      if(typeof factory!=="function")throw new Error("Módulo ausente: "+chave);
+      const modulo=factory(contexto);
+      if(!modulo||typeof modulo!=="object")throw new Error("Módulo inválido: "+chave);
+      for(const metodo of metodos){
+        if(typeof modulo[metodo]!=="function")
+          throw new Error("Contrato incompleto: "+chave+"."+metodo);
+      }
+      modulos[chave]=Object.freeze(modulo);
+    }catch(erro){
+      erroInicializacao=erro;
+      console.error("PMobile Dados locais: falha ao iniciar módulo",chave,erro);
+      break;
+    }
   }
+  if(erroInicializacao){
+    const informarFalha=()=>{
+      const msg="Dados locais não puderam iniciar. Verifique a atualização do PMobile e abra novamente.";
+      if(typeof window.alert==="function")window.alert(msg);
+      else console.error(msg);
+    };
+    // Mantém um acesso visível para orientar o usuário e preserva a Dogo.
+    const adicionarAcessoIndisponivel=()=>{
+      const base=$("menuContagemManual");
+      if(!base||$("menuDadosLocais"))return;
+      const botao=document.createElement("button");
+      botao.type="button";botao.id="menuDadosLocais";
+      botao.className="home-app-card";botao.textContent="Dados locais indisponíveis — atualizar PMobile";
+      botao.addEventListener("click",informarFalha);
+      base.insertAdjacentElement("afterend",botao);
+    };
+    window.abrirDadosLocaisPmobile=informarFalha;
+    window.voltarUmNivelDadosLocais=()=>false;
+    if(document.readyState==="loading")
+      document.addEventListener("DOMContentLoaded",adicionarAcessoIndisponivel);
+    else adicionarAcessoIndisponivel();
+    return;
+  }
+  Object.freeze(modulos);
   window.abrirDadosLocaisPmobile=abrir;
   window.voltarUmNivelDadosLocais=function(telaAtual) {
     if(telaAtual!=="dadosLocais")return false;
