@@ -5,7 +5,8 @@ const vm=require("node:vm");
 const path=require("node:path");
 
 function carregar(implementacao){
-  const code=implementacao||fs.readFileSync(path.join(__dirname,"..","dados-locais.js"),"utf8");
+  const partes=["pesquisa-local.js","estoque-local.js","reservas-local.js","conferencias-local.js","comparar-verificar.js","divergencias-local.js","locais-local.js","importacao-local.js"];
+  const code=implementacao||[...partes,"dados-locais.js"].map(f=>fs.readFileSync(path.join(__dirname,"..",f),"utf8")).join("\n");
   const instrumentado=code.replace("  window.abrirDadosLocaisPmobile=abrir;",
     "  window.__importacaoTeste={textoSeguroCatalogo,erroJsonImportacao,erroTemporarioImportacao,enviarLoteCatalogo,lerPlanilha,chaveArquivoCatalogo};\n"+
     "  window.abrirDadosLocaisPmobile=abrir;");
