@@ -4,7 +4,7 @@ const fs=require("node:fs");
 const path=require("node:path");
 const vm=require("node:vm");
 const raiz=path.resolve(__dirname,"..");
-const source=["pesquisa-local.js","estoque-local.js","reservas-local.js","conferencias-local.js","comparar-verificar.js","divergencias-local.js","locais-local.js","importacao-local.js","dados-locais.js"].map(p=>fs.readFileSync(path.join(raiz,p),"utf8")).join("\n");
+const source=["dados-locais/pesquisa-local.js","dados-locais/estoque-local.js","dados-locais/reservas-local.js","dados-locais/conferencias-local.js","dados-locais/comparar-verificar.js","dados-locais/divergencias-local.js","dados-locais/locais-local.js","dados-locais/importacao-local.js","dados-locais.js"].map(p=>fs.readFileSync(path.join(raiz,p),"utf8")).join("\n");
 function compilar(){
   const code=source.replace("  window.abrirDadosLocaisPmobile=abrir;",
     "  window.__visualTeste={htmlPrincipal,desenharMateriais,desenharComparacao,icone,atualizarResumo};\n"+
