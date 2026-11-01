@@ -3,7 +3,7 @@
  "use strict";
  const registry=window.PMobileDadosLocaisModulos||(window.PMobileDadosLocaisModulos=Object.create(null));
  registry.reservas=function(ctx){
-  const {$,estado,escape,valor,num,norm,rpc,sessao,mensagem,consultar,paginacao,resumo,painel,pesquisarForm,compararForm,atualizarResumo,desenharMateriais,desenharComparacao,quantidade}=ctx;
+  const {$,escape,num,paginacao,painel,pesquisarForm}=ctx;
   function form(){
 return '<div class="painel painel-reservas">'+
         '<div id="dlResultados-reservas" aria-live="polite"></div>'+
