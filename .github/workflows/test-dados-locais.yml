@@ -5,6 +5,9 @@ on:
     paths:
       - 'index.html'
       - 'www/index.html'
+      - 'pmobile-modulos.js'
+      - 'www/pmobile-modulos.js'
+      - 'tests/modulos-legados.test.cjs'
       - 'dados-locais.js'
       - 'dados-locais/**'
       - 'www/dados-locais/**'
@@ -26,6 +29,9 @@ on:
     paths:
       - 'index.html'
       - 'www/index.html'
+      - 'pmobile-modulos.js'
+      - 'www/pmobile-modulos.js'
+      - 'tests/modulos-legados.test.cjs'
       - 'dados-locais.js'
       - 'reorganizacao-pmobile.js'
       - 'dados-locais/**'
@@ -56,6 +62,7 @@ jobs:
           node-version: '22'
       - name: Conferir sintaxe e isolamento das fontes
         run: |
+          node --check pmobile-modulos.js
           node --check dados-locais.js
           for f in dados-locais/*.js; do node --check "$f"; done
           node --check reorganizacao-pmobile.js

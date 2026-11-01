@@ -69,4 +69,5 @@ window.addEventListener("pmobile:rastreio-atualizado",()=>{
 document.addEventListener("click",e=>{const b=e.target.closest("[data-cot-regiao]");if(b)abrirDetalheCotacao(b.dataset.cotRegiao);});
 document.addEventListener("input",e=>{if(e.target?.id==="cotBusca")renderRegioes();});
 window.abrirOpcoesCotacoes=abrirOpcoesCotacoes;window.abrirCotacoesRegiao=abrirCotacoesRegiao;window.voltarOpcoesCotacoes=voltarOpcoesCotacoes;window.voltarListaCotacoes=voltarListaCotacoes;
+window.PMobileModulos?.registrarAcao("cotacoes",abrirOpcoesCotacoes);
 })();

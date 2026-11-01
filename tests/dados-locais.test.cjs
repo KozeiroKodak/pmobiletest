@@ -45,12 +45,16 @@ test("menu Dados locais e hub Transportes integrados somente por novos módulos"
  assert.match(entry,/dados-locais\.js\?v=/);
  assert.match(entry,/reorganizacao-pmobile\.js\?v=/);
  assert.match(entry,/implementacoes\/dados-locais\.css\?v=/);
- assert.match(original,/voltarUmNivelDadosLocais/);
- assert.match(original,/voltarUmNivelTransportesPmobile/);
+ assert.match(original,/PMobileModulos\?\.consumirRetorno/);
+ assert.doesNotMatch(original,/window\.voltarUmNivel(?:DadosLocais|TransportesPmobile)/);
  assert.match(mover,/configuracoesHub/);
- for(const fn of ["abrirValoresTotal","abrirImportacao",
-                  "abrirConferencias","abrirRastreio","abrirOpcoesCotacoes"])
-   assert.ok(mover.includes(fn),fn);
+ assert.match(mover,/PMobileModulos\?\.executarAcao/);
+ for(const action of ["valores-total","importar-estoque",
+                       "conferencias","rastreio","cotacoes"])
+   assert.ok(mover.includes(action),action);
+ for(const [file,action] of [["valorestotal.js","valores-total"],["rastreio.js","rastreio"],
+                            ["cotacoes.js","cotacoes"],["script.js","conferencias"]])
+   assert.ok(ler(file).includes('registrarAcao("'+action+'"'),file);
 });
 test("módulos locais inteiramente separados",()=>{
  for(const fn of ["listar","salvar_estoque","registrar_conferencia",
@@ -96,6 +100,6 @@ test("migração bidirecional preserva API, autorização e não altera as tabel
 test("versão web e Android invalidam cache dos módulos corrigidos",()=>{
  const html=ler("index.html"),mobile=ler("www/index.html");
  assert.equal(html,mobile);
- assert.ok(html.includes('src="dados-locais.js?v=8.0"'));
+ assert.ok(html.includes('src="dados-locais.js?v=9.0"'));
  assert.ok(html.includes('src="dados-locais/divergencias-local.js?v=8.0"'));
 });

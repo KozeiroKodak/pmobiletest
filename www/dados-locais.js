@@ -388,6 +388,7 @@
     };
     window.abrirDadosLocaisPmobile=informarFalha;
     window.voltarUmNivelDadosLocais=()=>false;
+    window.PMobileModulos?.registrarRetorno("dados-locais",window.voltarUmNivelDadosLocais);
     if(document.readyState==="loading")
       document.addEventListener("DOMContentLoaded",adicionarAcessoIndisponivel);
     else adicionarAcessoIndisponivel();
@@ -399,6 +400,7 @@
     if(telaAtual!=="dadosLocais")return false;
     return voltar();
   };
+  window.PMobileModulos?.registrarRetorno("dados-locais",window.voltarUmNivelDadosLocais);
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
   else init();
 })();
