@@ -137,18 +137,18 @@ async function pesquisarLocalmente(
 function exibirResultadosPesquisa(resultados,areaResultado){
  if(!areaResultado)return;
  limparResultado(areaResultado);
- if(!Array.isArray(resultados)||!resultados.length){areaResultado.innerHTML='<div class="pesquisa-v2-vazio"><strong>Nenhum material encontrado</strong><p>Confira os dados e tente novamente.</p></div>';return;}
- const count=document.createElement("p");count.className="pesquisa-v2-contagem";count.textContent=resultados.length+" material(is) encontrado(s)";areaResultado.appendChild(count);
+ if(!Array.isArray(resultados)||!resultados.length){areaResultado.innerHTML='<div class="pesquisa-vazio"><strong>Nenhum material encontrado</strong><p>Confira os dados e tente novamente.</p></div>';return;}
+ const count=document.createElement("p");count.className="pesquisa-contagem";count.textContent=resultados.length+" material(is) encontrado(s)";areaResultado.appendChild(count);
  resultados.forEach(function(m){
   const total=Number(m.quantidade??0),reservada=Number(m.quantidadeReservada??m.quantidade_reservada??0),disponivel=total-reservada;
-  const card=document.createElement("details");card.className="pesquisa-v2-card";
+  const card=document.createElement("details");card.className="pesquisa-card";
   const sum=document.createElement("summary");
-  const cod=document.createElement("span");cod.className="pesquisa-v2-codigo";cod.textContent=m.codigo??"-";
-  const badge=document.createElement("span");badge.className="pesquisa-v2-disponivel"+(disponivel<=0?" zero":"");badge.textContent=disponivel>0?"Disponível":"Sem estoque";
+  const cod=document.createElement("span");cod.className="pesquisa-codigo";cod.textContent=m.codigo??"-";
+  const badge=document.createElement("span");badge.className="pesquisa-disponivel"+(disponivel<=0?" zero":"");badge.textContent=disponivel>0?"Disponível":"Sem estoque";
   const desc=document.createElement("strong");desc.textContent=m.descricao??"-";
   const ref=document.createElement("small");ref.textContent="Ref.: "+(m.referencia??"-")+"  ·  Toque para detalhes";
   sum.append(cod,badge,desc,ref);card.appendChild(sum);
-  const det=document.createElement("div");det.className="pesquisa-v2-detalhes";
+  const det=document.createElement("div");det.className="pesquisa-detalhes";
   [["Código",m.codigo],["Referência",m.referencia],["Marca",m.marca],["Local",m.local],["Quantidade disponível",Number.isFinite(disponivel)?disponivel:"-"],["Quantidade reservada",Number.isFinite(reservada)?reservada:"-"]].forEach(([label,value])=>{const item=document.createElement("div"),small=document.createElement("small"),bold=document.createElement("b");small.textContent=label;bold.textContent=value??"-";item.append(small,bold);det.appendChild(item)});
   card.appendChild(det);areaResultado.appendChild(card);
  });
@@ -183,7 +183,7 @@ function selecionarTipoBuscaPesquisaMaterial(tipo){
  campo.focus();
 }
 function atualizarStatusPesquisaMaterial(fonte){
- const el=document.getElementById("statusPesquisaMaterial"),rodape=document.getElementById("pesquisaV2Fonte");
+ const el=document.getElementById("statusPesquisaMaterial"),rodape=document.getElementById("pesquisaFonte");
  if(el){el.textContent=navigator.onLine?"● Conectado":"● Modo offline";el.classList.toggle("offline",!navigator.onLine)}
  if(rodape&&fonte)rodape.textContent="Fonte: "+fonte;
 }
@@ -211,7 +211,7 @@ async function pesquisarMaterialSelecionado() {
     }
 
     limparResultado(areaResultado);
-    areaResultado.innerHTML = '<div class="pesquisa-v2-vazio"><strong>Pesquisando...</strong></div>';
+    areaResultado.innerHTML = '<div class="pesquisa-vazio"><strong>Pesquisando...</strong></div>';
     atualizarStatusPesquisaMaterial();
 
     if (!estaOnline()) {
