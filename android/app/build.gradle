@@ -1,6 +1,12 @@
 apply plugin: 'com.android.application'
 def bundledWebVersion = new groovy.json.JsonSlurper().parse(rootProject.file('../ota/manifest.json')).webVersion
 def otaPreview = project.hasProperty('otaPreview')
+// Only the isolated test app may simulate an older embedded bundle.
+if (otaPreview && project.hasProperty('otaPreviewWebVersion')) {
+    def previewVersion = project.property('otaPreviewWebVersion').toString()
+    if (!(previewVersion ==~ /\d+\.\d+\.\d+/)) throw new GradleException('Invalid preview web version')
+    bundledWebVersion = previewVersion
+}
 
 android {
 buildToolsVersion = "35.0.0"
@@ -12,8 +18,8 @@ buildToolsVersion = "35.0.0"
         manifestPlaceholders = [pmobileAppLabel: otaPreview ? "PMobile · Teste OTA" : "PMOBILE"]
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 121
-        versionName "1.03"
+        versionCode 122
+        versionName "1.04"
         buildConfigField 'String', 'WEB_BUNDLE_VERSION', '"' + bundledWebVersion + '"'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
