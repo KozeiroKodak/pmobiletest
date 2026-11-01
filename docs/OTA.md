@@ -28,7 +28,7 @@ A publicação executa a regressão JavaScript antes de empacotar e exclui arqui
 node --test tests/*.test.cjs
 npx cap sync android
 cd android
-.\gradlew.bat testDebugUnitTest assembleDebug
+.\gradlew.bat :app:testDebugUnitTest :app:assembleDebug
 ```
 
 Para validar no celular sem substituir o PMobile instalado:
@@ -42,3 +42,7 @@ Esse modo usa `com.pmobile.preview`, com nome **PMobile · Teste OTA**. A compil
 Nunca desinstale o aplicativo em uso para contornar uma divergência de assinatura. Uma atualização por APK deve usar a mesma chave de assinatura da instalação anterior. A cópia de teste não migra dados locais nem copia credenciais da instalação original.
 
 A prévia local de estados é gerada por `node tests/build-ota.cjs`; ela usa dados simulados e não instala atualizações.
+
+Para testar um download real, compile a cópia isolada com `-PotaPreview -PotaPreviewWebVersion=0.0.399` (uma versão anterior à OTA publicada). Instale seu APK e o APK de testes, mantenha o celular desbloqueado e execute `adb shell am instrument -w -e otaNetworkTest true -e class com.pmobile.app.OtaInstrumentedTest#downloadsAndAppliesPublishedUpdate com.pmobile.preview.test/androidx.test.runner.AndroidJUnitRunner`. Esse teste acessa a OTA pública e verifica a confirmação real da abertura. A opção de simular a versão é ignorada na compilação do aplicativo principal.
+
+O APK 1.04 também permite baixar e aplicar novamente uma OTA rejeitada na primeira abertura. Somente o diretório da tentativa inativa pode ser substituído; a versão ativa e a de recuperação são protegidas.
