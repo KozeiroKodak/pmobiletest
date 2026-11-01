@@ -83,7 +83,7 @@ jobs:
 
   publish-ota:
     needs: ota-gate
-    if: needs.ota-gate.outputs.publish == 'true' && (github.event_name == 'workflow_dispatch' || github.actor != 'github-actions[bot]')
+    if: false # Publicacao pausada durante a consolidacao dos arquivos principais
     runs-on: ubuntu-latest
 
     steps:
