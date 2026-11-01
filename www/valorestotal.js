@@ -277,3 +277,6 @@ async function salvarValoresTotalPlanilha() {
  if(r.error)throw r.error;
  if(document.getElementById("valoresTotal")?.style.display!=="none")await carregarValoresTotal();
 }
+
+// Ponte de navegação: a área financeira publica seu ponto de entrada.
+window.PMobileModulos?.registrarAcao("valores-total",abrirValoresTotal);
