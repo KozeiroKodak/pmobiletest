@@ -11,6 +11,9 @@ public final class OtaManifest {
     private final String packageLocation;
     private final String sha256;
     private final boolean mandatory;
+    private String releaseNotes = "";
+    private String publishedAt = "";
+    private long sizeBytes;
 
     private OtaManifest(
         String webVersion,
@@ -48,13 +51,23 @@ public final class OtaManifest {
             throw new JSONException("Field 'sha256' must contain 64 hexadecimal characters");
         }
 
-        return new OtaManifest(
+        try {
+            java.net.URL url = new java.net.URL(packageLocation);
+            if (!"https".equalsIgnoreCase(url.getProtocol())) throw new Exception();
+        } catch (Exception invalidUrl) {
+            throw new JSONException("OTA package URL must use HTTPS");
+        }
+        OtaManifest manifest = new OtaManifest(
             webVersion,
             nativeMinVersion,
             packageLocation,
             sha256,
             object.getBoolean("mandatory")
         );
+        manifest.releaseNotes = object.optString("releaseNotes", "");
+        manifest.publishedAt = object.optString("publishedAt", "");
+        manifest.sizeBytes = Math.max(0, object.optLong("sizeBytes", 0));
+        return manifest;
     }
 
     private static String requiredString(JSONObject object, String key) throws JSONException {
@@ -70,6 +83,9 @@ public final class OtaManifest {
     public String getPackageLocation() { return packageLocation; }
     public String getSha256() { return sha256; }
     public boolean isMandatory() { return mandatory; }
+    public String getReleaseNotes() { return releaseNotes; }
+    public String getPublishedAt() { return publishedAt; }
+    public long getSizeBytes() { return sizeBytes; }
 
     public boolean isNewerThan(String currentWebVersion) {
         return OtaVersion.parse(webVersion).compareTo(OtaVersion.parse(currentWebVersion)) > 0;
