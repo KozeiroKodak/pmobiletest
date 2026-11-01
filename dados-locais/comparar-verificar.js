@@ -9,15 +9,15 @@
       "Pesquisar divergências":"Pesquisar material";
     return '<div class="painel painel-locais"><div class="dl-nativo-comparador">'+
       resumo(aba)+
-      '<form class="locais-v3-ferramentas" data-dl-comparar="'+aba+'">'+
+      '<form class="locais-ferramentas" data-dl-comparar="'+aba+'">'+
       '<label> '+titulo+'<input type="search" name="termo" placeholder="Código, produto ou local..." autocomplete="off"></label>'+
-      '<span class="locais-v3-ajuda">Comparação automática ao abrir a tela e ao pesquisar. Indicadores da página atual.</span>'+
+      '<span class="locais-ajuda">Comparação automática ao abrir a tela e ao pesquisar. Indicadores da página atual.</span>'+
       '</form><div id="dlResultados-'+aba+'" aria-live="polite"></div>'+
       paginacao(aba)+'</div></div>';
   }
 
   function indicador(rotulo,numero,tipo) {
-    return '<div class="locais-v3-indicador '+(tipo==="alerta"?"alerta":tipo==="ok"?"sucesso":"")+
+    return '<div class="locais-indicador '+(tipo==="alerta"?"alerta":tipo==="ok"?"sucesso":"")+
       '"><span>'+rotulo+'</span><strong>'+Number(numero).toLocaleString("pt-BR")+'</strong></div>';
   }
 
