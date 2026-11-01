@@ -9,6 +9,12 @@ on:
       - 'www/dados-locais.js'
       - 'tests/dados-locais-importacao.test.cjs'
       - 'tests/dados-locais-visual.test.cjs'
+      - 'tests/unificacao.test.cjs'
+      - 'tests/build-unificacao.cjs'
+      - 'locais.js'
+      - 'script.js'
+      - 'valorestotal.js'
+      - 'implementacoes/**'
       - 'tests/build-bughunter-conferencias.cjs'
       - 'tests/fixtures/dados-locais-paridade.html'
       - '.github/workflows/test-dados-locais.yml'
@@ -24,6 +30,8 @@ on:
       - 'sql/pmobile_dados_locais_isolados.sql'
       - 'tests/dados-locais.test.cjs'
       - 'tests/dados-locais-visual.test.cjs'
+      - 'tests/unificacao.test.cjs'
+      - 'tests/build-unificacao.cjs'
       - 'tests/build-bughunter-conferencias.cjs'
       - 'tests/fixtures/dados-locais-paridade.html'
       - '.github/workflows/test-dados-locais.yml'
@@ -44,7 +52,15 @@ jobs:
           for f in dados-locais/*.js; do node --check "$f"; done
           node --check reorganizacao-pmobile.js
           node --check script.js
-          node --test tests/dados-locais.test.cjs tests/dados-locais-importacao.test.cjs tests/dados-locais-visual.test.cjs
+          node --test tests/*.test.cjs
+      - name: Verificar navegação e análise financeira unificadas
+        run: |
+          node tests/build-unificacao.cjs
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME"
+          mkdir -p artefatos-ui
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=390,1300 --virtual-time-budget=1500 --dump-dom "file://$PWD/tests/fixtures/unificacao.html" > artefatos-ui/unificacao.html
+          grep -q 'data-qa-fail="0"' artefatos-ui/unificacao.html
       - name: Conferir paridade de estilos em navegador real
         run: |
           CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
