@@ -19,10 +19,12 @@ const validos=itens.filter(m=>m.dogo_quantidade!==null&&
         '<p>🟢 <strong>Sobras:</strong> '+sobras.length+' produtos / '+
         num(sum(sobras))+' unidades</p></div>'+
         itens.map(m=>{
+          // Uma divergência confirmada de reservas não pode ser ocultada
+          // apenas porque o campo de quantidade física ainda está vazio.
           const tipo=m.sem_dogo?"NÃO CADASTRADO NA DOGO":
-            m.local_quantidade===null?"PENDENTE":
             m.diferenca_quantidade?(Number(m.local_quantidade)<Number(m.dogo_quantidade)?"🔴 FALTANTE":"🟢 SOBRA"):
-            m.diferenca_reserva?"RESERVA DIVERGENTE":"VERIFICAR";
+            m.diferenca_reserva?"RESERVA DIVERGENTE":
+            m.local_quantidade===null?"PENDENTE":"VERIFICAR";
           return '<div class="registro-divergencia"><h3>'+escape(m.descricao)+'</h3>'+
             '<p><strong>Código:</strong> '+escape(m.codigo)+'</p>'+
             '<p><strong>Dogo:</strong> '+num(m.dogo_quantidade)+

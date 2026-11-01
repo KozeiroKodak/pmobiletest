@@ -22,7 +22,7 @@
   };
   const icone=(id)=>'<svg viewBox="0 0 24 24" aria-hidden="true">'+(ICONES[id]||ICONES.estoque)+'</svg>';
   const estado = { tela:"inicio",material:null,resultados:{},offsets:{},busy:false,
-    ultimaComparacao:0,importando:false };
+    consultas:Object.create(null),ultimaComparacao:0,importando:false };
   const $ = (id) => document.getElementById(id);
   const escape = (v) => String(v == null ? "" : v)
     .replace(/&/g,"&amp;").replace(/</g,"&lt;")
@@ -262,26 +262,65 @@
     const form=document.querySelector('#dadosLocais [data-dl-busca="'+aba+'"], #dadosLocais [data-dl-comparar="'+aba+'"]');
     return {termo:form?.elements?.termo?.value?.trim()||"",tipo:form?.elements?.tipo?.value||"todos"};
   }
+  // Uma única requisição ativa por tela. Enquanto ela responde, preservamos
+  // somente a consulta mais recente (filtro/página), evitando sobreposição no
+  // Supabase e o erro de uma resposta antiga substituir a pesquisa nova.
   async function consultar(aba) {
     const lista=$("dlResultados-"+aba);if(!lista)return;
-    lista.textContent="Carregando dados locais...";
-    const {termo,tipo}=obterFiltros(aba);
-    const offset=estado.offsets[aba]||0;
+    const {termo,tipo}=obterFiltros(aba),offset=estado.offsets[aba]||0;
+    const comparativa=["comparar","divergencias","locais"].includes(aba);
+    const fila=estado.consultas[aba]||(estado.consultas[aba]={
+      ativa:false,proxima:null,versao:0
+    });
+    const versao=++fila.versao;
+    fila.proxima={termo,tipo,offset,versao};
+    if(fila.ativa)return; // A requisição mais nova será executada após a atual.
+    fila.ativa=true;
+    if(comparativa)estado.busy=true;
     try{
-      if(["pesquisa","estoque","reservas","conferencias"].includes(aba)){
-        const data=await rpc("listar",{p_termo:termo,p_tipo:tipo,p_limite:aba==="reservas"?20:50,p_offset:offset,p_somente_reservas:aba==="reservas"});
-        estado.resultados[aba]=Array.isArray(data)?data:[];
-        desenharMateriais(aba,estado.resultados[aba]);
-      }else{
-        const modo=aba==="divergencias"?"divergencias":aba==="locais"?"locais":"todos";
-        const data=await rpc("comparar",{p_termo:termo,p_limite:100,p_offset:offset,p_modo:modo});
-        estado.resultados[aba]=Array.isArray(data)?data:[];
-        estado.ultimaComparacao=Date.now();
-        desenharComparacao(aba,estado.resultados[aba]);
+      while(fila.proxima){
+        const atual=fila.proxima;fila.proxima=null;
+        lista.textContent="Carregando dados locais...";
+        try{
+          let data;
+          if(["pesquisa","estoque","reservas","conferencias"].includes(aba)){
+            data=await rpc("listar",{
+              p_termo:atual.termo,p_tipo:atual.tipo,
+              p_limite:aba==="reservas"?20:50,p_offset:atual.offset,
+              p_somente_reservas:aba==="reservas"
+            });
+          }else{
+            data=await rpc("comparar",{
+              p_termo:atual.termo,p_limite:100,p_offset:atual.offset,
+              p_modo:aba==="divergencias"?"divergencias":aba==="locais"?"locais":"todos"
+            });
+          }
+          // Não desenhar conteúdo desatualizado ou de uma tela já fechada.
+          if(fila.proxima||atual.versao!==fila.versao||estado.tela!==aba)continue;
+          estado.resultados[aba]=Array.isArray(data)?data:[];
+          if(comparativa){
+            estado.ultimaComparacao=Date.now();
+            desenharComparacao(aba,estado.resultados[aba]);
+          }else desenharMateriais(aba,estado.resultados[aba]);
+          const pag=$("dlPagina-"+aba);
+          if(pag){
+            const tamanho=comparativa?100:aba==="reservas"?20:50;
+            pag.textContent="Página "+(Math.floor(atual.offset/tamanho)+1);
+          }
+        }catch(e){
+          // A falha de uma solicitação antiga não apaga o resultado novo.
+          if(!fila.proxima&&atual.versao===fila.versao&&estado.tela===aba){
+            lista.textContent=e.message;
+            mensagem(e.message,true);
+          }
+        }
       }
-      const pag=$("dlPagina-"+aba);
-      if(pag)pag.textContent="Página "+(Math.floor(offset/(["comparar","divergencias","locais"].includes(aba)?100:aba==="reservas"?20:50))+1);
-    }catch(e){lista.textContent=e.message;mensagem(e.message,true);}
+    }finally{
+      fila.ativa=false;
+      estado.busy=["comparar","divergencias","locais"].some(
+        nome=>estado.consultas[nome]?.ativa
+      );
+    }
   }
   function indicador(...a){return modulos.comparar.indicador(...a);}
   function detalhe(...a){return modulos.comparar.detalhe(...a);}
