@@ -522,7 +522,12 @@ public class OtaManager {
 
         File activeBundle = new File(versionsDir, version);
         if (activeBundle.exists()) {
-            throw new IOException("OTA version already exists");
+            // A failed first boot leaves its bundle behind for diagnosis. A fresh,
+            // validated download may replace it, but never the active or fallback.
+            if (version.equals(getActiveVersion()) || version.equals(getPreviousVersion())) {
+                throw new IOException("OTA version is currently in use");
+            }
+            deleteRecursively(activeBundle, versionsDir);
         }
         if (!candidate.renameTo(activeBundle)) {
             throw new IOException("Unable to move OTA candidate into versions");
