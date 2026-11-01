@@ -50,14 +50,14 @@
   }
 
   function template(){return painel("estoque",pesquisarForm("estoque")+
-        '<form id="dlFormEstoque" class="painel contagem-v2 contagem-v2-registro" hidden>'+
-        '<h3 class="contagem-v2-etapa" id="dlEditorTitulo">02 · Registrar estoque local</h3>'+
+        '<form id="dlFormEstoque" class="painel contagem contagem-registro" hidden>'+
+        '<h3 class="contagem-etapa" id="dlEditorTitulo">02 · Registrar estoque local</h3>'+
         '<div class="linha-formulario">'+
-        '<label class="contagem-v2-label">Quantidade do item<input id="dlQtdItem" type="number" min="0" step="any" placeholder="Não preenchido"></label>'+
-        '<label class="contagem-v2-label">Quantidade total<input id="dlQtdTotal" type="number" min="0" step="any" placeholder="Não preenchido"></label>'+
-        '<label class="contagem-v2-label">Itens reservados<input id="dlQtdReservada" type="number" min="0" step="any" placeholder="Não preenchido"></label>'+
-        '<label class="contagem-v2-label">Local<input id="dlLocal" type="text" placeholder="Não preenchido"></label>'+
-        '<button class="botao-aba contagem-v2-salvar" type="submit">✓ &nbsp; Salvar estoque local</button></div></form>',
+        '<label class="contagem-label">Quantidade do item<input id="dlQtdItem" type="number" min="0" step="any" placeholder="Não preenchido"></label>'+
+        '<label class="contagem-label">Quantidade total<input id="dlQtdTotal" type="number" min="0" step="any" placeholder="Não preenchido"></label>'+
+        '<label class="contagem-label">Itens reservados<input id="dlQtdReservada" type="number" min="0" step="any" placeholder="Não preenchido"></label>'+
+        '<label class="contagem-label">Local<input id="dlLocal" type="text" placeholder="Não preenchido"></label>'+
+        '<button class="botao-aba contagem-salvar" type="submit">✓ &nbsp; Salvar estoque local</button></div></form>',
         "Altere somente o estoque manual; a Dogo permanece intacta.");}
   return {selecionar,quantidade,salvarEstoque,template};
  };
