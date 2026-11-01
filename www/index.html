@@ -18,11 +18,6 @@
     >
 <link
         rel="stylesheet"
-        href="implementacoes/locais.css?v=mono-2.2"
-    >
-
-    <link
-        rel="stylesheet"
         href="implementacoes/reservas.css?v=0.0.248"
     >
 
@@ -49,7 +44,6 @@
 <link rel="stylesheet" href="implementacoes/popupescolha.css?v=mono-2.2">
     <link rel="stylesheet" href="implementacoes/login.css?v=0.0.248">
     <link rel="stylesheet" href="implementacoes/contagemmanual.css?v=mono-2.2">
-    <link rel="stylesheet" href="implementacoes/configuracoes.css?v=0.0.253">
     <link rel="stylesheet" href="implementacoes/solicitacoes.css?v=0.0.248">
     <link rel="stylesheet" href="implementacoes/importacao.css?v=mono-3.0">
 
@@ -60,10 +54,9 @@
 <link rel="stylesheet" href="sync-center.css?v=mono-3.0">
 <link rel="stylesheet" href="cotacoes.css?v=mono-2.2"><link rel="stylesheet" href="monochrome.css?v=3.0">
 <link rel="stylesheet" href="cyan-theme.css?v=1.1">
-<link rel="stylesheet" href="implementacoes/configuracoes-v3.css?v=1.0">
-<link rel="stylesheet" href="implementacoes/locais-v3.css?v=1.0">
+<link rel="stylesheet" href="implementacoes/configuracoes.css?v=1.0">
+<link rel="stylesheet" href="implementacoes/locais.css?v=1.0">
 <link rel="stylesheet" href="implementacoes/dados-locais.css?v=5.0">
-<link rel="stylesheet" href="implementacoes/valorestotal2.css?v=1.0">
 </head>
 
 <body>
@@ -278,7 +271,6 @@
 
 
                     <button id="menuValoresTotal" class="home-app-card" onclick="abrirValoresTotal()" title="Valores total"><span class="home-app-icone" aria-hidden="true">💰</span><span class="home-app-conteudo"><strong>Valores total</strong><small>Resumo financeiro da planilha online</small></span><span class="home-app-seta" aria-hidden="true">›</span></button>
-                    <button id="menuValoresTotal2" class="home-app-card" onclick="abrirValoresTotal2()" title="Frete geral 2"><span class="home-app-icone" aria-hidden="true">📊</span><span class="home-app-conteudo"><strong>Frete geral 2</strong><small>Versão analítica para comparação</small></span><span class="home-app-seta" aria-hidden="true">›</span></button>
                     <button id="menuImportacao" class="home-app-card" onclick="abrirImportacao()" title="Importar inventário">
                         <span class="home-app-icone" aria-hidden="true">📦</span>
                         <span class="home-app-conteudo">
@@ -347,72 +339,10 @@
              ================================================= -->
 
 
-        <style>
-#valoresTotal .valores-hero{position:relative;overflow:hidden;border:1px solid #315e50;border-radius:20px;padding:25px 22px;background:radial-gradient(circle at 90% 0%,rgba(49,201,144,.22),transparent 48%),linear-gradient(135deg,#152b26,#121716 70%);margin-bottom:20px}
-#valoresTotal .valores-hero:after{content:"";position:absolute;width:190px;height:190px;border:1px solid rgba(68,219,159,.17);border-radius:50%;right:-65px;top:-85px;pointer-events:none}
-#valoresTotal .valores-eyebrow{color:#8be3bb;font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase}
-#valoresTotal .valores-hero h1{font-size:clamp(27px,5vw,38px);margin:9px 0 8px;letter-spacing:-1px}
-#valoresTotal .valores-hero p{color:#aec3b8;margin:0;font-size:14px;max-width:460px;line-height:1.6}
-#valoresTotal .valores-painel{background:linear-gradient(180deg,#191d1b,#151515);border:1px solid #2c3731;border-radius:20px;padding:clamp(15px,3vw,26px)}
-#valoresTotal #valoresTotalStatus{display:flex;align-items:center;gap:9px;flex-wrap:wrap;color:#a5b8ad!important;font-size:12px;padding:0 0 16px;border-bottom:1px solid #2a342e;margin-bottom:20px!important}
-#valoresTotal #valoresTotalStatus:before{content:"";width:8px;height:8px;background:#37d79a;border-radius:50%;box-shadow:0 0 0 4px rgba(55,215,154,.1)}
-#valoresTotal #valoresTotalCards{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important}
-#valoresTotal .valores-kpi{position:relative;overflow:hidden;min-width:0;min-height:105px;background:#1b211e;border:1px solid #35413a;border-radius:16px;padding:17px}
-#valoresTotal .valores-kpi:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--kpi-accent,#64796e)}
-#valoresTotal .valores-kpi-label{font-size:12px;color:#a7b8ae;line-height:1.45;margin-bottom:12px}
-#valoresTotal .valores-kpi strong{font-size:clamp(17px,3vw,25px);letter-spacing:-.5px;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
-#valoresTotal .valores-kpi.destaque{background:linear-gradient(140deg,#193d31,#1b2722);border-color:#368965}
-#valoresTotal .valores-kpi.destaque strong{color:#81f1b8}
-#valoresTotal .valores-kpi.percentual strong{color:#91d5ff}
-#valoresTotal #valoresTotalMensais{border-top:1px solid #303b34;padding-top:24px}
-#valoresTotal #valoresTotalMensais>h3{font-size:12px!important;letter-spacing:1.8px;text-transform:uppercase;color:#91b9a4;margin-bottom:14px!important}
-#valoresTotal #valoresTotalMensais button{flex:1;min-width:90px;font-weight:700;transition:background .15s,border-color .15s}
-#valoresTotal #valoresTotalMensais details{transition:border-color .15s}
-#valoresTotal #valoresTotalMensais details[open]{border-color:#4a8067!important}
-#valoresTotal #valoresTotalMensais summary{line-height:1.5}
-#valoresTotal .valores-atualizar{margin-top:20px!important;border:1px solid #376b52!important;border-radius:12px!important;color:#b8f6d2!important;background:#20392d!important;padding:11px 16px!important}
-@media(min-width:700px){#valoresTotal #valoresTotalCards{grid-template-columns:repeat(3,minmax(0,1fr))!important}#valoresTotal .valores-kpi{min-height:130px}}
-@media(max-width:380px){#valoresTotal .valores-kpi{padding:12px}#valoresTotal .valores-kpi strong{font-size:16px}}
 
-/* Reaproveita a escala responsiva global do PMobile para o painel financeiro. */
-@media(max-width:700px){
- #valoresTotal{padding:12px 10px}
- #valoresTotal .valores-hero{padding:16px 15px;border-radius:14px;margin-bottom:12px}
- #valoresTotal .valores-hero:after{width:120px;height:120px;right:-50px;top:-55px}
- #valoresTotal .valores-hero h1{font-size:24px;margin:6px 0}
- #valoresTotal .valores-hero p{font-size:12px;line-height:1.4}
- #valoresTotal .valores-painel{padding:12px;border-radius:14px}
- #valoresTotal #valoresTotalStatus{font-size:11px;padding-bottom:12px;margin-bottom:12px!important}
- #valoresTotal #valoresTotalCards{gap:8px!important}
- #valoresTotal .valores-kpi{min-height:82px;padding:11px;border-radius:11px}
- #valoresTotal .valores-kpi-label{font-size:11px;line-height:1.3;margin-bottom:8px}
- #valoresTotal .valores-kpi strong{font-size:clamp(14px,3.8vw,18px);letter-spacing:-.3px}
- #valoresTotal #valoresTotalMensais{padding-top:14px;margin-top:16px!important}
- #valoresTotal #valoresTotalMensais>h3{font-size:11px!important;margin-bottom:10px!important}
- #valoresTotal #valoresTotalMensais button{min-width:0!important;padding:9px 7px!important;font-size:12px}
- #valoresTotal #valoresTotalMensais details{padding:11px!important;border-radius:11px!important;margin-bottom:9px!important}
- #valoresTotal #valoresTotalMensais summary{font-size:13px}
- #valoresTotal #valoresTotalMensais details div[style*="grid-template-columns"]{gap:8px!important;margin:9px 0 12px!important;grid-template-columns:repeat(2,minmax(0,1fr))!important}
- #valoresTotal #valoresTotalMensais details div[style*="grid-template-columns"]>div{padding:10px!important;min-width:0;border-radius:10px!important}
- #valoresTotal #valoresTotalMensais details div[style*="grid-template-columns"] strong{font-size:clamp(13px,3.6vw,17px)!important;overflow-wrap:anywhere}
- #valoresTotal #valoresTotalMensais details div[style*="grid-template-columns"]>div>div{font-size:11px!important;line-height:1.3}
-
- #valoresTotal #valoresTotalMensais select{min-width:0;max-width:100%;font-size:14px}
- #valoresTotal .valores-atualizar{margin-top:12px!important}
-}
-@media(max-width:360px){
- #valoresTotal #valoresTotalCards{grid-template-columns:1fr!important}
- #valoresTotal .valores-kpi{min-height:68px}
-}
-
-</style>
 <section id="valoresTotal" class="tela-sistema" style="display:none">
           <div class="valores-hero"><div class="valores-eyebrow">PMOBILE</div><h1>Frete geral</h1><p>Totais consolidados e análises por período e transportadora.</p></div>
-          <div class="painel valores-painel"><div id="valoresTotalStatus" style="color:#aaa;margin-bottom:18px">Consultando valores...</div><div id="valoresTotalCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px"></div><button type="button" class="botao-aba" style="margin-top:18px" onclick="carregarValoresTotal()" class="valores-atualizar">↻ Atualizar valores</button></div>
-        </section>
-        <section id="valoresTotal2" class="tela-sistema" style="display:none">
-          <div class="valores-hero"><div class="valores-eyebrow">PMOBILE</div><h1>Frete geral 2</h1><p>Totais consolidados e análises por período e transportadora.</p></div>
-          <div class="painel valores-painel"><div id="valoresTotal2Status" style="color:#aaa;margin-bottom:18px">Consultando valores...</div><div id="valoresTotal2Cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px"></div><button type="button" class="botao-aba valores-atualizar" style="margin-top:18px" onclick="carregarValoresTotal2()">↻ Atualizar valores</button></div>
+          <div class="painel valores-painel"><div id="valoresTotalStatus" style="color:#aaa;margin-bottom:18px">Consultando valores...</div><div id="valoresTotalCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px"></div><button type="button" class="botao-aba valores-atualizar" style="margin-top:18px" onclick="carregarValoresTotal()">↻ Atualizar valores</button></div>
         </section>
         <section id="rastreio" class="tela-sistema" style="display: none;">
             <div class="cabecalho-pagina">
@@ -465,15 +395,15 @@
 
             </div>
 
-            <div class="painel pesquisa-v2">
-  <div class="pesquisa-v2-topo"><div class="pesquisa-v2-marca"><span class="pesquisa-v2-icone">⌕</span><div><strong>PMobile</strong><small>Catálogo de materiais</small></div></div><span id="statusPesquisaMaterial" class="pesquisa-v2-status">● Verificando conexão</span></div>
-  <div class="pesquisa-v2-intro"><h2>Encontrar material</h2><p>Pesquise por código, referência ou descrição.</p></div>
-  <div class="pesquisa-v2-campo"><span aria-hidden="true" class="pesquisa-v2-lupa">⌕</span><input type="text" id="campoPesquisaMaterial" placeholder="Digite o código" autocomplete="off" aria-label="Termo de pesquisa" onkeydown="if(event.key==='Enter'){event.preventDefault();pesquisarMaterialSelecionado();}"></div>
-  <select id="tipoBuscaPesquisaMaterial" class="pesquisa-v2-select" aria-label="Tipo de pesquisa"><option value="codigo">Código</option><option value="referencia">Referência</option><option value="descricao">Descrição</option></select>
-  <div class="pesquisa-v2-tipos" role="group" aria-label="Pesquisar por"><button type="button" class="ativo" data-pesquisa-tipo="codigo" onclick="selecionarTipoBuscaPesquisaMaterial('codigo')">Código</button><button type="button" data-pesquisa-tipo="referencia" onclick="selecionarTipoBuscaPesquisaMaterial('referencia')">Referência</button><button type="button" data-pesquisa-tipo="descricao" onclick="selecionarTipoBuscaPesquisaMaterial('descricao')">Descrição</button></div>
-  <button type="button" class="pesquisa-v2-buscar" onclick="pesquisarMaterialSelecionado()">⌕ &nbsp; Pesquisar material</button>
-  <div id="resultadoPesquisaMaterial" class="pesquisa-v2-resultados" aria-live="polite"><div class="pesquisa-v2-vazio"><span>⌕</span><strong>Encontre o que precisa</strong><p>Selecione o tipo de pesquisa e informe o material.</p></div></div>
-  <div class="pesquisa-v2-rodape"><span>◉</span><span id="pesquisaV2Fonte">Fonte: aguardando consulta</span></div>
+            <div class="painel pesquisa">
+  <div class="pesquisa-topo"><div class="pesquisa-marca"><span class="pesquisa-icone">⌕</span><div><strong>PMobile</strong><small>Catálogo de materiais</small></div></div><span id="statusPesquisaMaterial" class="pesquisa-status">● Verificando conexão</span></div>
+  <div class="pesquisa-intro"><h2>Encontrar material</h2><p>Pesquise por código, referência ou descrição.</p></div>
+  <div class="pesquisa-campo"><span aria-hidden="true" class="pesquisa-lupa">⌕</span><input type="text" id="campoPesquisaMaterial" placeholder="Digite o código" autocomplete="off" aria-label="Termo de pesquisa" onkeydown="if(event.key==='Enter'){event.preventDefault();pesquisarMaterialSelecionado();}"></div>
+  <select id="tipoBuscaPesquisaMaterial" class="pesquisa-select" aria-label="Tipo de pesquisa"><option value="codigo">Código</option><option value="referencia">Referência</option><option value="descricao">Descrição</option></select>
+  <div class="pesquisa-tipos" role="group" aria-label="Pesquisar por"><button type="button" class="ativo" data-pesquisa-tipo="codigo" onclick="selecionarTipoBuscaPesquisaMaterial('codigo')">Código</button><button type="button" data-pesquisa-tipo="referencia" onclick="selecionarTipoBuscaPesquisaMaterial('referencia')">Referência</button><button type="button" data-pesquisa-tipo="descricao" onclick="selecionarTipoBuscaPesquisaMaterial('descricao')">Descrição</button></div>
+  <button type="button" class="pesquisa-buscar" onclick="pesquisarMaterialSelecionado()">⌕ &nbsp; Pesquisar material</button>
+  <div id="resultadoPesquisaMaterial" class="pesquisa-resultados" aria-live="polite"><div class="pesquisa-vazio"><span>⌕</span><strong>Encontre o que precisa</strong><p>Selecione o tipo de pesquisa e informe o material.</p></div></div>
+  <div class="pesquisa-rodape"><span>◉</span><span id="pesquisaFonte">Fonte: aguardando consulta</span></div>
 </div>
 
         </section>
@@ -485,25 +415,25 @@
 
         <section id="contagemManual" class="tela-sistema" style="display: none;">
  <div class="cabecalho-pagina"><p class="cabecalho-caminho">PMOBILE / Contagem manual</p><h1>Contagem manual</h1><p>Localize o material e registre o local encontrado e a quantidade física.</p></div>
- <div class="painel contagem-v2">
-  <div class="contagem-v2-topo"><div class="contagem-v2-marca"><span class="contagem-v2-icone">▤</span><div><strong>PMobile</strong><small>Inventário / Contagem manual</small></div></div><span class="contagem-v2-selo">● Registro local</span></div>
-  <div class="contagem-v2-intro"><h2>Contagem manual</h2><p>Encontre um material para iniciar a contagem.</p></div>
-  <h3 class="contagem-v2-etapa">01 · Localizar material</h3>
+ <div class="painel contagem">
+  <div class="contagem-topo"><div class="contagem-marca"><span class="contagem-icone">▤</span><div><strong>PMobile</strong><small>Inventário / Contagem manual</small></div></div><span class="contagem-selo">● Registro local</span></div>
+  <div class="contagem-intro"><h2>Contagem manual</h2><p>Encontre um material para iniciar a contagem.</p></div>
+  <h3 class="contagem-etapa">01 · Localizar material</h3>
   <div class="linha-formulario linha-contagem-manual-busca">
-   <div class="contagem-v2-campo"><span aria-hidden="true">⌕</span><input type="text" id="campoContagemManual" placeholder="Digite o código" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();buscarMaterialContagemManual();}"></div>
+   <div class="contagem-campo"><span aria-hidden="true">⌕</span><input type="text" id="campoContagemManual" placeholder="Digite o código" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();buscarMaterialContagemManual();}"></div>
    <div class="seletor-contagem-manual-wrapper">
     <select id="tipoBuscaContagemManual" class="seletor-contagem-manual-nativo" aria-hidden="true" tabindex="-1"><option value="codigo">CÓD</option><option value="descricao">DESC</option><option value="referencia">REF</option></select>
     <button type="button" class="seletor-contagem-manual" id="botaoTipoBuscaContagemManual" onclick="alternarSeletorContagemManual()" aria-haspopup="listbox" aria-expanded="false">CÓD</button>
     <div id="menuTipoBuscaContagemManual" class="menu-tipo-busca-contagem-manual" role="listbox"><button type="button" onclick="selecionarTipoBuscaContagemManual('codigo')">Código</button><button type="button" onclick="selecionarTipoBuscaContagemManual('referencia')">Referência</button><button type="button" onclick="selecionarTipoBuscaContagemManual('descricao')">Descrição</button></div>
    </div>
-   <div class="contagem-v2-tipos" role="group" aria-label="Tipo de pesquisa"><button type="button" class="ativo" data-contagem-tipo="codigo" onclick="selecionarTipoBuscaContagemManual('codigo')">Código</button><button type="button" data-contagem-tipo="referencia" onclick="selecionarTipoBuscaContagemManual('referencia')">Referência</button><button type="button" data-contagem-tipo="descricao" onclick="selecionarTipoBuscaContagemManual('descricao')">Descrição</button></div>
+   <div class="contagem-tipos" role="group" aria-label="Tipo de pesquisa"><button type="button" class="ativo" data-contagem-tipo="codigo" onclick="selecionarTipoBuscaContagemManual('codigo')">Código</button><button type="button" data-contagem-tipo="referencia" onclick="selecionarTipoBuscaContagemManual('referencia')">Referência</button><button type="button" data-contagem-tipo="descricao" onclick="selecionarTipoBuscaContagemManual('descricao')">Descrição</button></div>
    <button type="button" class="botao-aba botao-buscar-contagem-manual" onclick="buscarMaterialContagemManual()">⌕ &nbsp; Buscar material</button>
    <div class="acoes-contagem-manual-config"><button type="button" class="botao-aba botao-config-contagem-manual" onclick="alternarMenuConfiguracoesContagemManual()" aria-label="Configurações da contagem manual" title="Configurações">⚙</button><div id="menuConfiguracoesContagemManual" class="menu-config-contagem-manual"><button type="button" onclick="limparContagensManuais()">🗑️ Limpar contagem manual</button></div></div>
   </div>
-  <div id="resultadoBuscaContagemManual" class="contagem-v2-resultados"></div>
+  <div id="resultadoBuscaContagemManual" class="contagem-resultados"></div>
  </div>
- <div class="painel contagem-v2 contagem-v2-registro" id="painelRegistroContagemManual" style="display: none;"><h3 class="contagem-v2-etapa">02 · Registrar contagem</h3><div id="materialSelecionadoContagemManual"></div><div class="linha-formulario"><label class="contagem-v2-label">Local encontrado<input type="text" id="localContagemManual" placeholder="Ex.: A-03-12" autocomplete="off"></label><label class="contagem-v2-label">Quantidade física<input type="number" id="quantidadeContagemManual" placeholder="Informe a quantidade" min="0" step="1" inputmode="numeric"></label><button class="botao-aba contagem-v2-salvar" onclick="salvarContagemManual()">✓ &nbsp; Salvar contagem</button></div><div id="statusContagemManual"></div></div>
- <div class="painel contagem-v2 contagem-v2-lista"><div class="contagem-v2-lista-titulo"><div><h3>Contagens registradas</h3><p>Neste dispositivo</p></div><span aria-hidden="true">▤</span></div><div id="listaContagensManuais"></div></div>
+ <div class="painel contagem contagem-registro" id="painelRegistroContagemManual" style="display: none;"><h3 class="contagem-etapa">02 · Registrar contagem</h3><div id="materialSelecionadoContagemManual"></div><div class="linha-formulario"><label class="contagem-label">Local encontrado<input type="text" id="localContagemManual" placeholder="Ex.: A-03-12" autocomplete="off"></label><label class="contagem-label">Quantidade física<input type="number" id="quantidadeContagemManual" placeholder="Informe a quantidade" min="0" step="1" inputmode="numeric"></label><button class="botao-aba contagem-salvar" onclick="salvarContagemManual()">✓ &nbsp; Salvar contagem</button></div><div id="statusContagemManual"></div></div>
+ <div class="painel contagem contagem-lista"><div class="contagem-lista-titulo"><div><h3>Contagens registradas</h3><p>Neste dispositivo</p></div><span aria-hidden="true">▤</span></div><div id="listaContagensManuais"></div></div>
 </section>
 
 
@@ -525,47 +455,47 @@
                     <button type="button" id="abaLocaisDerivados" class="aba-locais" onclick="alternarAbaLocais('derivados')" role="tab">⚠️ Derivados</button>
                 </div>
                 <div id="painelLocaisAlterados">
-                    <div class="locais-v3-resumo" aria-label="Resumo das alterações">
-                        <div class="locais-v3-indicador"><span>Total</span><strong data-contador-local="total">—</strong></div>
-                        <div class="locais-v3-indicador alerta"><span>Pendentes</span><strong data-contador-local="pendentes">—</strong></div>
-                        <div class="locais-v3-indicador sucesso"><span>Confirmados</span><strong data-contador-local="confirmados">—</strong></div>
+                    <div class="locais-resumo" aria-label="Resumo das alterações">
+                        <div class="locais-indicador"><span>Total</span><strong data-contador-local="total">—</strong></div>
+                        <div class="locais-indicador alerta"><span>Pendentes</span><strong data-contador-local="pendentes">—</strong></div>
+                        <div class="locais-indicador sucesso"><span>Confirmados</span><strong data-contador-local="confirmados">—</strong></div>
                     </div>
-                    <div class="locais-v3-ferramentas">
-                        <label for="locaisV3BuscarAlterados">Buscar alteração de local</label>
-                        <input type="search" id="locaisV3BuscarAlterados" placeholder="Produto, código, local ou responsável..." autocomplete="off">
-                        <div class="locais-v3-filtros" role="group" aria-label="Filtrar alterações">
-                            <button type="button" class="ativo" aria-pressed="true" data-filtro-local="todos" onclick="aplicarFiltroLocaisV3('todos')">Todas</button>
-                            <button type="button" aria-pressed="false" data-filtro-local="pendente" onclick="aplicarFiltroLocaisV3('pendente')">Pendentes</button>
-                            <button type="button" aria-pressed="false" data-filtro-local="confirmado" onclick="aplicarFiltroLocaisV3('confirmado')">Confirmadas</button>
+                    <div class="locais-ferramentas">
+                        <label for="locaisBuscarAlterados">Buscar alteração de local</label>
+                        <input type="search" id="locaisBuscarAlterados" placeholder="Produto, código, local ou responsável..." autocomplete="off">
+                        <div class="locais-filtros" role="group" aria-label="Filtrar alterações">
+                            <button type="button" class="ativo" aria-pressed="true" data-filtro-local="todos" onclick="aplicarFiltroLocais('todos')">Todas</button>
+                            <button type="button" aria-pressed="false" data-filtro-local="pendente" onclick="aplicarFiltroLocais('pendente')">Pendentes</button>
+                            <button type="button" aria-pressed="false" data-filtro-local="confirmado" onclick="aplicarFiltroLocais('confirmado')">Confirmadas</button>
                         </div>
                     </div>
                     <div id="listaLocaisAlterados"></div>
-                    <p class="locais-v3-sem-resultado" id="locaisV3NenhumAlterado" hidden>Nenhuma alteração corresponde aos filtros.</p>
+                    <p class="locais-sem-resultado" id="locaisNenhumAlterado" hidden>Nenhuma alteração corresponde aos filtros.</p>
                 </div>
                 <div id="painelLocaisVazios" style="display: none;">
-                    <div class="locais-v3-resumo" aria-label="Resumo das posições">
-                        <div class="locais-v3-indicador"><span>Posições</span><strong data-contador-local="posicoes">—</strong></div>
-                        <div class="locais-v3-indicador"><span>Ocupadas</span><strong data-contador-local="ocupadas">—</strong></div>
-                        <div class="locais-v3-indicador sucesso"><span>Vazias</span><strong data-contador-local="vazias">—</strong></div>
+                    <div class="locais-resumo" aria-label="Resumo das posições">
+                        <div class="locais-indicador"><span>Posições</span><strong data-contador-local="posicoes">—</strong></div>
+                        <div class="locais-indicador"><span>Ocupadas</span><strong data-contador-local="ocupadas">—</strong></div>
+                        <div class="locais-indicador sucesso"><span>Vazias</span><strong data-contador-local="vazias">—</strong></div>
                     </div>
-                    <div class="locais-v3-ferramentas">
-                        <label for="locaisV3BuscarVazios">Buscar setor</label>
-                        <input type="search" id="locaisV3BuscarVazios" placeholder="Ex.: P01, J01..." autocomplete="off">
+                    <div class="locais-ferramentas">
+                        <label for="locaisBuscarVazios">Buscar setor</label>
+                        <input type="search" id="locaisBuscarVazios" placeholder="Ex.: P01, J01..." autocomplete="off">
                     </div>
                     <div id="listaAreasVazias"></div>
-                    <p class="locais-v3-sem-resultado" id="locaisV3NenhumVazio" hidden>Nenhum setor encontrado.</p>
+                    <p class="locais-sem-resultado" id="locaisNenhumVazio" hidden>Nenhum setor encontrado.</p>
                 </div>
                 <div id="painelLocaisDerivados" style="display: none;">
-                    <div class="locais-v3-resumo" aria-label="Resumo dos derivados">
-                        <div class="locais-v3-indicador"><span>Fora do padrão</span><strong data-contador-local="derivados">—</strong></div>
+                    <div class="locais-resumo" aria-label="Resumo dos derivados">
+                        <div class="locais-indicador"><span>Fora do padrão</span><strong data-contador-local="derivados">—</strong></div>
                     </div>
-                    <div class="locais-v3-ferramentas">
-                        <label for="locaisV3BuscarDerivados">Pesquisar materiais derivados</label>
-                        <input type="search" id="locaisV3BuscarDerivados" placeholder="Código, produto, referência ou local..." autocomplete="off">
-                        <span id="locaisV3BuscaPagina" class="locais-v3-ajuda">A pesquisa considera apenas a página exibida.</span>
+                    <div class="locais-ferramentas">
+                        <label for="locaisBuscarDerivados">Pesquisar materiais derivados</label>
+                        <input type="search" id="locaisBuscarDerivados" placeholder="Código, produto, referência ou local..." autocomplete="off">
+                        <span id="locaisBuscaPagina" class="locais-ajuda">A pesquisa considera apenas a página exibida.</span>
                     </div>
                     <div id="listaLocaisDerivados"></div>
-                    <p class="locais-v3-sem-resultado" id="locaisV3NenhumDerivado" hidden>Nenhum material nesta página corresponde à pesquisa.</p>
+                    <p class="locais-sem-resultado" id="locaisNenhumDerivado" hidden>Nenhum material nesta página corresponde à pesquisa.</p>
                 </div>
             </div>
         </section>
@@ -859,52 +789,52 @@
 
 
 
-            <!-- Menu central de Configurações 3.0: as ferramentas reais ficam abaixo -->
-            <div id="configuracoesV3Hub" class="configuracoes-v3-hub">
-                <div class="configuracoes-v3-grupo">
-                    <p class="configuracoes-v3-etiqueta">DADOS E INTEGRAÇÕES</p>
-                    <div class="configuracoes-v3-grade">
-                        <button type="button" class="configuracoes-v3-card" onclick="abrirAreaConfiguracoesV3('rastreios')">
-                            <span class="configuracoes-v3-icone" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10 6 4h12l3 6-9 5-9-5Z"/><path d="M3 10v8l9 4 9-4v-8M12 15v7"/></svg></span>
-                            <span class="configuracoes-v3-textos"><strong>Importação de rastreios</strong><small>Planilha, OneDrive e sincronização</small></span>
-                            <span class="configuracoes-v3-canto" aria-hidden="true">↗</span>
+            <!-- Menu central de Configurações: as ferramentas reais ficam abaixo -->
+            <div id="configuracoesHub" class="configuracoes-hub">
+                <div class="configuracoes-grupo">
+                    <p class="configuracoes-etiqueta">DADOS E INTEGRAÇÕES</p>
+                    <div class="configuracoes-grade">
+                        <button type="button" class="configuracoes-card" onclick="abrirAreaConfiguracoes('rastreios')">
+                            <span class="configuracoes-icone" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10 6 4h12l3 6-9 5-9-5Z"/><path d="M3 10v8l9 4 9-4v-8M12 15v7"/></svg></span>
+                            <span class="configuracoes-textos"><strong>Importação de rastreios</strong><small>Planilha, OneDrive e sincronização</small></span>
+                            <span class="configuracoes-canto" aria-hidden="true">↗</span>
                         </button>
-                        <button type="button" class="configuracoes-v3-card" id="configuracoesV3AbrirNF" data-config-v3="nf" onclick="abrirAreaConfiguracoesV3('nf')" hidden>
-                            <span class="configuracoes-v3-icone" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h8l5 5v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1Z"/><path d="M14 2v5h5M9 12h6M9 16h6M12 11v6"/></svg></span>
-                            <span class="configuracoes-v3-textos"><strong>Importação NF</strong><small>Planilhas e notas fiscais</small></span>
-                            <span class="configuracoes-v3-canto" aria-hidden="true">↗</span>
-                        </button>
-                    </div>
-                </div>
-                <div class="configuracoes-v3-grupo">
-                    <p class="configuracoes-v3-etiqueta">APLICATIVO</p>
-                    <div class="configuracoes-v3-linhas">
-                        <button type="button" class="configuracoes-v3-linha" onclick="abrirAreaConfiguracoesV3('sistema')">
-                            <span class="configuracoes-v3-icone" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.6 5.6 7 7m10 10 1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="2"/></svg></span>
-                            <span class="configuracoes-v3-textos"><strong>Sistema</strong><small>Atualizações do aplicativo</small></span>
-                            <span class="configuracoes-v3-seta" aria-hidden="true">›</span>
-                        </button>
-                        <button type="button" class="configuracoes-v3-linha" onclick="abrirAreaConfiguracoesV3('conta')">
-                            <span class="configuracoes-v3-icone" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M5 21v-2c0-3 3-5 7-5s7 2 7 5v2"/></svg></span>
-                            <span class="configuracoes-v3-textos"><strong>Conta</strong><small>Informações da sessão</small></span>
-                            <span class="configuracoes-v3-seta" aria-hidden="true">›</span>
+                        <button type="button" class="configuracoes-card" id="configuracoesAbrirNF" data-config="nf" onclick="abrirAreaConfiguracoes('nf')" hidden>
+                            <span class="configuracoes-icone" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h8l5 5v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1Z"/><path d="M14 2v5h5M9 12h6M9 16h6M12 11v6"/></svg></span>
+                            <span class="configuracoes-textos"><strong>Importação NF</strong><small>Planilhas e notas fiscais</small></span>
+                            <span class="configuracoes-canto" aria-hidden="true">↗</span>
                         </button>
                     </div>
                 </div>
-                <div class="configuracoes-v3-grupo">
-                    <p class="configuracoes-v3-etiqueta">GERENCIAMENTO</p>
-                    <button type="button" class="configuracoes-v3-linha configuracoes-v3-admin" id="configuracoesV3AbrirAdmin" data-config-v3="admin" onclick="abrirAreaConfiguracoesV3('admin')" hidden>
-                        <span class="configuracoes-v3-icone" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 8 4v5c0 5-3.4 8.7-8 11-4.6-2.3-8-6-8-11V6l8-4Z"/><path d="m9 12 2 2 4-4"/></svg></span>
-                        <span class="configuracoes-v3-textos"><strong>Administração</strong><small>Usuários e ferramentas administrativas · acesso restrito</small></span>
-                        <span class="configuracoes-v3-seta" aria-hidden="true">›</span>
+                <div class="configuracoes-grupo">
+                    <p class="configuracoes-etiqueta">APLICATIVO</p>
+                    <div class="configuracoes-linhas">
+                        <button type="button" class="configuracoes-linha" onclick="abrirAreaConfiguracoes('sistema')">
+                            <span class="configuracoes-icone" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.6 5.6 7 7m10 10 1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="2"/></svg></span>
+                            <span class="configuracoes-textos"><strong>Sistema</strong><small>Atualizações do aplicativo</small></span>
+                            <span class="configuracoes-seta" aria-hidden="true">›</span>
+                        </button>
+                        <button type="button" class="configuracoes-linha" onclick="abrirAreaConfiguracoes('conta')">
+                            <span class="configuracoes-icone" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M5 21v-2c0-3 3-5 7-5s7 2 7 5v2"/></svg></span>
+                            <span class="configuracoes-textos"><strong>Conta</strong><small>Informações da sessão</small></span>
+                            <span class="configuracoes-seta" aria-hidden="true">›</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="configuracoes-grupo">
+                    <p class="configuracoes-etiqueta">GERENCIAMENTO</p>
+                    <button type="button" class="configuracoes-linha configuracoes-admin" id="configuracoesAbrirAdmin" data-config="admin" onclick="abrirAreaConfiguracoes('admin')" hidden>
+                        <span class="configuracoes-icone" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 8 4v5c0 5-3.4 8.7-8 11-4.6-2.3-8-6-8-11V6l8-4Z"/><path d="m9 12 2 2 4-4"/></svg></span>
+                        <span class="configuracoes-textos"><strong>Administração</strong><small>Usuários e ferramentas administrativas · acesso restrito</small></span>
+                        <span class="configuracoes-seta" aria-hidden="true">›</span>
                     </button>
                 </div>
             </div>
-            <div class="configuracoes-v3-cabecalho" id="configuracoesV3Cabecalho" hidden>
-                <button type="button" class="configuracoes-v3-voltar" onclick="voltarConfiguracoesV3()">← Voltar</button>
-                <p class="configuracoes-v3-caminho" id="configuracoesV3Caminho"></p>
-                <h2 class="configuracoes-v3-titulo" id="configuracoesV3Titulo"></h2>
-                <p class="configuracoes-v3-descricao" id="configuracoesV3Descricao"></p>
+            <div class="configuracoes-cabecalho" id="configuracoesCabecalho" hidden>
+                <button type="button" class="configuracoes-voltar" onclick="voltarConfiguracoes()">← Voltar</button>
+                <p class="configuracoes-caminho" id="configuracoesCaminho"></p>
+                <h2 class="configuracoes-titulo" id="configuracoesTitulo"></h2>
+                <p class="configuracoes-descricao" id="configuracoesDescricao"></p>
             </div>
 
             <div class="configuracoes-modulos" role="group" aria-label="Módulos de configuração">
@@ -991,14 +921,14 @@
                 <details class="configuracoes-accordion">
                     <summary><span class="home-app-icone" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h8l5 5v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1Z"/><path d="M14 2v5h5M9 12h6M9 16h6M12 11v6"/></svg></span><span class="home-app-conteudo"><strong>Importação NF</strong><small>Planilhas e histórico de notas fiscais</small></span><span class="home-app-seta">›</span></summary>
                     <div class="configuracoes-conteudo">
-                        <div class="configuracoes-v3-info"><span class="configuracoes-v3-info-icone" aria-hidden="true">▣</span><span>Abra o módulo existente para importar e consultar notas fiscais.</span></div>
+                        <div class="configuracoes-info"><span class="configuracoes-info-icone" aria-hidden="true">▣</span><span>Abra o módulo existente para importar e consultar notas fiscais.</span></div>
                         <button type="button" id="menuImportacaoNF" class="botao-aba" onclick="abrirImportacaoNF()">Abrir Importação NF</button>
                     </div>
                 </details>
             </div>
             <div class="painel configuracoes-painel-sistema configuracoes-modulo" id="painelConfiguracoesSistema">
                 <details class="configuracoes-accordion"><summary><span class="home-app-icone" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.6 5.6 7 7m10 10 1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="2"/></svg></span><span class="home-app-conteudo"><strong>Sistema</strong><small>Atualizações do aplicativo</small></span><span class="home-app-seta">›</span></summary><div class="configuracoes-conteudo">
-                <div class="configuracoes-v3-info"><span class="configuracoes-v3-info-icone" aria-hidden="true">↻</span><span>Verifique se há atualizações disponíveis para esta instalação do PMobile.</span></div>
+                <div class="configuracoes-info"><span class="configuracoes-info-icone" aria-hidden="true">↻</span><span>Verifique se há atualizações disponíveis para esta instalação do PMobile.</span></div>
                 <div class="configuracoes-acoes">
                     <button class="botao-aba" type="button" onclick="procurarAtualizacoesOta()">🔄 Procurar atualizações</button>
                 </div>
@@ -1010,12 +940,12 @@
                 <details class="configuracoes-accordion"><summary><span class="home-app-icone" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 8 4v5c0 5-3.4 8.7-8 11-4.6-2.3-8-6-8-11V6l8-4Z"/><path d="m9 12 2 2 4-4"/></svg></span><span class="home-app-conteudo"><strong>Administração</strong><small>Usuários e ferramentas administrativas</small></span><span class="home-app-seta">›</span></summary><div class="configuracoes-conteudo">
 
                 <div class="configuracoes-acoes">
-                    <button class="botao-aba" onclick="abrirSubareaConfiguracoesV3('usuarios')">👥 Usuários</button>
-                    <button class="botao-aba" onclick="abrirSubareaConfiguracoesV3('locais')">📍 Locais</button>
-                    <button class="botao-aba" onclick="abrirSubareaConfiguracoesV3('tokens')">🔑 Recuperação de tokens</button>
-                    <button class="botao-perigo" onclick="abrirSubareaConfiguracoesV3('manutencao')">🛠️ Manutenção</button>
-                    <button class="botao-aba" onclick="abrirSubareaConfiguracoesV3('arquivos')">📁 Arquivos de teste</button>
-                    <button class="botao-aba" onclick="abrirSubareaConfiguracoesV3('divergencias')">⚠️ Divergências</button>
+                    <button class="botao-aba" onclick="abrirSubareaConfiguracoes('usuarios')">👥 Usuários</button>
+                    <button class="botao-aba" onclick="abrirSubareaConfiguracoes('locais')">📍 Locais</button>
+                    <button class="botao-aba" onclick="abrirSubareaConfiguracoes('tokens')">🔑 Recuperação de tokens</button>
+                    <button class="botao-perigo" onclick="abrirSubareaConfiguracoes('manutencao')">🛠️ Manutenção</button>
+                    <button class="botao-aba" onclick="abrirSubareaConfiguracoes('arquivos')">📁 Arquivos de teste</button>
+                    <button class="botao-aba" onclick="abrirSubareaConfiguracoes('divergencias')">⚠️ Divergências</button>
                 </div>
 
                 </div></details>
@@ -1024,7 +954,7 @@
 
             <div class="painel configuracoes-modulo" id="painelConfiguracoesUsuario" style="display: none;">
                 <details class="configuracoes-accordion"><summary><span class="home-app-icone" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M5 21v-2c0-3 3-5 7-5s7 2 7 5v2"/></svg></span><span class="home-app-conteudo"><strong>Conta</strong><small>Informações da sessão</small></span><span class="home-app-seta">›</span></summary><div class="configuracoes-conteudo">
-                <div class="configuracoes-v3-perfil"><div class="configuracoes-v3-avatar" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M5 21v-2c0-3 3-5 7-5s7 2 7 5v2"/></svg></div><div id="resumoContaPmobile"></div></div>
+                <div class="configuracoes-perfil"><div class="configuracoes-avatar" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M5 21v-2c0-3 3-5 7-5s7 2 7 5v2"/></svg></div><div id="resumoContaPmobile"></div></div>
                 </div></details>
             </div>
             </div>
@@ -1034,7 +964,7 @@
                     <button
                         type="button"
                         class="solicitacoes-voltar"
-                        onclick="voltarConfiguracoesV3()"
+                        onclick="voltarConfiguracoes()"
                         aria-label="Voltar"
                     >‹</button>
 
@@ -1074,7 +1004,7 @@
             </div>
 
             <div class="painel" id="painelConfiguracoesManutencao" style="display: none;">
-                <p class="configuracoes-v3-info configuracoes-v3-alerta"><span class="configuracoes-v3-info-icone" aria-hidden="true">⚠</span><span>Operações sensíveis. Revise cuidadosamente antes de excluir registros.</span></p>
+                <p class="configuracoes-info configuracoes-alerta"><span class="configuracoes-info-icone" aria-hidden="true">⚠</span><span>Operações sensíveis. Revise cuidadosamente antes de excluir registros.</span></p>
                 <h2>🛠️ Manutenção</h2>
                 <p>Operações administrativas do banco de dados.</p>
                 <button class="botao-perigo" onclick="limparMateriaisSupabase()">🗑️ Materiais importados</button>
@@ -1083,7 +1013,7 @@
             </div>
 
             <div class="painel arquivos-teste-painel" id="painelArquivosTeste" style="display: none;">
-                <button type="button" class="botao-secundario arquivos-teste-voltar" onclick="voltarConfiguracoesV3()">‹ Voltar</button>
+                <button type="button" class="botao-secundario arquivos-teste-voltar" onclick="voltarConfiguracoes()">‹ Voltar</button>
 
                 <h2>📁 Arquivos de teste</h2>
                 <p>Área administrativa para armazenar o arquivo original no Supabase, independentemente da extensão, para auditoria.</p>
@@ -1265,7 +1195,6 @@
 <script src="arquivosteste.js?v=0.0.248"></script>
 
 <script src="valorestotal.js?v=0.0.354-financeiro"></script>
-<script src="valorestotal2.js?v=1.0"></script>
 <script src="rastreio.js?v=0.0.369-coletado"></script>
 
 <script src="rastreioimportacao.js?v=0.0.365-sync-rapida"></script>
@@ -1286,7 +1215,6 @@
 <script src="contagemmanual.js?v=0.0.333-cleanup"></script>
 
 <script src="locais.js?v=0.0.391-back-nav"></script>
-<script src="locais-v3.js?v=1.0"></script>
 <script src="reservas.js?v=0.0.248"></script>
 
 
@@ -1313,7 +1241,6 @@
      ========================================================= -->
 
 <script src="script.js?v=0.0.390-back-nav"></script>
-<script src="configuracoes-v3.js?v=1.1-back-nav"></script>
 <!-- Central de sincronização -->
 
 <script src="sync-center.js?v=1.0.3"></script>
