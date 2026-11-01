@@ -8,7 +8,7 @@ test('entradas unificadas existem, sem assets ausentes ou identificadores duplic
  for(const p of ['locais-v3.js','configuracoes-v3.js','valorestotal2.js','implementacoes/locais-v3.css','implementacoes/configuracoes-v3.css','implementacoes/valorestotal2.css'])for(const prefix of ['', 'www/'])assert.equal(fs.existsSync(path.join(root,prefix+p)),false,prefix+p);
 });
 test('fontes de apresentação e espelho não mantêm namespaces de versões',()=>{
- function walk(dir){return fs.readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(path.join(dir,e.name)):[path.join(dir,e.name)])}
+ function walk(dir){return fs.readdirSync(dir,{withFileTypes:true}).filter(e=>!['node_modules','.git','.gradle','build'].includes(e.name)).flatMap(e=>e.isDirectory()?walk(path.join(dir,e.name)):[path.join(dir,e.name)])}
  for(const full of walk(root)){
   const p=path.relative(root,full).replaceAll('\\','/');if(!/\.(js|html|css)$/.test(p)||/^(android|tests)\//.test(p)||p.endsWith('xlsx.full.min.js'))continue;
   assert.doesNotMatch(read(p),/configuracoes-v3|config-v3|ConfiguracoesV3|configuracoesV3|locais-v3|LocaisV3|locaisV3|valoresTotal2|ValoresTotal2|ValoresMensais2|frete2-|pesquisa-v2|pesquisaV2|contagem-v2/,p);
