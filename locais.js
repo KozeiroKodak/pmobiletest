@@ -155,28 +155,6 @@ function renderizarPaginaLocaisDerivados(area, registros, totalRegistros) {
         '</div>';
 }
 
-function renderizarLocalDerivado(item) {
-    return (
-        '<article class="local-derivado-card">' +
-            '<div class="local-derivado-celula local-derivado-id" data-label="ID">' +
-                escapeHtmlPmobile(item.codigo || "-") +
-            '</div>' +
-            '<div class="local-derivado-celula local-derivado-descricao" data-label="Descrição">' +
-                escapeHtmlPmobile(item.descricao || "-") +
-            '</div>' +
-            '<div class="local-derivado-celula local-derivado-referencia" data-label="Referência">' +
-                escapeHtmlPmobile(item.referencia || "-") +
-            '</div>' +
-            '<div class="local-derivado-celula local-derivado-local" data-label="Local">' +
-                escapeHtmlPmobile(item.local || "-") +
-            '</div>' +
-            '<div class="local-derivado-celula local-derivado-quantidade" data-label="Quantidade">' +
-                escapeHtmlPmobile(formatarNumeroLocal(item.quantidade)) +
-            '</div>' +
-        '</article>'
-    );
-}
-
 async function mudarPaginaLocaisDerivados(direcao) {
     const area = document.getElementById("listaLocaisDerivados");
     if (!area) return;
@@ -253,57 +231,6 @@ async function carregarLocaisAlterados() {
                 '<p>' + escapeHtmlPmobile(erro?.message || "Erro ao consultar as alterações.") + '</p>' +
             '</div>';
     }
-}
-
-function renderizarLocalAlterado(item) {
-    const codigo = escapeHtmlPmobile(item.codigo_material || "-");
-    const novoLocal = escapeHtmlPmobile(item.local_encontrado || "-");
-    const quantidade = escapeHtmlPmobile(formatarNumeroLocal(item.quantidade_fisica));
-    const usuario = escapeHtmlPmobile(item.usuario_nome || "Usuário não identificado");
-    const data = escapeHtmlPmobile(formatarDataLocal(item.data_hora));
-    const status = item.alteracao_status === "CONFIRMADO" ? "CONFIRMADO" : "PENDENTE";
-    const confirmadoPor = escapeHtmlPmobile(item.alteracao_confirmada_por_nome || "");
-    const confirmadoEm = item.alteracao_confirmada_em
-        ? escapeHtmlPmobile(formatarDataLocal(item.alteracao_confirmada_em))
-        : "";
-
-    const admin =
-        window.usuarioPmobileAtual &&
-        window.usuarioPmobileAtual.nivel === "ADMIN";
-
-    const botaoConfirmar = status === "PENDENTE" && admin
-        ? '<button type="button" class="botao-local-confirmar" onclick="confirmarAlteracaoLocal(\'' +
-            escapeHtmlPmobile(item.id) +
-            '\')">✓ Confirmar alteração</button>'
-        : "";
-
-    return (
-        '<article class="local-alterado-card">' +
-            '<div class="local-alterado-principal">' +
-                '<div>' +
-                    '<span class="local-alterado-legenda">Código</span>' +
-                    '<strong class="local-alterado-codigo">' + codigo + '</strong>' +
-                '</div>' +
-                '<div class="local-alterado-seta" aria-hidden="true">→</div>' +
-                '<div>' +
-                    '<span class="local-alterado-legenda">Novo local</span>' +
-                    '<strong class="local-alterado-local">' + novoLocal + '</strong>' +
-                '</div>' +
-                '<span class="local-alterado-status ' + (status === "CONFIRMADO" ? "confirmado" : "pendente") + '">' +
-                    (status === "CONFIRMADO" ? "Confirmado" : "Pendente") +
-                '</span>' +
-            '</div>' +
-            '<div class="local-alterado-detalhes">' +
-                '<span><b>Qtd. física:</b> ' + quantidade + '</span>' +
-                '<span><b>Contado por:</b> ' + usuario + '</span>' +
-                '<span><b>Data/hora:</b> ' + data + '</span>' +
-                (status === "CONFIRMADO"
-                    ? '<span><b>Confirmado por:</b> ' + confirmadoPor + ' · ' + confirmadoEm + '</span>'
-                    : '') +
-            '</div>' +
-            (botaoConfirmar ? '<div class="local-alterado-acoes">' + botaoConfirmar + '</div>' : '') +
-        '</article>'
-    );
 }
 
 async function confirmarAlteracaoLocal(contagemId) {
@@ -500,3 +427,183 @@ function formatarNumeroLocal(valor) {
         ? numero.toLocaleString("pt-BR", { maximumFractionDigits: 2 })
         : "-";
 }
+
+/* PMobile — Locais
+ * Visualização sem alterar consultas, confirmações ou estrutura do Supabase.
+ * local_original é o endereço registrado na contagem, nunca o local atual.
+ */
+(function () {
+  "use strict";
+  const state={filtro:"todos",buscaAlterados:"",buscaVazios:"",buscaDerivados:""};
+  function safe(value,fallback="Não informado") {
+    const raw=String(value == null ? "" : value).trim();
+    return escapeHtmlPmobile(raw || fallback);
+  }
+  function search(value) {
+    return String(value == null ? "" : value).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+  }
+  function status(item) {return item.alteracao_status==="CONFIRMADO"?"confirmado":"pendente";}
+  function cardAlterado(item) {
+    const st=status(item),ok=st==="confirmado";
+    const referencia=String(item.referencia_material||"").trim();
+    const descricao=String(item.descricao_material||"").trim();
+    const busca=[item.codigo_material,descricao,referencia,item.local_original,item.local_encontrado,item.usuario_nome].map(search).join(" ");
+    const id=String(item.id||"");
+    const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    const admin=window.usuarioPmobileAtual && window.usuarioPmobileAtual.nivel==="ADMIN";
+    const botao=(!ok && admin && uuid)
+      ? '<button class="botao-local-confirmar" type="button" data-local-confirmar="'+safe(id)+'">✓ Confirmar alteração no ERP</button>'
+      : "";
+    const confirmado=ok
+      ? '<div><span>Confirmado por</span><strong>'+safe(item.alteracao_confirmada_por_nome)+'</strong></div>'+
+        '<div><span>Confirmado em</span><strong>'+safe(item.alteracao_confirmada_em?formatarDataLocal(item.alteracao_confirmada_em):null)+'</strong></div>'
+      : "";
+    return '<details class="local-alterado-card locais-cartao" data-local-status="'+st+'" data-local-busca="'+safe(busca,"")+'">'+
+      '<summary class="locais-resumo-cartao">'+
+        '<div class="locais-topo">'+
+          '<div class="locais-produto"><h3>'+safe(descricao,"Material")+'</h3>'+
+            '<p>Cód. '+safe(item.codigo_material,"-")+(referencia?" · Ref. "+safe(referencia):"")+'</p></div>'+
+          '<span class="local-alterado-status '+st+'">'+(ok?"✓ Confirmado":"Pendente")+'</span>'+
+        '</div>'+
+        '<div class="locais-local">'+
+          '<span class="locais-rotulo">ALTERAÇÃO DE LOCAL</span>'+
+          '<div class="locais-trajeto">'+
+            '<div class="locais-endereco"><span>Local anterior</span><strong>'+safe(item.local_original)+'</strong></div>'+
+            '<span class="locais-seta" aria-hidden="true">→</span>'+
+            '<div class="locais-endereco"><span>Novo local</span><strong>'+safe(item.local_encontrado)+'</strong></div>'+
+          '</div>'+
+        '</div>'+
+        '<div class="locais-metricas">'+
+          '<div><span>Estoque esperado</span><strong>'+safe(formatarNumeroLocal(item.quantidade_esperada),"-")+'</strong></div>'+
+          '<div><span>Quantidade física</span><strong>'+safe(formatarNumeroLocal(item.quantidade_fisica),"-")+'</strong></div>'+
+        '</div>'+
+        '<div class="locais-responsavel">'+
+          '<span class="locais-avatar" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 21v-2c0-3 3-5 7-5s7 2 7 5v2"/></svg></span>'+
+          '<div><span>Contagem realizada por</span><strong>'+safe(item.usuario_nome,"Usuário não identificado")+'</strong></div>'+
+        '</div>'+
+        '<span class="locais-expandir"><span class="fechado">Ver mais detalhes</span>'+
+          '<span class="aberto">Ocultar detalhes</span> <span class="locais-chevron" aria-hidden="true">⌄</span></span>'+
+      '</summary>'+
+      '<div class="locais-detalhes">'+
+        '<div><span>Data/hora</span><strong>'+safe(formatarDataLocal(item.data_hora),"-")+'</strong></div>'+
+        '<div><span>Status no ERP</span><strong>'+(ok?"Confirmado":"Aguardando confirmação")+'</strong></div>'+
+        confirmado+
+        (botao?'<div class="locais-confirmacao">'+botao+'</div>':"")+
+      '</div>'+
+    '</details>';
+  }
+  function cardDerivado(item) {
+    const busca=[item.codigo,item.descricao,item.referencia,item.local].map(search).join(" ");
+    return '<details class="local-derivado-card locais-cartao" data-local-busca="'+safe(busca,"")+'">'+
+      '<summary class="locais-resumo-cartao">'+
+        '<div class="locais-topo">'+
+          '<div class="locais-produto"><h3>'+safe(item.descricao,"Material")+'</h3><p>Cód. '+safe(item.codigo,"-")+'</p></div>'+
+          '<span class="locais-derivado-tag">Fora do padrão</span>'+
+        '</div>'+
+        '<div class="locais-trajeto locais-trajeto-unico">'+
+          '<div class="locais-endereco"><span>Local cadastrado</span><strong>'+safe(item.local)+'</strong></div>'+
+          '<div class="locais-endereco"><span>Quantidade</span><strong>'+safe(formatarNumeroLocal(item.quantidade),"-")+'</strong></div>'+
+        '</div>'+
+        '<span class="locais-expandir"><span class="fechado">Ver mais detalhes</span>'+
+          '<span class="aberto">Ocultar detalhes</span> <span class="locais-chevron" aria-hidden="true">⌄</span></span>'+
+      '</summary>'+
+      '<div class="locais-detalhes">'+
+        '<div><span>Referência</span><strong>'+safe(item.referencia)+'</strong></div>'+
+        '<div><span>Situação</span><strong>Fora dos setores padrão</strong></div>'+
+      '</div>'+
+    '</details>';
+  }
+
+  // Os renderizadores originais são utilizados pelas RPCs existentes.
+  // Substituímos somente o HTML, nunca as consultas ou a ação de confirmar.
+  window.renderizarLocalAlterado=cardAlterado;
+  window.renderizarLocalDerivado=cardDerivado;
+
+  function cards(tipo) {
+    const container= document.getElementById(tipo==="alterados"?"listaLocaisAlterados":tipo==="vazios"?"listaAreasVazias":"listaLocaisDerivados");
+    if (!container) return [];
+    return Array.from(container.querySelectorAll(tipo==="alterados"?"details.local-alterado-card":tipo==="vazios"?".local-vazio-area-card":"details.local-derivado-card"));
+  }
+  function mostrarFiltros(tipo) {
+    const lista=cards(tipo);
+    const term=search(tipo==="alterados"?state.buscaAlterados:tipo==="vazios"?state.buscaVazios:state.buscaDerivados).trim();
+    let encontrados=0;
+    lista.forEach(function(card) {
+      const situacao=card.dataset.localStatus;
+      const area=card.querySelector(".local-vazio-area-info strong");
+      const valor=tipo==="vazios"?(area?area.textContent:""):card.dataset.localBusca;
+      const visivel=(!term || search(valor).includes(term)) &&
+        (tipo!=="alterados" || state.filtro==="todos" || situacao===state.filtro);
+      card.hidden=!visivel;
+      if (visivel) encontrados++;
+    });
+    const vazio=document.getElementById(tipo==="alterados"?"locaisNenhumAlterado":tipo==="vazios"?"locaisNenhumVazio":"locaisNenhumDerivado");
+    if (vazio) vazio.hidden=lista.length===0 || encontrados>0;
+    if (tipo==="alterados") {
+      document.querySelectorAll("#locais .locais-filtros button").forEach(function(button){
+        const ativo=button.dataset.filtroLocal===state.filtro;
+        button.classList.toggle("ativo",ativo);
+        button.setAttribute("aria-pressed",String(ativo));
+      });
+    }
+  }
+  function atualizarContadores(tipo) {
+    const lista=cards(tipo);
+    if (tipo==="alterados") {
+      const confirmados=lista.filter(x=>x.dataset.localStatus==="confirmado").length;
+      const valores={total:lista.length,pendentes:lista.length-confirmados,confirmados};
+      Object.keys(valores).forEach(k=>{
+        const alvo=document.querySelector('[data-contador-local="'+k+'"]');
+        if(alvo)alvo.textContent=String(valores[k]);
+      });
+    } else if (tipo==="vazios") {
+      // Totais calculados a partir das posições reais exibidas pelo módulo.
+      let ocupados=0,vazios=0,total=0;
+      lista.forEach(function(card) {
+        const vals=Array.from(card.querySelectorAll(".local-vazio-metrica strong")).map(x=>Number(x.textContent.replace(/\./g,"")));
+        if(vals.length===3){total+=vals[0];ocupados+=vals[1];vazios+=vals[2];}
+      });
+      const counts={posicoes:total,ocupadas:ocupados,vazias:vazios};
+      Object.keys(counts).forEach(k=>{const alvo=document.querySelector('[data-contador-local="'+k+'"]');if(alvo)alvo.textContent=counts[k].toLocaleString("pt-BR");});
+    } else {
+      const original=document.querySelector("#listaLocaisDerivados .locais-resumo-derivados strong");
+      const numero=document.querySelector('[data-contador-local="derivados"]');
+      if(numero)numero.textContent=original?original.textContent:"0";
+      const aviso=document.getElementById("locaisBuscaPagina");
+      if(aviso)aviso.textContent="Pesquisa nos "+lista.length+" registros desta página.";
+    }
+    mostrarFiltros(tipo);
+  }
+  function preparar(tipo) {
+    const id=tipo==="alterados"?"listaLocaisAlterados":tipo==="vazios"?"listaAreasVazias":"listaLocaisDerivados";
+    const area=document.getElementById(id);
+    if(!area)return;
+    const obs=new MutationObserver(function(){atualizarContadores(tipo);});
+    obs.observe(area,{childList:true});
+    atualizarContadores(tipo);
+  }
+  window.aplicarFiltroLocais=function(tipo) {
+    if (!["todos","pendente","confirmado"].includes(tipo)) return;
+    state.filtro=tipo;
+    mostrarFiltros("alterados");
+  };
+  document.addEventListener("DOMContentLoaded",function(){
+    const entradas=[
+      ["locaisBuscarAlterados","alterados","buscaAlterados"],
+      ["locaisBuscarVazios","vazios","buscaVazios"],
+      ["locaisBuscarDerivados","derivados","buscaDerivados"]
+    ];
+    entradas.forEach(function([id,tipo,chave]){
+      const input=document.getElementById(id);
+      if(input)input.addEventListener("input",function(){state[chave]=input.value;mostrarFiltros(tipo);});
+      preparar(tipo);
+    });
+    const alterados=document.getElementById("listaLocaisAlterados");
+    if(alterados)alterados.addEventListener("click",function(evento){
+      const botao=evento.target.closest("[data-local-confirmar]");
+      if(botao && alterados.contains(botao)) {
+        confirmarAlteracaoLocal(botao.dataset.localConfirmar);
+      }
+    });
+  });
+})();
