@@ -6,7 +6,7 @@ const root=path.resolve(__dirname,"..");
 const ler=(f)=>fs.readFileSync(path.join(root,f),"utf8");
 const entry=ler("index.html");
 const original=ler("script.js");
-const MODULOS=["pesquisa-local.js","estoque-local.js","reservas-local.js","conferencias-local.js","comparar-verificar.js","divergencias-local.js","locais-local.js","importacao-local.js"];
+const MODULOS=["dados-locais/pesquisa-local.js","dados-locais/estoque-local.js","dados-locais/reservas-local.js","dados-locais/conferencias-local.js","dados-locais/comparar-verificar.js","dados-locais/divergencias-local.js","dados-locais/locais-local.js","dados-locais/importacao-local.js"];
 const local=[...MODULOS,"dados-locais.js"].map(ler).join("\n");
 const mover=ler("reorganizacao-pmobile.js");
 const sql=ler("sql/pmobile_dados_locais_isolados.sql");
