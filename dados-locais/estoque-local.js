@@ -3,7 +3,7 @@
  "use strict";
  const registry=window.PMobileDadosLocaisModulos||(window.PMobileDadosLocaisModulos=Object.create(null));
  registry.estoque=function(ctx){
-  const {$,estado,escape,valor,num,norm,rpc,sessao,mensagem,consultar,paginacao,resumo,painel,pesquisarForm,compararForm,atualizarResumo,desenharMateriais,desenharComparacao}=ctx;
+  const {$,estado,rpc,mensagem,consultar,painel,pesquisarForm}=ctx;
   function selecionar(m) {
     estado.material=m;
     $("dlEditorTitulo").textContent="Editar: "+m.codigo+" — "+m.descricao;
