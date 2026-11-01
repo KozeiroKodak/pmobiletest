@@ -62,17 +62,17 @@
   // Essas sequências não devem chegar ao corpo JSON do PostgREST.
 
   function template(){return painel("conferencias",pesquisarForm("conferencias")+
-        '<form id="dlFormConferencia" class="painel contagem-v2 contagem-v2-registro" hidden>'+
-        '<h3 class="contagem-v2-etapa">02 · Registrar conferência local</h3>'+
+        '<form id="dlFormConferencia" class="painel contagem contagem-registro" hidden>'+
+        '<h3 class="contagem-etapa">02 · Registrar conferência local</h3>'+
         '<div id="dlConSelecionado" class="dl-material-selecionado"></div>'+
         '<div class="linha-formulario">'+
-        '<label class="contagem-v2-label">Código do material<input id="dlConCodigo" readonly required></label>'+
-        '<label class="contagem-v2-label">Local encontrado<input id="dlConLocal" placeholder="Ex.: A-03-12"></label>'+
-        '<label class="contagem-v2-label">Quantidade física<input id="dlConQuantidade" type="number" min="0" step="any" required></label>'+
-        '<button class="botao-aba contagem-v2-salvar" type="submit">✓ &nbsp; Salvar conferência</button>'+
+        '<label class="contagem-label">Código do material<input id="dlConCodigo" readonly required></label>'+
+        '<label class="contagem-label">Local encontrado<input id="dlConLocal" placeholder="Ex.: A-03-12"></label>'+
+        '<label class="contagem-label">Quantidade física<input id="dlConQuantidade" type="number" min="0" step="any" required></label>'+
+        '<button class="botao-aba contagem-salvar" type="submit">✓ &nbsp; Salvar conferência</button>'+
         '</div></form>'+
-        '<div class="painel contagem-v2 contagem-v2-lista">'+
-        '<div class="contagem-v2-lista-titulo"><div><h3>Contagens registradas</h3>'+
+        '<div class="painel contagem contagem-lista">'+
+        '<div class="contagem-lista-titulo"><div><h3>Contagens registradas</h3>'+
         '<p>Histórico local independente</p></div><span aria-hidden="true">▤</span></div>'+
         '<div id="dlHistorico"></div></div>',
         "Conferências locais são separadas do histórico original.");}
