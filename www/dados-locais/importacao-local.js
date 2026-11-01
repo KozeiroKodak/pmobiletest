@@ -3,7 +3,7 @@
  "use strict";
  const registry=window.PMobileDadosLocaisModulos||(window.PMobileDadosLocaisModulos=Object.create(null));
  registry.importacao=function(ctx){
-  const {$,estado,escape,valor,num,norm,rpc,sessao,mensagem,consultar,paginacao,resumo,painel,pesquisarForm,compararForm,atualizarResumo,desenharMateriais,desenharComparacao,quantidade}=ctx;
+  const {$,estado,norm,rpc,sessao,mensagem,painel}=ctx;
   function textoSeguroCatalogo(valor) {
     const fonte=String(valor??"").normalize("NFC");
     let destino="";
