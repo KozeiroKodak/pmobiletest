@@ -8,7 +8,7 @@
     divergencias:"Divergências locais", locais:"Locais do estoque local",
     importar:"Importar catálogo Dogo"
   };
-  // Mesmo padrão de pictogramas SVG utilizado nas Configurações 3.0.
+  // Mesmo padrão de pictogramas SVG utilizado nas Configurações.
   // Ícones são decorativos, sem acesso a dados externos.
   const ICONES = {
     pesquisa:'<circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/>',
@@ -62,7 +62,7 @@
       '<button class="botao-secundario" type="button" data-dl-page="1" data-dl-aba="'+aba+'">Próxima ›</button></nav>';
   }
   function resumo(aba) {
-    const classe=aba==="locais"?"locais-v3-resumo":"conferencias-resumo";
+    const classe=aba==="locais"?"locais-resumo":"conferencias-resumo";
     return '<div class="'+classe+'" id="dlResumo-'+aba+'" aria-label="Indicadores da página"></div>';
   }
   // Pesquisa continua usando o próprio template; os dois módulos de contagem
@@ -86,11 +86,11 @@
       locais:"Ver locais anteriores e novos locais",
       importar:"Atualizar cadastro sem alterar contagens"
     };
-    return '<button type="button" class="configuracoes-v3-card" data-dl-open="'+id+'">'+
-      '<span class="configuracoes-v3-icone">'+icone(id)+'</span>'+
-      '<span class="configuracoes-v3-textos"><strong>'+TITULOS[id]+'</strong>'+
+    return '<button type="button" class="configuracoes-card" data-dl-open="'+id+'">'+
+      '<span class="configuracoes-icone">'+icone(id)+'</span>'+
+      '<span class="configuracoes-textos"><strong>'+TITULOS[id]+'</strong>'+
       '<small>'+descricoes[id]+'</small></span>'+
-      '<span class="configuracoes-v3-canto" aria-hidden="true">↗</span></button>';
+      '<span class="configuracoes-canto" aria-hidden="true">↗</span></button>';
   }
   function htmlPrincipal() {
     return '<div class="dl-app"><div class="cabecalho-pagina">'+
@@ -98,11 +98,11 @@
       '<h1 id="dlCabecalhoTitulo">Dados locais</h1>'+
       '<p id="dlCabecalhoDescricao">Cadastro permanente, controle manual e comparação com a Dogo.</p>'+
       '</div><div id="dlMensagem" role="status" aria-live="polite"></div>'+
-      '<section data-dl-panel="inicio" class="configuracoes-v3-hub">'+
-      '<div class="configuracoes-v3-grupo"><p class="configuracoes-v3-etiqueta">ESTOQUE LOCAL</p>'+
-      '<div class="configuracoes-v3-grade">'+["pesquisa","estoque","reservas","conferencias"].map(cartaoMenu).join("")+'</div></div>'+
-      '<div class="configuracoes-v3-grupo"><p class="configuracoes-v3-etiqueta">VERIFICAÇÃO E CADASTRO</p>'+
-      '<div class="configuracoes-v3-grade">'+["comparar","divergencias","locais","importar"].map(cartaoMenu).join("")+'</div></div>'+
+      '<section data-dl-panel="inicio" class="configuracoes-hub">'+
+      '<div class="configuracoes-grupo"><p class="configuracoes-etiqueta">ESTOQUE LOCAL</p>'+
+      '<div class="configuracoes-grade">'+["pesquisa","estoque","reservas","conferencias"].map(cartaoMenu).join("")+'</div></div>'+
+      '<div class="configuracoes-grupo"><p class="configuracoes-etiqueta">VERIFICAÇÃO E CADASTRO</p>'+
+      '<div class="configuracoes-grade">'+["comparar","divergencias","locais","importar"].map(cartaoMenu).join("")+'</div></div>'+
       '<p class="dl-informacao">As funções originais da Dogo permanecem inalteradas.</p></section>'+
       painel("pesquisa",pesquisarForm("pesquisa"),"Pesquisa na base independente da Dogo.")+
       modulos.estoque.template()+
