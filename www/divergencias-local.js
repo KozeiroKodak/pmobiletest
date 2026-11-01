@@ -6,6 +6,7 @@
   const {$,estado,escape,valor,num,norm,rpc,sessao,mensagem,consultar,paginacao,resumo,painel,pesquisarForm,compararForm,atualizarResumo,desenharMateriais,desenharComparacao,quantidade}=ctx;
   function render(itens){
   const el=$("dlResultados-divergencias");el.replaceChildren();
+  atualizarResumo("divergencias",itens,true);
 const validos=itens.filter(m=>m.dogo_quantidade!==null&&
         m.local_quantidade!==null&&!m.sem_dogo);
       const faltantes=validos.filter(m=>Number(m.local_quantidade)<Number(m.dogo_quantidade));
