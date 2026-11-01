@@ -112,25 +112,13 @@ function voltarTelaAnteriorPmobile() {
 
     const telaAtual = obterTelaSistemaAtual();
 
-    if (typeof window.voltarUmNivelDadosLocais === "function" &&
-        window.voltarUmNivelDadosLocais(telaAtual)) return true;
-
-    if (typeof window.voltarUmNivelTransportesPmobile === "function" &&
-        window.voltarUmNivelTransportesPmobile(telaAtual)) return true;
-
-    // Configurações possui uma hierarquia interna que não aparece
-    // no histórico de telas principais: Subárea → Administração →
-    // Configurações. Locais e Divergências também voltam ao pai.
-    if (typeof window.voltarUmNivelConfiguracoes === "function" &&
-        window.voltarUmNivelConfiguracoes(telaAtual)) {
-
-        if (telaAtual === "locais" || telaAtual === "divergencias") {
-            // Remove a entrada consumida para não voltar novamente à
-            // mesma tela ao retornar do hub de Configurações.
+    // O núcleo usa somente o contrato registrado pelos módulos.
+    const moduloRetorno = window.PMobileModulos?.consumirRetorno(telaAtual);
+    if (moduloRetorno) {
+        if (moduloRetorno === "configuracoes" &&
+            (telaAtual === "locais" || telaAtual === "divergencias")) {
             const posicao = historicoTelasSistema.lastIndexOf("configuracoes");
-            if (posicao !== -1) {
-                historicoTelasSistema.splice(posicao, 1);
-            }
+            if (posicao !== -1) historicoTelasSistema.splice(posicao, 1);
         }
         return true;
     }
@@ -2704,6 +2692,11 @@ function procurarAtualizacoesOta() {
     else iniciar();
 })();
 
+// Adaptadores de acesso às funções históricas. As permissões permanecem
+// em cada módulo; o menu não invoca nomes globais dinâmicos.
+window.PMobileModulos?.registrarAcao("importar-estoque",abrirImportacao);
+window.PMobileModulos?.registrarAcao("conferencias",abrirConferencias);
+
 window.PMOBILE_OK = true;
 
 // ============================================================
@@ -3055,6 +3048,8 @@ document.addEventListener(
         }
         return false;
     };
+
+    window.PMobileModulos?.registrarRetorno("configuracoes",window.voltarUmNivelConfiguracoes);
 
     document.addEventListener("DOMContentLoaded", function () {
         // Se a aplicação for aberta sem passar pela função de navegação,
