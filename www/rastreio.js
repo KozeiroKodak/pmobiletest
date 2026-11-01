@@ -374,3 +374,6 @@ function abrirPopupStatusRastreio() {
     });
     botao.setAttribute("aria-expanded", "true");
 }
+
+// Ponte de navegação: o rastreio publica seu ponto de entrada.
+window.PMobileModulos?.registrarAcao("rastreio",abrirRastreio);
