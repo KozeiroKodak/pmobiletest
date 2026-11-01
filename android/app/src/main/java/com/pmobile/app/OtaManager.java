@@ -42,6 +42,7 @@ public class OtaManager {
 
     private static final String KEY_CANDIDATE_HEALTHY =
         "candidateHealthy";
+    private static final String KEY_BOOT_ATTEMPTED = "bootAttempted";
 
 
     // ============================================================
@@ -244,6 +245,78 @@ public class OtaManager {
         return getActiveVersion();
     }
 
+    /** A new bundle gets one real WebView boot before it may replace its fallback. */
+    public synchronized File getBundleForStartup(String embeddedVersion) throws IOException {
+        String active = getActiveVersion();
+        if (active != null && OtaVersion.parse(embeddedVersion).compareTo(OtaVersion.parse(active)) >= 0) {
+            // A signed APK with an equal/newer bundle supersedes older OTA files.
+            // Keep the files, but select APK assets without touching WebView data.
+            if (!preferences.edit().remove(KEY_ACTIVE_VERSION).remove(KEY_PREVIOUS_VERSION)
+                    .remove(KEY_CANDIDATE_VERSION).remove(KEY_BOOT_ATTEMPTED)
+                    .putBoolean(KEY_CANDIDATE_HEALTHY, true).commit()) {
+                throw new IOException("Unable to select embedded web bundle");
+            }
+            return null;
+        }
+        return getBundleForStartup();
+    }
+
+    public synchronized File getBundleForStartup() throws IOException {
+        String candidate = getCandidateVersion();
+        if (candidate != null && !isCandidateHealthy()) {
+            if (preferences.getBoolean(KEY_BOOT_ATTEMPTED, false)) {
+                restorePreviousVersion();
+                return getHealthyActiveBundle();
+            }
+            File bundle = new File(versionsDir, candidate);
+            try {
+                if (!candidate.equals(getActiveVersion()) || !isWithinDirectory(versionsDir, bundle)) {
+                    throw new IOException("Invalid pending OTA state");
+                }
+                validateBundle(bundle);
+            } catch (IOException invalid) {
+                restorePreviousVersion();
+                return getHealthyActiveBundle();
+            }
+            if (!preferences.edit().putBoolean(KEY_BOOT_ATTEMPTED, true).commit()) {
+                throw new IOException("Unable to record OTA boot attempt");
+            }
+            return bundle;
+        }
+        return getHealthyActiveBundle();
+    }
+
+    public synchronized void restorePreviousVersion() throws IOException {
+        String previous = getPreviousVersion();
+        SharedPreferences.Editor editor = preferences.edit()
+            .remove(KEY_CANDIDATE_VERSION).remove(KEY_BOOT_ATTEMPTED)
+            .putBoolean(KEY_CANDIDATE_HEALTHY, true)
+            .putString("lastRecovery", "A versão anterior foi restaurada após uma falha de inicialização.");
+        if (previous == null) editor.remove(KEY_ACTIVE_VERSION);
+        else editor.putString(KEY_ACTIVE_VERSION, previous);
+        if (!editor.commit()) throw new IOException("Unable to restore OTA fallback");
+    }
+
+    public synchronized boolean confirmWebBoot(String version) throws IOException {
+        if (version == null || !version.equals(getCandidateVersion())
+                || !preferences.getBoolean(KEY_BOOT_ATTEMPTED, false)) return false;
+        return healthCheckPendingCandidate();
+    }
+
+    public String getLastRecovery() { return preferences.getString("lastRecovery", ""); }
+
+    public synchronized void clearStaging() throws IOException {
+        ensureDirectories();
+        File[] entries = stagingDir.listFiles();
+        if (entries == null) throw new IOException("Unable to inspect OTA staging");
+        for (File entry : entries) deleteRecursively(entry, stagingDir);
+    }
+
+    public synchronized boolean hasPreparedCandidate() {
+        File[] entries = stagingDir.listFiles(file -> file.isDirectory() && file.getName().endsWith(".candidate"));
+        return entries != null && entries.length == 1;
+    }
+
     /** Returns the active bundle only when its persisted health state and files are valid. */
     public synchronized File getHealthyActiveBundle() throws IOException {
         String activeVersion = getActiveVersion();
@@ -322,13 +395,13 @@ public class OtaManager {
 
     /**
      * Revalidates a persisted pending candidate and marks it healthy only after
-     * its bundle is readable and structurally valid. A failed check leaves the
+     * a confirmed WebView boot and readable bundle. A failed check leaves the
      * pending state intact for a later rollback/fallback step.
      */
     public synchronized boolean healthCheckPendingCandidate() throws IOException {
         String candidateVersion = getCandidateVersion();
         if (candidateVersion == null || candidateVersion.trim().isEmpty()
-                || isCandidateHealthy()) {
+                || isCandidateHealthy() || !preferences.getBoolean(KEY_BOOT_ATTEMPTED, false)) {
             return false;
         }
         if (!candidateVersion.equals(getActiveVersion())
@@ -348,7 +421,8 @@ public class OtaManager {
         if (!index.canRead()) {
             throw new IOException("OTA candidate index.html is not readable");
         }
-        if (!preferences.edit().putBoolean(KEY_CANDIDATE_HEALTHY, true).commit()) {
+        if (!preferences.edit().putBoolean(KEY_CANDIDATE_HEALTHY, true)
+                .remove(KEY_BOOT_ATTEMPTED).putLong("installedAt", System.currentTimeMillis()).commit()) {
             throw new IOException("Unable to persist healthy OTA candidate state");
         }
 
@@ -363,8 +437,7 @@ public class OtaManager {
     /**
      * Removes only obsolete OTA bundles and temporary staging artifacts after
      * the active candidate has passed its health check. The active bundle is
-     * always preserved; the previous version is removed only after the new
-     * version is confirmed healthy.
+     * always preserved together with the immediately previous healthy version.
      */
     private synchronized void cleanupObsoleteOtaData(String activeVersion) throws IOException {
         if (activeVersion == null || activeVersion.trim().isEmpty()
@@ -381,7 +454,7 @@ public class OtaManager {
         File[] versionBundles = versionsDir.listFiles(File::isDirectory);
         if (versionBundles != null) {
             for (File bundle : versionBundles) {
-                if (!bundle.equals(activeBundle)) {
+                if (!bundle.equals(activeBundle) && !bundle.getName().equals(getPreviousVersion())) {
                     deleteRecursively(bundle, versionsDir);
                 }
             }
@@ -395,7 +468,6 @@ public class OtaManager {
         }
 
         if (!preferences.edit()
-                .remove(KEY_PREVIOUS_VERSION)
                 .remove(KEY_CANDIDATE_VERSION)
                 .putString(KEY_ACTIVE_VERSION, activeVersion)
                 .putBoolean(KEY_CANDIDATE_HEALTHY, true)
@@ -460,9 +532,12 @@ public class OtaManager {
         SharedPreferences.Editor editor = preferences.edit()
             .putString(KEY_ACTIVE_VERSION, version)
             .putString(KEY_CANDIDATE_VERSION, version)
+            .remove(KEY_BOOT_ATTEMPTED).remove("lastRecovery")
             .putBoolean(KEY_CANDIDATE_HEALTHY, false);
         if (oldActiveVersion != null && !oldActiveVersion.trim().isEmpty()) {
             editor.putString(KEY_PREVIOUS_VERSION, oldActiveVersion);
+        } else {
+            editor.remove(KEY_PREVIOUS_VERSION);
         }
         if (!editor.commit()) {
             if (!activeBundle.renameTo(candidate)) {
