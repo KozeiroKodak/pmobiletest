@@ -128,30 +128,30 @@ input:focus, select:focus, textarea:focus { border-color: var(--pm-acento); }
 :is(.botao-importar-materiais,.botao-buscar-contagem-manual,.botao-config-contagem-manual) {
   background-image: linear-gradient(135deg,rgba(87,220,235,.11),transparent 72%);
 }
-#pesquisa .pesquisa-v2-buscar { background: var(--pm-acento); color: #061b21; }
-#pesquisa .pesquisa-v2-vazio span { color: var(--pm-acento); }
+#pesquisa .pesquisa-buscar { background: var(--pm-acento); color: #061b21; }
+#pesquisa .pesquisa-vazio span { color: var(--pm-acento); }
 #locais .aba-locais.ativo { border-color: var(--pm-acento) !important; }
 #locais .aba-locais:focus-visible { outline-color: var(--pm-acento) !important; }
 
 /* Contagem manual: trocar acentos de marca, manter ERP OK e avisos semânticos. */
-#contagemManual .contagem-v2 { background: #0c1d23; border-color: var(--borda); }
-#contagemManual .contagem-v2-topo,
-#contagemManual .contagem-v2-resultados { border-color: var(--borda); }
-#contagemManual .contagem-v2-icone { background: #16414c; color: var(--pm-acento); }
-#contagemManual .contagem-v2-selo { background: #173941; color: var(--pm-acento); }
-#contagemManual .contagem-v2-campo { background: #122930; border-color: var(--borda-clara); }
-#contagemManual .contagem-v2-campo span { color: var(--pm-acento); }
-#contagemManual .contagem-v2-tipos button.ativo {
+#contagemManual .contagem { background: #0c1d23; border-color: var(--borda); }
+#contagemManual .contagem-topo,
+#contagemManual .contagem-resultados { border-color: var(--borda); }
+#contagemManual .contagem-icone { background: #16414c; color: var(--pm-acento); }
+#contagemManual .contagem-selo { background: #173941; color: var(--pm-acento); }
+#contagemManual .contagem-campo { background: #122930; border-color: var(--borda-clara); }
+#contagemManual .contagem-campo span { color: var(--pm-acento); }
+#contagemManual .contagem-tipos button.ativo {
   background: #126776; border-color: var(--pm-acento); color: #f6ffff;
 }
 #contagemManual .linha-contagem-manual-busca .botao-buscar-contagem-manual,
-#contagemManual .contagem-v2-salvar {
+#contagemManual .contagem-salvar {
   background: var(--pm-acento); color: #061b21;
 }
 #contagemManual .linha-contagem-manual-busca .botao-config-contagem-manual {
   background: #173943; color: var(--pm-acento);
 }
-#contagemManual .contagem-v2-lista-titulo > span {
+#contagemManual .contagem-lista-titulo > span {
   background: #173943; color: var(--pm-acento);
 }
 /* Etiquetas .erp-ok/.erp-analise: cores de estado mantidas. */
