@@ -11,7 +11,7 @@
       "Estoque manual":"Pesquisa local";
     const etapa=aba==="conferencias"?"Encontre um material para registrar uma conferência.":
       aba==="estoque"?"Encontre um material para atualizar o estoque.":"Encontre um material no cadastro local.";
-    const classe=contagem?"contagem-v2":"pesquisa-v2";
+    const classe=contagem?"contagem":"pesquisa";
     const prefix=classe;
     const subtitulo=contagem?"Inventário / "+nome:"Catálogo / Pesquisa local";
     const selector=contagem?'<div class="seletor-contagem-manual-wrapper">'+
@@ -19,7 +19,7 @@
       '<option value="codigo">CÓD</option><option value="referencia">REF</option>'+
       '<option value="descricao">DESC</option></select>'+
       '<button type="button" class="seletor-contagem-manual" data-dl-seletor aria-label="Alternar tipo de pesquisa">CÓD</button></div>':
-      '<select class="pesquisa-v2-select" name="tipo" aria-label="Tipo de pesquisa">'+
+      '<select class="pesquisa-select" name="tipo" aria-label="Tipo de pesquisa">'+
       '<option value="codigo">Código</option><option value="referencia">Referência</option>'+
       '<option value="descricao">Descrição</option></select>';
     const buttons=['codigo','referencia','descricao'].map(tipo=>{
@@ -36,14 +36,14 @@
       '<div><strong>PMobile</strong><small>'+subtitulo+'</small></div></div>'+
       '<span class="'+prefix+'-selo">● '+(contagem?'Registro local':'Dados locais')+'</span></div>'+
       '<div class="'+prefix+'-intro"><h2>'+nome+'</h2><p>'+etapa+'</p></div>'+
-      (contagem?'<h3 class="contagem-v2-etapa">01 · Localizar material</h3>':'')+
+      (contagem?'<h3 class="contagem-etapa">01 · Localizar material</h3>':'')+
       '<form class="'+(contagem?'linha-formulario linha-contagem-manual-busca':'dl-pesquisa-original')+
       '" data-dl-busca="'+aba+'">'+
       '<div class="'+prefix+'-campo"><span aria-hidden="true">⌕</span>'+
       '<input type="search" name="termo" placeholder="Digite o código" autocomplete="off" aria-label="Buscar material"></div>'+
       selector+
       '<div class="'+prefix+'-tipos" role="group" aria-label="Pesquisar por">'+buttons+'</div>'+
-      '<button type="submit" class="'+(contagem?'botao-aba botao-buscar-contagem-manual':'pesquisa-v2-buscar')+
+      '<button type="submit" class="'+(contagem?'botao-aba botao-buscar-contagem-manual':'pesquisa-buscar')+
       '">⌕ &nbsp; Buscar material</button>'+controls+'</form>'+
       '<div class="'+prefix+'-resultados" id="dlResultados-'+aba+'" aria-live="polite"></div>'+
       (contagem?'<p class="dl-informacao" id="dlConfig-'+aba+'" hidden>'+
@@ -56,7 +56,7 @@
     const el=$("dlResultados-"+aba);el.replaceChildren();
 
     if(!itens.length){
-      el.innerHTML='<div class="pesquisa-v2-vazio"><strong>Nenhum material encontrado</strong>'+
+      el.innerHTML='<div class="pesquisa-vazio"><strong>Nenhum material encontrado</strong>'+
         '<p>Confira o material e tente novamente.</p></div>';return;
     }
     if(aba==="estoque"||aba==="conferencias"){
@@ -79,20 +79,20 @@
       });
       return;
     }
-    const cont=document.createElement("p");cont.className="pesquisa-v2-contagem";
+    const cont=document.createElement("p");cont.className="pesquisa-contagem";
     cont.textContent=itens.length+" material(is) nesta página";el.appendChild(cont);
     itens.forEach((m)=>{
       const cadastrado=m.quantidade_total!==null||m.quantidade_item!==null||
         m.quantidade_reservada!==null||Boolean(m.local);
-      const card=document.createElement("details");card.className="pesquisa-v2-card";
+      const card=document.createElement("details");card.className="pesquisa-card";
       const sum=document.createElement("summary");
-      const cod=document.createElement("span");cod.className="pesquisa-v2-codigo";cod.textContent=m.codigo;
-      const status=document.createElement("span");status.className="pesquisa-v2-disponivel"+(cadastrado?"":" zero");
+      const cod=document.createElement("span");cod.className="pesquisa-codigo";cod.textContent=m.codigo;
+      const status=document.createElement("span");status.className="pesquisa-disponivel"+(cadastrado?"":" zero");
       status.textContent=cadastrado?"Dados preenchidos":"Pendente";
       const desc=document.createElement("strong");desc.textContent=m.descricao;
       const ref=document.createElement("small");ref.textContent="Ref.: "+valor(m.referencia)+" · Toque para detalhes";
       sum.append(cod,status,desc,ref);card.appendChild(sum);
-      const detalhes=document.createElement("div");detalhes.className="pesquisa-v2-detalhes";
+      const detalhes=document.createElement("div");detalhes.className="pesquisa-detalhes";
       [["Código",m.codigo],["Referência",m.referencia],["Marca",m.marca],
        ["Local",m.local],["Quantidade do item",num(m.quantidade_item)],
        ["Quantidade total",num(m.quantidade_total)],["Itens reservados",num(m.quantidade_reservada)]]
