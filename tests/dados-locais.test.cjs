@@ -47,8 +47,8 @@ test("menu Dados locais e hub Transportes integrados somente por novos módulos"
  assert.match(entry,/implementacoes\/dados-locais\.css\?v=/);
  assert.match(original,/voltarUmNivelDadosLocais/);
  assert.match(original,/voltarUmNivelTransportesPmobile/);
- assert.match(mover,/configuracoesV3Hub/);
- for(const fn of ["abrirValoresTotal","abrirValoresTotal2","abrirImportacao",
+ assert.match(mover,/configuracoesHub/);
+ for(const fn of ["abrirValoresTotal","abrirImportacao",
                   "abrirConferencias","abrirRastreio","abrirOpcoesCotacoes"])
    assert.ok(mover.includes(fn),fn);
 });
