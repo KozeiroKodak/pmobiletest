@@ -33,8 +33,22 @@ check(document.querySelectorAll('.frete-lista details').length===1&&document.que
 const botoes=[...document.querySelectorAll('#valoresTotalMensais > div > button')];
 for(const nome of ['Ano','Mês','Transportadora']){const b=botoes.find(x=>x.textContent===nome);check(!!b,'aba '+nome);b.click();}
 check(document.querySelectorAll('[id="valoresTotal"]').length===1,'rota financeira única');
+check(!!window.PMobileModulos,'ponte modular presente');
+check(!!document.getElementById('pmConfigFerramentas'),'cartões legados em Configurações');
+const valoresCard=[...document.querySelectorAll('#pmConfigFerramentas button')].find(x=>x.textContent.includes('Valores Total'));
+check(!!valoresCard,'acesso financeiro registrado');
+valoresCard.click();check(atual==='valoresTotal','clique financeiro delega via registro');
+const menuTrans=document.getElementById('menuTransportes');
+check(!!menuTrans,'hub Transportes registrado');
+menuTrans.click();check(atual==='transportes','menu Transportes abre o hub');
+const origemVoltar=window.PMobileModulos.consumirRetorno('transportes');
+check(origemVoltar==='transportes'&&atual==='homeSistema','retorno de Transportes pela ponte');
+const voltarCot=document.querySelector('#opcoesCotacoes .cot-back');
+check(!!voltarCot&&!voltarCot.hasAttribute('onclick'),'botão de Cotações sem handler global inline');
+voltarCot.click();check(atual==='transportes','retorno de Cotações sem global dinâmico');
+
 output.dataset.qaFail='0';
 }catch(e){log.push('FALHOU '+e.message);output.dataset.qaFail='1';}
 output.textContent=log.join('\\n');});`;
-html=html.replace('</body>','<script>'+mocks+'</script><script src="locais.js"></script><script src="valorestotal.js"></script><script>'+config+'</script><script>'+checks+'</script></body>');
+html=html.replace('</body>','<script>'+mocks+'</script><script src="pmobile-modulos.js"></script><script src="locais.js"></script><script src="valorestotal.js"></script><script>'+config+'</script><script src="reorganizacao-pmobile.js"></script><script>'+checks+'</script></body>');
 fs.writeFileSync(path.join(root,'tests/fixtures/unificacao.html'),html);console.log('Fixture de navegação e financeiro gerada');
