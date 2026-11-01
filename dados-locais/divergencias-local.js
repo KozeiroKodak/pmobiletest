@@ -3,7 +3,7 @@
  "use strict";
  const registry=window.PMobileDadosLocaisModulos||(window.PMobileDadosLocaisModulos=Object.create(null));
  registry.divergencias=function(ctx){
-  const {$,estado,escape,valor,num,norm,rpc,sessao,mensagem,consultar,paginacao,resumo,painel,pesquisarForm,compararForm,atualizarResumo,desenharMateriais,desenharComparacao,quantidade}=ctx;
+  const {$,escape,num,painel,compararForm,atualizarResumo}=ctx;
   function render(itens){
   const el=$("dlResultados-divergencias");el.replaceChildren();
   atualizarResumo("divergencias",itens,true);
