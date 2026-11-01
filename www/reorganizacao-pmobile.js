@@ -8,14 +8,15 @@
    conferencias:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2h6v2m-7 7 2 2 4-4m-6 8h8"/>'
  };
  const itensConfig=[
-   ["valores","Valores Total","abrirValoresTotal","Resumo financeiro atual"],
-   ["estoque","Importar Estoque","abrirImportacao","Importação Dogo original"],
-   ["conferencias","Conferências","abrirConferencias","Histórico existente"]
+   ["valores","Valores Total","valores-total","Resumo financeiro atual"],
+   ["estoque","Importar Estoque","importar-estoque","Importação Dogo original"],
+   ["conferencias","Conferências","conferencias","Histórico existente"]
  ];
  const $=(id)=>document.getElementById(id);
  function executar(nome) {
-   if(typeof window[nome]!=="function"){alert("Funcionalidade indisponível nesta versão.");return;}
-   window[nome]();
+   if(!window.PMobileModulos?.executarAcao(nome)){
+     alert("Funcionalidade indisponível nesta versão.");
+   }
  }
  function init(){
    const hub=$("configuracoesHub");
@@ -56,10 +57,10 @@
      screen.innerHTML='<div class="home-apps"><div class="home-apps-cabecalho">'+
        '<div><p class="home-apps-kicker">PMOBILE / TRANSPORTES</p><h1>Transportes</h1>'+
        '<p>Selecione uma funcionalidade.</p></div></div><div class="home-apps-grade">'+
-       '<button class="home-app-card" type="button" data-pm-transporte="abrirRastreio">'+
+       '<button class="home-app-card" type="button" data-pm-transporte="rastreio">'+
        '<span class="home-app-icone">🚚</span><span class="home-app-conteudo"><strong>Rastreio</strong>'+
        '<small>Relação de notas fiscais enviadas</small></span><span class="home-app-seta">›</span></button>'+
-       '<button class="home-app-card" type="button" data-pm-transporte="abrirOpcoesCotacoes">'+
+       '<button class="home-app-card" type="button" data-pm-transporte="cotacoes">'+
        '<span class="home-app-icone">📋</span><span class="home-app-conteudo"><strong>Opções de Cotações</strong>'+
        '<small>Consulte transportadoras por região</small></span><span class="home-app-seta">›</span></button>'+
        '</div></div>';
@@ -76,7 +77,10 @@
       const el=$(id);if(el)el.style.display="none";
     });
    const voltarCotacoes=document.querySelector("#opcoesCotacoes .cot-back");
-   if(voltarCotacoes)voltarCotacoes.setAttribute("onclick","abrirTransportesPmobile()");
+   if(voltarCotacoes){
+     voltarCotacoes.removeAttribute("onclick");
+     voltarCotacoes.addEventListener("click",e=>{e.preventDefault();abrir();});
+   }
  }
  function abrir(){
    if(typeof window.mostrarTelaSistema!=="function")return;
@@ -87,6 +91,7 @@
    if(typeof window.mostrarTelaSistema!=="function")return false;
    window.mostrarTelaSistema("homeSistema",null,true);return true;
  }
+ window.PMobileModulos?.registrarRetorno("transportes",voltar);
  window.abrirTransportesPmobile=abrir;
  window.voltarUmNivelTransportesPmobile=voltar;
  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
