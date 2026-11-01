@@ -177,3 +177,17 @@ test("Divergências locais usa cartões e classificação nativos sem tratar NUL
   assert.ok(!el.innerHTML.includes("7 unidades")); // pendente não soma faltas
   assert.ok(el.innerHTML.includes("PENDENTE"));
 });
+
+test("reserva divergente não é ocultada por quantidade física pendente",()=>{
+  const {api,elemento}=compilar();
+  const el=elemento("dlResultados-divergencias");
+  elemento("dlResumo-divergencias");
+  api.desenharComparacao("divergencias",[
+    {codigo:"R-1",descricao:"Reservado",dogo_quantidade:8,
+     local_quantidade:null,dogo_reservada:0,local_reservada:5,
+     diferenca_quantidade:false,diferenca_reserva:true,
+     diferenca_local:false,sem_dogo:false}
+  ]);
+  assert.ok(el.innerHTML.includes("RESERVA DIVERGENTE"));
+  assert.ok(!el.innerHTML.includes("<strong>Classificação:</strong> PENDENTE"));
+});
