@@ -4,10 +4,6 @@
    Toda a apresentação desta tela permanece neste CSS dedicado.
    ============================================================ */
 
-#sistema {
-    display: none !important;
-}
-
 #conteudoPrincipal {
     width: 100%;
     min-height: 100vh;
