@@ -12,7 +12,7 @@
   --verde: #57dceb; /* compatibilidade com componentes legados de marca */
   --verde-hover: #8cebf5;
   --fundo: #09151a;
-  --fundo-sidebar: #0d1c22;
+  --fundo-status: #0d1c22;
   --fundo-painel: #14252b;
   --fundo-hover: #1b343b;
   --fundo-ativo: #20414a;
@@ -29,9 +29,6 @@
 body, #aplicacao, #conteudoPrincipal, .tela-sistema {
   background-color: var(--fundo);
 }
-#sistema { background-color: var(--fundo-sidebar); border-color: var(--borda); }
-.sidebar-logo { background: var(--pm-acento); color: #061c22; }
-.sidebar-item.ativo { background: var(--fundo-ativo); border-color: var(--pm-acento); color: var(--pm-acento); }
 .painel, .painel-reservas, .rastreio-painel, .configuracoes-painel-admin,
 .painel-solicitacoes, .painel-locais, .rastreio-importacao-painel,
 .arquivos-teste-painel { background-color: var(--fundo-painel); border-color: var(--borda); }
@@ -45,7 +42,6 @@ input:focus, select:focus, textarea:focus { border-color: var(--pm-acento); }
 .botao-principal:hover { background: var(--pm-acento-hover); border-color: var(--pm-acento-hover); }
 .botao-secundario { border-color: var(--borda-clara); background: #183039; }
 .botao-secundario:hover { background: var(--fundo-hover); }
-.botao-perigo, .botao-perigo:hover { /* exclusão mantém o alerta vermelho */ }
 
 /* Início e menu de aplicativos. Sobrescreve a camada monocromática. */
 #homeSistema {
