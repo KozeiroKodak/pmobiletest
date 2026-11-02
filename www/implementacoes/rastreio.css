@@ -18,7 +18,7 @@
 }
 
 .rastreio-filtros input,
-.rastreio-filtros select {
+    .rastreio-filtros select {
     width: 100%;
     min-width: 0;
     min-height: 42px;
@@ -311,12 +311,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .rastreio-filtros input,
-    .rastreio-filtros select,
-    .rastreio-card,
-    .rastreio-nfs-detalhes,
-    .rastreio-detalhes-modal,
-    .rastreio-detalhes-caixa {
+    .rastreio-filtros input, .rastreio-filtros select, .rastreio-card, .rastreio-nfs-detalhes {
         transition: none;
     }
 }
@@ -359,88 +354,6 @@
     opacity: .7;
     white-space: nowrap;
 }
-.rastreio-detalhes-modal {
-    position: fixed;
-    inset: 0;
-    z-index: 1200;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 18px;
-    background: rgba(0,0,0,.48);
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transition: opacity .18s ease, visibility .18s ease;
-}
-.rastreio-detalhes-modal.aberto {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-}
-.rastreio-detalhes-caixa {
-    width: min(520px, 100%);
-    max-height: min(720px, calc(100vh - 36px));
-    overflow: auto;
-    border-radius: 18px;
-    padding: 20px;
-    background: var(--fundo-painel);
-    box-shadow: 0 20px 60px rgba(0,0,0,.22);
-    transform: translateY(8px) scale(.98);
-    transition: transform .18s ease;
-}
-.rastreio-detalhes-modal.aberto .rastreio-detalhes-caixa {
-    transform: translateY(0) scale(1);
-}
-.rastreio-detalhes-cabecalho {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 18px;
-}
-.rastreio-detalhes-cabecalho span {
-    font-size: .78rem;
-    opacity: .65;
-}
-.rastreio-detalhes-cabecalho h2 {
-    margin: 3px 0 0;
-    color: var(--texto);
-}
-.rastreio-detalhes-fechar {
-    border: 0;
-    background: transparent;
-    color: var(--texto-secundario);
-    font-size: 1.7rem;
-    line-height: 1;
-    cursor: pointer;
-}
-.rastreio-detalhes-grade {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-}
-.rastreio-detalhes-grade > div {
-    padding: 14px;
-    border: 1px solid rgba(127,127,127,.18);
-    border-radius: 12px;
-}
-.rastreio-detalhes-grade small {
-    display: block;
-    margin-bottom: 5px;
-    opacity: .68;
-}
-.rastreio-detalhes-grade strong {
-    display: block;
-    font-size: 1.05rem;
-}
-@media (max-width: 560px) {
-    .rastreio-detalhes-modal { padding: 10px; }
-    .rastreio-detalhes-caixa { max-height: calc(100vh - 20px); padding: 16px; border-radius: 15px; }
-    .rastreio-detalhes-grade {
-        grid-template-columns: 1fr;
-    }
-}
 
 
 /* ============================================================
@@ -456,9 +369,6 @@
         grid-template-columns: 76px minmax(0, 1fr);
         gap: 6px;
     }
-    .rastreio-detalhes-cabecalho { gap: 10px; }
-    .rastreio-detalhes-cabecalho h2 { font-size: 18px; }
-    .rastreio-detalhes-fechar { flex: 0 0 auto; padding: 4px; }
 }
 
 /* Cards compactos: leitura rápida no celular, sem perder informações. */
