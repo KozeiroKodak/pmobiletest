@@ -12,3 +12,5 @@ tests/fixtures/ota.html
 *.jks
 *.keystore
 keystore.properties
+google-services.json
+*service-account*.json
