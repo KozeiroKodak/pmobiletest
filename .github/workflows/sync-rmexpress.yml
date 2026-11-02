@@ -1,0 +1,36 @@
+name: Sync RMEXPRESS from PMEntregas
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/15 * * * *'
+permissions:
+  contents: write
+concurrency:
+  group: pmobile-rmexpress-sync
+  cancel-in-progress: false
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Import verified PMEntregas web release
+        run: node scripts/sync-rmexpress.mjs
+      - name: Validate module and existing application
+        run: |
+          npm run sync:android
+          npm test
+      - name: Update main when shared application changed
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add rmexpress www
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Update sincroniza RMEXPRESS com PMEntregas'
+          git pull --rebase origin main
+          git push origin HEAD:main
