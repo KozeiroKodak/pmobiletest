@@ -121,19 +121,8 @@
         6px 10px
         6px 14px;
 
-
-    /* ========================================================
-       FUNDO
-       ========================================================
-
-       Utiliza o mesmo fundo estrutural da sidebar.
-
-       O efeito transparente/blur do antigo popup foi removido.
-
-       ======================================================== */
-
     background:
-        var(--fundo-sidebar);
+        var(--fundo-status);
 
 
     /* ========================================================
