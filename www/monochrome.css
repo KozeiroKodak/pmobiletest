@@ -1,7 +1,7 @@
 /* PMobile Monochrome V2 — camada visual global, reversível.
    Estados operacionais (sucesso/erro/alerta) preservam suas cores. */
 :root{
- --fundo:#101010;--fundo-sidebar:#161616;--fundo-painel:#1b1b1b;
+ --fundo:#101010;--fundo-status:#161616;--fundo-painel:#1b1b1b;
  --fundo-hover:#252525;--fundo-ativo:#303030;
  --borda:#303030;--borda-clara:#454545;
  --texto:#ededed;--texto-secundario:#a3a3a3;--texto-fraco:#777;
