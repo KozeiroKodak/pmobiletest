@@ -68,7 +68,7 @@ jobs:
           fi
 
           changed_files="$(gh api "repos/${GITHUB_REPOSITORY}/compare/${latest_target}...${GITHUB_SHA}" --jq '.files[]?.filename')"
-          web_changes="$(printf '%s\\n' "${changed_files}" | grep -E '(^[^/]+\\.(html|css|js)$|^implementacoes/[^/]+\\.css$)' || true)"
+          web_changes="$(printf '%s\n' "${changed_files}" | grep -E '(^[^/]+\.(html|css|js)$|^implementacoes/[^/]+\.css$|^rmexpress/.*\.(html|css|js)$)' || true)"
 
           if [[ -z "${web_changes}" ]]; then
             echo "Nenhuma alteração do web layer desde o último OTA."
@@ -83,7 +83,7 @@ jobs:
 
   publish-ota:
     needs: ota-gate
-    if: false # Publicação pausada durante integração RMEXPRESS && (github.event_name == 'workflow_dispatch' || github.actor != 'github-actions[bot]')
+    if: needs.ota-gate.outputs.publish == 'true' && (github.event_name == 'workflow_dispatch' || github.actor != 'github-actions[bot]')
     runs-on: ubuntu-latest
 
     steps:
@@ -294,7 +294,7 @@ jobs:
           import json,os,datetime
           from pathlib import Path
           version=os.environ["VERSION"]; sha256=os.environ["SHA256"]; repo=os.environ["GITHUB_REPOSITORY"]
-          manifest={"webVersion":version,"nativeMinVersion":"1.0","package":f"https://github.com/{repo}/releases/download/ota-web-{version}/pmobile-web-{version}.zip","sha256":sha256,"mandatory":False,"sizeBytes":Path(f"pmobile-web-{version}.zip").stat().st_size,"publishedAt":datetime.datetime.now(datetime.timezone.utc).isoformat(),"releaseNotes":Path("ota/release-notes.md").read_text(encoding="utf-8").strip()}
+          manifest={"webVersion":version,"nativeMinVersion":"1.05","package":f"https://github.com/{repo}/releases/download/ota-web-{version}/pmobile-web-{version}.zip","sha256":sha256,"mandatory":False,"sizeBytes":Path(f"pmobile-web-{version}.zip").stat().st_size,"publishedAt":datetime.datetime.now(datetime.timezone.utc).isoformat(),"releaseNotes":Path("ota/release-notes.md").read_text(encoding="utf-8").strip()}
           path=Path("ota/manifest.json")
           path.write_text(json.dumps(manifest,indent=2,ensure_ascii=False)+"\n")
           json.loads(path.read_text())
