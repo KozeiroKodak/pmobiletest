@@ -1,0 +1,12 @@
+#rmexpress .rmexpress-cabecalho{display:flex;align-items:center;gap:16px;padding:16px 0}
+#rmexpress .rmexpress-cabecalho h1{margin:0;font-size:1.35rem}
+#rmexpress .rmexpress-cabecalho button,#rmexpressTentar{padding:10px 16px;border:1px solid #365064;border-radius:12px;background:#182b3f;color:#e8efff;font:inherit;cursor:pointer}
+#rmexpressStatus:empty{display:none}
+#rmexpressStatus{padding:14px;color:#a8bdd0}
+#rmexpressStatus.erro{color:#ffc6bf}
+#rmexpressFrame{width:100%;height:calc(100dvh - 130px);min-height:420px;border:0;border-radius:16px;background:#0b1424}
+#rmexpressFrame[hidden]{display:none}
+#rmexpressTentar{margin-bottom:12px}
+#menuRMExpress[hidden]{display:none!important}
+#rmexpressTentar[hidden]{display:none!important}
+body.rmexpress-ativa #pm-sync-center{display:none}
