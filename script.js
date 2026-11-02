@@ -114,7 +114,8 @@ const itensMenuSistema = [
 
     "menuConfiguracoes",
     "menuDadosLocais",
-    "menuTransportes"
+    "menuTransportes",
+    "menuRMExpress"
 
 ];
 
@@ -288,6 +289,7 @@ function mostrarTelaSistema(
 
     }
 
+    window.dispatchEvent(new Event('pmobile:tela-alterada'));
 }
 
 
@@ -1779,6 +1781,7 @@ function atualizarVisibilidadeConfiguracoes() {
         menuSair: !!usuario,
         menuConfiguracoes: isAdmin,
         menuTransportes: isAdmin || isNivel2,
+        menuRMExpress: ["ADMIN","RMADMIN","RMMOTORISTAS"].includes(nivel),
         menuDadosLocais: isAdmin || isNivel2,
         menuReservas: isAdmin || isNivel2,
         menuPesquisa: isAdmin || isNivel2,
@@ -1790,6 +1793,7 @@ function atualizarVisibilidadeConfiguracoes() {
         const botao = document.getElementById(id);
         if (botao) botao.style.display = regras[id] ? "" : "none";
     });
+    window.dispatchEvent(new Event('pmobile:sessao-alterada'));
 
 }
 
