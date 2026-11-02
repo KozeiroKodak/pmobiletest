@@ -33,7 +33,21 @@ jobs:
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
       - name: Sync Capacitor
-        run: npx cap sync android
+        run: |
+          npm run sync:android
+          npx cap sync android
+      - name: Configure Android Firebase
+        env:
+          FIREBASE_ANDROID_JSON: ${{ secrets.FIREBASE_ANDROID_JSON }}
+        run: |
+          node - <<'JS'
+          const fs=require('fs');
+          const raw=process.env.FIREBASE_ANDROID_JSON;
+          if(!raw)throw Error('Configure FIREBASE_ANDROID_JSON para notificações RMEXPRESS.');
+          const config=JSON.parse(raw);
+          if(!config.client?.some(c=>c.client_info?.android_client_info?.package_name==='com.pmobile.preview'))throw Error('Cliente Firebase PMobile preview ausente');
+          fs.writeFileSync('android/app/google-services.json',raw);
+          JS
       - name: Usar AAPT2 do runner Linux
         run: sed -i '/aapt2FromMavenOverride/d' android/gradle.properties
       - name: Build debug APK
