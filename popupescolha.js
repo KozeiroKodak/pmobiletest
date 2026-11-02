@@ -93,26 +93,4 @@ function abrirPopupEscolha(config) {
 }
 
 
-function abrirPopupEscolhaSelect(config) {
-    const seletor = document.getElementById(config.idSelect);
-    if (!seletor) return;
 
-    abrirPopupEscolha({
-        titulo: config.titulo,
-        opcoes: Array.from(seletor.options).map(function(opcao) {
-            return {
-                value: opcao.value,
-                label: opcao.textContent,
-                selected: opcao.selected
-            };
-        }),
-        aoEscolher: function(valor) {
-            seletor.value = valor;
-            seletor.dispatchEvent(new Event("change", { bubbles: true }));
-
-            if (typeof config.aoEscolher === "function") {
-                config.aoEscolher(valor);
-            }
-        }
-    });
-}
