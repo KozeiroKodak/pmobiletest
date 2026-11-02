@@ -1,0 +1,880 @@
+:root {
+  font-family: Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+  color:#e9f1ff;background:#0b1424;line-height:1.5;font-synthesis:none;
+  --surface:#111f33;--surface2:#15263a;--border:#293a50;
+  --muted:#a1b1c7;--mint:#6fe0c7;--mintdark:#153e47;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;min-height:100vh}
+button,input,select{font:inherit}
+button{cursor:pointer}
+button:disabled{cursor:not-allowed;opacity:.35}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #7beacb;outline-offset:2px}
+.app-shell{min-height:100vh}
+.topbar {
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  background:#0d182a;border-bottom:1px solid var(--border);
+  padding:15px max(20px,calc((100vw - 1080px)/2));
+}
+.identity{display:flex;align-items:center;gap:12px;min-width:0}
+.identity strong,.identity small{display:block}
+.identity strong{font-size:18px;letter-spacing:-.035em}
+.identity small{font-size:12px;color:var(--muted)}
+.brand-mark{
+  display:grid;place-items:center;flex:none;height:43px;width:43px;
+  border-radius:13px;background:linear-gradient(135deg,#46d7bd,#2f9abf);
+  font-size:19px;font-weight:900;color:#052331;
+}
+.connection{border:1px solid #365067;border-radius:100px;padding:7px 12px;color:#bed0e1;font-size:12px;text-align:center;max-width:172px}
+.connection.offline{border-color:#9b7149;color:#ffd3a8}
+.main{max-width:1080px;margin:0 auto;padding:28px 20px 28px}
+h1,h2,h3,p{margin:0}
+.eyebrow{font-size:11px;font-weight:780;letter-spacing:.11em;color:var(--mint)}
+.environment {
+  background:var(--surface2);border:1px solid #35556b;border-radius:15px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:16px 18px;margin-bottom:20px;
+}
+.environment-copy{display:flex;gap:12px;align-items:start;min-width:0}
+.environment-icon{color:var(--mint);font-size:24px;line-height:1}
+.environment-copy strong{font-size:14px}
+.environment-copy p{font-size:12px;color:#b4c8d9;max-width:630px;margin-top:2px}
+.demo-active .environment{border-color:#2b8075;background:#102f38}
+.environment-actions{display:flex;flex-wrap:wrap;gap:8px}
+.btn {
+  display:inline-flex;align-items:center;justify-content:center;border-radius:10px;
+  font-weight:720;padding:10px 13px;border:1px solid #345069;
+  min-height:40px;white-space:nowrap;font-size:12px;
+}
+.btn-primary{background:#62d9bc;border-color:#62d9bc;color:#092c32}
+.btn-primary:hover{background:#88ebd4}
+.btn-secondary{background:#192b41;color:#d4e3f2}
+.btn-secondary:hover{background:#233e53}
+.notice{padding:11px 13px;background:#203044;border:1px solid #436075;border-radius:11px;color:#e2eef9;font-size:12px;margin-bottom:15px}
+.section-heading{display:flex;align-items:end;justify-content:space-between;gap:10px;margin-bottom:13px}
+.section-heading h2{font-size:25px;letter-spacing:-.04em;margin-top:2px}
+.subtle,.muted{color:var(--muted);font-size:12px}
+.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.metric,.feature,.progress-card,.delivery-card,.route-card,.central-card,.route-intro,.quick-info,.empty{
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;
+}
+.metric{padding:16px;min-width:0}
+.metric span,.metric small{display:block;color:var(--muted);font-size:12px}
+.metric span{font-weight:650}
+.metric strong{display:block;font-size:31px;margin:4px 0;letter-spacing:-.045em}
+.progress-card{padding:15px 17px;margin-top:11px}
+.progress-line{display:flex;justify-content:space-between;gap:10px;margin-bottom:10px;font-size:12px}
+.progress-line span{color:var(--mint)}
+.progress-track{height:8px;border-radius:100px;background:#2b4052;overflow:hidden}
+.progress-track>div{height:100%;width:0;background:linear-gradient(90deg,#32a4bf,#67dcc0);transition:width .25s ease}
+.feature{display:flex;align-items:center;gap:13px;padding:16px;margin-top:11px}
+.feature-icon{display:grid;place-items:center;background:#18404b;color:#92e4d3;border-radius:12px;font-size:25px;flex:none;width:49px;height:49px}
+.feature-copy{flex:1;min-width:0}
+.jornada-fonte{display:grid;gap:4px;text-align:right;max-width:340px}
+.jornada-fonte small{font-size:10px;color:var(--muted)}
+#proximaParada{flex-wrap:wrap;align-items:flex-start;border-color:#376374;background:linear-gradient(125deg,#132c3b,var(--surface))}
+#proximaParada .feature-copy{flex-basis:calc(100% - 70px)}
+#proximaParada .proxima-situacao{display:inline-block;font-size:11px;color:var(--mint);margin:10px 0 4px}
+#proximaParada .proxima-destino{font-size:13px;color:#d6e8ef;margin:4px 0 8px}
+#proximaCarga{font-size:11px;color:var(--muted)}
+.proxima-acoes{display:flex;gap:10px;flex-wrap:wrap;width:100%;margin-top:6px}
+.proxima-acoes .btn{flex:1;min-height:46px}
+#proximaParada>#verEntregas{margin-left:auto}
+.feature h3{font-size:17px;margin-bottom:3px}
+.feature p{font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+.quick-info{padding:12px 16px;color:var(--muted);font-size:12px;margin-top:11px}
+.filterbar{display:flex;gap:10px;margin-bottom:14px}
+.filterfield{display:flex;flex-direction:column;gap:5px;flex:1;min-width:0}
+.filterfield span{font-size:11px;font-weight:650;color:var(--muted)}
+.filterfield input,.filterfield select{
+  background:#112237;border:1px solid #38506b;color:#e9f1ff;
+  width:100%;min-height:42px;padding:9px 12px;border-radius:10px;outline-offset:2px;
+}
+.filterfield input::placeholder{color:#8497b1}
+.filter-select{flex:0 0 210px}
+.delivery-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.delivery-card{padding:16px;min-width:0}
+.delivery-head{display:flex;justify-content:space-between;gap:9px;align-items:start}
+.delivery-head small{display:block;color:var(--mint);font-size:10px;font-weight:740;letter-spacing:.04em}
+.delivery-head h3{font-size:17px;margin-top:4px}
+.status-chip{display:inline-flex;border:1px solid #506176;border-radius:99px;padding:4px 9px;white-space:nowrap;font-size:10px;color:#c9d4e5}
+.status-pendente{background:#263146;border-color:#55657c}
+.status-em_rota{background:#173d4f;border-color:#33778d;color:#9adaec}
+.status-entregue{background:#163d38;border-color:#2d8673;color:#8be6c6}
+.status-ocorrencia{background:#513521;border-color:#966b45;color:#ffd4a0}
+.destination{color:#bed0df;font-size:12px;margin:12px 0}
+.delivery-meta{display:flex;flex-wrap:wrap;gap:8px;padding-top:11px;border-top:1px solid #2c4054}
+.delivery-meta span{font-size:11px;color:var(--muted)}
+.delivery-meta span:not(:last-child)::after{content:"·";padding-left:8px;color:#61758c}
+.delivery-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:13px}
+.empty{grid-column:1/-1;list-style:none;padding:42px 18px;text-align:center;color:var(--muted);font-size:13px}
+.empty strong{display:block;color:#dfebf8;font-size:15px;margin-bottom:5px}
+.empty p{max-width:380px;margin:0 auto}
+.route-intro{padding:15px 17px;margin-bottom:13px}
+.route-intro strong{font-size:14px}
+.route-intro p{font-size:12px;color:var(--muted);margin-top:4px}
+.route-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:9px}
+.route-card{display:flex;align-items:center;gap:12px;padding:13px 15px}
+.route-number{display:grid;place-items:center;background:#183d49;color:#8ce8d1;border-radius:11px;font-weight:850;width:38px;height:38px;flex:none}
+.route-details{flex:1;min-width:0}
+.route-details strong,.route-details span,.route-details small{display:block}
+.route-details strong{font-size:14px}
+.route-details span,.route-details small{font-size:11px;color:var(--muted);overflow-wrap:anywhere}
+.route-controls{display:flex;gap:6px}
+.route-controls button{background:#1b3449;border:1px solid #3c566e;color:#cce3ed;border-radius:9px;width:38px;height:38px;font-size:19px}
+.central-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.central-card{padding:19px}
+.central-icon{display:grid;place-items:center;background:#183e48;color:#90e7d1;border-radius:11px;width:42px;height:42px;margin-bottom:13px;font-size:23px}
+.central-card h3{font-size:16px;margin-bottom:5px}
+.central-card p{font-size:12px;color:var(--muted)}
+footer{text-align:center;color:#7e91aa;font-size:11px;margin:35px 0}
+@media(max-width:760px){
+  .delivery-list{grid-template-columns:1fr}
+  .central-grid{grid-template-columns:1fr}
+  .environment{align-items:stretch;flex-direction:column;gap:12px}
+}
+@media(max-width:620px){
+  .topbar{padding:12px 15px;gap:9px}
+  .identity{gap:9px}
+  .identity strong{font-size:16px}
+  .identity small{font-size:11px}
+  .brand-mark{width:38px;height:38px;font-size:16px;border-radius:11px}
+  .connection{font-size:10px;padding:6px 9px;max-width:130px;line-height:1.3}
+  .main{padding:22px 15px}
+  .environment{padding:12px;gap:10px;border-radius:12px;margin-bottom:16px}
+  .environment-copy{gap:9px}
+  .environment-icon{font-size:21px}
+  .environment-copy strong{font-size:12px}
+  .environment-copy p{font-size:11px}
+  .environment-actions .btn{flex:1;min-width:0}
+  .section-heading{align-items:start;flex-direction:column;gap:3px}
+  .section-heading h2{font-size:23px}
+  .metrics{gap:7px}
+  .metric{padding:11px 9px;border-radius:12px}
+  .metric span,.metric small{font-size:10px;line-height:1.3;overflow-wrap:anywhere}
+  .metric strong{font-size:27px}
+  .progress-card{padding:12px 13px}
+  .feature{padding:13px;gap:10px;flex-wrap:wrap}
+  .feature-icon{width:41px;height:41px;font-size:22px}
+  .feature h3{font-size:15px}
+  .feature p{font-size:11px}
+  .feature .btn{width:100%}
+  .filterbar{gap:7px}
+  .filter-select{flex-basis:38%}
+  .filterfield input,.filterfield select{font-size:12px;padding:9px}
+  .delivery-card{padding:13px}
+  .delivery-head h3{font-size:15px}
+  .route-card{padding:12px;gap:9px}
+  .route-number{width:33px;height:33px}
+  .route-controls button{height:36px;width:36px}
+  footer{font-size:10px;margin-top:25px}
+}
+@media(max-width:340px){
+  .main{padding-left:11px;padding-right:11px}
+  .topbar{padding-left:11px;padding-right:11px}
+  .identity strong{font-size:14px}
+  .connection{max-width:109px;font-size:9px}
+  .metric{padding:9px 6px}
+  .metric strong{font-size:25px}
+}
+@media(prefers-reduced-motion:reduce){.progress-track>div{transition:none}}
+
+/* PMEntregas 0.0.4 — autenticação PMobile e gerência administrativa */
+.gerencia-atribuicao label{display:flex;flex-direction:column;gap:5px;min-width:0}
+.gerencia-atribuicao label span{font-size:11px;font-weight:650;color:var(--muted)}
+.gerencia-atribuicao select{
+  background:#102338;border:1px solid #39556c;color:#e9f2ff;
+  border-radius:10px;padding:9px 11px;min-height:41px;width:100%;min-width:0;
+}
+.auth-user{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.auth-user strong,.auth-user span,.auth-user small{display:block}
+.auth-user strong{font-size:15px}
+.auth-user span{font-size:11px;color:var(--mint);font-weight:750}
+.auth-user small{font-size:10px;color:var(--muted)}
+.gerencia-status.erro{color:#ffd0ad}
+.gerencia-aviso{
+  font-size:12px;color:#c2dded;background:#163040;border:1px solid #32616c;
+  padding:12px 14px;border-radius:11px;margin-bottom:14px;
+}
+.gerencia-aviso strong{color:#9cebd4}
+.gerencia-status{font-size:12px;color:var(--mint);padding:7px 0;min-height:31px}
+.gerencia-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}
+.gerencia-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:15px;min-width:0}
+.gerencia-card .delivery-head h3{font-size:16px}
+.gerencia-atribuicao{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:9px;margin-top:14px}
+.gerencia-atribuicao>.btn{min-height:41px}
+.mais-gerencia{display:flex;margin:15px auto 0}
+#view-gerencia .filterbar{align-items:end}
+#view-gerencia .filterbar .btn{height:42px}
+@media(max-width:760px){.gerencia-grid{grid-template-columns:1fr}}
+@media(max-width:620px){
+  .auth-user strong{font-size:13px}
+  .gerencia-card{padding:12px}
+  .gerencia-atribuicao{grid-template-columns:minmax(0,1fr) 92px;gap:7px}
+  .gerencia-atribuicao .btn{font-size:11px;padding:7px 8px}
+  #view-gerencia .filterbar{flex-direction:column;align-items:stretch}
+  #view-gerencia .filterbar .btn{width:100%}
+}
+
+/* PMEntregas 0.0.5 — Histórico restrito à Gerência */
+.historico-section{border-top:1px solid var(--border);margin-top:30px;padding-top:22px}
+.historico-heading{align-items:center}
+.historico-heading h3{font-size:22px;letter-spacing:-.025em}
+.historico-explicacao{margin:0 0 15px}
+.historico-metricas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.historico-metrica{background:#112b36;border:1px solid #335563;border-radius:13px;padding:15px;min-width:0}
+.historico-metrica span{display:block;font-size:11px;color:#b2c8d7}
+.historico-metrica strong{display:block;font-size:28px;letter-spacing:-.035em;margin-top:4px;color:#86e8d1}
+.historico-subtitulo{font-size:15px;margin:18px 0 10px}
+.historico-motoristas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:16px}
+.historico-motorista{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:13px;min-width:0}
+.historico-motorista-top{display:flex;justify-content:space-between;gap:12px}
+.historico-motorista-top strong{font-size:13px;overflow-wrap:anywhere}
+.historico-motorista-top span{font-size:13px;color:var(--mint);font-weight:800;white-space:nowrap}
+.historico-motorista small{display:block;color:var(--muted);margin:4px 0 10px}
+.historico-motorista .btn{min-height:34px;padding:7px 10px}
+.historico-filtros{margin-top:15px}
+.historico-filtros .filter-select{flex:0 0 40%}
+.historico-lista{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.historico-nota{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:14px;min-width:0}
+.historico-nota h3{font-size:15px}
+.historico-meta{display:flex;flex-direction:column;gap:5px;margin-top:12px}
+.historico-meta span{font-size:11px;color:var(--muted)}
+.historico-meta strong{color:#d8e5f0;font-weight:650}
+@media(max-width:760px){
+  .historico-motoristas,.historico-lista{grid-template-columns:1fr}
+}
+@media(max-width:620px){
+  .historico-section{margin-top:23px;padding-top:18px}
+  .historico-heading{align-items:flex-start}
+  .historico-heading h3{font-size:19px}
+  .historico-heading .btn{width:100%}
+  .historico-metricas{gap:6px}
+  .historico-metrica{padding:11px 8px}
+  .historico-metrica span{font-size:10px;line-height:1.2}
+  .historico-metrica strong{font-size:24px}
+  .historico-filtros{flex-direction:column}
+  .historico-filtros .filter-select{flex:auto}
+  .historico-nota{padding:12px}
+}
+
+/* 0.0.6 — jornada real do motorista */
+.motorista-atualizar{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.motorista-atualizar .btn{min-height:34px;padding:7px 11px}
+.motorista-roteiro-acoes{
+  background:#142b39;border:1px solid #355769;border-radius:12px;
+  padding:12px 14px;display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:12px;
+}
+.motorista-roteiro-acoes .subtle{flex:1;min-width:180px}
+#statusMotoristaReal.erro,#statusRoteiroMotorista.erro{color:#ffd0ad}
+#view-entregas .delivery-actions .muted{display:block;white-space:normal}
+@media(max-width:620px){
+  .motorista-atualizar{width:100%;justify-content:space-between}
+  .motorista-atualizar .btn{flex:0 0 auto;font-size:11px}
+  .motorista-roteiro-acoes{flex-direction:column;align-items:stretch}
+  .motorista-roteiro-acoes .subtle{min-width:0}
+}
+
+/* 0.0.7 — etiquetas das prioridades operacionais, sem alterar a atribuição */
+.prioridade-legenda{display:flex;flex-wrap:wrap;gap:7px;align-items:center;padding:10px 0 14px}
+.prioridade-legenda>strong{width:100%;font-size:12px}
+.prioridade-legenda>small{display:block;width:100%;font-size:11px;color:var(--muted)}
+.nf-prioridade{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:5px 9px;font-size:10px;font-weight:760;letter-spacing:.012em;border:1px solid;white-space:nowrap}
+.nf-prioridade-expressa{color:#ffd0ba;border-color:#a95c46;background:#4c2828}
+.nf-prioridade-prioritaria{color:#ffdf9e;border-color:#9d7645;background:#45351d}
+.nf-prioridade-reenvio{color:#b7d9fb;border-color:#4176a3;background:#1b324d}
+.nf-prioridade-normal{color:#bac5d3;border-color:#4a596b;background:#263144}
+@media(max-width:620px){
+  .prioridade-legenda{gap:6px}
+  .nf-prioridade{font-size:9px;padding:5px 7px}
+  .gerencia-card .nf-prioridade{max-width:42%;white-space:normal;text-align:center}
+}
+
+/* PMEntregas 0.0.9 — seleção de categorias na Gerência e nas Entregas do motorista */
+.categoria-painel{margin:10px 0 16px}
+.categoria-titulo{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;font-size:13px;font-weight:750;margin-bottom:9px}
+.categoria-titulo small{color:var(--muted);font-weight:450;font-size:11px}
+.categoria-botoes{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.categoria-btn{
+  min-height:58px;border:1px solid #355066;background:#111f33;border-radius:12px;
+  color:#bbccde;display:flex;align-items:center;justify-content:space-between;
+  text-align:left;gap:7px;padding:11px 12px;font-weight:700;font-size:12px;min-width:0;
+}
+.categoria-btn strong{
+  display:grid;place-items:center;border-radius:999px;min-width:29px;
+  padding:4px 7px;background:#283a51;color:#dfebf5;font-size:12px;font-variant-numeric:tabular-nums;
+}
+.categoria-btn.active,.categoria-btn[aria-pressed="true"]{
+  border-color:#3ba68e;background:#153f43;color:#8df2d8;
+}
+.categoria-btn.active strong{background:#28615e;color:#dafff3}
+.categoria-btn:not(.active):hover{border-color:#62849a;background:#1b2b42}
+.categoria-btn:focus-visible{outline:2px solid #86ecd4;outline-offset:2px}
+#contadoresGerenciaStatus{margin:7px 0 0;min-height:16px}
+@media(max-width:720px){
+  .categoria-botoes{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  .categoria-btn:first-child{grid-column:1/-1;min-height:43px}
+  .categoria-btn{min-height:49px;padding:9px 11px;font-size:12px}
+  .categoria-titulo{display:block;font-size:12px}
+  .categoria-titulo small{display:block;line-height:1.5;margin-top:2px}
+}
+
+/* Central logística e gerenciamento de lotes (0.0.16) */
+.central-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:12px 0}
+.central-indicadores{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px}
+.central-indicadores article{padding:15px;background:#112d38;border:1px solid #315866;border-radius:12px;min-width:0}
+.central-indicadores span{display:block;color:#a9becb;font-size:11px}
+.central-indicadores strong{display:block;font-size:27px;color:#88ead1}
+.central-titulo{font-size:17px;margin:20px 0 10px}
+.central-motoristas-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.central-motorista,.central-nota{background:#111f33;border:1px solid #30465e;border-radius:13px;padding:15px;min-width:0}
+.central-motorista strong,.central-motorista span,.central-motorista small{display:block}
+.central-motorista strong{font-size:14px}
+.central-motorista-topo{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.central-motorista .central-disponibilidade{font-size:10px;border:1px solid #39566b;border-radius:30px;padding:3px 8px;margin:0}
+.central-progresso{margin:12px 0}
+.central-progresso progress{display:block;width:100%;height:7px;accent-color:var(--mint);border:0;border-radius:8px;overflow:hidden}
+.central-progresso progress::-webkit-progress-bar{background:#294353;border-radius:8px}
+.central-progresso progress::-webkit-progress-value{background:#6fe0c7;border-radius:8px}
+.central-motorista.central-atencao{border-color:#9e794a}
+.central-alerta{font-size:11px;color:#ffd7a5;margin:10px 0}
+.central-contexto{padding:16px;border:1px solid #38526a;border-radius:14px;background:#14273a;margin:16px 0}
+.central-contexto strong{font-size:13px}.central-contexto p{font-size:12px;margin:6px 0;color:#cee1ef}
+.central-contexto small{font-size:10px;color:var(--muted)}
+.central-edicao{margin-top:12px;border-top:1px solid var(--border);padding-top:12px}
+.central-edicao>summary{font-size:12px;color:var(--mint);cursor:pointer;padding:6px 0}
+@media(max-width:620px){
+ #view-painel>.section-heading{align-items:flex-start;flex-direction:column;gap:8px}
+ .jornada-fonte{text-align:left;max-width:100%}
+ .proxima-acoes{flex-direction:column}
+}
+.central-motorista span,.central-motorista small{color:#aebfd2;font-size:11px;margin:4px 0}
+.central-lista{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin-top:13px}
+.central-controles{display:flex;flex-wrap:wrap;align-items:end;gap:8px;margin-top:13px}
+.central-controles label,.gerencia-lote label{display:flex;flex:1;min-width:150px;flex-direction:column;gap:5px}
+.central-controles label span,.gerencia-lote label span{color:#a6b7cb;font-size:11px}
+.central-controles input,.central-controles select,.gerencia-lote select{
+  background:#102338;border:1px solid #36546e;color:#ecf4ff;border-radius:9px;min-height:40px;padding:8px 10px;
+  font:inherit;width:100%;font-size:13px
+}
+.gerencia-lote{display:flex;align-items:end;gap:10px;flex-wrap:wrap;margin:12px 0;padding:14px;
+  background:#173544;border:1px solid #3c7182;border-radius:13px}
+.gerencia-lote .btn{flex:0 0 auto}
+.gerencia-selecao{display:flex;align-items:center;gap:9px;color:#c4d6e7;font-size:12px;margin-top:12px}
+.gerencia-selecao input{accent-color:#6ee1c4;height:18px;width:18px}
+.route-navegar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.route-aviso{color:#abbece;font-size:11px;margin-top:9px}
+#centralStatus.erro{color:#ffd0ad}
+@media(max-width:900px){.central-indicadores{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:690px){
+ .central-indicadores{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .central-indicadores article:last-child{grid-column:1/-1}
+ .central-motoristas-grid,.central-lista{grid-template-columns:1fr}
+ .central-header{align-items:flex-start}
+ .gerencia-lote label{flex:1 0 100%}
+ .gerencia-lote .btn{flex:1}
+}
+
+/* Central de atualizações: padrão PMobile */
+
+.pm-atualizacoes .ota-painel{max-width:680px;margin:0 auto;padding:26px;border:1px solid #284b57;border-radius:24px;background:radial-gradient(ellipse at top right,#123845 0,transparent 58%),#0d1d24;color:#e8f4f6;overflow:hidden}
+.pm-atualizacoes .ota-painel [hidden]{display:none!important}
+.pm-atualizacoes .ota-cabecalho{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
+.pm-atualizacoes .ota-simbolo{display:grid;place-items:center;flex:0 0 48px;height:48px;border-radius:16px;color:#64dfed;border:1px solid #2f6571;background:#153b46;font-size:32px}
+.pm-atualizacoes .ota-selo{font-size:11px;font-weight:600;border:1px solid #34616b;border-radius:30px;padding:7px 10px;color:#a0e3e9;text-align:center}
+.pm-atualizacoes .ota-painel h2{font-size:clamp(25px,5vw,34px);line-height:1.15;letter-spacing:-1px;margin:0 0 12px;color:#f1fafb}
+.pm-atualizacoes .ota-intro{font-size:14px;line-height:1.6;color:#a5bec8;margin:0 0 24px}
+.pm-atualizacoes .ota-versoes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding:16px 0;margin:0 0 22px;border-top:1px solid #25434e;border-bottom:1px solid #25434e;gap:12px}
+.pm-atualizacoes .ota-versoes dt{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#94b3be;margin-bottom:8px}
+.pm-atualizacoes .ota-versoes dd{margin:0;font-size:18px;font-weight:700;color:#dff6fa;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.pm-atualizacoes .ota-situacao strong{display:block;color:#e1f6f8;font-size:17px;margin-bottom:8px}
+.pm-atualizacoes .ota-situacao p{color:#aac2cb;line-height:1.6;font-size:13px;margin:0}
+.pm-atualizacoes .ota-progresso{margin:20px 0 0}
+.pm-atualizacoes .ota-progresso>div{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:#c4e8ee;margin-bottom:8px}
+.pm-atualizacoes .ota-progresso progress{width:100%;height:8px;display:block;border:0;border-radius:10px;overflow:hidden;accent-color:#53d6e5;background:#1b3c46}
+.pm-atualizacoes .ota-progresso progress::-webkit-progress-bar{background:#1b3c46;border-radius:10px}
+.pm-atualizacoes .ota-progresso progress::-webkit-progress-value{background:#53d6e5;border-radius:10px}
+.pm-atualizacoes .ota-progresso small{display:block;margin-top:8px;font-size:11px;color:#87aeba;font-variant-numeric:tabular-nums}
+.pm-atualizacoes .ota-etapas{list-style:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:0;margin:24px 0;color:#708f9b;font-size:10px}
+.pm-atualizacoes .ota-etapas li{border-top:2px solid #25414c;padding-top:8px}
+.pm-atualizacoes .ota-etapas li[data-situacao=atual]{color:#a4f1f5;border-color:#55d8e6}
+.pm-atualizacoes .ota-etapas li[data-situacao=concluida]{color:#9bd7c4;border-color:#4cae93}
+.pm-atualizacoes .ota-novidades{border-radius:14px;background:#102831;border:1px solid #244752;padding:16px;margin:18px 0}
+.pm-atualizacoes .ota-novidades h3{font-size:12px;margin:0 0 10px;color:#d0edf2}
+.pm-atualizacoes .ota-novidades p{font-size:12px;line-height:1.7;color:#a5c4ce;margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.pm-atualizacoes .ota-acoes{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+.pm-atualizacoes .ota-acoes .ota-primario{width:100%;min-height:48px;border-radius:14px;background:#58d9e6;color:#062a33;font-size:14px;font-weight:750;border:1px solid #83e9f1;padding:12px 18px}
+.pm-atualizacoes .ota-acoes button:disabled{opacity:.5;cursor:wait}
+.pm-atualizacoes .ota-acoes button:focus-visible{outline:2px solid #d9fbff;outline-offset:4px}
+.pm-atualizacoes .ota-rodape{font-size:11px;color:#88aab7;line-height:1.7;margin:16px 0 0}
+.pm-atualizacoes .ota-ultima{display:block;color:#7698a5;font-size:10px;margin-top:12px}
+.pm-atualizacoes .ota-recuperacao{padding:12px;border-radius:12px;background:#173a32;color:#b1e4cf;font-size:12px;line-height:1.6}
+.pm-atualizacoes .ota-painel[data-estado=error] .ota-situacao strong{color:#ffcb9e}
+@media(max-width:480px){.pm-atualizacoes .ota-painel{padding:20px 16px;border-radius:20px}.pm-atualizacoes .ota-selo{max-width:170px}.pm-atualizacoes .ota-versoes{gap:8px}.pm-atualizacoes .ota-versoes dd{font-size:16px}}
+
+.pm-atualizacoes{width:100%;margin:16px auto}.atualizacoes-acesso{margin:24px 0}.atualizacoes-acesso>summary{cursor:pointer;padding:16px;font-weight:600}
+
+/* Início e Login: referência PMobile, estilos isolados. */
+/* PMOBILE — Tela inicial */
+/* ============================================================
+   TELA INICIAL
+   ============================================================ */
+
+#inicio {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: calc(100dvh - var(--status-altura) - 48px);
+    margin: 0;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: var(--fundo);
+}
+
+#inicio h1 {
+
+    margin:
+        0 0 8px;
+
+    font-size:
+        26px;
+
+    font-weight:
+        600;
+
+}
+
+
+#inicio p {
+
+    margin:
+        0;
+
+    color:
+        var(--texto-secundario);
+
+}
+
+/* ============================================================
+   BOTÃO INICIAR
+   ============================================================ */
+
+#inicio button {
+    min-width: 150px;
+    min-height: 42px;
+    margin-top: 20px;
+    padding: 9px 22px;
+    border: 1px solid var(--borda-clara);
+    border-radius: 8px;
+    background: var(--fundo-painel);
+    color: var(--texto);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+#inicio button:hover {
+
+    background:
+        var(--fundo-hover);
+
+}
+
+
+@media (max-width: 700px) {
+    #inicio {
+        min-height: calc(100dvh - var(--status-altura) - 48px);
+        padding: 20px 18px;
+    }
+
+    #inicio h1 {
+        max-width: 100%;
+        font-size: clamp(23px, 7vw, 30px);
+        line-height: 1.15;
+    }
+
+    #inicio p {
+        max-width: 330px;
+        line-height: 1.45;
+    }
+
+    #inicio button {
+        width: min(100%, 260px);
+        min-height: 44px;
+    }
+}
+
+@media (max-width: 380px) {
+    #inicio {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    #inicio h1 {
+        font-size: 23px;
+    }
+
+    #inicio p {
+        font-size: 13px;
+    }
+}
+
+/* PMOBILE — Login */
+/* ============================================================
+   LOGIN PMOBILE
+   Visual isolado para testes da interface de acesso.
+   ============================================================ */
+
+.login-pmobile.login-pmobile {
+    --login-fundo: #171717;
+    --login-painel: #222222;
+    --login-painel-borda: #323232;
+    --login-texto: #f4f4f4;
+    --login-secundario: #9b9b9b;
+    --login-borda: #444444;
+    --login-campo: #2b2b2b;
+    --login-destaque: #ffffff;
+
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    width: 100%;
+    min-height: 100dvh;
+    overflow-y: auto;
+    background: var(--login-fundo);
+    color: var(--login-texto);
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.login-pmobile .login-pmobile-topo {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    width: 100%;
+    min-height: 54px;
+    display: grid;
+    grid-template-columns: 48px 1fr 48px;
+    align-items: center;
+    padding: 0 12px;
+    border-bottom: 1px solid #2c2c2c;
+    background: rgba(23, 23, 23, 0.97);
+    text-align: center;
+}
+
+.login-pmobile .login-pmobile-topo strong {
+    color: #f2f2f2;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: .08em;
+}
+
+.login-pmobile .login-topo-espaco {
+    width: 48px;
+}
+
+.login-pmobile .login-voltar {
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #f2f2f2;
+    font-size: 31px;
+    font-weight: 300;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.login-pmobile .login-voltar:hover {
+    background: #292929;
+}
+
+.login-pmobile .login-pmobile-corpo {
+    width: calc(100% - 32px);
+    max-width: 430px;
+    margin: 0 auto;
+    padding: 46px 0 38px;
+}
+
+.login-pmobile .login-pmobile-marca {
+    margin: 0 0 32px;
+    text-align: center;
+}
+
+.login-pmobile .login-pmobile-logo {
+    width: 68px;
+    height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    border: 1px solid #3b3b3b;
+    border-radius: 50%;
+    background: #242424;
+    color: #f7f7f7;
+    font-size: 29px;
+    font-weight: 700;
+}
+
+.login-pmobile .login-pmobile-marca h1 {
+    margin: 0 0 8px;
+    color: #f5f5f5;
+    font-size: 26px;
+    font-weight: 500;
+    line-height: 1.2;
+}
+
+.login-pmobile .login-pmobile-marca p {
+    margin: 0;
+    color: var(--login-secundario);
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.login-pmobile .login-pmobile-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 22px 20px 20px;
+    border: 1px solid var(--login-painel-borda);
+    border-radius: 8px;
+    background: var(--login-painel);
+}
+
+.login-pmobile .login-pmobile-form label {
+    margin: 0 0 7px;
+    color: #c9c9c9;
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.login-pmobile .login-pmobile-form > input,
+.login-pmobile .login-senha-campo {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 48px;
+    margin: 0 0 17px;
+    border: 1px solid var(--login-borda);
+    border-radius: 5px;
+    background: var(--login-campo);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.02);
+}
+
+.login-pmobile .login-pmobile-form > input,
+.login-pmobile .login-senha-campo input {
+    color: #f4f4f4;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 15px;
+}
+
+.login-pmobile .login-pmobile-form > input {
+    padding: 0 13px;
+    outline: none;
+}
+
+.login-pmobile .login-pmobile-form > input::placeholder,
+.login-pmobile .login-senha-campo input::placeholder {
+    color: #777777;
+}
+
+.login-pmobile .login-pmobile-form > input:focus,
+.login-pmobile .login-senha-campo:focus-within {
+    border-color: #777777;
+    background: #303030;
+    outline: none;
+}
+
+.login-pmobile .login-senha-campo {
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+}
+
+.login-pmobile .login-senha-campo input {
+    min-width: 0;
+    flex: 1;
+    height: 46px;
+    padding: 0 8px 0 13px;
+    border: 0;
+    outline: none;
+    background: transparent;
+}
+
+.login-pmobile .login-mostrar-senha {
+    height: 46px;
+    padding: 0 13px;
+    border: 0;
+    background: transparent;
+    color: #aaaaaa;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.login-pmobile .login-mostrar-senha:hover {
+    color: #ffffff;
+}
+
+.login-pmobile .login-entrar {
+    width: 100%;
+    min-height: 48px;
+    margin: 5px 0 0;
+    padding: 0 18px;
+    border: 1px solid #efefef;
+    border-radius: 5px;
+    background: var(--login-destaque);
+    color: #171717;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .05em;
+    cursor: pointer;
+}
+
+.login-pmobile .login-entrar:hover {
+    background: #e8e8e8;
+}
+
+.login-pmobile .login-entrar:active {
+    background: #d8d8d8;
+}
+
+.login-pmobile .login-esqueceu {
+    align-self: center;
+    margin: 14px 0 0;
+    padding: 8px 10px;
+    border: 0;
+    background: transparent;
+    color: #a7a7a7;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.login-pmobile .login-esqueceu:hover {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+.login-pmobile .login-status {
+    min-height: 20px;
+    margin: 16px 0 0;
+    color: #999999;
+    font-size: 12px;
+    line-height: 1.4;
+    text-align: center;
+}
+
+@media (max-width: 480px) {
+    .login-pmobile .login-pmobile-corpo {
+        width: calc(100% - 24px);
+        padding-top: 34px;
+    }
+
+    .login-pmobile .login-pmobile-form {
+        padding: 20px 16px 18px;
+    }
+}
+
+@media (min-width: 700px) {
+    .login-pmobile .login-pmobile-corpo {
+        max-width: 430px;
+        padding-top: 66px;
+    }
+}
+
+/* ============================================================
+   LOGIN — MANTER LOGIN
+   Checkbox compacta com texto ao lado.
+   ============================================================ */
+
+.login-pmobile .login-ajuda {
+    margin: -2px 0 10px;
+    color: #8f8f8f;
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+/* ============================================================
+   SOLICITAÇÃO DE NOVO USUÁRIO
+   ============================================================ */
+
+#inicio{--fundo:#121212;--fundo-painel:#181818;--fundo-hover:#242424;--borda-clara:#3a3a3a;--texto:#ededed;--texto-secundario:#a3a3a3;--status-altura:0px;min-height:100dvh;color:var(--texto);font-family:Arial,Helvetica,sans-serif}
+.login-pmobile .login-ajuda-acesso{margin:20px 0 12px;color:var(--login-secundario);font-size:12px;line-height:1.6}
+.login-pmobile .login-ajuda-acesso summary{cursor:pointer;color:var(--login-texto);padding:8px 0}
+.login-pmobile .login-status.erro{color:#ffc2b3}
+.login-pmobile .login-entrar:disabled{opacity:.55;cursor:wait}
+.login-pmobile .login-esqueceu{width:100%;margin:8px 0;color:var(--login-secundario)}
+.acesso-sessao{margin:0 0 20px}.acesso-sessao .auth-user{padding:14px 16px;border:1px solid var(--border);border-radius:14px;background:var(--surface)}
+@media(max-width:700px){.login-pmobile .login-pmobile-corpo{width:min(100%,430px);padding-left:14px;padding-right:14px}.login-pmobile .login-pmobile-form>input,.login-pmobile .login-senha-campo input{min-height:44px;font-size:16px}}
+
+
+/* Home PMEntregas — navegação por cartões como na Home atual do PMobile.
+   Mantém as views e a lógica de Supabase originais. */
+.home-hub { min-height:calc(100dvh - 120px); }
+.home-apps { max-width:1000px; margin:0 auto; }
+.home-apps-cabecalho { position:relative; margin:0 0 22px; padding:9px 2px 20px; border-bottom:1px solid rgba(225,240,250,.09); }
+.home-apps-cabecalho::after { content:""; position:absolute; left:2px; bottom:-1px; width:52px; height:2px; border-radius:12px; background:var(--mint); }
+.home-apps-kicker { color:var(--mint); font-size:11px; letter-spacing:.13em; font-weight:800; }
+.home-apps-cabecalho h1 { font-size:clamp(27px,4vw,38px); line-height:1.15; letter-spacing:-.045em; margin:9px 0 7px; }
+.home-apps-cabecalho p { color:var(--muted); font-size:13px; }
+.home-apps-grade { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:11px; }
+.home-app-card { display:grid; grid-template-columns:46px minmax(0,1fr) 17px; align-items:center; gap:13px; width:100%; min-height:91px; padding:14px 15px; text-align:left; color:#edf3fb; border:1px solid #2b3e51; border-radius:14px; background:linear-gradient(145deg,rgba(255,255,255,.035),transparent 65%),var(--surface); box-shadow:0 6px 20px rgba(0,0,0,.11); transition:border-color .15s,background .15s,transform .15s; }
+.home-app-card:hover { border-color:#478278; background:linear-gradient(145deg,rgba(111,224,199,.045),transparent 65%),var(--surface2); transform:translateY(-1px); }
+.home-app-card:active { transform:translateY(0); }
+.home-app-card.active { border-color:#3d756e; }
+.home-app-icone { display:grid; place-items:center; width:46px; height:46px; flex:none; font-size:23px; background:#1c3345; border:1px solid #2c4656; border-radius:12px; }
+.home-app-conteudo { display:flex; flex-direction:column; min-width:0; gap:4px; }
+.home-app-conteudo strong { font-size:15px; font-weight:750; }
+.home-app-conteudo small { font-size:12px; color:var(--muted); line-height:1.35; }
+.home-app-seta { color:#849db0; font-size:23px; line-height:1; justify-self:end; }
+.home-admin-group { grid-column:1/-1; margin-top:9px; }
+.home-group-title { margin:0 0 12px 2px; }
+.home-admin-group .home-apps-grade { width:100%; }
+.home-session { margin-top:20px; }
+.home-session .acesso-sessao { margin:0; }
+.home-session .acesso-sessao .auth-user { padding:12px 14px; }
+.home-session .auth-user strong { font-size:13px; }
+.home-session .auth-user span { font-size:10px; }
+.home-session .btn { min-height:35px; }
+.home-info { margin-top:14px; color:var(--muted); font-size:12px; }
+.home-info summary { cursor:pointer; padding:10px 4px; }
+.home-info .environment { margin-top:7px; margin-bottom:12px; }
+.home-hub .atualizacoes-acesso { margin-top:20px; }
+.home-hub footer { margin-bottom:10px; }
+.home-back { display:inline-flex; align-items:center; justify-content:center; gap:4px; padding:7px 10px; border:1px solid #345069; border-radius:9px; color:#d4e3f2; background:#192b41; font-size:12px; font-weight:750; white-space:nowrap; }
+.home-back[hidden] { display:none!important; }
+.home-back:hover { background:#233e53; }
+.topbar .identity { min-width:0; }
+@media(max-width:700px) {
+ .home-hub { min-height:calc(100dvh - 90px); }
+ .home-apps-cabecalho { margin-bottom:17px; padding-top:4px; padding-bottom:18px; }
+ .home-apps-cabecalho h1 { font-size:clamp(27px,7.8vw,34px); }
+ .home-apps-grade { grid-template-columns:1fr; gap:9px; }
+ .home-app-card { min-height:78px; padding:12px 13px; grid-template-columns:42px minmax(0,1fr) 16px; gap:11px; border-radius:12px; }
+ .home-app-icone { width:42px; height:42px; font-size:21px; border-radius:11px; }
+ .home-app-conteudo strong { font-size:14px; }
+ .home-app-conteudo small { font-size:11px; }
+ .home-admin-group { margin-top:8px; }
+ .home-group-title { margin-bottom:9px; }
+ .home-back { font-size:11px; padding:7px 8px; }
+}
+@media(prefers-reduced-motion:reduce) { .home-app-card { transition:none; } }
+
+.notificacoes-abrir{margin:0 0 16px}.notificacoes-painel{padding:18px;margin-bottom:20px;background:var(--surface);border:1px solid var(--border);border-radius:14px}.notificacoes-painel[hidden]{display:none!important}.notificacoes-acoes{display:flex;gap:8px;flex-wrap:wrap}#listaNotificacoes{padding:0;list-style:none;display:grid;gap:9px}.notificacao-item{display:grid;gap:7px;text-align:left;width:100%;padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--surface2);color:#e9f1ff}.notificacao-item.nao-lida{border-left:4px solid var(--mint)}.notificacao-item span{font-size:13px;line-height:1.5}.notificacao-item small{color:var(--muted)}#statusNotificacoes,#notificacoesVazias{padding:12px 0;color:var(--muted);font-size:13px}
+/* PMobile hosts this same application in its RMEXPRESS tab. */
+body.integrado-pmobile #inicio,body.integrado-pmobile #loginPmobile,
+body.integrado-pmobile .atualizacoes-acesso,body.integrado-pmobile footer,
+body.integrado-pmobile #sairPmobile,body.integrado-pmobile #entrarPeloAplicativo {display:none!important}
+body.integrado-pmobile .topbar {position:static}
