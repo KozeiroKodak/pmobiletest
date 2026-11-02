@@ -3,7 +3,6 @@
  "use strict";
  const iconesConfiguracoes={
    valores:'<circle cx="12" cy="12" r="9"/><path d="M12 6v12m3-9c-1-1-5-1-6 1-.8 1.5 1 2.3 3 2.6 3 .4 4 2 2.3 3.7-1.1 1-4.1 1.2-5.3-.2"/>',
-   frete:'<path d="M4 20V11m5 9V6m5 14V9m5 11V3"/><path d="M2 21h20"/>',
    estoque:'<path d="M4 7 12 3l8 4v11l-8 4-8-4z"/><path d="m4 7 8 4 8-4M12 11v11"/>',
    conferencias:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2h6v2m-7 7 2 2 4-4m-6 8h8"/>'
  };
@@ -41,17 +40,9 @@
      const primeiro=hub.querySelector(".configuracoes-grupo");
      if(primeiro)primeiro.insertAdjacentElement("afterend",grupo);else hub.appendChild(grupo);
    }
-   const rastreio=$("menuRastreio");
+   const card=$("menuTransportes");
    const conteudo=$("conteudoPrincipal");
-   if(rastreio && conteudo && !$("transportes")){
-     const card=document.createElement("button");card.type="button";
-     card.id="menuTransportes";card.className="home-app-card";
-     card.innerHTML='<span class="home-app-icone" aria-hidden="true">🚚</span>'+
-       '<span class="home-app-conteudo"><strong>Transportes</strong>'+
-       '<small>Rastreio e opções de cotações</small></span>'+
-       '<span class="home-app-seta" aria-hidden="true">›</span>';
-     card.addEventListener("click",abrir);
-     rastreio.insertAdjacentElement("beforebegin",card);
+   if(card && conteudo && !$("transportes")){
      const screen=document.createElement("section");
      screen.id="transportes";screen.className="tela-sistema";screen.style.display="none";
      screen.innerHTML='<div class="home-apps"><div class="home-apps-cabecalho">'+
@@ -70,12 +61,6 @@
        if(btn)executar(btn.dataset.pmTransporte);
      });
    }
-   // Apenas os pontos de entrada do menu mudam; os elementos originais
-   // continuam no DOM para não comprometer IDs, funções e listeners.
-   ["menuValoresTotal","menuImportacao",
-    "menuConferencias","menuRastreio","menuOpcoesCotacoes"].forEach((id)=>{
-      const el=$(id);if(el)el.style.display="none";
-    });
    const voltarCotacoes=document.querySelector("#opcoesCotacoes .cot-back");
    if(voltarCotacoes){
      voltarCotacoes.removeAttribute("onclick");
