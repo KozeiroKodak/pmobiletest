@@ -30,23 +30,7 @@ function abrirArquivoRastreio() {
     document.getElementById("arquivoRastreio")?.click();
 }
 
-function alternarImportacaoSemMotoristaRastreio(checkbox) {
-    importarSemMotoristaRastreio = Boolean(checkbox?.checked);
-    if (importarSemMotoristaRastreio) {
-        mapaMotoristasRastreio = {};
-    }
-    if (dadosImportacaoRastreio) {
-        if (modoAutomatico) {
-            // Sincronização automática: não oferecer segunda importação manual.
-            const previa = document.getElementById("rastreioImportacaoPrevia");
-            if (previa) previa.replaceChildren();
-        } else {
-            renderizarPreviaImportacaoRastreio();
-        }
-    } else {
-        montarMapaMotoristasUI();
-    }
-}
+
 
 async function prepararImportacaoRastreio(arquivoExterno = null, modoAutomatico = false, bufferPrecarregado = null) {
     const arquivo =
@@ -1035,91 +1019,9 @@ async function limparTodosDadosRastreio() {
 }
 
 
-function normalizarUrlPlanilhaOnlineRastreio(urlInformada) {
-    let url;
 
-    try {
-        url = new URL(urlInformada);
-    } catch {
-        throw new Error("O link informado não é uma URL válida.");
-    }
 
-    if (url.protocol !== "https:" && url.protocol !== "http:") {
-        throw new Error("O link deve começar com http:// ou https://.");
-    }
 
-    const host = url.hostname.toLowerCase();
-
-    const matchGoogle = url.pathname.match(/^\/spreadsheets\/d\/([^/]+)/);
-
-    if (
-        (host === "docs.google.com" || host === "sheets.google.com") &&
-        matchGoogle
-    ) {
-        return (
-            "https://docs.google.com/spreadsheets/d/" +
-            encodeURIComponent(matchGoogle[1]) +
-            "/export?format=xlsx"
-        );
-    }
-
-    const matchDrive = url.pathname.match(/^\/file\/d\/([^/]+)/);
-
-    if (host === "drive.google.com" && matchDrive) {
-        return (
-            "https://drive.google.com/uc?export=download&id=" +
-            encodeURIComponent(matchDrive[1])
-        );
-    }
-
-    if (
-        host === "1drv.ms" ||
-        host === "onedrive.live.com" ||
-        host.endsWith(".onedrive.live.com") ||
-        host === "automotivacba-my.sharepoint.com"
-    ) {
-        if (url.pathname.startsWith("/:x:/g/")) {
-            url.search = "?download=1";
-            return url.toString();
-        }
-
-        url.searchParams.set("download", "1");
-        return url.toString();
-    }
-
-    return url.toString();
-}
-
-function obterNomeArquivoOnlineRastreio(resposta, url) {
-    const disposicao = resposta.headers.get("content-disposition");
-
-    const nomeHeader = disposicao?.match(
-        /filename\*?=(?:UTF-8''|")?([^";]+)/
-    )?.[1];
-
-    if (nomeHeader) {
-        try {
-            return decodeURIComponent(nomeHeader).trim();
-        } catch {
-            return nomeHeader.trim();
-        }
-    }
-
-    try {
-        const pathname = new URL(url).pathname;
-        const nome = decodeURIComponent(
-            pathname.split("/").pop() || ""
-        ).trim();
-
-        if (nome && /\.(xlsx?|xlsm|xlsb|csv)$/i.test(nome)) {
-            return nome;
-        }
-    } catch {
-        // usa o nome padrão
-    }
-
-    return "planilha-online.xlsx";
-}
 
 function normalizarChaveRastreio(valor) {
     return String(valor ?? "")
@@ -1943,15 +1845,7 @@ function concluirProgressoImportacaoRastreio() {
     });
 }
 
-async function calcularSha256Rastreio(buffer) {
-    if (!window.crypto?.subtle) return null;
 
-    const digest = await window.crypto.subtle.digest("SHA-256", buffer);
-
-    return Array.from(new Uint8Array(digest))
-        .map(byte => byte.toString(16).padStart(2, "0"))
-        .join("");
-}
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", atualizarAcessoAdminRastreio); else atualizarAcessoAdminRastreio();
 // A sessão é carregada após o DOM; reavaliar permissões quando o login concluir.
 setInterval(atualizarAcessoAdminRastreio, 1500);
