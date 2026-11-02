@@ -1,0 +1,23 @@
+{
+  "repositorio": "KozeiroKodak/pmentregas",
+  "versao": "0.0.8",
+  "arquivos": {
+    "app.js": "adcde923e875b027bcbf72d887032499eb80d54676f04b206ef32f1e2599be9f",
+    "index.html": "021e02cbea78a5f1b792b86a51a7474a935af8f433040930256adc87448dec58",
+    "src/acesso.js": "87382010a36bc79e7dcd4987ae1286b48fe3270983d37f5d1a0483c4dc29ddf1",
+    "src/api.js": "5ad3dcd2e9cfee63e53bbd2ecbf3038e96b489401f9cd9e017eab9bc6fce666a",
+    "src/central.js": "4321d1547bcc1539988290c23ff4f081b8f8e87c82df47f1d6ad2603cdabef1b",
+    "src/demo-data.js": "62a2f6ea83a354987eaa0dde4b903386f378387cc0a1890e9cc8a43d958d7a6e",
+    "src/demo-store.js": "8ddfb925fb0ec8da957a8625a31a35c6e2d0a5d72aedfc5bc5204097a6b542a4",
+    "src/domain.js": "90d97b1171c1d415219d61a99b405df19f10bd7fbdf9357060e13e092084a0ae",
+    "src/gerencia.js": "ef3720685ccd2419a0b879f72b0cdaf2207929730ab9e2508b49f4e4df370f1f",
+    "src/historico.js": "67049826bc74afc11c0853f35b13f5848f91a364fe9a82331512ea1a8e206f77",
+    "src/integracao.js": "3ea05946a835c482bbe79c8729051801d9361e4a49b4eb7b095a7838dcc483e6",
+    "src/motorista.js": "7a883a0381ff11240ca8ae1064bd0ca6e6b0cf0340667bee0d9033bd414dd707",
+    "src/notificacoes.js": "9fb179c5168ae23587d334dbd94b0464d472a61bf555c26a38a4213f43d2c938",
+    "src/offline.js": "71ea9beb6d70074ddafa3d3f0ffb9ecea6b0afc71db2f02a18f0c85cc306b1fd",
+    "src/prioridade.js": "edfd20ad422409b6ae0b3b0145015ea09c5c938778b488777008f97095d3460d",
+    "src/rota.js": "b3f2e6b43a48c3ec691de16d8ea757247a639a9d59f58be32d5a1831fcb11d74",
+    "style.css": "0545c471d3c60264dc5a85c245a3d30953ce2266ff2c049320146aebfc3f2dc0"
+  }
+}
