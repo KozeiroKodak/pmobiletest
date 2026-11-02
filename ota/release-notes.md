@@ -1,5 +1,8 @@
-PMobile: limpeza de estruturas antigas e código sem uso.
+PMobile: operação RMEXPRESS integrada.
 
-Menu lateral vazio, CSS e larguras laterais removidos. A Home usa diretamente Transportes; acessos duplicados ocultos foram retirados. Interfaces antigas de pesquisa por popup e detalhes modais de rastreio foram removidas. Conferência mantém a fila offline e sua sincronização, sem a antiga interface destacada. Banco temporário de importação sem chamadas foi retirado.
-
-Dados locais, filas pendentes e integrações atuais preservados.
+- Painel, Entregas, Roteiros, Gerência, Central e notificações do PMEntregas dentro do PMobile.
+- Acesso com a sessão PMobile e permissões de cada perfil.
+- Retorno do Android respeita as áreas e volta ao painel central.
+- Fontes compartilhadas com o PMEntregas e sincronização automática de novas versões web.
+- Requer APK PMobile 1.05 para a ponte de notificações e navegação nativa.
+- Estoque, Dados locais e filas existentes preservados.
