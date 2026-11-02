@@ -57,6 +57,7 @@
 <link rel="stylesheet" href="implementacoes/configuracoes.css?v=1.0">
 <link rel="stylesheet" href="implementacoes/locais.css?v=1.0">
 <link rel="stylesheet" href="implementacoes/dados-locais.css?v=5.0">
+<link rel="stylesheet" href="rmexpress.css">
 </head>
 
 <body>
@@ -264,6 +265,7 @@
 
                     
 
+                    <button id="menuRMExpress" class="home-app-card" type="button" hidden><span class="home-app-icone" aria-hidden="true">🚛</span><span class="home-app-conteudo"><strong>RMEXPRESS</strong><small>Painel, entregas, roteiros e gestão</small></span><span class="home-app-seta" aria-hidden="true">›</span></button>
                     <button id="menuReservas" class="home-app-card" onclick="abrirReservas()" title="Reservas">
                         <span class="home-app-icone" aria-hidden="true">📦</span>
                         <span class="home-app-conteudo">
@@ -307,6 +309,7 @@
 
 
 
+<section id="rmexpress" class="tela-sistema" style="display:none" aria-label="RMEXPRESS"><div class="rmexpress-cabecalho"><button type="button" id="rmexpressVoltar">‹ Voltar</button><h1>RMEXPRESS</h1></div><p id="rmexpressStatus" role="status" aria-live="polite"></p><button type="button" id="rmexpressTentar">Atualizar acesso</button><div id="rmexpressConteudo"></div></section>
 <section id="valoresTotal" class="tela-sistema" style="display:none">
           <div class="valores-hero"><div class="valores-eyebrow">PMOBILE</div><h1>Frete geral</h1><p>Totais consolidados e análises por período e transportadora.</p></div>
           <div class="painel valores-painel"><div id="valoresTotalStatus" style="color:#aaa;margin-bottom:18px">Consultando valores...</div><div id="valoresTotalCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px"></div><button type="button" class="botao-aba valores-atualizar" style="margin-top:18px" onclick="carregarValoresTotal()">↻ Atualizar valores</button></div>
@@ -1230,6 +1233,7 @@
 <script src="dados-locais/locais-local.js?v=8.0"></script>
 <script src="dados-locais/importacao-local.js?v=8.0"></script>
 <script src="dados-locais.js?v=9.0"></script>
-<script src="reorganizacao-pmobile.js?v=3.0"></script></body>
+<script src="reorganizacao-pmobile.js?v=3.0"></script>
+<script src="rmexpress.js"></script></body>
 
 </html>
