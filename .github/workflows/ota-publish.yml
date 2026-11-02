@@ -83,7 +83,7 @@ jobs:
 
   publish-ota:
     needs: ota-gate
-    if: needs.ota-gate.outputs.publish == 'true' && (github.event_name == 'workflow_dispatch' || github.actor != 'github-actions[bot]')
+    if: false # Limpeza coordenada dos arquivos na main
     runs-on: ubuntu-latest
 
     steps:
