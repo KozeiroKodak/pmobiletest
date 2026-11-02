@@ -1,8 +1,5 @@
-Uma central de atualizações mais simples de acompanhar.
+PMobile: limpeza de estruturas antigas e código sem uso.
 
-• Acompanhe a versão instalada, a disponível e cada etapa do download.
-• Continue usando o PMobile enquanto a atualização é preparada.
-• Reinicie e aplique quando terminar suas operações.
-• O aplicativo confirma a abertura da nova versão antes de aprová-la.
+Menu lateral vazio, CSS e larguras laterais removidos. A Home usa diretamente Transportes; acessos duplicados ocultos foram retirados. Interfaces antigas de pesquisa por popup e detalhes modais de rastreio foram removidas. Conferência mantém a fila offline e sua sincronização, sem a antiga interface destacada. Banco temporário de importação sem chamadas foi retirado.
 
-O painel completo e a recuperação de inicialização exigem o novo APK 1.03. APKs anteriores continuam usando o atualizador já instalado.
+Dados locais, filas pendentes e integrações atuais preservados.
