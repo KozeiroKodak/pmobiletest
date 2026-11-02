@@ -154,24 +154,7 @@ function exibirResultadosPesquisa(resultados,areaResultado){
  });
 }
 
-function abrirPopupPesquisaMaterial() {
-    const seletor = document.getElementById("tipoBuscaPesquisaMaterial");
-    const botao = document.getElementById("botaoTipoBuscaPesquisaMaterial");
-    if (!seletor || !botao || typeof abrirPopupEscolha !== "function") return;
 
-    abrirPopupEscolha({
-        titulo: "Pesquisar por",
-        opcoes: [
-            { value: "codigo", label: "Código", selected: seletor.value === "codigo" },
-            { value: "referencia", label: "Referência", selected: seletor.value === "referencia" },
-            { value: "descricao", label: "Descrição", selected: seletor.value === "descricao" }
-        ],
-        aoEscolher: function(tipo) {
-            selecionarTipoBuscaPesquisaMaterial(tipo);
-        }
-    });
-    botao.setAttribute("aria-expanded", "true");
-}
 
 function selecionarTipoBuscaPesquisaMaterial(tipo){
  const seletor=document.getElementById("tipoBuscaPesquisaMaterial"),campo=document.getElementById("campoPesquisaMaterial");
