@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b1424">
+  <meta name="description" content="PMEntregas: jornada do motorista com entregas reais atribuídas, roteiros e gerência RMExpress.">
+  <title>PMEntregas · Jornada do motorista</title>
+  <link rel="stylesheet" href="./style.css?v=0.0.8">
+</head>
+<body>
+  <section id="inicio" aria-labelledby="tituloInicioAcesso">
+    <h1 id="tituloInicioAcesso">PMENTREGAS</h1>
+    <p>Organize entregas, roteiros e acompanhe suas paradas.</p>
+    <button type="button" id="iniciarAcesso">Iniciar</button>
+  </section>
+
+  <section id="loginPmobile" class="login-pmobile" aria-labelledby="tituloAcesso" hidden>
+    <div class="login-pmobile-topo">
+      <button type="button" class="login-voltar" id="voltarInicioAcesso" aria-label="Voltar ao início">‹</button>
+      <strong>PMENTREGAS</strong><span class="login-topo-espaco"></span>
+    </div>
+    <div class="login-pmobile-corpo">
+      <div class="login-pmobile-marca"><div class="login-pmobile-logo" aria-hidden="true">P</div><h1 id="tituloAcesso">Entrar</h1><p>Acesse o PMEntregas para continuar.</p></div>
+      <form id="formLoginPmobile" class="login-pmobile-form" method="post" autocomplete="on" aria-busy="false">
+        <label for="loginUsuario">Usuário</label>
+        <input id="loginUsuario" name="username" type="text" autocomplete="username" required maxlength="80" placeholder="Usuário PMobile" autocapitalize="none" spellcheck="false">
+        <label for="loginSenha">Senha</label>
+        <div class="login-senha-campo"><input id="loginSenha" name="password" type="password" autocomplete="current-password" required placeholder="Senha de acesso"><button type="button" class="login-mostrar-senha" id="mostrarSenhaAcesso" aria-label="Mostrar senha" aria-pressed="false">Mostrar</button></div>
+        <p class="login-ajuda">Use os mesmos dados do PMobile. Sua senha não fica salva neste aplicativo.</p>
+        <button type="submit" class="login-entrar" id="botaoLogin">ENTRAR</button>
+      </form>
+      <p id="statusLogin" class="login-status" role="status" aria-live="polite"></p>
+      <details class="login-ajuda-acesso"><summary>Cadastro e recuperação de acesso</summary><p>Crie seu usuário ou recupere sua senha no PMobile. Depois, volte para entrar no PMEntregas.</p></details>
+      <button type="button" class="login-esqueceu" id="abrirDemonstracaoAcesso">Explorar demonstração</button>
+    </div>
+  </section>
+
+  <div class="app-shell" id="aplicacao" hidden>
+    <header class="topbar">
+      <div class="identity">
+        <button type="button" class="home-back" id="voltarMenu" hidden aria-label="Voltar ao menu de áreas">‹ Voltar</button>
+        <div class="brand-mark" aria-hidden="true">PM</div>
+        <div><strong>PMEntregas</strong><small>Operação logística</small></div>
+      </div>
+      <div class="connection" id="connection" role="status" aria-live="polite">Verificando conexão</div>
+    </header>
+
+    <main class="main">
+      <button type="button" class="btn btn-secondary notificacoes-abrir" id="abrirNotificacoes" aria-expanded="false" aria-controls="painelNotificacoes" hidden>Notificações · <span id="totalNotificacoes">0</span></button>
+      <section id="painelNotificacoes" class="notificacoes-painel" aria-labelledby="tituloNotificacoes" hidden>
+        <div class="section-heading"><h2 id="tituloNotificacoes">Notificações</h2><button type="button" class="btn btn-secondary" id="fecharNotificacoes">Fechar</button></div>
+        <div class="notificacoes-acoes"><button type="button" class="btn btn-secondary" id="atualizarNotificacoes">Atualizar avisos</button><button type="button" class="btn btn-primary" id="ativarNotificacoes">Ativar avisos do Android</button></div>
+        <p id="statusNotificacoes" role="status" aria-live="polite"></p><p id="notificacoesVazias">Nenhum aviso por aqui.</p>
+        <ul id="listaNotificacoes"></ul>
+      </section>
+      <div class="notice" id="aviso" role="status" aria-live="polite" hidden></div>
+      <section class="view home-hub" id="view-inicio" aria-labelledby="tituloPrincipal">
+        <div class="home-apps">
+          <header class="home-apps-cabecalho">
+            <div class="home-apps-kicker">PMENTREGAS / OPERAÇÃO LOGÍSTICA</div>
+            <h1 id="tituloPrincipal">Central de entregas</h1>
+            <p>Selecione uma área para continuar.</p>
+          </header>
+          <nav class="home-apps-grade" aria-label="Áreas do PMEntregas">
+            <button type="button" class="home-app-card" data-view="painel"  title="Abrir Painel"><span class="home-app-icone" aria-hidden="true">📊</span><span class="home-app-conteudo"><strong>Painel</strong><small>Resumo da jornada e progresso</small></span><span class="home-app-seta" aria-hidden="true">›</span></button>
+            <button type="button" class="home-app-card" data-view="entregas"  title="Abrir Entregas"><span class="home-app-icone" aria-hidden="true">📦</span><span class="home-app-conteudo"><strong>Entregas</strong><small>Notas atribuídas e confirmações</small></span><span class="home-app-seta" aria-hidden="true">›</span></button>
+            <button type="button" class="home-app-card" data-view="roteiros"  title="Abrir Roteiros"><span class="home-app-icone" aria-hidden="true">🗺️</span><span class="home-app-conteudo"><strong>Roteiros</strong><small>Organize e acompanhe suas paradas</small></span><span class="home-app-seta" aria-hidden="true">›</span></button>
+            <div class="home-admin-group" id="grupoGestao" hidden>
+              <p class="home-apps-kicker home-group-title">GESTÃO / RMEXPRESS</p>
+              <div class="home-apps-grade">
+            <button type="button" class="home-app-card" data-view="gerencia" id="tabGerencia" hidden title="Abrir Gerência"><span class="home-app-icone" aria-hidden="true">👥</span><span class="home-app-conteudo"><strong>Gerência</strong><small>Atribuições de motoristas e histórico</small></span><span class="home-app-seta" aria-hidden="true">›</span></button>
+            <button type="button" class="home-app-card" data-view="central" id="tabCentral" hidden title="Abrir Central"><span class="home-app-icone" aria-hidden="true">🚚</span><span class="home-app-conteudo"><strong>Central</strong><small>Acompanhamento da operação</small></span><span class="home-app-seta" aria-hidden="true">›</span></button>
+              </div>
+            </div>
+          </nav>
+          <div class="home-session">
+      <section class="acesso-sessao" aria-label="Conta PMobile">
+        <div id="usuarioAutenticado" class="auth-user" hidden><div><strong id="nomeUsuario"></strong><span id="perfilUsuario"></span></div><button type="button" class="btn btn-secondary" id="sairPmobile">Sair</button></div>
+        <button type="button" class="btn btn-secondary" id="entrarPeloAplicativo">Entrar com PMobile</button>
+      </section>
+          </div>
+          <details class="home-info">
+            <summary>Informações da sessão e do ambiente</summary>
+      <section class="environment" aria-label="Ambiente de desenvolvimento">
+        <div class="environment-copy">
+          <span class="environment-icon" aria-hidden="true">⚙</span>
+          <div>
+            <strong id="environmentTitle">Ambiente de desenvolvimento</strong>
+            <p id="environmentText">Nenhuma fonte de dados conectada. Você pode experimentar uma jornada fictícia, sem alterar NFs reais.</p>
+          </div>
+        </div>
+        <div class="environment-actions">
+          <button type="button" id="iniciarDemo" class="btn btn-primary">Ativar demonstração</button>
+          <button type="button" id="reiniciarDemo" class="btn btn-secondary" hidden>Reiniciar exemplo</button>
+          <button type="button" id="sairDemo" class="btn btn-secondary" hidden>Encerrar demonstração</button>
+        </div>
+      </section>
+          </details>
+      <details class="atualizacoes-acesso"><summary>Atualizações do aplicativo</summary><div class="pm-atualizacoes"><section class="ota-painel" id="otaPainel" aria-labelledby="otaTitulo">
+                  <header class="ota-cabecalho"><span class="ota-simbolo" aria-hidden="true">↻</span><span class="ota-selo" id="otaSelo">PMEntregas sempre em dia</span></header>
+                  <h2 id="otaTitulo">Uma atualização.<br>Uma experiência melhor.</h2>
+                  <p class="ota-intro">Novidades e melhorias chegam por aqui, no seu tempo.</p>
+                  <dl class="ota-versoes"><div><dt>Instalada</dt><dd id="otaAtual">—</dd></div><div><dt>Disponível</dt><dd id="otaDisponivel">—</dd></div><div><dt>Aplicativo</dt><dd id="otaNativa">—</dd></div></dl>
+                  <div class="ota-situacao" role="status" aria-live="polite"><strong id="otaEstadoTitulo">Pronto para verificar</strong><p id="otaMensagem">Consulte as atualizações disponíveis para seu PMEntregas.</p></div>
+                  <div class="ota-progresso" id="otaProgresso" hidden><div><span id="otaEtapa">Preparando</span><span id="otaPorcentagem"></span></div><progress id="otaBarra" max="100" aria-label="Progresso da atualização"></progress><small id="otaBytes"></small></div>
+                  <ol class="ota-etapas" aria-label="Etapas da atualização"><li data-ota-etapa="checking">Verificar</li><li data-ota-etapa="downloading">Baixar</li><li data-ota-etapa="verifying">Conferir</li><li data-ota-etapa="ready">Aplicar</li></ol>
+                  <section class="ota-novidades" id="otaNovidades" hidden><h3>O que vem nesta atualização</h3><p id="otaNotas"></p></section>
+                  <p class="ota-recuperacao" id="otaRecuperacao" hidden></p>
+                  <div class="ota-acoes"><button class="botao-aba ota-primario" id="otaVerificar" type="button" onclick="procurarAtualizacoesOta()">Verificar atualizações</button><button class="botao-aba ota-primario" id="otaBaixar" type="button" onclick="baixarAtualizacaoOta()" hidden>Baixar atualização</button><button class="botao-aba ota-primario" id="otaAplicar" type="button" onclick="aplicarAtualizacaoOta()" hidden>Reiniciar e aplicar</button></div>
+                  <p class="ota-rodape" id="otaRodape">O download acontece em segundo plano. O aplicativo só reinicia quando você escolhe aplicar.</p><small class="ota-ultima" id="otaUltima"></small>
+                </section></div></details>
+      <footer>PMEntregas 0.0.20 · Desenvolvimento · Ações reais no Supabase mediante confirmação</footer>
+
+        </div>
+      </section>
+
+      <section class="view" id="view-painel" aria-labelledby="tituloPainel" hidden>
+        <div class="section-heading">
+          <div><div class="eyebrow">VISÃO GERAL</div><h2 id="tituloPainel">Minha jornada</h2></div>
+          <div class="jornada-fonte"><span id="legendaJornada" class="subtle">Aguardando integração</span><small id="motoristaSincronizacao" hidden></small></div>
+        </div>
+        <div class="metrics">
+          <article class="metric"><span>Atribuídas</span><strong id="metricaTotal">—</strong><small>Notas na jornada</small></article>
+          <article class="metric"><span>Em andamento</span><strong id="metricaAbertas">—</strong><small>Inclui pendências</small></article>
+          <article class="metric"><span>Concluídas</span><strong id="metricaConcluidas">—</strong><small>Entregas finalizadas</small></article>
+        </div>
+        <article class="progress-card">
+          <div class="progress-line"><strong>Progresso da jornada</strong><span id="progressoTexto">Sem dados</span></div>
+          <div class="progress-track" role="progressbar" id="progressoBarra" aria-label="Progresso da jornada" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="progressoPreenchimento"></div></div>
+        </article>
+        <article class="feature" id="proximaParada">
+          <div class="feature-icon" aria-hidden="true">⌖</div>
+          <div class="feature-copy"><h3>Próxima parada</h3><p id="proximaDescricao">A próxima entrega aparecerá aqui quando houver atribuições.</p><span class="proxima-situacao" id="proximaSituacao" hidden></span><p class="proxima-destino" id="proximaDestino" hidden></p><small id="proximaCarga" hidden></small></div>
+          <div class="proxima-acoes" id="proximaAcoes" hidden><button type="button" class="btn btn-primary" id="proximaNavegar" disabled>Abrir navegação</button><button type="button" class="btn btn-secondary" id="verRoteiroProxima">Revisar roteiro</button></div>
+          <button type="button" class="btn btn-secondary" id="verEntregas">Ver entregas</button>
+        </article>
+        <article class="quick-info" id="resumoOcorrencias">Nenhuma operação real está habilitada nesta versão.</article>
+      </section>
+
+      <section class="view" id="view-entregas" aria-labelledby="tituloEntregas" hidden>
+        <div class="section-heading">
+          <div><div class="eyebrow">OPERAÇÃO DO MOTORISTA</div><h2 id="tituloEntregas">Minhas entregas</h2></div>
+          <div class="motorista-atualizar"><span class="subtle" id="quantidadeEntregas">Sem atribuições</span><button type="button" class="btn btn-secondary" id="atualizarMotorista" hidden>Atualizar entregas</button></div>
+        </div>
+        <div class="categoria-painel" id="painelCategoriasMotorista" hidden>
+          <div class="categoria-titulo">Minhas notas por prioridade <small>Registros atribuídos, inclusive os concluídos.</small></div>
+          <nav class="categoria-botoes" id="categoriasMotorista" aria-label="Filtrar minhas notas por prioridade">
+            <button class="categoria-btn active" type="button" data-motorista-categoria="todas" aria-pressed="true">Todas <strong data-motorista-count="todas">0</strong></button>
+            <button class="categoria-btn" type="button" data-motorista-categoria="expressa" aria-pressed="false">Expressas <strong data-motorista-count="expressa">0</strong></button>
+            <button class="categoria-btn" type="button" data-motorista-categoria="prioritaria" aria-pressed="false">Prioridades <strong data-motorista-count="prioritaria">0</strong></button>
+            <button class="categoria-btn" type="button" data-motorista-categoria="reenvio" aria-pressed="false">Reenvios <strong data-motorista-count="reenvio">0</strong></button>
+            <button class="categoria-btn" type="button" data-motorista-categoria="normal" aria-pressed="false">Outras <strong data-motorista-count="normal">0</strong></button>
+          </nav>
+        </div>
+        <div class="filterbar">
+          <label class="filterfield"><span>Pesquisar NF ou cliente</span><input id="buscaEntregas" type="search" autocomplete="off" placeholder="Buscar entregas…" maxlength="80"></label>
+          <label class="filterfield filter-select"><span>Situação</span><select id="filtroStatus">
+            <option value="todas">Todas</option>
+            <option value="pendente">Pendentes</option>
+            <option value="em_rota">Em rota</option>
+            <option value="entregue">Concluídas</option>
+            <option value="ocorrencia">Ocorrências</option>
+          </select></label>
+        </div>
+        <div class="gerencia-status" id="statusMotoristaReal" role="status" aria-live="polite"></div>
+        <div class="delivery-list" id="listaEntregas"><div class="empty">Sem entregas vinculadas nesta versão.</div></div>
+      </section>
+
+      <section class="view" id="view-roteiros" aria-labelledby="tituloRoteiros" hidden>
+        <div class="section-heading">
+          <div><div class="eyebrow">PLANEJAMENTO</div><h2 id="tituloRoteiros">Meu roteiro</h2></div>
+          <span class="subtle" id="quantidadeRoteiros">Sem paradas</span>
+        </div>
+        <div class="route-intro">
+          <strong>Sequência manual de paradas</strong>
+          <p id="routeDescricaoMotorista">Na demonstração, use as setas para mudar a ordem das entregas. Otimização automática, GPS e mapas serão integrados depois, com destinos confirmados.</p>
+        </div>
+        <div id="roteiroAcoesMotorista" class="motorista-roteiro-acoes" hidden><button type="button" class="btn btn-secondary" id="botaoSugerirRota" hidden>Sugerir ordem aproximada</button><button type="button" class="btn btn-primary" id="botaoConfirmarRoteiro">Confirmar roteiro no Supabase</button><span class="subtle">Somente coordenadas confirmadas. Confira a ordem antes de confirmar no servidor.</span></div>
+        <div class="gerencia-status" id="statusRoteiroMotorista" role="status" aria-live="polite"></div>
+        <ol class="route-list" id="listaRoteiros"><li class="empty">Nenhum roteiro atribuído.</li></ol>
+      </section>
+
+
+      <section class="view" id="view-gerencia" aria-labelledby="tituloGerencia" hidden>
+        <div class="section-heading">
+          <div><div class="eyebrow">ATRIBUIÇÃO DE MOTORISTAS · DADOS REAIS</div><h2 id="tituloGerencia">Gerência RMExpress</h2></div>
+          <span class="subtle">Somente ADMIN / RMADMIN</span>
+        </div>
+        <div id="estadoGerencia" class="empty">Acesso restrito a administradores autenticados do PMobile.</div>
+        <div id="conteudoGerencia" hidden>
+          <div class="gerencia-aviso"><strong>Operação real:</strong> ao atribuir uma nota, o nome do motorista é gravado no rastreio oficial compartilhado com o PMobile e o PMColetas. Não é uma simulação.</div>
+          <div class="categoria-painel">
+            <div class="categoria-titulo">Disponíveis para atribuição <small>Contagem de registros; grupos de NFs contam uma vez.</small></div>
+            <nav class="categoria-botoes" id="categoriasGerencia" aria-label="Filtrar disponíveis por prioridade">
+              <button class="categoria-btn active" type="button" data-gerencia-categoria="todas" aria-pressed="true">Todas <strong data-gerencia-count="todas">—</strong></button>
+              <button class="categoria-btn" type="button" data-gerencia-categoria="expressa" aria-pressed="false">Expressas <strong data-gerencia-count="expressa">—</strong></button>
+              <button class="categoria-btn" type="button" data-gerencia-categoria="prioritaria" aria-pressed="false">Prioridades <strong data-gerencia-count="prioritaria">—</strong></button>
+              <button class="categoria-btn" type="button" data-gerencia-categoria="reenvio" aria-pressed="false">Reenvios <strong data-gerencia-count="reenvio">—</strong></button>
+              <button class="categoria-btn" type="button" data-gerencia-categoria="normal" aria-pressed="false">Outras <strong data-gerencia-count="normal">—</strong></button>
+            </nav>
+            <div class="subtle" id="contadoresGerenciaStatus" role="status" aria-live="polite"></div>
+          </div>
+          <p class="subtle" style="margin:0 0 14px">Todas mantém a sequência original da planilha, sem priorização automática. Os grupos entram no botão correspondente à letra de maior prioridade; cada categoria também respeita a ordem das linhas.</p>
+          <div class="filterbar">
+            <label class="filterfield"><span>Pesquisar nota, cliente ou região</span><input type="search" id="buscaGerencia" maxlength="100" autocomplete="off" placeholder="Digite para consultar no servidor…"></label>
+            <button class="btn btn-secondary" type="button" id="atualizarGerencia">Atualizar</button>
+          </div>
+          <div id="gerenciaLote" class="gerencia-lote" hidden><label><span>Motorista para o lote (até 50 registros)</span><select id="loteMotorista"><option value="">Selecione um motorista</option></select></label><span id="loteSelecionadas" class="subtle">0 selecionados</span><button id="atribuirLote" type="button" class="btn btn-primary">Atribuir seleção</button><button id="limparLote" type="button" class="btn btn-secondary">Limpar</button></div>
+          <div id="gerenciaStatus" class="gerencia-status" role="status" aria-live="polite"></div>
+          <div id="resumoGerencia" class="subtle"></div>
+          <div id="listaGerencia" class="gerencia-grid"></div>
+          <button type="button" class="btn btn-secondary mais-gerencia" id="carregarMaisGerencia" hidden>Carregar mais notas</button>
+
+          <section class="historico-section" id="historicoGerencia" aria-labelledby="tituloHistorico">
+            <div class="section-heading historico-heading">
+              <div><div class="eyebrow">COMPROVAÇÃO DE ENTREGA · DADOS REAIS</div><h3 id="tituloHistorico">Histórico de entregas</h3></div>
+              <button class="btn btn-secondary" type="button" id="atualizarHistorico">Atualizar histórico</button>
+            </div>
+            <p class="subtle historico-explicacao">NFs confirmadas pelos motoristas. Contagem individual das notas agrupadas, sem duplicidade por registro do Rastreio.</p>
+            <div class="historico-metricas">
+              <article class="historico-metrica"><span>NFs entregues</span><strong id="historicoTotalNotas">—</strong></article>
+              <article class="historico-metrica"><span>Registros concluídos</span><strong id="historicoTotalRegistros">—</strong></article>
+              <article class="historico-metrica"><span>Motoristas com entregas</span><strong id="historicoTotalMotoristas">—</strong></article>
+            </div>
+            <h4 class="historico-subtitulo">Total de notas por motorista</h4>
+            <div id="motoristasHistorico" class="historico-motoristas"></div>
+            <div class="filterbar historico-filtros">
+              <label class="filterfield filter-select"><span>Motorista</span><select id="filtroHistoricoMotorista"><option value="">Todos os motoristas</option></select></label>
+              <label class="filterfield"><span>NF ou cliente</span><input type="search" autocomplete="off" maxlength="100" id="buscaHistorico" placeholder="Pesquisar histórico…"></label>
+            </div>
+            <div id="statusHistorico" class="gerencia-status" role="status" aria-live="polite"></div>
+            <div id="listaHistorico" class="historico-lista"></div>
+            <button class="btn btn-secondary mais-gerencia" id="carregarMaisHistorico" type="button" hidden>Carregar mais entregas</button>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="view-central" aria-labelledby="tituloCentral" hidden>
+        <div class="section-heading">
+          <div><div class="eyebrow">OPERAÇÃO RMEXPRESS</div><h2 id="tituloCentral">Central logística</h2></div>
+          <span class="subtle">Gestão em tempo real sob consulta</span>
+        </div>
+        <div id="centralPainelReal" hidden>
+          <div class="central-header"><p class="subtle">Dados reais · Perfil ADMIN/RMADMIN</p><button id="centralAtualizar" type="button" class="btn btn-secondary">Atualizar Central</button></div>
+          <div class="central-indicadores">
+            <article><span>Motoristas ativos</span><strong id="centralMotoristas">—</strong></article>
+            <article><span>Registros atribuídos</span><strong id="centralAtribuidas">—</strong></article>
+            <article><span>Pendentes</span><strong id="centralPendentes">—</strong></article>
+            <article><span>Concluídos</span><strong id="centralConcluidas">—</strong></article>
+            <article><span>NFs entregues (histórico)</span><strong id="centralNFs">—</strong></article>
+          </div>
+          <p id="centralStatus" class="gerencia-status" role="status" aria-live="polite"></p>
+          <h3 class="central-titulo">Acompanhamento dos motoristas</h3>
+          <div class="central-motoristas-grid" id="centralMotoristasLista"></div>
+          <h3 class="central-titulo">Distribuição de rotas e entregas</h3>
+          <p class="subtle">Transferência só antes da confirmação do roteiro. Endereços devem ser conferidos antes de liberar navegação.</p>
+          <div class="filterbar">
+            <label class="filterfield"><span>Motorista</span><select id="centralFiltroMotorista"><option value="">Todos os motoristas</option></select></label>
+            <label class="filterfield"><span>NF ou cliente</span><input id="centralBusca" type="search" maxlength="100" placeholder="Pesquisar atribuições…"></label>
+          </div>
+          <aside class="central-contexto" aria-live="polite"><strong>Conferência da lista atual</strong><p id="centralContexto">As pendências serão exibidas após consultar as atribuições.</p><small id="centralSincronizacao"></small></aside>
+          <div class="central-lista" id="centralAtribuicoesLista"></div>
+          <button type="button" class="btn btn-secondary mais-gerencia" id="centralCarregarMais" hidden>Carregar mais</button>
+        </div>
+      </section>
+
+    </main>
+  </div>
+  <script type="module" src="./app.js?v=0.0.8"></script>
+</body>
+</html>
