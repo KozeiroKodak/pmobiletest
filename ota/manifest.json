@@ -1,10 +1,10 @@
 {
-  "webVersion": "0.0.403",
+  "webVersion": "0.0.404",
   "nativeMinVersion": "1.0",
-  "package": "https://github.com/KozeiroKodak/pmobiletest/releases/download/ota-web-0.0.403/pmobile-web-0.0.403.zip",
-  "sha256": "bb51fd1078163328a851eaef485ffbec5ea61b8e6555e5fa88d02e12d29f7936",
+  "package": "https://github.com/KozeiroKodak/pmobiletest/releases/download/ota-web-0.0.404/pmobile-web-0.0.404.zip",
+  "sha256": "fd4e51002a17ed0018220db558109446f5387269b61da81a605a69d75995d598",
   "mandatory": false,
-  "sizeBytes": 557176,
-  "publishedAt": "2026-11-01T23:48:43.589417+00:00",
-  "releaseNotes": "Uma central de atualizações mais simples de acompanhar.\n\n• Acompanhe a versão instalada, a disponível e cada etapa do download.\n• Continue usando o PMobile enquanto a atualização é preparada.\n• Reinicie e aplique quando terminar suas operações.\n• O aplicativo confirma a abertura da nova versão antes de aprová-la.\n\nO painel completo e a recuperação de inicialização exigem o novo APK 1.03. APKs anteriores continuam usando o atualizador já instalado."
+  "sizeBytes": 546563,
+  "publishedAt": "2026-11-02T03:43:03.555292+00:00",
+  "releaseNotes": "PMobile: limpeza de estruturas antigas e código sem uso.\n\nMenu lateral vazio, CSS e larguras laterais removidos. A Home usa diretamente Transportes; acessos duplicados ocultos foram retirados. Interfaces antigas de pesquisa por popup e detalhes modais de rastreio foram removidas. Conferência mantém a fila offline e sua sincronização, sem a antiga interface destacada. Banco temporário de importação sem chamadas foi retirado.\n\nDados locais, filas pendentes e integrações atuais preservados."
 }
