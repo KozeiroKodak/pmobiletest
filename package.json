@@ -4,6 +4,7 @@
   "description": "//.///",
   "main": "bancoimportacao.js",
   "scripts": {
+    "sync:android": "node scripts/sync-www.mjs",
     "test": "node --test"
   },
   "repository": {
