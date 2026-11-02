@@ -205,14 +205,6 @@
 >
 
 
-    <!-- =====================================================
-         SIDEBAR
-         ===================================================== -->
-
-    
-    <aside id="sistema" aria-hidden="true"></aside>
-
-
 
     <!-- =====================================================
          CONTEÚDO PRINCIPAL
@@ -260,38 +252,17 @@
                         <span class="home-app-seta" aria-hidden="true">›</span>
                     </button>
 
-                    <button id="menuRastreio" class="home-app-card" onclick="abrirRastreio()" title="Rastreio">
-                        <span class="home-app-icone" aria-hidden="true">🚚</span>
-                        <span class="home-app-conteudo">
-                            <strong>Rastreio</strong>
-                            <small>Relação de notas fiscais enviadas</small>
-                        </span>
-                        <span class="home-app-seta" aria-hidden="true">›</span>
-                    </button>
+                    <button id="menuTransportes" class="home-app-card" type="button" onclick="abrirTransportesPmobile()" title="Transportes"><span class="home-app-icone" aria-hidden="true">🚚</span><span class="home-app-conteudo"><strong>Transportes</strong><small>Rastreio e opções de cotações</small></span><span class="home-app-seta" aria-hidden="true">›</span></button>
 
 
-                    <button id="menuValoresTotal" class="home-app-card" onclick="abrirValoresTotal()" title="Valores total"><span class="home-app-icone" aria-hidden="true">💰</span><span class="home-app-conteudo"><strong>Valores total</strong><small>Resumo financeiro da planilha online</small></span><span class="home-app-seta" aria-hidden="true">›</span></button>
-                    <button id="menuImportacao" class="home-app-card" onclick="abrirImportacao()" title="Importar inventário">
-                        <span class="home-app-icone" aria-hidden="true">📦</span>
-                        <span class="home-app-conteudo">
-                            <strong>Importar estoque</strong>
-                            <small>Atualize a relação de materiais</small>
-                        </span>
-                        <span class="home-app-seta" aria-hidden="true">›</span>
-                    </button>
+                    
+                    
 
 
 
                     
 
-                    <button id="menuConferencias" class="home-app-card" onclick="abrirConferencias()" title="Conferências realizadas">
-                        <span class="home-app-icone" aria-hidden="true">🗂️</span>
-                        <span class="home-app-conteudo">
-                            <strong>Conferências</strong>
-                            <small>Consulte conferências realizadas</small>
-                        </span>
-                        <span class="home-app-seta" aria-hidden="true">›</span>
-                    </button>
+                    
 
                     <button id="menuReservas" class="home-app-card" onclick="abrirReservas()" title="Reservas">
                         <span class="home-app-icone" aria-hidden="true">📦</span>
@@ -302,11 +273,7 @@
                         <span class="home-app-seta" aria-hidden="true">›</span>
                     </button>
 
-                    <button id="menuOpcoesCotacoes" class="home-app-card" onclick="abrirOpcoesCotacoes()" title="Opções de Cotações">
-                        <span class="home-app-icone" aria-hidden="true">📋</span>
-                        <span class="home-app-conteudo"><strong>Opções de Cotações</strong><small>Consulte transportadoras por região</small></span>
-                        <span class="home-app-seta" aria-hidden="true">›</span>
-                    </button>
+                    
 
                     <button id="menuConfiguracoes" class="home-app-card home-app-card-config" onclick="abrirConfiguracoes()" title="Configurações">
                         <span class="home-app-icone" aria-hidden="true">⚙️</span>
@@ -1196,8 +1163,6 @@
 <!-- =========================================================
      IMPORTAÇÃO
      ========================================================= -->
-
-<script src="bancoimportacao.js?v=0.0.248"></script>
 
 <script src="importacao.js?v=0.0.248"></script>
 
