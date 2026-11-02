@@ -9,10 +9,7 @@
 //
 // ESTRUTURA:
 //
-// A sidebar permanece visível depois que o usuário entra
-// no sistema.
-//
-// Somente o conteúdo localizado à direita da sidebar muda.
+// A Home reúne os cartões de acesso. A navegação alterna as telas internas.
 //
 // A tela Pesquisa utiliza uma interface unificada:
 //
@@ -37,41 +34,15 @@
 // LISTA DAS TELAS PRINCIPAIS DO SISTEMA
 // ============================================================
 //
-// Estas são as telas controladas pela sidebar.
+// Estas são as telas controladas pela Home.
 //
 // As subtelas da Pesquisa NÃO entram nesta lista,
 // porque pertencem internamente à tela #pesquisa.
 //
 // ============================================================
 
-const telasSistema = [
-
-    "homeSistema",
-
-    "pesquisa",
-
-    "rastreio",
-    "valoresTotal",
-
-    "contagemManual",
-
-    "conferencias",
-
-    "locais",
-
-    "detalhesLocaisVazios",
-
-    "divergencias",
-
-    "importacao",
-
-    "configuracoes"
-
-];
-
-
 // ============================================================
-// LISTA DOS ITENS DA SIDEBAR
+// LISTA DOS ITENS DA HOME
 // ============================================================
 //
 // Utilizada para remover o destaque visual antes de
@@ -139,15 +110,7 @@ const itensMenuSistema = [
 
     "menuPesquisa",
 
-    "menuImportacao",
-
-
-    "menuRastreio",
-    "menuValoresTotal",
-
     "menuContagemManual",
-
-    "menuConferencias",
 
     "menuConfiguracoes",
     "menuDadosLocais",
@@ -164,7 +127,7 @@ const itensMenuSistema = [
 //
 // Esconder todas as telas principais do sistema.
 //
-// A sidebar permanece visível.
+// A Home permanece visível.
 //
 // Esta função NÃO controla as subtelas internas da Pesquisa.
 //
@@ -197,7 +160,7 @@ function esconderTelasSistema() {
 //
 // OBJETIVO:
 //
-// Remover o destaque visual de todos os itens da sidebar.
+// Remover o destaque visual de todos os itens da Home.
 //
 // Depois disso, mostrarTelaSistema() pode destacar
 // somente o item correspondente à tela atual.
@@ -245,14 +208,14 @@ function limparMenuAtivo() {
 //     ID da tela que será exibida.
 //
 // idMenu
-//     ID do item da sidebar que deverá ficar destacado.
+//     ID do item da Home que deverá ficar destacado.
 //
 // FUNCIONAMENTO:
 //
 // 1. Esconde todas as telas principais.
-// 2. Remove os destaques da sidebar.
+// 2. Remove os destaques da Home.
 // 3. Mostra a tela solicitada.
-// 4. Destaca o item correspondente da sidebar.
+// 4. Destaca o item correspondente da Home.
 //
 // ============================================================
 
@@ -304,7 +267,7 @@ function mostrarTelaSistema(
 
 
     // ========================================================
-    // DESTACAR ITEM DA SIDEBAR
+    // DESTACAR ITEM DA HOME
     // ========================================================
 
     if (idMenu) {
@@ -339,8 +302,7 @@ function mostrarTelaSistema(
 //
 // Sair da tela inicial e entrar na aplicação.
 //
-// A sidebar passa a ficar disponível e a tela inicial
-// do sistema é exibida.
+// A aplicação exibe a Home após autenticar o usuário.
 //
 // ============================================================
 
@@ -1469,7 +1431,7 @@ async function enviarSolicitacaoCadastro(event) {
 //
 // OBJETIVO:
 //
-// Abrir o módulo Pesquisa através da sidebar.
+// Abrir o módulo Pesquisa através da Home.
 //
 // Sempre que o usuário clicar em:
 //
@@ -1566,7 +1528,7 @@ function abrirContagemManual() {
 //     abrirConferencia()
 //
 // Abre a tela de conferência e destaca o item correspondente
-// na sidebar.
+// na Home.
 //
 // ============================================================
 // CONFERÊNCIAS REALIZADAS
@@ -1590,8 +1552,7 @@ function abrirConferencias() {
     }
 
     mostrarTelaSistema(
-        "conferencias",
-        "menuConferencias"
+        "conferencias", "menuConfiguracoes"
     );
 
 
@@ -1705,8 +1666,7 @@ function abrirImportacao() {
     }
 
     mostrarTelaSistema(
-        "importacao",
-        "menuImportacao"
+        "importacao", "menuConfiguracoes"
     );
 
 
@@ -1818,13 +1778,6 @@ function atualizarVisibilidadeConfiguracoes() {
     const regras = {
         menuSair: !!usuario,
         menuConfiguracoes: isAdmin,
-        // Entradas antigas realocadas para Configurações / Transportes.
-        // As funções continuam existentes, mas não voltam ao menu inicial no login.
-        menuImportacao: false,
-        menuRastreio: false,
-        menuValoresTotal: false,
-
-        menuConferencias: false,
         menuTransportes: isAdmin || isNivel2,
         menuDadosLocais: isAdmin || isNivel2,
         menuReservas: isAdmin || isNivel2,
@@ -2423,7 +2376,6 @@ async function confirmarZeramento(
 }
 
 
-
 // ============================================================
 // BOTÃO VOLTAR DO ANDROID
 // ============================================================
@@ -2595,7 +2547,6 @@ if (document.readyState === "loading") {
     });
 
 }
-
 
 
 // ============================================================
