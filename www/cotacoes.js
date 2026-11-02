@@ -9,10 +9,10 @@ const $ = id => document.getElementById(id);
 const normal = v => String(v == null ? "" : v).trim().replace(/\s+/g," ");
 const chave = v => normal(v).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLocaleUpperCase("pt-BR");
 const html = v => normal(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-function abrirOpcoesCotacoes(){mostrarTelaSistema("opcoesCotacoes","menuOpcoesCotacoes");}
-function abrirCotacoesRegiao(){mostrarTelaSistema("cotacoesRegiao","menuOpcoesCotacoes");$("cotBusca").value="";if(mapa.size){renderRegioes();if(Date.now()-ultimaConsulta<30000)return;}carregarCotacoesRegiao();}
-function voltarOpcoesCotacoes(){mostrarTelaSistema("opcoesCotacoes","menuOpcoesCotacoes");}
-function voltarListaCotacoes(){mostrarTelaSistema("cotacoesRegiao","menuOpcoesCotacoes");}
+function abrirOpcoesCotacoes(){mostrarTelaSistema("opcoesCotacoes","menuTransportes");}
+function abrirCotacoesRegiao(){mostrarTelaSistema("cotacoesRegiao","menuTransportes");$("cotBusca").value="";if(mapa.size){renderRegioes();if(Date.now()-ultimaConsulta<30000)return;}carregarCotacoesRegiao();}
+function voltarOpcoesCotacoes(){mostrarTelaSistema("opcoesCotacoes","menuTransportes");}
+function voltarListaCotacoes(){mostrarTelaSistema("cotacoesRegiao","menuTransportes");}
 function renderRegioes(){
  const termo=chave($("cotBusca").value);
  const lista=[...mapa.values()].filter(x=>chave(x.nome).includes(termo)).sort((a,b)=>a.nome.localeCompare(b.nome,"pt-BR"));
@@ -24,7 +24,7 @@ function abrirDetalheCotacao(ch){
  const nomes=[...item.transportadoras.values()].sort((a,b)=>a.localeCompare(b,"pt-BR"));
  $("cotDetalheStatus").textContent=nomes.length+' transportadora(s) identificada(s) nos rastreios sincronizados.';
  $("cotDetalheLista").innerHTML=nomes.length?nomes.map(n=>'<div class="cot-row"><span>🚛 '+html(n)+'</span><small>Atende esta região</small></div>').join(""):'<div class="cot-empty">Nenhuma transportadora identificada para esta região nos registros disponíveis.</div>';
- mostrarTelaSistema("cotacoesDetalhe","menuOpcoesCotacoes");
+ mostrarTelaSistema("cotacoesDetalhe","menuTransportes");
 }
 async function carregarCotacoesRegiao(){
  if(consultaAtual)return consultaAtual;
