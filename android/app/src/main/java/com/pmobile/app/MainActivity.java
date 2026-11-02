@@ -27,6 +27,20 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MainActivity extends BridgeActivity {
 
+    private NotificacoesBridge notificacoesBridge;
+    private final androidx.activity.result.ActivityResultLauncher<String> permissaoNotificacoes = registerForActivityResult(
+        new androidx.activity.result.contract.ActivityResultContracts.RequestPermission(), granted -> { if(notificacoesBridge!=null){notificacoesBridge.atualizarToken();notificacoesBridge.avisar();} });
+    void pedirPermissaoNotificacoes(){permissaoNotificacoes.launch(android.Manifest.permission.POST_NOTIFICATIONS);}
+    private void capturarNotificacao(Intent intent){
+        if(intent==null)return;
+        String destino=intent.getStringExtra("notificacaoDestino"),usuario=intent.getStringExtra("notificacaoUsuario");
+        if(usuario!=null&&("entregas".equals(destino)||"gerencia".equals(destino)||"central".equals(destino))){
+            getSharedPreferences("PMEntregasPush",0).edit().putString("destino",destino).putString("destinoUsuario",usuario).apply();
+            intent.removeExtra("notificacaoDestino");intent.removeExtra("notificacaoUsuario");
+        }
+    }
+    @Override protected void onNewIntent(Intent intent){super.onNewIntent(intent);capturarNotificacao(intent);if(notificacoesBridge!=null)notificacoesBridge.avisar();}
+
     private static final String TAG = "PMobileOta";
     private static final String NATIVE_WEB_BUNDLE_VERSION = BuildConfig.WEB_BUNDLE_VERSION;
     private static final ExecutorService OTA_MANIFEST_EXECUTOR =
@@ -74,6 +88,17 @@ public class MainActivity extends BridgeActivity {
         }
 
         super.onCreate(savedInstanceState);
+        capturarNotificacao(getIntent());
+        getOnBackPressedDispatcher().addCallback(this,new androidx.activity.OnBackPressedCallback(true){
+            private boolean pending;
+            @Override public void handleOnBackPressed(){
+                if(pending)return;pending=true;
+                getBridge().getWebView().evaluateJavascript("typeof obterTelaSistemaAtual==='function' && obterTelaSistemaAtual()==='rmexpress' && voltarTelaAnteriorPmobile()===true",result->{
+                    pending=false;if(isFinishing()||isDestroyed()||"true".equals(result))return;
+                    setEnabled(false);try{getOnBackPressedDispatcher().onBackPressed();}finally{if(!isFinishing()&&!isDestroyed())setEnabled(true);}
+                });
+            }
+        });
         final String startupCandidate = new OtaManager(getApplicationContext()).getCandidateVersion();
         new Handler(getMainLooper()).postDelayed(() -> {
             if (isFinishing() || isDestroyed() || startupCandidate == null) return;
@@ -92,7 +117,10 @@ public class MainActivity extends BridgeActivity {
         android.webkit.WebView webView = findViewById(com.getcapacitor.android.R.id.webview);
         webView.addJavascriptInterface(new OtaJsBridge(), "PMOBILE_OTA");
         webView.addJavascriptInterface(new OneDriveJsBridge(), "PMCOLETAS_ONEDRIVE");
+        notificacoesBridge=new NotificacoesBridge(this);
+        webView.addJavascriptInterface(notificacoesBridge,"PMEntregasNotificacoes");
         super.load();
+        notificacoesBridge.atualizarToken();
     }
 
 
