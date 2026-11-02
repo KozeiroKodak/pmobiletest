@@ -1,59 +1,8 @@
 /* ============================================================
-   PMOBILE
-   ARQUIVO: style.css
-   ============================================================
-
-   OBJETIVO:
-
-   Centralizar toda a aparência visual do PMOBILE.
-
-   RESPONSABILIDADES DESTE ARQUIVO:
-
-   1. Definir as cores principais do sistema.
-   2. Controlar a tela inicial.
-   3. Controlar a sidebar.
-   4. Controlar a área principal.
-   5. Controlar painéis.
-   6. Controlar formulários.
-   7. Controlar botões.
-   8. Controlar modais.
-   9. Controlar a barra fixa de status do PMOBILE.
-   10. Controlar o menu interno de Pesquisa.
-   11. Controlar a adaptação para celulares.
-
-   REFERÊNCIA VISUAL:
-
-   Supabase Studio.
-
-   IMPORTANTE:
-
-   A aparência deve permanecer neste arquivo.
-
-   JavaScript deve cuidar das funções e não da aparência.
-
-   ALTERAÇÃO DESTA VERSÃO:
-
-   A antiga notificação flutuante #statusSupabase deixa de
-   possuir aparência de popup.
-
-   Ela passa a funcionar visualmente como uma barra fixa de
-   status no rodapé da aplicação.
-
-   A lógica JavaScript permanece inalterada.
-
-   ============================================================ */
-
-
-/* ============================================================
    VARIÁVEIS GERAIS
    ============================================================ */
 
 :root {
-
-    /* SIDEBAR */
-
-    --sidebar-largura: 240px;
-    --sidebar-mobile: 58px;
 
     /* ALTURA RESERVADA PARA A BARRA DE STATUS */
     --status-altura: 52px;
@@ -62,7 +11,7 @@
     /* FUNDOS */
 
     --fundo: #121212;
-    --fundo-sidebar: #171717;
+    --fundo-status: #171717;
     --fundo-painel: #181818;
     --fundo-hover: #242424;
     --fundo-ativo: #2a2a2a;
@@ -207,329 +156,6 @@ body {
 
 
 /* ============================================================
-   SIDEBAR
-   ============================================================ */
-
-#sistema {
-
-    position:
-        fixed;
-
-    top:
-        0;
-
-    left:
-        0;
-
-    bottom:
-        0;
-
-    width:
-        var(--sidebar-largura);
-
-    display:
-        flex;
-
-    flex-direction:
-        column;
-
-    background:
-        var(--fundo-sidebar);
-
-    border-right:
-        1px solid
-        var(--borda);
-
-    /*
-       A barra de status fica fixed sobre a janela.
-       Reservamos espaço dentro da sidebar para que o botão
-       Configurações nunca fique atrás dela.
-    */
-    padding-bottom:
-        var(--status-altura);
-
-    z-index:
-        1000;
-
-}
-
-
-/* ============================================================
-   TOPO DA SIDEBAR
-   ============================================================ */
-
-.sidebar-topo {
-
-    min-height:
-        64px;
-
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    gap:
-        10px;
-
-    padding:
-        10px 12px;
-
-    border-bottom:
-        1px solid
-        var(--borda);
-
-}
-
-
-/* ============================================================
-   LOGOTIPO DA SIDEBAR
-   ============================================================ */
-
-.sidebar-logo {
-
-    width:
-        34px;
-
-    height:
-        34px;
-
-    flex-shrink:
-        0;
-
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    justify-content:
-        center;
-
-    border-radius:
-        7px;
-
-    background:
-        var(--verde);
-
-    color:
-        #0a0a0a;
-
-    font-weight:
-        700;
-
-    font-size:
-        16px;
-
-}
-
-
-/* ============================================================
-   TÍTULO DA SIDEBAR
-   ============================================================ */
-
-.sidebar-titulo {
-
-    min-width:
-        0;
-
-    display:
-        flex;
-
-    flex-direction:
-        column;
-
-}
-
-
-.sidebar-titulo strong {
-
-    color:
-        #ffffff;
-
-    font-size:
-        14px;
-
-    font-weight:
-        600;
-
-}
-
-
-.sidebar-titulo span {
-
-    margin-top:
-        2px;
-
-    color:
-        var(--texto-fraco);
-
-    font-size:
-        12px;
-
-}
-
-
-/* ============================================================
-   ÁREA DE NAVEGAÇÃO DA SIDEBAR
-   ============================================================ */
-
-.sidebar-menu {
-
-    flex:
-        1;
-
-    padding:
-        10px 8px;
-
-    overflow-y:
-        auto;
-
-}
-
-
-/* ============================================================
-   ITEM DA SIDEBAR
-   ============================================================ */
-
-.sidebar-item {
-
-    width:
-        100%;
-
-    min-height:
-        40px;
-
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    gap:
-        10px;
-
-    margin:
-        2px 0;
-
-    padding:
-        8px 10px;
-
-    border:
-        0;
-
-    border-radius:
-        6px;
-
-    background:
-        #2a2a2a;
-
-    color:
-        #d0d0d0;
-
-    font-family:
-        inherit;
-
-    font-size:
-        13px;
-
-    text-align:
-        left;
-
-    cursor:
-        pointer;
-
-    transition:
-        background 0.12s ease,
-        color 0.12s ease;
-
-}
-
-
-.sidebar-item:hover {
-
-    background:
-        var(--fundo-hover);
-
-    color:
-        #ffffff;
-
-}
-
-
-.sidebar-item.ativo {
-
-    background:
-        var(--fundo-ativo);
-
-    color:
-        #ffffff;
-
-}
-
-
-/* ============================================================
-   ÍCONE DA SIDEBAR
-   ============================================================ */
-
-.sidebar-icone {
-
-    width:
-        22px;
-
-    flex-shrink:
-        0;
-
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    justify-content:
-        center;
-
-    font-size:
-        16px;
-
-}
-
-
-/* ============================================================
-   TEXTO DA SIDEBAR
-   ============================================================ */
-
-.sidebar-texto {
-
-    white-space:
-        nowrap;
-
-    overflow:
-        hidden;
-
-    text-overflow:
-        ellipsis;
-
-}
-
-
-/* ============================================================
-   RODAPÉ DA SIDEBAR
-   ============================================================ */
-
-.sidebar-rodape {
-
-    padding:
-        8px;
-
-    border-top:
-        1px solid
-        var(--borda);
-
-}
-
-
-/* ============================================================
    CONTEÚDO PRINCIPAL
    ============================================================ */
 
@@ -539,7 +165,7 @@ body {
         100vh;
 
     margin-left:
-        var(--sidebar-largura);
+        0;
 
     background:
         var(--fundo);
@@ -761,8 +387,8 @@ input:focus {
    ============================================================ */
 
 .botao-principal,
-.botao-secundario,
-.botao-perigo {
+    .botao-secundario,
+    .botao-perigo {
 
     min-height:
         40px;
@@ -1000,93 +626,7 @@ input:focus {
 
    ============================================================ */
 
-@media (max-width: 700px) {/* ========================================================
-       SIDEBAR COMPACTA
-       ======================================================== */
-
-    #sistema {
-
-        width:
-            var(--sidebar-mobile);
-
-    }
-
-.sidebar-topo {
-
-        justify-content:
-            center;
-
-        padding-left:
-            8px;
-
-        padding-right:
-            8px;
-
-    }
-
-.sidebar-logo {
-
-        width:
-            34px;
-
-        height:
-            34px;
-
-    }
-
-.sidebar-titulo {
-
-        display:
-            none;
-
-    }
-
-.sidebar-menu {
-
-        padding-left:
-            6px;
-
-        padding-right:
-            6px;
-
-    }
-
-.sidebar-rodape {
-
-        padding-left:
-            6px;
-
-        padding-right:
-            6px;
-
-    }
-
-.sidebar-item {
-
-        justify-content:
-            center;
-
-        padding-left:
-            6px;
-
-        padding-right:
-            6px;
-
-    }
-
-.sidebar-icone {
-
-        width:
-            24px;
-
-    }
-
-.sidebar-texto {
-
-        display:
-            none;
-
-    }
+@media (max-width: 700px) {
 
 /* ========================================================
        CONTEÚDO PRINCIPAL
@@ -1095,7 +635,7 @@ input:focus {
     #conteudoPrincipal {
 
         margin-left:
-            var(--sidebar-mobile);
+            0;
 
     }
 
@@ -1271,7 +811,7 @@ input {
 }
 
 .painel > h2,
-.painel > h3 {
+    .painel > h3 {
     margin-bottom: var(--espaco-4);
 }
 
@@ -1313,21 +853,6 @@ input {
 #statusContagemManual,
 #listaContagensManuais {
     margin-top: var(--espaco-4);
-}
-
-/* Sidebar */
-.sidebar-menu {
-    padding: var(--espaco-2);
-}
-
-.sidebar-item {
-    gap: var(--espaco-2);
-    margin: var(--espaco-1) 0;
-    padding: var(--espaco-2) var(--espaco-3);
-}
-
-.sidebar-rodape {
-    padding: var(--espaco-2);
 }
 
 /* Pesquisa */
@@ -1506,11 +1031,7 @@ input {
 }
 
 @media (min-width:701px) and (max-width:1024px){
-    :root{--sidebar-largura:210px}
-    #sistema{width:var(--sidebar-largura)}
-    #conteudoPrincipal{margin-left:var(--sidebar-largura)}
-    .sidebar-item{padding-left:12px;padding-right:12px}
-    .sidebar-texto{font-size:13px}
+    #conteudoPrincipal{margin-left:0}
 }
 
 /* ============================================================
@@ -1521,9 +1042,9 @@ input {
 
 /* Régua comum de todos os controles */
 button,
-input,
-select,
-textarea {
+    input,
+    select,
+    textarea {
     box-sizing: border-box;
     font-family: inherit;
 }
@@ -1568,8 +1089,8 @@ button:disabled {
 
 /* Campos de texto */
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
-select,
-textarea {
+    select,
+    textarea {
     width: 100%;
     min-height: 40px;
     border: 1px solid var(--borda-clara);
@@ -1634,7 +1155,7 @@ textarea:disabled {
 
 /* Checkbox e radio: compactos, alinhados e sem herdar a caixa dos inputs de texto */
 input[type="checkbox"],
-input[type="radio"] {
+    input[type="radio"] {
     width: 16px;
     height: 16px;
     min-width: 16px;
@@ -1993,7 +1514,7 @@ body { padding-bottom: max(64px, env(safe-area-inset-bottom, 0px)) !important; }
 #valoresTotal .frete-valor>span,
 #valoresTotal .frete-percentual>span{font-size:10px;color:#9fb7bf;}
 #valoresTotal .frete-valor>strong,
-#valoresTotal .frete-percentual>strong{
+  #valoresTotal .frete-percentual>strong{
   font-size:12px;overflow-wrap:anywhere;font-variant-numeric:tabular-nums;
 }
 #valoresTotal .frete-percentual>strong{color:#82d9ec;}
