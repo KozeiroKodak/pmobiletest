@@ -9,31 +9,9 @@ const CHAVE_CONTAGENS_MANUAIS = "pmobile_contagens_manuais_v1";
 const TABELA_CONTAGENS_MANUAIS_SUPABASE = "contagens_manuais";
 let materialContagemManualSelecionado = null;
 
-function mostrarOpcoesCompletasContagemManual(seletor) {
-    if (!seletor) return;
-    const nomes = {
-        codigo: "Código",
-        descricao: "Descrição",
-        referencia: "Referência"
-    };
 
-    Array.from(seletor.options).forEach(opcao => {
-        opcao.textContent = nomes[opcao.value] || opcao.textContent;
-    });
-}
 
-function mostrarOpcoesCurtasContagemManual(seletor) {
-    if (!seletor) return;
-    const nomes = {
-        codigo: "CÓD",
-        descricao: "DESC",
-        referencia: "REF"
-    };
 
-    Array.from(seletor.options).forEach(opcao => {
-        opcao.textContent = nomes[opcao.value] || opcao.textContent;
-    });
-}
 
 function alternarSeletorContagemManual() {
     const menu = document.getElementById("menuTipoBuscaContagemManual");
