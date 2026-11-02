@@ -98,7 +98,7 @@ async function abrirRastreio() {
         alert("Acesso negado.");
         return;
     }
-    mostrarTelaSistema("rastreio", "menuRastreio");
+    mostrarTelaSistema("rastreio", "menuTransportes");
     // A sessão pode ser estabelecida após o DOMContentLoaded.
     // Reavaliar a permissão ao abrir evita ocultar os controles para ADMIN.
     if (typeof atualizarAcessoAdminRastreio === "function") {
@@ -289,12 +289,7 @@ function escaparAtributoRastreio(valor) {
     return escaparHtmlRastreio(valor).replaceAll("`", "&#96;");
 }
 
-function formatarValorRastreio(valor) {
-    const numero = Number(valor);
-    return Number.isFinite(numero)
-        ? numero.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-        : "—";
-}
+
 
 function formatarMoedaRastreio(valor) {
     const numero = Number(valor);
@@ -303,77 +298,12 @@ function formatarMoedaRastreio(valor) {
         : "—";
 }
 
-function abrirDetalhesRastreio(id) {
-    const item = [...rastreiosBuscaNFRapida, ...rastreiosPmobile]
-        .find(registro => String(registro.id) === String(id));
-    if (!item) return;
-
-    let modal = document.getElementById("rastreioDetalhesModal");
-    if (!modal) {
-        modal = document.createElement("div");
-        modal.id = "rastreioDetalhesModal";
-        modal.className = "rastreio-detalhes-modal";
-        modal.setAttribute("aria-hidden", "true");
-        modal.innerHTML =
-            '<div class="rastreio-detalhes-caixa" role="dialog" aria-modal="true" aria-labelledby="rastreioDetalhesTitulo">' +
-                '<div class="rastreio-detalhes-cabecalho">' +
-                    '<div><span>Rastreio</span><h2 id="rastreioDetalhesTitulo">Detalhes da NF</h2></div>' +
-                    '<button type="button" class="rastreio-detalhes-fechar" aria-label="Fechar">×</button>' +
-                '</div>' +
-                '<div id="rastreioDetalhesConteudo" class="rastreio-detalhes-grade"></div>' +
-            '</div>';
-        document.body.appendChild(modal);
-
-        modal.addEventListener("click", evento => {
-            if (evento.target === modal) fecharDetalhesRastreio();
-        });
-        modal.querySelector(".rastreio-detalhes-fechar")
-            .addEventListener("click", fecharDetalhesRastreio);
-    }
-
-    const titulo = modal.querySelector("#rastreioDetalhesTitulo");
-    const conteudo = modal.querySelector("#rastreioDetalhesConteudo");
-    titulo.textContent = "NF " + (item.notas_fiscais || "—");
-
-    conteudo.innerHTML =
-        '<div><small>Volume</small><strong>' + escaparHtmlRastreio(formatarValorRastreio(item.volume)) + '</strong></div>' +
-        '<div><small>Peso</small><strong>' + escaparHtmlRastreio(formatarValorRastreio(item.peso)) + '</strong></div>' +
-        '<div><small>Valor da nota</small><strong>' + escaparHtmlRastreio(formatarMoedaRastreio(item.valor_nf)) + '</strong></div>' +
-        '<div><small>Valor do frete embutido</small><strong>' + escaparHtmlRastreio(formatarMoedaRastreioSeguro(item.valor_frete_embutido)) + '</strong></div>' +
-        '<div><small>Valor do frete</small><strong>' + escaparHtmlRastreio(formatarMoedaRastreioSeguro(item.valor_frete)) + '</strong></div>' +
-        '<div><small>% Final</small><strong>' + escaparHtmlRastreio(formatarPercentualFinalRastreio(item.percentual_final)) + '</strong></div>';
-
-    modal.classList.add("aberto");
-    modal.setAttribute("aria-hidden", "false");
-    document.body.classList.add("rastreio-modal-aberto");
-}
-
-function fecharDetalhesRastreio() {
-    const modal = document.getElementById("rastreioDetalhesModal");
-    if (!modal) return;
-    modal.classList.remove("aberto");
-    modal.setAttribute("aria-hidden", "true");
-    document.body.classList.remove("rastreio-modal-aberto");
-}
 
 
-function abrirPopupStatusRastreio() {
-    const seletor = document.getElementById("filtroStatusRastreio");
-    const botao = document.getElementById("botaoFiltroStatusRastreio");
-    if (!seletor || !botao || typeof abrirPopupEscolhaSelect !== "function") return;
 
-    abrirPopupEscolhaSelect({
-        idSelect: "filtroStatusRastreio",
-        titulo: "Filtrar por status",
-        aoEscolher: function(valor) {
-            const opcao = seletor.options[seletor.selectedIndex];
-            botao.textContent = opcao ? opcao.textContent : "Todos os status";
-            botao.setAttribute("aria-expanded", "false");
-            filtrarRastreios();
-        }
-    });
-    botao.setAttribute("aria-expanded", "true");
-}
+
+
+
 
 // Ponte de navegação: o rastreio publica seu ponto de entrada.
 window.PMobileModulos?.registrarAcao("rastreio",abrirRastreio);
