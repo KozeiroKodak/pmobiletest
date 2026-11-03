@@ -62,6 +62,19 @@
 
 const historicoTelasSistema = [];
 
+// O Nível 2 acessa apenas as quatro áreas autorizadas e as subtelas de Transportes.
+const TELAS_NIVEL2_PMOBILE = new Set([
+    "homeSistema",
+    "pesquisa",
+    "contagemManual",
+    "transportes",
+    "rastreio",
+    "opcoesCotacoes",
+    "cotacoesRegiao",
+    "cotacoesDetalhe",
+    "reservas"
+]);
+
 function obterTelaSistemaAtual() {
 
     const telas =
@@ -225,6 +238,12 @@ function mostrarTelaSistema(
     idMenu,
     restaurandoHistorico = false
 ) {
+
+    // Bloqueio central para impedir acesso direto ou por histórico a áreas restritas.
+    if (window.usuarioPmobileAtual?.nivel === "NIVEL2" &&
+        !TELAS_NIVEL2_PMOBILE.has(idTela)) {
+        return false;
+    }
 
     const atual = obterTelaSistemaAtual();
 
@@ -1782,7 +1801,7 @@ function atualizarVisibilidadeConfiguracoes() {
         menuConfiguracoes: isAdmin,
         menuTransportes: isAdmin || isNivel2,
         menuRMExpress: ["ADMIN","RMADMIN","RMMOTORISTAS"].includes(nivel),
-        menuDadosLocais: isAdmin || isNivel2,
+        menuDadosLocais: isAdmin,
         menuReservas: isAdmin || isNivel2,
         menuPesquisa: isAdmin || isNivel2,
         menuContagemManual: isAdmin || isNivel2,
@@ -1793,6 +1812,18 @@ function atualizarVisibilidadeConfiguracoes() {
         const botao = document.getElementById(id);
         if (botao) botao.style.display = regras[id] ? "" : "none";
     });
+
+    // Lista positiva: cartões novos não podem aparecer para o Nível 2 por engano.
+    if (isNivel2) {
+        const menusPermitidos = new Set([
+            "menuPesquisa", "menuContagemManual",
+            "menuTransportes", "menuReservas", "menuSair"
+        ]);
+        document.querySelectorAll("#homeSistema .home-app-card").forEach(function(botao) {
+            if (!menusPermitidos.has(botao.id)) botao.style.display = "none";
+        });
+    }
+
     window.dispatchEvent(new Event('pmobile:sessao-alterada'));
 
 }
@@ -1927,7 +1958,7 @@ async function abrirGerenciamentoUsuarios() {
                         '</select>' +
                         '<button type="button" class="seletor-nivel-usuario" id="botaoNivelSolicitacao_' + solicitacao.id + '" onclick="alternarSeletorNivelUsuario(' + solicitacao.id + ')" aria-haspopup="listbox" aria-expanded="false">Nível 2</button>' +
                         '<div id="menuNivelSolicitacao_' + solicitacao.id + '" class="menu-nivel-usuario" role="listbox">' +
-                            '<button type="button" onclick="selecionarNivelUsuario(' + solicitacao.id + ', \'NIVEL2\')">Nível 2 — Pesquisa e Contagem manual</button>' +
+                            '<button type="button" onclick="selecionarNivelUsuario(' + solicitacao.id + ', \'NIVEL2\')">Nível 2 — Pesquisa, Contagem manual, Transportes e Reservas</button>' +
                             '<button type="button" onclick="selecionarNivelUsuario(' + solicitacao.id + ', \'ADMIN\')">Administrativo — acesso total</button>' +
                             '<button type="button" onclick="selecionarNivelUsuario(' + solicitacao.id + ', \'RMADMIN\')">RMAdmin — gestão do RMExpress</button>' +
                             '<button type="button" onclick="selecionarNivelUsuario(' + solicitacao.id + ', \'RMMOTORISTAS\')">RMMotoristas — entregas e roteiro</button>' +
@@ -2008,7 +2039,7 @@ function formatarDataSolicitacaoPmobile(valor) {
 const NIVEIS_APROVACAO_PMOBILE = [
     {
         value: "NIVEL2",
-        label: "Nível 2 — Pesquisa e Contagem manual"
+        label: "Nível 2 — Pesquisa, Contagem manual, Transportes e Reservas"
     },
     {
         value: "ADMIN",
