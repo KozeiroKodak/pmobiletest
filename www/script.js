@@ -2994,7 +2994,7 @@ document.addEventListener(
         areaAtual = null;
         subareaAtual = null;
         origemSubtelaAdmin = null;
-        limparCredenciaisAdminVisiveis();
+        if (typeof limparCredenciaisAdminVisiveis === "function") limparCredenciaisAdminVisiveis();
         atualizarTela();
     };
 
@@ -3023,7 +3023,7 @@ document.addEventListener(
         } else {
             esconderPainelSeExistir("painelGerenciamentoUsuarios");
             esconderPainelSeExistir("painelRecuperacaoCredenciais");
-            limparCredenciaisAdminVisiveis();
+            if (typeof limparCredenciaisAdminVisiveis === "function") limparCredenciaisAdminVisiveis();
             esconderPainelSeExistir("painelConfiguracoesManutencao");
             esconderPainelSeExistir("painelArquivosTeste");
         }
@@ -3093,7 +3093,7 @@ document.addEventListener(
             } else if (subareaAtual === "arquivos" && typeof fecharArquivosTeste === "function") {
                 fecharArquivosTeste();
             } else if (subareaAtual === "tokens") {
-                limparCredenciaisAdminVisiveis();
+                if (typeof limparCredenciaisAdminVisiveis === "function") limparCredenciaisAdminVisiveis();
             }
             prepararPainelAdmin();
             areaAtual = ehAdmin() ? "admin" : null;
