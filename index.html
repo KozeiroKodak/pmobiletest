@@ -938,6 +938,31 @@
             </div>
             </div>
 
+            <div class="painel configuracoes-modulo credenciais-admin-painel" id="painelRecuperacaoCredenciais" style="display: none;">
+                <div class="credenciais-admin-intro">
+                    <h3>Recuperação manual de acesso</h3>
+                    <p>Consulte o nome, o login e a situação de cada conta. Para emitir credenciais, confirme a operação: a senha anterior será substituída por uma primeira senha provisória.</p>
+                    <p><strong>Importante:</strong> o token e a primeira senha são exibidos somente na emissão. Após sair desta área, eles não podem ser consultados novamente. O usuário define a senha definitiva no primeiro acesso.</p>
+                </div>
+                <section id="credenciaisGeradasAdmin" class="credenciais-admin-revelados" aria-live="polite" hidden>
+                    <strong id="credenciaisIdentidadeAdmin"></strong>
+                    <label for="credenciaisTokenAdmin">Token de acesso</label>
+                    <div class="credenciais-admin-campo">
+                        <input id="credenciaisTokenAdmin" readonly autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Token provisório">
+                        <button type="button" class="botao-aba" onclick="copiarCredencialAdmin('token')">Copiar</button>
+                    </div>
+                    <label for="credenciaisSenhaAdmin">Primeira senha provisória</label>
+                    <div class="credenciais-admin-campo">
+                        <input id="credenciaisSenhaAdmin" readonly autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Primeira senha provisória">
+                        <button type="button" class="botao-aba" onclick="copiarCredencialAdmin('senha')">Copiar</button>
+                    </div>
+                    <p>Copie os dois dados agora. Ao atualizar ou sair, eles desaparecem; para emitir novos, a credencial anterior será invalidada.</p>
+                    <button type="button" class="botao-secundario" onclick="limparCredenciaisAdminVisiveis()">Ocultar credenciais</button>
+                </section>
+                <div class="credenciais-admin-lista-topo"><h3>Usuários cadastrados</h3><button type="button" class="botao-aba" onclick="carregarListaCredenciaisAdmin()">Atualizar</button></div>
+                <div id="listaCredenciaisAdmin" class="credenciais-admin-lista" aria-live="polite"></div>
+            </div>
+
             <div class="painel painel-solicitacoes" id="painelGerenciamentoUsuarios" style="display: none;">
                 <div class="solicitacoes-topo">
                     <button
@@ -1218,7 +1243,7 @@
      CONTROLE GERAL
      ========================================================= -->
 
-<script src="script.js?v=0.0.404-nivel2"></script>
+<script src="script.js?v=0.0.405-credenciais"></script>
 <!-- Central de sincronização -->
 
 <script src="sync-center.js?v=1.0.3"></script>
