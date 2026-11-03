@@ -1,10 +1,10 @@
 {
-  "webVersion": "0.0.408",
+  "webVersion": "0.0.409",
   "nativeMinVersion": "1.05",
-  "package": "https://github.com/KozeiroKodak/pmobiletest/releases/download/ota-web-0.0.408/pmobile-web-0.0.408.zip",
-  "sha256": "8042539557f5098f971fc96e3840d37e8ccabb90c2b5d47b76d39196ff4cd928",
+  "package": "https://github.com/KozeiroKodak/pmobiletest/releases/download/ota-web-0.0.409/pmobile-web-0.0.409.zip",
+  "sha256": "2671713891f2a73da691248e04c63e7950a86dc548e4cc37372491e092cbe816",
   "mandatory": false,
-  "sizeBytes": 605344,
-  "publishedAt": "2026-11-03T20:53:51.672403+00:00",
+  "sizeBytes": 605354,
+  "publishedAt": "2026-11-03T20:56:52.178029+00:00",
   "releaseNotes": "PMobile: operação RMEXPRESS integrada.\n\n- Painel, Entregas, Roteiros, Gerência, Central e notificações do PMEntregas dentro do PMobile.\n- Acesso com a sessão PMobile e permissões de cada perfil.\n- Retorno do Android respeita as áreas e volta ao painel central.\n- Fontes compartilhadas com o PMEntregas e sincronização automática de novas versões web.\n- Requer APK PMobile 1.05 para a ponte de notificações e navegação nativa.\n- Estoque, Dados locais e filas existentes preservados."
 }
