@@ -1560,3 +1560,26 @@ body { padding-bottom: max(64px, env(safe-area-inset-bottom, 0px)) !important; }
   #valoresTotal .frete-percentual{grid-column:3;grid-row:2;}
   #valoresTotal .frete-valor{grid-column:3;}
 }
+
+
+/* Recuperação manual de credenciais: layout compacto e responsivo. */
+.credenciais-admin-painel{max-width:100%;box-sizing:border-box}
+.credenciais-admin-intro{line-height:1.55;margin-bottom:20px}
+.credenciais-admin-intro h3{font-size:1.15rem;margin:0 0 8px}
+.credenciais-admin-intro p{margin:8px 0}
+.credenciais-admin-revelados{padding:17px;border:1px solid #238a82;border-radius:14px;background:rgba(24,149,130,.08);display:grid;gap:10px;margin:15px 0 22px}
+.credenciais-admin-revelados[hidden]{display:none!important}
+.credenciais-admin-revelados label{font-weight:650;font-size:.9rem}
+.credenciais-admin-revelados p{font-size:.88rem;line-height:1.5;margin:4px 0}
+.credenciais-admin-campo{display:flex;gap:8px;align-items:stretch}
+.credenciais-admin-campo input{flex:1;min-width:0;background:var(--cor-fundo,#10191b);color:inherit;border:1px solid #56706e;padding:12px;border-radius:9px;font:inherit;font-size:.92rem}
+.credenciais-admin-campo button{flex:none}
+.credenciais-admin-lista-topo{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+.credenciais-admin-lista-topo h3{font-size:1rem;margin:0}
+.credenciais-admin-lista{display:grid;gap:10px}
+.credenciais-admin-item{border:1px solid rgba(128,147,147,.3);border-radius:13px;padding:14px;display:flex;gap:15px;align-items:center;justify-content:space-between}
+.credenciais-admin-info{display:grid;gap:5px;min-width:0;overflow-wrap:anywhere}
+.credenciais-admin-info strong{font-size:1rem}
+.credenciais-admin-info small,.credenciais-admin-info span{opacity:.8;font-size:.86rem}
+.credenciais-admin-gerar{flex:none}
+@media(max-width:640px){.credenciais-admin-item{flex-direction:column;align-items:stretch}.credenciais-admin-gerar{width:100%}.credenciais-admin-campo{flex-wrap:wrap}.credenciais-admin-campo input{flex-basis:100%}.credenciais-admin-campo button{flex:1}}
