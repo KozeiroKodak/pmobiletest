@@ -434,6 +434,8 @@ function sairPmobile() {
     }
 
     usuarioPmobileCadastroSenha = null;
+    tokenPmobileCadastroSenha = null;
+    limparCredenciaisAdminVisiveis();
     const criarSenha = document.getElementById("criarSenhaPmobile");
     if (criarSenha) {
         criarSenha.style.display = "none";
@@ -2164,17 +2166,118 @@ function escapeHtmlPmobile(valor) {
 }
 
 
-function abrirSolicitacoesResetToken() {
+function limparCredenciaisAdminVisiveis() {
+    const box = document.getElementById("credenciaisGeradasAdmin");
+    const token = document.getElementById("credenciaisTokenAdmin");
+    const senha = document.getElementById("credenciaisSenhaAdmin");
+    const nome = document.getElementById("credenciaisIdentidadeAdmin");
+    if (box) box.hidden = true;
+    if (token) token.value = "";
+    if (senha) senha.value = "";
+    if (nome) nome.textContent = "";
+}
 
-    if (!window.usuarioPmobileAtual || window.usuarioPmobileAtual.nivel !== "ADMIN") {
+async function carregarListaCredenciaisAdmin() {
+    if (window.usuarioPmobileAtual?.nivel !== "ADMIN" || !credencialPmobileAtual) return;
+    const lista = document.getElementById("listaCredenciaisAdmin");
+    if (!lista) return;
+    lista.textContent = "Consultando usuários...";
+    try {
+        const {data,error} = await window.clienteSupabase.rpc("pmobile_admin_listar_credenciais",{
+            p_admin_usuario: window.usuarioPmobileAtual.usuario,
+            p_admin_credencial: credencialPmobileAtual
+        });
+        if (error) throw error;
+        if (window.usuarioPmobileAtual?.nivel !== "ADMIN") return;
+        lista.replaceChildren();
+        for (const u of (Array.isArray(data)?data:[])) {
+            const card = document.createElement("article");
+            card.className = "credenciais-admin-item";
+            const dados = document.createElement("div");
+            dados.className = "credenciais-admin-info";
+            const titulo = document.createElement("strong");
+            titulo.textContent = u.nome || u.usuario;
+            const login = document.createElement("span");
+            login.textContent = "@" + u.usuario + " · " + u.nivel;
+            const situacao = document.createElement("small");
+            situacao.textContent = !u.ativo ? "Conta inativa" :
+              (u.senha_provisoria ? "Primeira senha pendente de troca" :
+              (u.senha_definida ? "Senha definitiva cadastrada" : "Aguardando ativação")) +
+              " · Token " + (u.token_pendente?"ativo (valor oculto)":"consumido ou inexistente");
+            const ultima = document.createElement("small");
+            ultima.textContent = u.senha_criada_em ?
+              "Senha cadastrada em " + new Date(u.senha_criada_em).toLocaleString("pt-BR"):
+              "Senha ainda não cadastrada";
+            dados.append(titulo,login,situacao,ultima);
+            card.append(dados);
+            if (u.ativo && u.nivel !== "ADMIN") {
+                const emitir = document.createElement("button");
+                emitir.type = "button";
+                emitir.className = "botao-aba credenciais-admin-gerar";
+                emitir.textContent = "Gerar token e primeira senha";
+                emitir.addEventListener("click",function(){gerarCredenciaisProvisoriasAdmin(u.id,u.usuario);});
+                card.append(emitir);
+            }
+            lista.append(card);
+        }
+        if (!lista.children.length) lista.textContent = "Nenhum usuário cadastrado.";
+    } catch(erro) {
+        lista.textContent = "Consulta indisponível: " + (erro.message||"Tente novamente.");
+    }
+}
+
+async function abrirSolicitacoesResetToken() {
+    if (window.usuarioPmobileAtual?.nivel !== "ADMIN" ||
+        !credencialPmobileAtual || !window.clienteSupabase) {
         alert("Acesso administrativo negado.");
         return;
     }
-
-    alert("Solicitações de recuperação de token serão exibidas nesta área na próxima etapa.");
-
+    const painel = document.getElementById("painelRecuperacaoCredenciais");
+    if (painel) painel.style.display = "block";
+    limparCredenciaisAdminVisiveis();
+    await carregarListaCredenciaisAdmin();
 }
 
+async function gerarCredenciaisProvisoriasAdmin(id,usuario) {
+    if (window.usuarioPmobileAtual?.nivel !== "ADMIN" || !credencialPmobileAtual) return;
+    if (!confirm("Gerar novo token e primeira senha para @" + usuario +
+        "? A senha e o token anteriores deixarão de funcionar imediatamente.")) return;
+    const botoes = document.querySelectorAll("#listaCredenciaisAdmin button");
+    botoes.forEach(function(b){b.disabled=true;});
+    limparCredenciaisAdminVisiveis();
+    try {
+        const {data,error} = await window.clienteSupabase.rpc("pmobile_admin_gerar_credenciais",{
+            p_admin_usuario: window.usuarioPmobileAtual.usuario,
+            p_admin_credencial: credencialPmobileAtual,
+            p_usuario_id: Number(id)
+        });
+        if (error) throw error;
+        if (window.usuarioPmobileAtual?.nivel !== "ADMIN") return;
+        const segredo = Array.isArray(data)?data[0]:data;
+        if (!segredo?.token || !segredo?.primeira_senha) throw Error("Resposta incompleta.");
+        document.getElementById("credenciaisIdentidadeAdmin").textContent = segredo.nome + " · @" + segredo.usuario;
+        document.getElementById("credenciaisTokenAdmin").value = segredo.token;
+        document.getElementById("credenciaisSenhaAdmin").value = segredo.primeira_senha;
+        document.getElementById("credenciaisGeradasAdmin").hidden = false;
+        await carregarListaCredenciaisAdmin();
+    } catch(erro) {
+        alert("Falha ao gerar credenciais: " + (erro.message || "Tente novamente."));
+        botoes.forEach(function(b){b.disabled=false;});
+    }
+}
+
+async function copiarCredencialAdmin(tipo) {
+    if (window.usuarioPmobileAtual?.nivel !== "ADMIN") return;
+    const input = document.getElementById(tipo==="token"?"credenciaisTokenAdmin":"credenciaisSenhaAdmin");
+    if (!input?.value) return;
+    try {
+        if (!navigator.clipboard?.writeText) throw Error("Clipboard indisponível");
+        await navigator.clipboard.writeText(input.value);
+    } catch {
+        input.focus();input.select();
+        alert("Selecione e copie o valor mostrado.");
+    }
+}
 
 // ============================================================
 // VOLTAR DAS CONFIGURAÇÕES
@@ -2788,6 +2891,7 @@ document.addEventListener(
 
     const subareas = {
         usuarios: { titulo: "Usuários", painel: "painelGerenciamentoUsuarios" },
+        tokens: { titulo: "Recuperação de tokens e senhas", painel: "painelRecuperacaoCredenciais" },
         arquivos: { titulo: "Arquivos de teste", painel: "painelArquivosTeste" },
         manutencao: { titulo: "Manutenção", painel: "painelConfiguracoesManutencao" }
     };
@@ -2881,6 +2985,7 @@ document.addEventListener(
         const admin = elemento("painelConfiguracoesAdmin");
         if (admin) admin.style.display = ehAdmin() ? "block" : "none";
         esconderPainelSeExistir("painelGerenciamentoUsuarios");
+        esconderPainelSeExistir("painelRecuperacaoCredenciais");
         esconderPainelSeExistir("painelConfiguracoesManutencao");
         esconderPainelSeExistir("painelArquivosTeste");
     }
@@ -2889,6 +2994,7 @@ document.addEventListener(
         areaAtual = null;
         subareaAtual = null;
         origemSubtelaAdmin = null;
+        limparCredenciaisAdminVisiveis();
         atualizarTela();
     };
 
@@ -2916,6 +3022,8 @@ document.addEventListener(
             prepararPainelAdmin();
         } else {
             esconderPainelSeExistir("painelGerenciamentoUsuarios");
+            esconderPainelSeExistir("painelRecuperacaoCredenciais");
+            limparCredenciaisAdminVisiveis();
             esconderPainelSeExistir("painelConfiguracoesManutencao");
             esconderPainelSeExistir("painelArquivosTeste");
         }
@@ -2948,15 +3056,11 @@ document.addEventListener(
             }
             return;
         }
-        if (nome === "tokens") {
-            // A função atual ainda é informativa; não criar fluxos fictícios.
-            if (typeof abrirSolicitacoesResetToken === "function") abrirSolicitacoesResetToken();
-            return;
-        }
-
         if (!subareas[nome]) return;
 
-        if (nome === "usuarios") {
+        if (nome === "tokens") {
+            if (typeof abrirSolicitacoesResetToken === "function") abrirSolicitacoesResetToken();
+        } else if (nome === "usuarios") {
             if (typeof abrirGerenciamentoUsuarios === "function") {
                 abrirGerenciamentoUsuarios();
             }
@@ -2988,6 +3092,8 @@ document.addEventListener(
                 fecharGerenciamentoUsuarios();
             } else if (subareaAtual === "arquivos" && typeof fecharArquivosTeste === "function") {
                 fecharArquivosTeste();
+            } else if (subareaAtual === "tokens") {
+                limparCredenciaisAdminVisiveis();
             }
             prepararPainelAdmin();
             areaAtual = ehAdmin() ? "admin" : null;
