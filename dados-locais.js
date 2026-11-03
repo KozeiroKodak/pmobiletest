@@ -127,7 +127,7 @@
     menu.addEventListener("click",abrir);
     menuBase.insertAdjacentElement("afterend",menu);
     // O módulo é administrativo; não expor o cartão antes da atualização do login.
-    menu.style.display=window.usuarioPmobileAtual?.nivel==="ADMIN"?"":"none";
+    if(menu.style)menu.style.display=window.usuarioPmobileAtual?.nivel==="ADMIN"?"":"none";
     const section=document.createElement("section");
     section.className="tela-sistema";section.id="dadosLocais";section.style.display="none";
     section.innerHTML=htmlPrincipal();conteudo.appendChild(section);
@@ -387,7 +387,7 @@
       botao.className="home-app-card";botao.textContent="Dados locais indisponíveis — atualizar PMobile";
       botao.addEventListener("click",informarFalha);
       base.insertAdjacentElement("afterend",botao);
-      botao.style.display=window.usuarioPmobileAtual?.nivel==="ADMIN"?"":"none";
+      if(botao.style)botao.style.display=window.usuarioPmobileAtual?.nivel==="ADMIN"?"":"none";
     };
     window.abrirDadosLocaisPmobile=informarFalha;
     window.voltarUmNivelDadosLocais=()=>false;
