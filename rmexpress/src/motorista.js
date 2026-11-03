@@ -1,4 +1,4 @@
-// Jornada real do usuário RMMOTORISTAS. Usa RPCs oficiais do banco compartilhado.
+// Jornada real dos motoristas RMMOTORISTAS e RMADMIN habilitados no servidor.
 // Nenhum cache de entregas/senhas em localStorage e nenhuma alteração offline.
 import { listarEntregasMotorista, confirmarRotaMotorista, confirmarEntregaMotorista, listarDestinos } from "./api.js";
 import {enderecoValido,coordenadaValida,urlNavegacao,sugerirSequencia} from "./rota.js";
@@ -58,7 +58,7 @@ export function iniciarMotorista(){
   let dadosCache=false;
   let atualizadoEm=null;
   let categoriaAtiva="todas";
-  const perfilAtivo=()=>Boolean(sessao && sessao.nivel==="RMMOTORISTAS");
+  const perfilAtivo=()=>Boolean(sessao && ["RMMOTORISTAS","RMADMIN"].includes(sessao.nivel));
 
   function status(texto,erro=false){
     for(const id of ["statusMotoristaReal","statusRoteiroMotorista"]){
@@ -225,7 +225,7 @@ export function iniciarMotorista(){
       if(!Array.isArray(resultado))throw new Error("O servidor retornou dados inesperados.");
       let novosDestinos=new Map();
       try{
-        const dest=await listarDestinos(usuarioAtual);
+        const dest=await listarDestinos(usuarioAtual,usuarioAtual.id);
         if(Array.isArray(dest))novosDestinos=new Map(dest.map(x=>[x.rastreio_id,x]));
       }catch{/* A destination lookup failure must not reuse a previous destination. */}
       if(id!==versao||sessao!==usuarioAtual)return;
@@ -258,7 +258,7 @@ export function iniciarMotorista(){
   }
   async function entrar(novaSessao){
     sair();
-    if(!novaSessao || novaSessao.nivel!=="RMMOTORISTAS")return;
+    if(!novaSessao || !["RMMOTORISTAS","RMADMIN"].includes(novaSessao.nivel))return;
     sessao=novaSessao;
     desenhar();
     return carregar();

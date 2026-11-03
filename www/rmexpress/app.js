@@ -159,7 +159,7 @@ function renderizar() {
     ? "Todas as NFs, clientes e destinos são exemplos. As ações são gravadas apenas neste navegador; não existe integração de produção."
     : "Nenhuma fonte de dados conectada. Você pode experimentar uma jornada fictícia, sem alterar NFs reais.";
   document.body.classList.toggle("demo-active",ativa);
-  if (sessaoPmobile?.nivel === "RMMOTORISTAS") {
+  if (motorista.estaAtivo()) {
     $("environmentTitle").textContent="MOTORISTA · DADOS REAIS";
     $("environmentText").textContent="As suas notas atribuídas são consultadas no Supabase. Confirmações de roteiro e entregas alteram dados oficiais.";
     atualizarConexao();

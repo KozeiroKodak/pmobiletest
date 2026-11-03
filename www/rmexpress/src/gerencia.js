@@ -4,6 +4,13 @@ import { autenticar, listarMotoristas, buscarDisponiveis, buscarDisponiveisPorCa
 
 const $ = id => document.getElementById(id);
 const PERFIS_GERENCIA=new Set(["ADMIN","RMADMIN"]);
+
+// RMADMIN só opera como motorista se constar na lista autorizada pelo Supabase.
+export function podeAtuarComoMotorista(perfil,motoristas=[]){
+  if(!perfil)return false;
+  if(perfil.nivel==="RMMOTORISTAS")return true;
+  return perfil.nivel==="RMADMIN" && motoristas.some(m=>String(m.id)===String(perfil.id));
+}
 const LIMITE=60;
 
 function escapar(valor){
@@ -170,11 +177,12 @@ export function iniciarGerencia({aoAlterarSessao=()=>{},aoSessaoMotorista=()=>{}
         aoSessaoAdmin(sessao);
         aviso("Acesso autorizado. Consultando notas disponíveis...");
         await carregarMotoristas();
+        if(podeAtuarComoMotorista(perfil,motoristas))await aoSessaoMotorista(sessao);
         await carregarContadores();
         await carregarNotas(true);
         await historico.carregar();
       }else{
-        if(perfil.nivel==="RMMOTORISTAS") await aoSessaoMotorista(sessao);
+        if(podeAtuarComoMotorista(perfil,motoristas)) await aoSessaoMotorista(sessao);
         aviso("");
         $("estadoGerencia").textContent="Este perfil não possui autorização de gerência. Apenas ADMIN e RMADMIN podem atribuir motoristas.";
       }
@@ -193,7 +201,7 @@ export function iniciarGerencia({aoAlterarSessao=()=>{},aoSessaoMotorista=()=>{}
       if(!autorizada())return;
       motoristas=Array.isArray(resultado)?resultado.filter(x=>x.id!=null&&x.nome):[];
       atualizarLote();
-      if(!motoristas.length)aviso("Não existem motoristas ativos no perfil RMMOTORISTAS. Nenhuma atribuição poderá ser efetuada.",true);
+      if(!motoristas.length)aviso("Não existem motoristas ativos habilitados. Nenhuma atribuição poderá ser efetuada.",true);
     }catch(erro){
       motoristas=[];
       aviso("Falha ao consultar os motoristas: "+(erro.message||"tente novamente."),true);
