@@ -181,8 +181,7 @@ begin
 
     return next;
 end;
-$function$
-
+$function$;
 
 -- API: exige credenciais verificadas por funções, nunca dá SELECT em hashes.
 REVOKE ALL ON FUNCTION public.pmobile_admin_listar_credenciais(text,text) FROM PUBLIC,anon,authenticated;
