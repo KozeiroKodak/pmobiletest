@@ -377,6 +377,7 @@ async function abrirSistema() {
 
 let usuarioPmobileAtual = null;
 let credencialPmobileAtual = null;
+let tokenPmobileCadastroSenha = null;
 
 
 function voltarInicio() {
@@ -809,9 +810,10 @@ async function tentarRestaurarLoginPmobile() {
 }
 
 
-function abrirCriacaoSenha(usuario, dadosUsuario) {
+function abrirCriacaoSenha(usuario, dadosUsuario, credencial) {
 
     usuarioPmobileCadastroSenha = usuario;
+    tokenPmobileCadastroSenha = credencial || null;
 
     const login = document.getElementById("loginPmobile");
     const criarSenha = document.getElementById("criarSenhaPmobile");
@@ -852,6 +854,7 @@ function abrirCriacaoSenha(usuario, dadosUsuario) {
 function voltarLoginCriacaoSenha() {
 
     usuarioPmobileCadastroSenha = null;
+    tokenPmobileCadastroSenha = null;
     const criarSenha = document.getElementById("criarSenhaPmobile");
     const login = document.getElementById("loginPmobile");
 
@@ -942,7 +945,8 @@ async function criarSenhaPmobile(event) {
                 "criar_senha_usuario",
                 {
                     p_usuario: usuarioPmobileCadastroSenha,
-                    p_senha: senha
+                    p_senha: senha,
+                    p_credencial: tokenPmobileCadastroSenha
                 }
             );
 
@@ -1135,55 +1139,9 @@ async function entrarInterface(event) {
 
     try {
 
-        // Primeiro acesso: usuário aprovado, ainda sem senha.
+        // Primeiro acesso exige prova de posse: token ou senha provisória.
         if (!senha) {
-
-            const { data, error } =
-                await window.clienteSupabase.rpc(
-                    "autenticar_usuario",
-                    {
-                        p_usuario: usuario
-                    }
-                );
-
-            if (error) {
-                console.error(
-                    "❌ Erro ao verificar primeiro acesso:",
-                    error
-                );
-
-                mostrarStatusLogin(
-                    "Não foi possível validar o acesso.",
-                    true
-                );
-                return;
-            }
-
-            const usuarioAtivacao =
-                Array.isArray(data)
-                    ? data[0]
-                    : data;
-
-            if (
-                usuarioAtivacao &&
-                usuarioAtivacao.precisa_criar_senha
-            ) {
-                abrirCriacaoSenha(
-                    usuarioAtivacao.usuario,
-                    usuarioAtivacao
-                );
-
-                mostrarStatusCriarSenha(
-                    "Seu usuário foi aprovado. Agora crie sua senha de acesso."
-                );
-
-                return;
-            }
-
-            mostrarStatusLogin(
-                "Usuário ou senha inválidos.",
-                true
-            );
+            mostrarStatusLogin("Informe senha, senha provisória ou token de ativação.",true);
             return;
         }
 
@@ -1229,6 +1187,13 @@ async function entrarInterface(event) {
                 campoSenha.focus();
             }
 
+            return;
+        }
+
+        if (usuarioAutenticado.precisa_criar_senha) {
+            abrirCriacaoSenha(usuarioAutenticado.usuario, usuarioAutenticado, senha);
+            mostrarStatusCriarSenha("Acesso provisório validado. Defina a senha definitiva.");
+            if (campoSenha) campoSenha.value = "";
             return;
         }
 
@@ -2131,9 +2096,29 @@ async function aprovarCadastroUsuario(solicitacaoId) {
         const usuarioCriado = Array.isArray(data) ? data[0] : data;
         if (!usuarioCriado) throw new Error("O servidor não retornou o novo usuário.");
 
-        alert("Usuário aprovado!\\n\\nUsuário: " + usuarioCriado.usuario +
-            "\\nNível: " + usuarioCriado.nivel +
-            "\\n\\nTOKEN DE ACESSO (copie agora):\\n" + usuarioCriado.token);
+        // O primeiro acesso é emitido manualmente e os valores aparecem só uma vez.
+        let emitida;
+        try {
+            const resposta = await window.clienteSupabase.rpc("pmobile_admin_gerar_credenciais", {
+                p_admin_usuario: window.usuarioPmobileAtual.usuario,
+                p_admin_credencial: credencialPmobileAtual,
+                p_usuario_id: usuarioCriado.usuario_id
+            });
+            if (resposta.error) throw resposta.error;
+            emitida = Array.isArray(resposta.data) ? resposta.data[0] : resposta.data;
+            if (!emitida) throw new Error("O servidor não retornou credenciais.");
+        } catch (falha) {
+            alert("Usuário aprovado, mas a primeira senha não foi emitida.\n\n" +
+                "Token inicial (copie agora):\n" + usuarioCriado.token +
+                "\n\nEntre em Recuperação de tokens para gerar nova senha.");
+            await abrirGerenciamentoUsuarios();
+            return;
+        }
+        alert("Usuário aprovado!\n\nUsuário: " + emitida.usuario +
+            "\nNível: " + usuarioCriado.nivel +
+            "\n\nTOKEN (copie agora):\n" + emitida.token +
+            "\n\nPRIMEIRA SENHA (provisória):\n" + emitida.primeira_senha +
+            "\n\nOs valores são exibidos uma só vez; o usuário criará a senha definitiva.");
 
         await abrirGerenciamentoUsuarios();
 
