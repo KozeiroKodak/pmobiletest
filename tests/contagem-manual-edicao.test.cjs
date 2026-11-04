@@ -99,6 +99,14 @@ test("cadastro novo continua criando um registro", async () => {
     assert.equal(env.getItens()[0].sincronizado, false);
     assert.equal(env.chamadas.length, 0);
 });
+test("duplo clique em salvar não duplica a contagem nova", async () => {
+    const env = ambiente(null);
+    const a = vm.runInContext("salvarContagemManual()", env.ctx);
+    const b = vm.runInContext("salvarContagemManual()", env.ctx);
+    await Promise.all([a, b]);
+    assert.equal(env.getItens().length, 1);
+});
+
 test("RPC restringe edição por autor, status ERP e não insere novas linhas", () => {
     assert.match(sql,/v_registro\.usuario_id is distinct from v_usuario_id/i);
     assert.match(sql,/v_registro\.alteracao_status = 'CONFIRMADO'/i);
