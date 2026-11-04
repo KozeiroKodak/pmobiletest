@@ -43,7 +43,7 @@
     <link rel="stylesheet" href="implementacoes/status.css?v=0.0.248">
 <link rel="stylesheet" href="implementacoes/popupescolha.css?v=mono-2.2">
     <link rel="stylesheet" href="implementacoes/login.css?v=0.0.248">
-    <link rel="stylesheet" href="implementacoes/contagemmanual.css?v=mono-2.2">
+    <link rel="stylesheet" href="implementacoes/contagemmanual.css?v=0.0.406-edicao">
     <link rel="stylesheet" href="implementacoes/solicitacoes.css?v=0.0.248">
     <link rel="stylesheet" href="implementacoes/importacao.css?v=mono-3.0">
 
@@ -402,7 +402,7 @@
   </div>
   <div id="resultadoBuscaContagemManual" class="contagem-resultados"></div>
  </div>
- <div class="painel contagem contagem-registro" id="painelRegistroContagemManual" style="display: none;"><h3 class="contagem-etapa">02 · Registrar contagem</h3><div id="materialSelecionadoContagemManual"></div><div class="linha-formulario"><label class="contagem-label">Local encontrado<input type="text" id="localContagemManual" placeholder="Ex.: A-03-12" autocomplete="off"></label><label class="contagem-label">Quantidade física<input type="number" id="quantidadeContagemManual" placeholder="Informe a quantidade" min="0" step="1" inputmode="numeric"></label><button class="botao-aba contagem-salvar" onclick="salvarContagemManual()">✓ &nbsp; Salvar contagem</button></div><div id="statusContagemManual"></div></div>
+ <div class="painel contagem contagem-registro" id="painelRegistroContagemManual" style="display: none;"><h3 class="contagem-etapa">02 · Registrar contagem</h3><div id="materialSelecionadoContagemManual"></div><div class="linha-formulario"><label class="contagem-label">Local encontrado<input type="text" id="localContagemManual" placeholder="Ex.: A-03-12" autocomplete="off"></label><label class="contagem-label">Quantidade física<input type="number" id="quantidadeContagemManual" placeholder="Informe a quantidade" min="0" step="1" inputmode="numeric"></label><button class="botao-aba contagem-salvar" id="botaoSalvarContagemManual" type="button" onclick="salvarContagemManual()">✓ &nbsp; Salvar contagem</button><button class="botao-cancelar-edicao-contagem" id="botaoCancelarEdicaoContagemManual" type="button" onclick="cancelarEdicaoContagemManual()" style="display:none">Cancelar edição</button></div><div id="statusContagemManual"></div></div>
  <div class="painel contagem contagem-lista"><div class="contagem-lista-titulo"><div><h3>Contagens registradas</h3><p>Neste dispositivo</p></div><span aria-hidden="true">▤</span></div><div id="listaContagensManuais"></div></div>
 </section>
 
@@ -1215,7 +1215,7 @@
      CONTAGEM MANUAL
      ========================================================= -->
 
-<script src="contagemmanual.js?v=0.0.333-cleanup"></script>
+<script src="contagemmanual.js?v=0.0.406-edicao"></script>
 
 <script src="locais.js?v=0.0.391-back-nav"></script>
 <script src="reservas.js?v=0.0.248"></script>
