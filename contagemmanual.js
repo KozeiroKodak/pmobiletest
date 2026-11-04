@@ -880,6 +880,7 @@ async function exibirContagensManuais() {
         bloco.appendChild(dataHora);
 
         const flags = document.createElement("p");
+        flags.className = "contagem-flags";
         flags.textContent = (registro.localAlterado ? "LOCAL ALTERADO" : "LOCAL MANTIDO") +
             (registro.zerado ? " • ITEM ZERADO" : "");
         bloco.appendChild(flags);
