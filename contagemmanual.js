@@ -535,15 +535,26 @@ async function salvarContagemManual() {
         sincronizado: false
     };
 
-    const lista = await lerContagensManuais();
-    lista.unshift(registro);
-    await gravarContagensManuais(lista);
-
-    if (status) status.textContent = "Contagem salva offline. Sincronizando...";
-    quantidadeCampo.value = "";
-    exibirContagensManuais();
-
-    await atualizarContagensManuais();
+    // Evita criar duplicatas quando o botão é pressionado repetidamente.
+    if (gravacaoContagemManualOcupada) return;
+    gravacaoContagemManualOcupada = true;
+    const botaoSalvar = document.getElementById("botaoSalvarContagemManual");
+    if (botaoSalvar) botaoSalvar.disabled = true;
+    try {
+        const lista = await lerContagensManuais();
+        lista.unshift(registro);
+        await gravarContagensManuais(lista);
+        if (status) status.textContent = "Contagem salva offline. Sincronizando...";
+        quantidadeCampo.value = "";
+        await exibirContagensManuais();
+        await atualizarContagensManuais();
+    } catch (erro) {
+        console.warn("Falha ao registrar contagem manual:", erro);
+        if (status) status.textContent = "⚠️ " + (erro?.message || "Não foi possível registrar a contagem.");
+    } finally {
+        gravacaoContagemManualOcupada = false;
+        if (botaoSalvar) botaoSalvar.disabled = false;
+    }
 }
 
 // Mescla com a leitura mais recente para não perder registros criados durante a rede.
