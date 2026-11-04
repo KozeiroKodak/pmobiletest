@@ -8,6 +8,59 @@
 const CHAVE_CONTAGENS_MANUAIS = "pmobile_contagens_manuais_v1";
 const TABELA_CONTAGENS_MANUAIS_SUPABASE = "contagens_manuais";
 let materialContagemManualSelecionado = null;
+let idContagemManualEmEdicao = null;
+let gravacaoContagemManualOcupada = false;
+
+function modoFormularioContagemManual() {
+    const editando = idContagemManualEmEdicao !== null;
+    const titulo = document.querySelector("#painelRegistroContagemManual .contagem-etapa");
+    const botao = document.getElementById("botaoSalvarContagemManual");
+    const cancelar = document.getElementById("botaoCancelarEdicaoContagemManual");
+    if (titulo) titulo.textContent = editando ? "02 · Editar informações" : "02 · Registrar contagem";
+    if (botao) botao.textContent = editando ? "✓  Salvar alterações" : "✓  Salvar contagem";
+    if (cancelar) cancelar.style.display = editando ? "block" : "none";
+}
+
+function cancelarEdicaoContagemManual() {
+    idContagemManualEmEdicao = null;
+    materialContagemManualSelecionado = null;
+    const painel = document.getElementById("painelRegistroContagemManual");
+    if (painel) painel.style.display = "none";
+    modoFormularioContagemManual();
+}
+
+async function editarInformacoesContagemManual(id) {
+    const registro = (await lerContagensManuais()).find(item => String(item.id) === String(id));
+    if (!registro || registro.bloqueadoPorLimpeza || registro.alteracaoStatus === "CONFIRMADO") {
+        alert("Esta contagem não está disponível para edição. Atualize o histórico.");
+        return;
+    }
+    const usuario = window.usuarioPmobileAtual;
+    if (String(usuario?.nivel || "").toUpperCase() !== "ADMIN" &&
+        (registro.usuarioId == null || String(registro.usuarioId) !== String(usuario?.id))) {
+        alert("Somente o responsável pela contagem ou um administrador pode editá-la.");
+        return;
+    }
+    idContagemManualEmEdicao = String(registro.id);
+    materialContagemManualSelecionado = {
+        codigo: registro.codigo, descricao: registro.descricao,
+        local: registro.localOriginal, quantidade: registro.quantidadeEsperada
+    };
+    const painel = document.getElementById("painelRegistroContagemManual");
+    const resumo = document.getElementById("materialSelecionadoContagemManual");
+    const local = document.getElementById("localContagemManual");
+    const qtd = document.getElementById("quantidadeContagemManual");
+    const status = document.getElementById("statusContagemManual");
+    if (resumo) resumo.textContent = (registro.codigo || "-") + " — " +
+        (registro.descricao || "Material") + " | Local inventário: " + (registro.localOriginal || "-");
+    if (local) local.value = registro.localEncontrado || "";
+    if (qtd) qtd.value = String(registro.quantidadeFisica ?? "");
+    if (status) status.textContent = "Editando a contagem existente. Nenhum registro novo será criado.";
+    modoFormularioContagemManual();
+    if (painel) { painel.style.display = "block"; painel.scrollIntoView({behavior:"smooth",block:"start"}); }
+    if (local) local.focus({preventScroll:true});
+}
+
 
 
 
@@ -90,6 +143,8 @@ async function buscarMaterialContagemManual() {
     const busca = normalizarTextoContagemManual(termo);
     const seletor = document.getElementById("tipoBuscaContagemManual");
     const tipo = ["codigo", "referencia", "descricao"].includes(seletor?.value) ? seletor.value : "codigo";
+    idContagemManualEmEdicao = null;
+    modoFormularioContagemManual();
     materialContagemManualSelecionado = null;
     const painel = document.getElementById("painelRegistroContagemManual");
     if (painel) painel.style.display = "none";
@@ -172,6 +227,8 @@ function renderizarResultadosContagemManual(lista) {
 }
 
 function selecionarMaterialContagemManual(material) {
+    idContagemManualEmEdicao = null;
+    modoFormularioContagemManual();
     materialContagemManualSelecionado = material;
 
     const painel = document.getElementById("painelRegistroContagemManual");
@@ -389,6 +446,73 @@ async function salvarContagemManual() {
     if (textoQuantidade === "" || !Number.isFinite(quantidadeFisica) || quantidadeFisica < 0 || !Number.isInteger(quantidadeFisica)) {
         if (status) status.textContent = "Informe uma quantidade inteira igual ou maior que zero.";
         quantidadeCampo.focus();
+        return;
+    }
+
+    if (idContagemManualEmEdicao !== null) {
+        if (gravacaoContagemManualOcupada) return;
+        gravacaoContagemManualOcupada = true;
+        const botao = document.getElementById("botaoSalvarContagemManual");
+        if (botao) botao.disabled = true;
+        try {
+            const lista = await lerContagensManuais();
+            const indice = lista.findIndex(item => String(item.id) === idContagemManualEmEdicao);
+            if (indice === -1) throw new Error("Contagem não encontrada. Atualize o histórico.");
+            const registro = lista[indice];
+            if (registro.bloqueadoPorLimpeza || registro.alteracaoStatus === "CONFIRMADO") {
+                throw new Error("Esta contagem foi bloqueada ou já confirmada no ERP.");
+            }
+            const usuario = window.usuarioPmobileAtual;
+            if (String(usuario?.nivel || "").toUpperCase() !== "ADMIN" &&
+                (registro.usuarioId == null || String(registro.usuarioId) !== String(usuario?.id))) {
+                throw new Error("Você não tem permissão para editar esta contagem.");
+            }
+            if (registro.sincronizado) {
+                if (!navigator.onLine || typeof obterClienteSupabase !== "function") {
+                    throw new Error("É necessário estar online para editar uma contagem sincronizada.");
+                }
+                if (sincronizacaoContagensManuaisEmAndamento) {
+                    throw new Error("Sincronização em andamento. Tente salvar novamente.");
+                }
+                const usuarioSessao = window.usuarioPmobileAtual;
+                const credencial = (typeof credencialPmobileAtual !== "undefined" && credencialPmobileAtual)
+                    ? credencialPmobileAtual : window.credencialPmobileAtual;
+                if (!usuarioSessao?.usuario || !credencial) {
+                    throw new Error("Sessão indisponível para atualizar a contagem.");
+                }
+                const {data, error} = await obterClienteSupabase().rpc("pmobile_contagem_manual_atualizar", {
+                    p_usuario: usuarioSessao.usuario,
+                    p_credencial: credencial,
+                    p_id: registro.id,
+                    p_local_encontrado: localEncontrado,
+                    p_quantidade_fisica: quantidadeFisica
+                });
+                if (error) throw error;
+                registro.localAlterado = Boolean(data.local_alterado);
+                registro.zerado = Boolean(data.zerado);
+                registro.alteracaoStatus = data.alteracao_status || "PENDENTE";
+            } else {
+                registro.localAlterado = normalizarTextoContagemManual(localEncontrado) !==
+                    normalizarTextoContagemManual(registro.localOriginal);
+                registro.zerado = quantidadeFisica === 0;
+            }
+            // Preserva o UUID, autor e data/hora da contagem original.
+            registro.localEncontrado = localEncontrado;
+            registro.quantidadeFisica = quantidadeFisica;
+            lista[indice] = registro;
+            await gravarContagensManuais(lista);
+            await exibirContagensManuais();
+            if (!registro.sincronizado) await atualizarContagensManuais();
+            if (status) status.textContent = registro.sincronizado
+                ? "Informações atualizadas no mesmo registro e sincronizadas."
+                : "Informações corrigidas no mesmo registro. Sincronização pendente.";
+        } catch (erro) {
+            console.warn("Falha ao editar contagem manual:", erro);
+            if (status) status.textContent = "⚠️ " + (erro?.message || "Não foi possível atualizar.");
+        } finally {
+            gravacaoContagemManualOcupada = false;
+            if (botao) botao.disabled = false;
+        }
         return;
     }
 
@@ -611,6 +735,7 @@ async function baixarContagensManuaisSupabase(limpezaEm = null) {
                 quantidadeFisica: Number(item.quantidade_fisica ?? 0),
                 localAlterado: Boolean(item.local_alterado),
                 zerado: Boolean(item.zerado),
+                alteracaoStatus: item.alteracao_status || "PENDENTE",
                 dataHora: item.data_hora,
                 usuarioId: item.usuario_id ?? null,
                 usuarioNome: item.usuario_nome ?? "Usuário não identificado",
@@ -768,6 +893,20 @@ async function exibirContagensManuais() {
             bloco.appendChild(erp);
         }
 
+        const usuarioAtual = window.usuarioPmobileAtual;
+        const administrador = String(usuarioAtual?.nivel || "").toUpperCase() === "ADMIN";
+        const responsavel = registro.usuarioId != null &&
+            String(registro.usuarioId) === String(usuarioAtual?.id);
+        if ((administrador || responsavel) && !registro.bloqueadoPorLimpeza &&
+            registro.alteracaoStatus !== "CONFIRMADO") {
+            const editar = document.createElement("button");
+            editar.type = "button";
+            editar.className = "botao-editar-contagem-manual";
+            editar.textContent = "✎  Editar informações";
+            editar.setAttribute("aria-label", "Editar informações da contagem " + (registro.codigo || ""));
+            editar.addEventListener("click", () => editarInformacoesContagemManual(registro.id));
+            bloco.appendChild(editar);
+        }
         area.appendChild(bloco);
     });
 }
