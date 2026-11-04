@@ -847,3 +847,16 @@
         min-height: 46px;
     }
 }
+
+/* O status continua destacado mesmo após adicionar o botão de edição. */
+#contagemManual .registro-contagem-manual p.contagem-flags {
+    display: inline-block;
+    margin-top: 9px;
+    padding: 5px 9px;
+    border-radius: 7px;
+    background: #22382e;
+    color: #8be3bb;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0;
+}
