@@ -803,3 +803,47 @@
 #contagemManual .contagem-lista-titulo p{margin:4px 0 0;color:#98aa9e;font-size:12px}
 #contagemManual .contagem-lista-titulo>span{color:#6de2a5;background:#1e3c2b;border-radius:10px;padding:10px}
 @media(max-width:700px){#contagemManual .contagem{padding:15px;border-radius:19px}#contagemManual .contagem-intro h2{font-size:22px}#contagemManual .contagem-selo{font-size:10px}#contagemManual .contagem-tipos button{padding:9px 13px}}
+
+/* Ações por contagem — edição do registro existente. */
+#contagemManual .botao-editar-contagem-manual {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    margin-top: 12px;
+    padding: 10px 14px;
+    min-height: 42px;
+    border: 1px solid #3c7779;
+    border-radius: 10px;
+    background: #193137;
+    color: #88e9f0;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+#contagemManual .botao-editar-contagem-manual:focus-visible,
+#contagemManual .botao-cancelar-edicao-contagem:focus-visible {
+    outline: 2px solid #50d7e7;
+    outline-offset: 2px;
+}
+#contagemManual .botao-cancelar-edicao-contagem {
+    width: 100%;
+    min-height: 44px;
+    border: 1px solid #53646a;
+    border-radius: 12px;
+    background: transparent;
+    color: #c2d7db;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+#contagemManual #botaoSalvarContagemManual:disabled {
+    opacity: .65;
+    cursor: wait;
+}
+@media (max-width: 700px) {
+    #contagemManual .botao-editar-contagem-manual {
+        width: 100%;
+        min-height: 46px;
+    }
+}
