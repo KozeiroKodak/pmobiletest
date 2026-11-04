@@ -855,6 +855,11 @@ async function exibirContagensManuais() {
             console.warn("Status ERP indisponível para contagem manual:", erro);
         }
     }
+    // A sincronização redesenha os cartões periodicamente; manter os que o usuário abriu.
+    const cartoesAbertos = new Set(Array.from(
+        area.querySelectorAll("details.registro-contagem-manual[open]"),
+        cartao => cartao.dataset.contagemId
+    ));
     area.innerHTML = "";
 
     if (!lista.length) {
@@ -870,31 +875,39 @@ async function exibirContagensManuais() {
     });
 
     listaOrdenada.slice(0, 100).forEach(registro => {
-        const bloco = document.createElement("div");
+        const bloco = document.createElement("details");
         bloco.className = "registro-contagem-manual";
+        bloco.dataset.contagemId = String(registro.id);
+        bloco.open = cartoesAbertos.has(String(registro.id));
+
+        // Toque em qualquer ponto da área de resumo para revelar as ações.
+        const resumo = document.createElement("summary");
+        resumo.className = "registro-contagem-resumo";
+        resumo.setAttribute("aria-label", "Contagem " + (registro.codigo || "") + ". Toque para ver opções");
+        bloco.appendChild(resumo);
 
         const titulo = document.createElement("h3");
         titulo.textContent = registro.codigo + " — " + (registro.descricao || "Material");
-        bloco.appendChild(titulo);
+        resumo.appendChild(titulo);
 
         const detalhes = document.createElement("p");
         detalhes.textContent = "Local: " + registro.localOriginal + " → " + registro.localEncontrado +
             " | Esperado: " + registro.quantidadeEsperada + " | Físico: " + registro.quantidadeFisica;
-        bloco.appendChild(detalhes);
+        resumo.appendChild(detalhes);
 
         const usuario = document.createElement("p");
         usuario.textContent = "Realizado por: " + (registro.usuarioNome || "Usuário não identificado");
-        bloco.appendChild(usuario);
+        resumo.appendChild(usuario);
 
         const dataHora = document.createElement("p");
         dataHora.textContent = "Data/hora: " + (registro.dataHora ? new Date(registro.dataHora).toLocaleString("pt-BR") : "-");
-        bloco.appendChild(dataHora);
+        resumo.appendChild(dataHora);
 
         const flags = document.createElement("p");
         flags.className = "contagem-flags";
         flags.textContent = (registro.localAlterado ? "LOCAL ALTERADO" : "LOCAL MANTIDO") +
             (registro.zerado ? " • ITEM ZERADO" : "");
-        bloco.appendChild(flags);
+        resumo.appendChild(flags);
 
         if (registro.localAlterado) {
             const erp = document.createElement("span");
@@ -902,23 +915,45 @@ async function exibirContagensManuais() {
                 (statusERPDisponivel && registro.sincronizado ? "EM ANÁLISE" : "STATUS ERP INDISPONÍVEL");
             erp.className = "contagem-erp-tag " + (situacao === "ERP - OK" ? "erp-ok" : situacao === "EM ANÁLISE" ? "erp-analise" : "erp-indisponivel");
             erp.textContent = situacao;
-            bloco.appendChild(erp);
+            resumo.appendChild(erp);
         }
 
+        const indicador = document.createElement("span");
+        indicador.className = "registro-contagem-indicador";
+        indicador.setAttribute("aria-hidden", "true");
+        indicador.textContent = "⌄";
+        resumo.appendChild(indicador);
+
+        const acoes = document.createElement("div");
+        acoes.className = "registro-contagem-acoes";
         const usuarioAtual = window.usuarioPmobileAtual;
         const administrador = String(usuarioAtual?.nivel || "").toUpperCase() === "ADMIN";
         const responsavel = registro.usuarioId != null &&
             String(registro.usuarioId) === String(usuarioAtual?.id);
-        if ((administrador || responsavel) && !registro.bloqueadoPorLimpeza &&
-            registro.alteracaoStatus !== "CONFIRMADO") {
+        const confirmado = registro.alteracaoStatus === "CONFIRMADO" ||
+            statusERP.get(String(registro.id).toLowerCase()) === "ERP - OK";
+        if (confirmado || registro.bloqueadoPorLimpeza) {
+            const aviso = document.createElement("p");
+            aviso.className = "registro-contagem-bloqueado";
+            aviso.textContent = confirmado
+                ? "Contagem confirmada no ERP. Edição indisponível."
+                : "Contagem bloqueada após limpeza administrativa.";
+            acoes.appendChild(aviso);
+        } else if (administrador || responsavel) {
             const editar = document.createElement("button");
             editar.type = "button";
             editar.className = "botao-editar-contagem-manual";
             editar.textContent = "✎  Editar informações";
             editar.setAttribute("aria-label", "Editar informações da contagem " + (registro.codigo || ""));
             editar.addEventListener("click", () => editarInformacoesContagemManual(registro.id));
-            bloco.appendChild(editar);
+            acoes.appendChild(editar);
+        } else {
+            const aviso = document.createElement("p");
+            aviso.className = "registro-contagem-bloqueado";
+            aviso.textContent = "Somente o responsável pela contagem ou um administrador pode editar.";
+            acoes.appendChild(aviso);
         }
+        bloco.appendChild(acoes);
         area.appendChild(bloco);
     });
 }
