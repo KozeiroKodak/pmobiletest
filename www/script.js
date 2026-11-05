@@ -942,8 +942,15 @@ async function criarSenhaPmobile(event) {
 
     try {
 
-        const { data, error } =
-            await window.clienteSupabase.rpc(
+        const chave = localStorage.getItem(chavePrimeiroAcesso(usuarioPmobileCadastroSenha));
+        const peloAparelho = chave && chave === tokenPmobileCadastroSenha;
+        const { data, error } = peloAparelho
+            ? await window.clienteSupabase.rpc("pmobile_primeiro_acesso", {
+                p_usuario: usuarioPmobileCadastroSenha,
+                p_chave: chave,
+                p_senha: senha
+            })
+            : await window.clienteSupabase.rpc(
                 "criar_senha_usuario",
                 {
                     p_usuario: usuarioPmobileCadastroSenha,
@@ -1084,6 +1091,10 @@ function mostrarStatusLogin(mensagem, erro = false) {
 }
 
 
+function chavePrimeiroAcesso(usuario) {
+    return "pmobile:primeiro-acesso:" + usuario.trim().toLowerCase();
+}
+
 async function entrarInterface(event) {
 
     if (event) {
@@ -1141,9 +1152,21 @@ async function entrarInterface(event) {
 
     try {
 
-        // Primeiro acesso exige prova de posse: token ou senha provisória.
         if (!senha) {
-            mostrarStatusLogin("Informe senha, senha provisória ou token de ativação.",true);
+            const chave = localStorage.getItem(chavePrimeiroAcesso(usuario));
+            if (!chave) {
+                mostrarStatusLogin("Informe senha, senha provisória ou token de ativação se você já tiver uma credencial. Para criar a primeira senha, use o aparelho do cadastro.", true);
+                return;
+            }
+            const { data, error } = await window.clienteSupabase.rpc("pmobile_primeiro_acesso", {
+                p_usuario: usuario,
+                p_chave: chave
+            });
+            if (error || !data?.[0]) {
+                mostrarStatusLogin("Aguarde a aprovação ou verifique se a conta já tem senha.", true);
+                return;
+            }
+            abrirCriacaoSenha(data[0].usuario, data[0], chave);
             return;
         }
 
@@ -1363,11 +1386,16 @@ async function enviarSolicitacaoCadastro(event) {
 
     try {
 
+        const chaveLocal = chavePrimeiroAcesso(usuario);
+        const chave = localStorage.getItem(chaveLocal) ||
+            Array.from(crypto.getRandomValues(new Uint8Array(32)), byte => byte.toString(16).padStart(2, "0")).join("");
+        localStorage.setItem(chaveLocal, chave);
         const { data, error } = await window.clienteSupabase.rpc(
-            "solicitar_cadastro_usuario",
+            "pmobile_solicitar_cadastro",
             {
                 p_nome: nome,
-                p_usuario: usuario
+                p_usuario: usuario,
+                p_chave: chave
             }
         );
 
@@ -2100,7 +2128,7 @@ async function aprovarCadastroUsuario(solicitacaoId) {
 
         alert("Usuário aprovado!\n\nNível: " + usuarioCriado.nivel +
             "\n\nToken de primeiro acesso (copie agora):\n" + usuarioCriado.token +
-            "\n\nO usuário entra com o token e define a senha definitiva.");
+            "\n\nO usuário informa apenas o nome de usuário no aparelho do cadastro e define a senha definitiva.");
 
         await abrirGerenciamentoUsuarios();
 
