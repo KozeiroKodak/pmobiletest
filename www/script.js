@@ -2098,29 +2098,9 @@ async function aprovarCadastroUsuario(solicitacaoId) {
         const usuarioCriado = Array.isArray(data) ? data[0] : data;
         if (!usuarioCriado) throw new Error("O servidor não retornou o novo usuário.");
 
-        // O primeiro acesso é emitido manualmente e os valores aparecem só uma vez.
-        let emitida;
-        try {
-            const resposta = await window.clienteSupabase.rpc("pmobile_admin_gerar_credenciais", {
-                p_admin_usuario: window.usuarioPmobileAtual.usuario,
-                p_admin_credencial: credencialPmobileAtual,
-                p_usuario_id: usuarioCriado.usuario_id
-            });
-            if (resposta.error) throw resposta.error;
-            emitida = Array.isArray(resposta.data) ? resposta.data[0] : resposta.data;
-            if (!emitida) throw new Error("O servidor não retornou credenciais.");
-        } catch (falha) {
-            alert("Usuário aprovado, mas a primeira senha não foi emitida.\n\n" +
-                "Token inicial (copie agora):\n" + usuarioCriado.token +
-                "\n\nEntre em Recuperação de tokens para gerar nova senha.");
-            await abrirGerenciamentoUsuarios();
-            return;
-        }
-        alert("Usuário aprovado!\n\nUsuário: " + emitida.usuario +
-            "\nNível: " + usuarioCriado.nivel +
-            "\n\nTOKEN (copie agora):\n" + emitida.token +
-            "\n\nPRIMEIRA SENHA (provisória):\n" + emitida.primeira_senha +
-            "\n\nOs valores são exibidos uma só vez; o usuário criará a senha definitiva.");
+        alert("Usuário aprovado!\n\nNível: " + usuarioCriado.nivel +
+            "\n\nToken de primeiro acesso (copie agora):\n" + usuarioCriado.token +
+            "\n\nO usuário entra com o token e define a senha definitiva.");
 
         await abrirGerenciamentoUsuarios();
 
