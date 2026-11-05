@@ -8,19 +8,11 @@
     divergencias:"Divergências locais", locais:"Locais do estoque local",
     importar:"Importar catálogo Dogo"
   };
-  // Mesmo padrão de pictogramas SVG utilizado nas Configurações.
-  // Ícones são decorativos, sem acesso a dados externos.
   const ICONES = {
-    pesquisa:'<circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/>',
-    estoque:'<path d="M4 7 12 3l8 4v10l-8 4-8-4z"/><path d="m4 7 8 4 8-4M12 11v10"/>',
-    reservas:'<path d="M3 8h18M5 8l2-4h10l2 4v12H5z"/><path d="M9 12h6"/>',
-    conferencias:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2h6v2m-7 7 2 2 4-4m-6 8h8"/>',
-    comparar:'<path d="M4 6h16M4 18h16M8 3v6m8 6v6"/><path d="m5 13 3-3 3 3m2-2 3 3 3-3"/>',
-    divergencias:'<path d="M12 3 2 20h20z"/><path d="M12 9v5m0 3h.01"/>',
-    locais:'<path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0z"/><circle cx="12" cy="10" r="2.5"/>',
-    importar:'<path d="M4 17v4h16v-4M12 3v13m-5-5 5 5 5-5"/><path d="M4 7V4h4"/>'
+    pesquisa:"🔎", estoque:"📦", reservas:"🗂️", conferencias:"📋",
+    comparar:"🔄", divergencias:"⚠️", locais:"📍", importar:"📥"
   };
-  const icone=(id)=>'<svg viewBox="0 0 24 24" aria-hidden="true">'+(ICONES[id]||ICONES.estoque)+'</svg>';
+  const icone = (id) => ICONES[id] || ICONES.estoque;
   const estado = { tela:"inicio",material:null,resultados:{},offsets:{},busy:false,
     consultas:Object.create(null),ultimaComparacao:0,importando:false };
   const $ = (id) => document.getElementById(id);
@@ -87,7 +79,7 @@
       importar:"Atualizar cadastro sem alterar contagens"
     };
     return '<button type="button" class="configuracoes-card" data-dl-open="'+id+'">'+
-      '<span class="configuracoes-icone">'+icone(id)+'</span>'+
+      '<span class="configuracoes-icone" aria-hidden="true">'+icone(id)+'</span>'+
       '<span class="configuracoes-textos"><strong>'+TITULOS[id]+'</strong>'+
       '<small>'+descricoes[id]+'</small></span>'+
       '<span class="configuracoes-canto" aria-hidden="true">↗</span></button>';

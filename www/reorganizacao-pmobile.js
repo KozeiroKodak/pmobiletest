@@ -1,15 +1,10 @@
 /* PMobile — reorganização por pontos de acesso, sem duplicar módulos antigos. */
 (function() {
  "use strict";
- const iconesConfiguracoes={
-   valores:'<circle cx="12" cy="12" r="9"/><path d="M12 6v12m3-9c-1-1-5-1-6 1-.8 1.5 1 2.3 3 2.6 3 .4 4 2 2.3 3.7-1.1 1-4.1 1.2-5.3-.2"/>',
-   estoque:'<path d="M4 7 12 3l8 4v11l-8 4-8-4z"/><path d="m4 7 8 4 8-4M12 11v11"/>',
-   conferencias:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2h6v2m-7 7 2 2 4-4m-6 8h8"/>'
- };
  const itensConfig=[
-   ["valores","Valores Total","valores-total","Resumo financeiro atual"],
-   ["estoque","Importar Estoque","importar-estoque","Importação Dogo original"],
-   ["conferencias","Conferências","conferencias","Histórico existente"]
+   ["💰","Valores Total","valores-total","Resumo financeiro atual"],
+   ["📦","Importar Estoque","importar-estoque","Importação Dogo original"],
+   ["📋","Conferências","conferencias","Histórico existente"]
  ];
  const $=(id)=>document.getElementById(id);
  function executar(nome) {
@@ -27,7 +22,7 @@
      const grade=document.createElement("div");grade.className="configuracoes-grade";
      itensConfig.forEach(([icone,nome,funcao,sub])=>{
        const botao=document.createElement("button");botao.type="button";botao.className="configuracoes-card";
-       const ic=document.createElement("span");ic.className="configuracoes-icone";ic.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true">'+(iconesConfiguracoes[icone]||"")+'</svg>';
+       const ic=document.createElement("span");ic.className="configuracoes-icone";ic.textContent=icone;ic.setAttribute("aria-hidden","true");
        const conteudo=document.createElement("span");conteudo.className="configuracoes-textos";
        const strong=document.createElement("strong");strong.textContent=nome;
        const pequeno=document.createElement("small");pequeno.textContent=sub;

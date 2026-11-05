@@ -478,7 +478,7 @@ function formatarNumeroLocal(valor) {
           '<div><span>Quantidade física</span><strong>'+safe(formatarNumeroLocal(item.quantidade_fisica),"-")+'</strong></div>'+
         '</div>'+
         '<div class="locais-responsavel">'+
-          '<span class="locais-avatar" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 21v-2c0-3 3-5 7-5s7 2 7 5v2"/></svg></span>'+
+          '<span class="locais-avatar" aria-hidden="true">👤</span>'+
           '<div><span>Contagem realizada por</span><strong>'+safe(item.usuario_nome,"Usuário não identificado")+'</strong></div>'+
         '</div>'+
         '<span class="locais-expandir"><span class="fechado">Ver mais detalhes</span>'+

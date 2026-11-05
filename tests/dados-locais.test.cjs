@@ -100,6 +100,6 @@ test("migração bidirecional preserva API, autorização e não altera as tabel
 test("versão web e Android invalidam cache dos módulos corrigidos",()=>{
  const html=ler("index.html"),mobile=ler("www/index.html");
  assert.equal(html,mobile);
- assert.ok(html.includes('src="dados-locais.js?v=9.1-nivel2"'));
+ assert.ok(html.includes('src="dados-locais.js?v=9.1-icones"'));
  assert.ok(html.includes('src="dados-locais/divergencias-local.js?v=8.0"'));
 });
