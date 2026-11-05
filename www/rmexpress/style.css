@@ -878,3 +878,122 @@ body.integrado-pmobile #inicio,body.integrado-pmobile #loginPmobile,
 body.integrado-pmobile .atualizacoes-acesso,body.integrado-pmobile footer,
 body.integrado-pmobile #sairPmobile,body.integrado-pmobile #entrarPeloAplicativo {display:none!important}
 body.integrado-pmobile .topbar {position:static}
+
+/* Identidade Ciano Industrial do PMobile. Cores operacionais de entrega,
+   ocorrência e prioridade continuam definidas pelos estados acima. */
+:root {
+  color-scheme:dark;
+  --pm-acento:#57dceb;
+  --pm-acento-hover:#8cebf5;
+  --fundo:#09151a;
+  --fundo-painel:#14252b;
+  --fundo-hover:#1b343b;
+  --borda-clara:#39606a;
+  --texto:#f1f7f8;
+  --texto-secundario:#a3bbc2;
+  --surface:#14252b;
+  --surface2:#172c33;
+  --border:#29434b;
+  --muted:#a3bbc2;
+  --mint:var(--pm-acento);
+  --mintdark:#173943;
+  color:var(--texto);
+  background:var(--fundo);
+  accent-color:var(--pm-acento);
+}
+body,.app-shell,.main{background:var(--fundo);color:var(--texto)}
+.topbar{background:#0d1c22;border-bottom-color:var(--border)}
+.brand-mark{background:linear-gradient(135deg,#57dceb,#2b9dad);color:#061b21}
+.connection{border-color:var(--borda-clara);color:var(--texto-secundario)}
+.environment,.notice,.motorista-roteiro-acoes,.central-contexto,.gerencia-lote{
+  background:var(--surface2);border-color:var(--border)
+}
+.btn{border-color:var(--borda-clara)}
+.btn-primary{background:var(--pm-acento);border-color:var(--pm-acento);color:#061b21}
+.btn-primary:hover{background:var(--pm-acento-hover)}
+.btn-secondary,.home-back,.route-controls button{
+  background:#183039;border-color:var(--borda-clara);color:var(--texto)
+}
+.btn-secondary:hover,.home-back:hover,.route-controls button:hover{background:var(--fundo-hover)}
+:where(button,input,select,textarea,summary,a):focus-visible{
+  outline:2px solid var(--pm-acento);outline-offset:2px
+}
+.filterfield input,.filterfield select,.gerencia-atribuicao select,
+.central-controles input,.central-controles select,.gerencia-lote select{
+  background:#102329;border-color:var(--borda-clara);color:var(--texto)
+}
+.filterfield input:focus,.filterfield select:focus,
+.gerencia-atribuicao select:focus,.central-controles :is(input,select):focus{
+  border-color:var(--pm-acento)
+}
+.progress-track{background:#1d3a43}
+.progress-track>div{background:var(--pm-acento)}
+.feature-icon,.route-number,.central-icon{
+  background:#16414c;color:var(--pm-acento)
+}
+#proximaParada{background:linear-gradient(125deg,#123039,var(--surface));border-color:#2d7886}
+.historico-metrica,.central-indicadores article{
+  background:var(--surface2);border-color:var(--border)
+}
+.historico-metrica strong,.central-indicadores strong{color:var(--pm-acento)}
+.central-motorista,.central-nota,.notificacao-item{
+  background:var(--surface);border-color:var(--border);color:var(--texto)
+}
+.central-progresso progress::-webkit-progress-value{background:var(--pm-acento)}
+.notificacao-item.nao-lida{border-left-color:var(--pm-acento)}
+.home-apps-cabecalho{border-bottom-color:var(--border)}
+.home-apps-cabecalho::after{background:var(--pm-acento)}
+.home-app-card{
+  background:linear-gradient(145deg,rgba(87,220,235,.045),transparent 68%),var(--surface);
+  border-color:rgba(87,220,235,.15);color:var(--texto)
+}
+.home-app-card:hover,.home-app-card.active{
+  background:linear-gradient(145deg,rgba(87,220,235,.09),transparent 69%),var(--surface);
+  border-color:rgba(87,220,235,.5)
+}
+.home-app-icone{background:rgba(87,220,235,.09);border-color:rgba(87,220,235,.23)}
+.home-app-seta{color:var(--pm-acento)}
+.categoria-btn{background:var(--surface);border-color:var(--border);color:var(--texto)}
+.categoria-btn strong{background:#20414a;color:var(--texto)}
+.categoria-btn.active,.categoria-btn[aria-pressed="true"]{
+  background:#16434d;border-color:var(--pm-acento);color:var(--pm-acento)
+}
+.categoria-btn.active strong{background:#126776;color:#f6ffff}
+.categoria-btn:not(.active):hover{background:var(--fundo-hover);border-color:#3c7783}
+
+#inicio{
+  --fundo:#09151a;--fundo-painel:#14252b;--fundo-hover:#1b343b;
+  --borda-clara:#39606a;--texto:#f1f7f8;--texto-secundario:#a3bbc2;
+  font-family:inherit
+}
+#inicio button{background:var(--pm-acento);border-color:var(--pm-acento);color:#061b21}
+#inicio button:hover{background:var(--pm-acento-hover)}
+.login-pmobile.login-pmobile{
+  --login-fundo:#09151a;--login-painel:#14252b;
+  --login-painel-borda:#29434b;--login-borda:#39606a;
+  --login-campo:#0e2026;--login-destaque:#57dceb;
+  --login-texto:#f1f7f8;--login-secundario:#a3bbc2
+}
+.login-pmobile .login-pmobile-topo{background:#0d1c22;border-color:var(--border)}
+.login-pmobile .login-pmobile-logo{
+  background:#143841;border-color:#2e7280;color:var(--pm-acento)
+}
+.login-pmobile .login-pmobile-form>input:focus,
+.login-pmobile .login-senha-campo:focus-within{
+  background:#102a31;border-color:var(--pm-acento)
+}
+.login-pmobile .login-entrar{
+  background:var(--pm-acento);border-color:var(--pm-acento);color:#061b21
+}
+.login-pmobile .login-entrar:hover{background:var(--pm-acento-hover)}
+.login-pmobile .login-entrar:active{background:#33c3d4}
+
+@media(max-width:380px){
+  .topbar{flex-wrap:wrap}
+  .topbar .identity>div:last-child{min-width:0}
+  .topbar .connection{flex:1 1 100%;max-width:none;min-width:0}
+  .categoria-btn{overflow-wrap:anywhere}
+}
+@media(max-width:620px){
+  .environment-actions .btn,.proxima-acoes .btn{white-space:normal}
+}

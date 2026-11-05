@@ -1,9 +1,9 @@
 {
   "repositorio": "KozeiroKodak/pmentregas",
-  "versao": "0.0.10",
+  "versao": "0.0.11",
   "arquivos": {
     "app.js": "afee88d4ac197b5e10b1a8122cd8df59cf5dae50fee573dd9bcbc7d5d0a9eb73",
-    "index.html": "3ecaa0e95976633bd8b3a1dec3b4055501f6e9c58565f67600607fd86220f5dc",
+    "index.html": "5a4fa11e25ce373679358398309825dd080beca39bac81d8d2a20f3c125103c3",
     "src/acesso.js": "87382010a36bc79e7dcd4987ae1286b48fe3270983d37f5d1a0483c4dc29ddf1",
     "src/api.js": "5ad3dcd2e9cfee63e53bbd2ecbf3038e96b489401f9cd9e017eab9bc6fce666a",
     "src/central.js": "4321d1547bcc1539988290c23ff4f081b8f8e87c82df47f1d6ad2603cdabef1b",
@@ -18,6 +18,6 @@
     "src/offline.js": "71ea9beb6d70074ddafa3d3f0ffb9ecea6b0afc71db2f02a18f0c85cc306b1fd",
     "src/prioridade.js": "edfd20ad422409b6ae0b3b0145015ea09c5c938778b488777008f97095d3460d",
     "src/rota.js": "b3f2e6b43a48c3ec691de16d8ea757247a639a9d59f58be32d5a1831fcb11d74",
-    "style.css": "0545c471d3c60264dc5a85c245a3d30953ce2266ff2c049320146aebfc3f2dc0"
+    "style.css": "ef31b5df0b5a05caa817a938ce042c34e5e654b6d5b070fe5aceb68cff1de2df"
   }
 }
