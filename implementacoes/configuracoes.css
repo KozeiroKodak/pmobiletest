@@ -669,3 +669,19 @@
 #configuracoes .ota-recuperacao{padding:12px;border-radius:12px;background:#173a32;color:#b1e4cf;font-size:12px;line-height:1.6}
 #configuracoes .ota-painel[data-estado=error] .ota-situacao strong{color:#ffcb9e}
 @media(max-width:480px){#configuracoes .ota-painel{padding:20px 16px;border-radius:20px}#configuracoes .ota-selo{max-width:170px}#configuracoes .ota-versoes{gap:8px}#configuracoes .ota-versoes dd{font-size:16px}}
+
+
+/* OTA nativo: o painel web existente permanece independente. */
+.ota-native-card[hidden], .ota-native-card [hidden] { display: none !important; }
+.ota-native-card {
+  border: 1px solid rgba(32, 191, 212, .4);
+  border-radius: 14px;
+  padding: 16px;
+  margin: 14px 0;
+  background: rgba(15, 34, 50, .12);
+}
+.ota-native-card h3 { margin: 0 0 9px; font-size: 1.05rem; }
+.ota-native-card p { margin: 7px 0; }
+.ota-native-card #otaNativeStatus { font-weight: 600; }
+.ota-native-card .ota-acoes { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0; }
+.ota-native-card #otaNativeHelp { font-size: .87rem; opacity: .85; }

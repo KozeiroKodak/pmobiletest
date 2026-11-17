@@ -88,6 +88,7 @@ public class MainActivity extends BridgeActivity {
         }
 
         super.onCreate(savedInstanceState);
+        nativeOta = new NativeOtaUpdater(getApplicationContext());
         capturarNotificacao(getIntent());
         getOnBackPressedDispatcher().addCallback(this,new androidx.activity.OnBackPressedCallback(true){
             private boolean pending;
@@ -343,6 +344,7 @@ public class MainActivity extends BridgeActivity {
     }
 
 
+    private NativeOtaUpdater nativeOta;
     private volatile boolean otaModernClient;
     private volatile OtaManifest availableManifest;
     private volatile String otaState = "idle";
@@ -377,7 +379,8 @@ public class MainActivity extends BridgeActivity {
                 .put("downloadedBytes", otaDownloaded).put("totalBytes", otaTotal)
                 .put("checkedAt", otaCheckedAt > 0 ? otaCheckedAt : otaUiPreferences().getLong("checkedAt", 0)).put("recovery", manager.getLastRecovery())
                 .put("releaseNotes", availableManifest == null ? "" : availableManifest.getReleaseNotes())
-                .put("publishedAt", availableManifest == null ? "" : availableManifest.getPublishedAt());
+                .put("publishedAt", availableManifest == null ? "" : availableManifest.getPublishedAt())
+                .put("nativeUpdate", nativeOta == null ? new org.json.JSONObject() : nativeOta.snapshot());
             return json.toString();
         } catch (Exception failure) { return "{\"state\":\"error\",\"message\":\"Não foi possível ler o estado da atualização.\"}"; }
     }
@@ -387,6 +390,10 @@ public class MainActivity extends BridgeActivity {
         @JavascriptInterface public void procurarAtualizacoes() { verificarOta(true); }
         @JavascriptInterface public void baixarAtualizacao() { iniciarDownload(); }
         @JavascriptInterface public void aplicarAtualizacao() { aplicarPreparada(); }
+        @JavascriptInterface public void baixarAtualizacaoNativa() { if (nativeOta != null) nativeOta.downloadAsync(); }
+        @JavascriptInterface public void instalarAtualizacaoNativa() {
+            runOnUiThread(() -> { if (nativeOta != null) nativeOta.install(MainActivity.this); });
+        }
         @JavascriptInterface public void confirmarInicializacao(String version) {
             OTA_MANIFEST_EXECUTOR.execute(() -> {
                 try { new OtaManager(getApplicationContext()).confirmWebBoot(version); }
@@ -396,6 +403,7 @@ public class MainActivity extends BridgeActivity {
     }
 
     private void verificarOta(boolean manual) {
+        if (nativeOta != null) nativeOta.checkAsync();
         if (!otaUiPreferences().getString("readyVersion", "").isEmpty()
                 && new OtaManager(getApplicationContext()).hasPreparedCandidate()) {
             setOtaState("ready", "Atualização pronta. Aplique quando terminar suas operações.", 100);

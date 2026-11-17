@@ -40,3 +40,50 @@ test('ponte Android disponível após a pintura ainda recebe a confirmação uma
  h.window.PMOBILE_OTA={obterEstado:()=>JSON.stringify({currentVersion:'0.0.400'}),confirmarInicializacao(){count++}};
  h.api.atualizar();h.api.atualizar();assert.equal(count,1);
 });
+
+
+test('OTA nativo é independente do OTA web e requer ação explícita para instalar',()=>{
+ const calls=[];
+ const h=setup({
+   obterEstado:()=>JSON.stringify({
+     state:'updated',currentVersion:'0.0.415',nativeVersion:'1.06',
+     nativeUpdate:{state:'available',availableVersion:'1.07',message:'Novo APK'}
+   }),
+   baixarAtualizacaoNativa(){calls.push('download-apk')},
+   instalarAtualizacaoNativa(){calls.push('install-apk')}
+ });
+ h.api.atualizar();
+ assert.equal(h.node('otaPainel').dataset.estado,'updated');
+ assert.equal(h.node('otaNativeCard').hidden,false);
+ assert.equal(h.node('otaNativeBaixar').hidden,false);
+ assert.equal(h.node('otaNativeInstalar').hidden,true);
+ h.window.baixarAtualizacaoNativaOta();
+ assert.deepEqual(calls,['download-apk']);
+ h.api.renderizar({
+   state:'updated',currentVersion:'0.0.415',nativeVersion:'1.06',
+   nativeUpdate:{state:'ready',availableVersion:'1.07',message:'APK validado'}
+ });
+ assert.equal(h.node('otaNativeInstalar').hidden,false);
+ assert.deepEqual(calls,['download-apk']);
+ h.window.instalarAtualizacaoNativaOta();
+ assert.deepEqual(calls,['download-apk','install-apk']);
+});
+
+test('canal APK nativo mantém assinatura e fluxo independente sem substituir OTA web',()=>{
+ const nativeManifest=JSON.parse(fs.readFileSync(path.join(root,'ota/native-manifest.json'),'utf8'));
+ const manifestXml=fs.readFileSync(path.join(root,'android/app/src/main/AndroidManifest.xml'),'utf8');
+ const java=fs.readFileSync(path.join(root,'android/app/src/main/java/com/pmobile/app/NativeOtaUpdater.java'),'utf8');
+ const workflow=fs.readFileSync(path.join(root,'.github/workflows/android-main-build.yml'),'utf8');
+ const webWorkflow=fs.readFileSync(path.join(root,'.github/workflows/ota-publish.yml'),'utf8');
+ assert.equal(nativeManifest.schemaVersion,1);
+ assert.equal(nativeManifest.packageName,'com.pmobile.app');
+ assert.ok(nativeManifest.release === null || nativeManifest.release.signingCertSha256);
+ assert.match(manifestXml,/android.permission.REQUEST_INSTALL_PACKAGES/);
+ assert.match(java,/getPackageArchiveInfo/);
+ assert.match(java,/MessageDigest.getInstance\("SHA-256"\)/);
+ assert.match(java,/getUriForFile/);
+ assert.match(java,/canRequestPackageInstalls/);
+ assert.match(java,/Intent.ACTION_INSTALL_PACKAGE/);
+ assert.match(workflow,/:app:assembleRelease/);
+ assert.doesNotMatch(webWorkflow,/native-manifest\.json.*zip/);
+});

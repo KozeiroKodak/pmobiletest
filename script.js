@@ -2695,6 +2695,75 @@ function procurarAtualizacoesOta() {
     let ultimo = "", estado = {}, ciclos = 0, bootConfirmado = false, primeiraPintura = false;
     const $ = id => document.getElementById(id);
     const ocupados = ["checking", "downloading", "verifying", "preparing", "applying"];
+
+    // A central conserva o OTA web e apresenta um canal Android independente.
+    let versaoNativaCompatibilidade = null;
+    function renderizarNativa(dados) {
+        const painel = $('otaNativeCard');
+        if (!painel) return;
+        const nativa = dados || versaoNativaCompatibilidade;
+        const status = nativa?.state || 'idle';
+        painel.hidden = !['checking','available','downloading','ready','error'].includes(status);
+        if (painel.hidden) return;
+        $('otaNativeStatus').textContent = nativa.message || 'Atualização do aplicativo Android';
+        $('otaNativeVersao').textContent = nativa.availableVersion || '—';
+        const suportaNativo = !!(window.PMOBILE_OTA && typeof window.PMOBILE_OTA.baixarAtualizacaoNativa === 'function');
+        $('otaNativeBaixar').hidden = !suportaNativo || status !== 'available';
+        $('otaNativeInstalar').hidden = !suportaNativo || status !== 'ready';
+        $('otaNativeLink').hidden = suportaNativo || status !== 'available' || !nativa.url;
+        if (!$('otaNativeLink').hidden) $('otaNativeLink').href = nativa.url;
+        $('otaNativeProgress').hidden = status !== 'downloading';
+        if (status === 'downloading') $('otaNativeProgress').textContent =
+            Number.isFinite(Number(nativa.percent)) && nativa.percent >= 0
+                ? 'Download: ' + nativa.percent + '%' : 'Baixando APK…';
+        $('otaNativeHelp').textContent = suportaNativo
+            ? 'O Android solicitará sua autorização para instalar o APK assinado. Seus dados serão preservados.'
+            : 'Esta versão ainda usa o instalador anterior. Abra o APK assinado pelo navegador e confirme a atualização Android. Não desinstale o PMobile.';
+    }
+    async function verificarManifestoApkCompatibilidade() {
+        const ponte = window.PMOBILE_OTA;
+        if (!ponte || typeof ponte.obterEstado !== 'function' ||
+            typeof ponte.baixarAtualizacaoNativa === 'function' || typeof fetch !== 'function') return;
+        try {
+            const resposta = await fetch('https://kozeirokodak.github.io/pmobiletest/ota/native-manifest.json?t=' +
+                Date.now(), {cache:'no-store'});
+            if (!resposta.ok) throw new Error('Manifesto indisponível');
+            const dados = await resposta.json(), release = dados.release;
+            const versaoAtual = String(estado.nativeVersion || '0');
+            const comparar = v => String(v || '0').split('.').map(n => Number(n) || 0);
+            const maior = (a,b) => {
+                const x = comparar(a), y = comparar(b);
+                for (let i=0;i<Math.max(x.length,y.length);i++) {
+                    if ((x[i]||0) !== (y[i]||0)) return (x[i]||0) > (y[i]||0);
+                }
+                return false;
+            };
+            if (dados.schemaVersion !== 1 || dados.packageName !== 'com.pmobile.app' ||
+                !release || !Number.isInteger(release.versionCode) ||
+                typeof release.versionName !== 'string' ||
+                !maior(release.versionName, versaoAtual) ||
+                !/^https:\/\/github\.com\/KozeiroKodak\/pmobiletest\/releases\/download\/pmobile-native-[^/]+\/[^/]+\.apk$/.test(release.url || '')) {
+                versaoNativaCompatibilidade = null; renderizarNativa(null); return;
+            }
+            versaoNativaCompatibilidade = {
+                state:'available', message:'Nova versão Android disponível pelo OTA.',
+                availableVersion:release.versionName, url:release.url
+            };
+            renderizarNativa(null);
+        } catch (erro) {
+            // Falhas de rede no canal APK não interrompem atualizações web.
+            console.warn('OTA Android ainda não disponível:', erro?.message || erro);
+        }
+    }
+    window.baixarAtualizacaoNativaOta = () => {
+        const ponte = window.PMOBILE_OTA;
+        if (typeof ponte?.baixarAtualizacaoNativa === 'function') ponte.baixarAtualizacaoNativa();
+    };
+    window.instalarAtualizacaoNativaOta = () => {
+        const ponte = window.PMOBILE_OTA;
+        if (typeof ponte?.instalarAtualizacaoNativa === 'function') ponte.instalarAtualizacaoNativa();
+    };
+
     const titulos = {idle:"Pronto para verificar",checking:"Procurando novidades",available:"Tem novidade para você",updated:"Você está em dia",downloading:"Atualização a caminho",verifying:"Conferindo os arquivos",preparing:"Quase pronto",ready:"Pronto para aplicar",applying:"Até já!",error:"Vamos tentar novamente?",incompatible:"Atualize o aplicativo",legacy:"Seu aplicativo usa o atualizador anterior",unsupported:"Disponível no aplicativo Android"};
     const formatarBytes = n => Number.isFinite(Number(n)) && Number(n) >= 0 ? (n / 1048576).toLocaleString("pt-BR", {maximumFractionDigits:1}) + " MB" : "";
     function renderizar(dados) {
@@ -2707,6 +2776,7 @@ function procurarAtualizacoesOta() {
         $('otaAtual').textContent = estado.currentVersion || "—";
         $('otaDisponivel').textContent = estado.availableVersion || (status === "updated" ? estado.currentVersion : "—") || "—";
         $('otaNativa').textContent = estado.nativeVersion || "—";
+        renderizarNativa(estado.nativeUpdate);
         $('otaSelo').textContent = status === "ready" ? "Download concluído" : status === "updated" ? "Tudo atualizado" : status === "available" ? "Nova versão disponível" : "PMobile sempre em dia";
         $('otaVerificar').hidden = ["available", "ready"].includes(status);
         $('otaVerificar').disabled = ocupado || status === "unsupported";
@@ -2749,7 +2819,7 @@ function procurarAtualizacoesOta() {
     }
     window.baixarAtualizacaoOta = () => executar("baixarAtualizacao");
     window.aplicarAtualizacaoOta = () => executar("aplicarAtualizacao");
-    window.PMobileAtualizacoes = {renderizar, atualizar, executar};
+    window.PMobileAtualizacoes = {renderizar, atualizar, executar, verificarManifestoApkCompatibilidade};
     function confirmarBoot() {
         const ponte = window.PMOBILE_OTA;
         const requisitos = [window.mostrarTelaSistema, window.abrirDadosLocaisPmobile, window.mostrarInicioConfiguracoes, window.abrirValoresTotal];
@@ -2760,6 +2830,7 @@ function procurarAtualizacoesOta() {
     }
     function iniciar() {
         atualizar();
+        verificarManifestoApkCompatibilidade();
         // Confirmar somente depois dos listeners de inicialização e da primeira pintura.
         requestAnimationFrame(() => requestAnimationFrame(() => {
             primeiraPintura = true; confirmarBoot();
