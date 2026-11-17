@@ -3,9 +3,9 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/pmobile_identity"
+        android:icon="@mipmap/pmobile_launcher"
         android:label="${pmobileAppLabel}"
-        android:roundIcon="@drawable/pmobile_identity"
+        android:roundIcon="@mipmap/pmobile_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 

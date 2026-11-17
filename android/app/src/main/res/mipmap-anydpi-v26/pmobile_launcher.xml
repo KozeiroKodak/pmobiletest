@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Imagem original sem moldura; a mascara do launcher recorta o fundo diretamente. -->
+    <background android:drawable="@drawable/pmobile_identity" />
+    <foreground android:drawable="@android:color/transparent" />
+</adaptive-icon>

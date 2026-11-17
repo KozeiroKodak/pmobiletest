@@ -58,8 +58,14 @@ jobs:
         run: |
           set -euo pipefail
           test -f android/app/src/main/res/drawable-nodpi/pmobile_identity.webp
-          grep -qF 'android:icon="@drawable/pmobile_identity"' android/app/src/main/AndroidManifest.xml
-          grep -qF 'android:roundIcon="@drawable/pmobile_identity"' android/app/src/main/AndroidManifest.xml
+          grep -qF 'android:icon="@mipmap/pmobile_launcher"' android/app/src/main/AndroidManifest.xml
+          grep -qF 'android:roundIcon="@mipmap/pmobile_launcher_round"' android/app/src/main/AndroidManifest.xml
+          test -f android/app/src/main/res/mipmap-anydpi-v26/pmobile_launcher.xml
+          test -f android/app/src/main/res/mipmap-anydpi-v26/pmobile_launcher_round.xml
+          grep -qF 'background android:drawable="@drawable/pmobile_identity"' android/app/src/main/res/mipmap-anydpi-v26/pmobile_launcher.xml
+          grep -qF 'foreground android:drawable="@android:color/transparent"' android/app/src/main/res/mipmap-anydpi-v26/pmobile_launcher.xml
+      - name: Testar icone adaptativo
+        run: node --test tests/android-launcher-icon.test.cjs
       - name: Compilar APK principal nao assinado
         working-directory: android
         run: ./gradlew --no-daemon :app:testDebugUnitTest :app:assembleRelease
@@ -74,7 +80,7 @@ jobs:
           if metadata.get('applicationId') != 'com.pmobile.app':
               raise SystemExit('Aplicativo diferente de com.pmobile.app.')
           element = metadata['elements'][0]
-          if element.get('versionCode', 0) < 124:
+          if element.get('versionCode', 0) < 126:
               raise SystemExit('VersionCode insuficiente.')
           apk = folder / element['outputFile']
           if not apk.is_file() or apk.stat().st_size == 0:
