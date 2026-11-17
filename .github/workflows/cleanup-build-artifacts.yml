@@ -1,0 +1,82 @@
+name: Limpar APKs antigos do PMobile
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cleanup-build-artifacts.yml'
+  workflow_run:
+    workflows:
+      - 'PMobile principal - APK para assinatura no Termux'
+    types: [completed]
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: cleanup-build-artifacts-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Preservar apenas a ultima compilacao Android bem-sucedida
+        uses: actions/github-script@v7
+        env:
+          BUILD_WORKFLOW_NAME: 'PMobile principal - APK para assinatura no Termux'
+          BUILD_ARTIFACT_REGEX: '^(pmobile-principal-unsigned|pmobiletest-teste-ota|pmobile.*(apk|debug|unsigned|teste-ota).*)$'
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
+            const expected = process.env.BUILD_WORKFLOW_NAME;
+            const pattern = new RegExp(process.env.BUILD_ARTIFACT_REGEX, 'i');
+            let protectedRun = null;
+            let keepArtifacts = [];
+            for (let page = 1; page <= 20 && !protectedRun; page++) {
+              const { data } = await github.rest.actions.listWorkflowRunsForRepo({owner,repo,per_page:100,page});
+              for (const run of data.workflow_runs) {
+                if (run.name !== expected || run.status !== 'completed' || run.conclusion !== 'success') continue;
+                const items = await github.paginate(github.rest.actions.listWorkflowRunArtifacts,
+                  {owner,repo,run_id:run.id,per_page:100});
+                const builds = items.filter(item => !item.expired && pattern.test(item.name));
+                if (builds.length) {
+                  protectedRun = run;
+                  keepArtifacts = builds;
+                  break;
+                }
+              }
+              if (data.workflow_runs.length < 100) break;
+            }
+            if (!protectedRun || keepArtifacts.length === 0) {
+              core.setFailed('Nenhuma compilacao bem-sucedida com APK encontrada. Nenhum artefato foi removido.');
+              return;
+            }
+            const keptIds = new Set(keepArtifacts.map(item => item.id));
+            const all = await github.paginate(github.rest.actions.listArtifactsForRepo,
+              {owner,repo,per_page:100});
+            const remove = all.filter(item => !item.expired && pattern.test(item.name) && !keptIds.has(item.id));
+            const bytes = remove.reduce((sum,item)=>sum+(item.size_in_bytes||0),0);
+            core.info('Compilacao preservada: ' + expected + ' / ' + protectedRun.id);
+            core.info('APKs preservados: ' + keepArtifacts.map(item=>item.name+' #'+item.id).join(', '));
+            core.info('Artefatos antigos identificados: ' + remove.length + ' (' + (bytes/1048576).toFixed(1) + ' MiB)');
+            let deleted = 0, freed = 0;
+            for (const item of remove) {
+              try {
+                await github.rest.actions.deleteArtifact({owner,repo,artifact_id:item.id});
+                deleted++;
+                freed += item.size_in_bytes||0;
+              } catch (error) {
+                if (error.status !== 404) throw error;
+              }
+              if (deleted % 50 === 0 && deleted) core.info('Apagados: ' + deleted + '/' + remove.length);
+              await new Promise(resolve => setTimeout(resolve, 150));
+            }
+            await core.summary.addHeading('Limpeza de compilacoes Android')
+              .addRaw('Repositório: '+owner+'/'+repo+'; build preservado: '+protectedRun.id+'; APKs mantidos: '+keepArtifacts.length+'; APKs antigos removidos: '+deleted+'; armazenamento removido: '+(freed/1048576).toFixed(1)+' MiB. Releases OTA, historico Git e outros arquivos nao foram alterados.')
+              .write();
+            core.info('Resultado: removidos ' + deleted + ' artefatos antigos; ' + (freed/1048576).toFixed(1) + ' MiB.');
