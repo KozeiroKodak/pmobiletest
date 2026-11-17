@@ -54,18 +54,37 @@ if command -v apksigner >/dev/null 2>&1; then
   apksigner sign --v4-signing-enabled false \
     --ks "$keystore" --ks-key-alias androiddebugkey --ks-pass pass:android --key-pass pass:android \
     --out "$signed" "$unsigned"
-  apksigner verify --print-certs "$signed" > "$workspace/verification.txt"
+  apksigner verify --print-certs "$signed" > "$workspace/verification.txt" 2>&1
 elif [ -f "$PREFIX/share/java/apksigner.jar" ]; then
   java -jar "$PREFIX/share/java/apksigner.jar" sign --v4-signing-enabled false \
     --ks "$keystore" --ks-key-alias androiddebugkey --ks-pass pass:android --key-pass pass:android \
     --out "$signed" "$unsigned"
-  java -jar "$PREFIX/share/java/apksigner.jar" verify --print-certs "$signed" > "$workspace/verification.txt"
+  java -jar "$PREFIX/share/java/apksigner.jar" verify --print-certs "$signed" > "$workspace/verification.txt" 2>&1
 else
   fail "apksigner nao encontrado. Nao envie APK sem assinatura."
 fi
-signed_cert="$(sed -nE 's/^Signer #1 certificate SHA-256 digest:[[:space:]]*//p' \
-  "$workspace/verification.txt" | head -n1 | tr -d ':[:space:]' | tr '[:upper:]' '[:lower:]')"
-[ "$signed_cert" = "$expected" ] || fail "O APK nao foi assinado pela chave aprovada."
+# Alguns builds do apksigner variam o formato e a capitalizacao do relatorio.
+# Use o certificado extraido do APK verificado; nunca desative a comparacao.
+signed_cert="$(python - "$workspace/verification.txt" <<'PY'
+import re, sys
+with open(sys.argv[1], encoding='utf-8', errors='replace') as f:
+    lines = f.read().splitlines()
+candidates = []
+for line in lines:
+    if re.search(r'certificate\\s+SHA[\\s-]*256\\s+digest\\s*:', line, re.IGNORECASE):
+        digest = re.sub(r'[^0-9a-f]', '', line.split(':', 1)[1].lower())
+        if len(digest) == 64:
+            candidates.append(digest)
+print(candidates[0] if len(candidates) == 1 else '')
+PY
+)"
+printf 'Certificado esperado: %s\n' "$expected"
+printf 'Certificado encontrado no APK: %s\n' "${signed_cert:-NAO IDENTIFICADO}"
+if [ "$signed_cert" != "$expected" ]; then
+  echo 'Linhas de certificado retornadas pelo apksigner:'
+  grep -iE 'certificate.*(sha.?256|digest)' "$workspace/verification.txt" | head -n 5 || true
+  fail 'Assinatura nao comprovada. Nenhum APK foi publicado. Envie o diagnostico acima.'
+fi
 hash="$(sha256sum "$signed" | cut -d' ' -f1)"
 size="$(wc -c < "$signed" | tr -d '[:space:]')"
 tag="pmobile-native-$code"
