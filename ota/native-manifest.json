@@ -2,13 +2,13 @@
   "schemaVersion": 1,
   "packageName": "com.pmobile.app",
   "release": {
-    "versionCode": 125,
-    "versionName": "1.06",
-    "url": "https://github.com/KozeiroKodak/pmobiletest/releases/download/pmobile-native-125/PMOBILE-PRINCIPAL.apk",
-    "sha256": "16050d7d1d5ffb65606cf2e026ca21aa40bb5ab03d5a94302f5690ea0a9e97a4",
+    "versionCode": 126,
+    "versionName": "1.07",
+    "url": "https://github.com/KozeiroKodak/pmobiletest/releases/download/pmobile-native-126/PMOBILE-PRINCIPAL.apk",
+    "sha256": "8328413f659b83ffc5e711b38b934696f177f187c8bc3aa1074193fbefdbbbc4",
     "signingCertSha256": "d73f1b234895f85b8e96321b95000cb18947b7c335e1b949b148e77a095c4a98",
-    "sizeBytes": 5171042,
-    "publishedAt": "2026-11-17T12:53:17.936412+00:00",
+    "sizeBytes": 5171267,
+    "publishedAt": "2026-11-17T13:42:17.258082+00:00",
     "releaseNotes": "Nova versao Android do PMobile pelo OTA."
   }
 }
