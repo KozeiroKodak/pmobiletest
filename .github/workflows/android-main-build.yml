@@ -1,0 +1,92 @@
+name: PMobile principal - APK para assinatura no Termux
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "android/**"
+      - "www/**"
+      - "capacitor.config.json"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/android-main-build.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-principal:
+    name: Compilar PMobile principal (com.pmobile.app)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Instalar dependencias
+        run: npm ci --no-audit --no-fund
+      - name: Sincronizar conteudo Android
+        run: |
+          npm run sync:android
+          npx cap sync android
+      - name: Configurar Firebase do PMobile principal
+        env:
+          FIREBASE_ANDROID_JSON: ${{ secrets.FIREBASE_ANDROID_JSON_PMOBILE || secrets.FIREBASE_ANDROID_JSON }}
+        run: |
+          node - <<'JS'
+          const fs = require('fs');
+          const raw = process.env.FIREBASE_ANDROID_JSON;
+          if (!raw) throw Error('Falta FIREBASE_ANDROID_JSON_PMOBILE ou FIREBASE_ANDROID_JSON.');
+          const config = JSON.parse(raw);
+          const clients = config.client || [];
+          if (!clients.some(c => c.client_info?.android_client_info?.package_name === 'com.pmobile.app')) {
+            throw Error('O Firebase configurado nao contem com.pmobile.app. Nao usar configuracao de teste.');
+          }
+          fs.writeFileSync('android/app/google-services.json', raw);
+          JS
+      - name: Usar AAPT2 do runner Linux
+        run: sed -i '/aapt2FromMavenOverride/d' android/gradle.properties
+      - name: Validar identidade e icone original
+        run: |
+          set -euo pipefail
+          test -f android/app/src/main/res/drawable-nodpi/pmobile_identity.webp
+          grep -qF 'android:icon="@drawable/pmobile_identity"' android/app/src/main/AndroidManifest.xml
+          grep -qF 'android:roundIcon="@drawable/pmobile_identity"' android/app/src/main/AndroidManifest.xml
+      - name: Compilar APK principal nao assinado
+        working-directory: android
+        run: ./gradlew --no-daemon :app:testDebugUnitTest :app:assembleRelease
+      - name: Validar identidade do APK principal
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          folder = Path('android/app/build/outputs/apk/release')
+          metadata = json.loads((folder / 'output-metadata.json').read_text())
+          if metadata.get('applicationId') != 'com.pmobile.app':
+              raise SystemExit('Aplicativo diferente de com.pmobile.app.')
+          element = metadata['elements'][0]
+          if element.get('versionCode', 0) < 124:
+              raise SystemExit('VersionCode insuficiente.')
+          apk = folder / element['outputFile']
+          if not apk.is_file() or apk.stat().st_size == 0:
+              raise SystemExit('APK nao foi gerado.')
+          if 'unsigned' not in apk.name:
+              raise SystemExit('Artefato deve ser nao assinado para usar chave original do Termux.')
+          print('PMobile principal confirmado:', metadata['applicationId'], element['versionCode'], apk)
+          PY
+      - name: Publicar artefato para assinatura no Termux
+        uses: actions/upload-artifact@v4
+        with:
+          name: pmobile-principal-unsigned
+          path: android/app/build/outputs/apk/release/app-release-unsigned.apk
+          if-no-files-found: error
+          retention-days: 30

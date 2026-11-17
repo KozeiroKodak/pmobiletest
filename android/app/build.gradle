@@ -18,8 +18,8 @@ buildToolsVersion = "35.0.0"
         manifestPlaceholders = [pmobileAppLabel: otaPreview ? "PMobile · Teste OTA" : "PMOBILE"]
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 123
-        versionName "1.05"
+        versionCode 124
+        versionName "1.05.1"
         buildConfigField 'String', 'WEB_BUNDLE_VERSION', '"' + bundledWebVersion + '"'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
