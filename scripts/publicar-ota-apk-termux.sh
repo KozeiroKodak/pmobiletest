@@ -70,14 +70,17 @@ fi
 signed_cert="$(python - "$workspace/verification.txt" <<'PY'
 import re, sys
 with open(sys.argv[1], encoding='utf-8', errors='replace') as f:
-    lines = f.read().splitlines()
-candidates = []
-for line in lines:
-    if re.search(r'certificate\s+SHA[\s-]*256\s+digest\s*:', line, re.IGNORECASE):
-        digest = re.sub(r'[^0-9a-f]', '', line.split(':', 1)[1].lower())
-        if len(digest) == 64:
-            candidates.append(digest)
-print(candidates[0] if len(candidates) == 1 else '')
+    report = f.read()
+# Extract ONLY the digest following 'certificate SHA-256 digest:'.
+# 'V3.0 Signer:' contains another colon; splitting on the first ':' is invalid.
+digests = set()
+for candidate in re.findall(r'certificate\s+SHA[\s-]*256\s+digest\s*:\s*([0-9a-fA-F:]+)', report, flags=re.I):
+    digest = candidate.replace(':', '').lower()
+    if re.fullmatch(r'[0-9a-f]{64}', digest):
+        digests.add(digest)
+# Multiple APK signature schemes may legitimately repeat the SAME certificate.
+# Different certificates are rejected: never guess which signer to trust.
+print(next(iter(digests)) if len(digests) == 1 else '')
 PY
 )"
 printf 'Certificado esperado: %s\n' "$expected"

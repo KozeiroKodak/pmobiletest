@@ -38,3 +38,40 @@ test('OTA APK: sem chave no GitHub; assina e verifica antes de liberar', () => {
   assert.match(script, /if \[ "\$signed_cert" != "\$expected" \]; then/);
   assert.match(script, /get.*metadata|metadata="\$workspace\/output-metadata.json"/);
 });
+
+const os = require('node:os');
+
+function readCertFromApksignerReport(report) {
+  const marker = "signed_cert=\"$(python - \"$workspace/verification.txt\" <<'PY'\n";
+  const start = script.indexOf(marker);
+  const end = script.indexOf('\nPY\n)"', start);
+  assert.ok(start >= 0 && end > start, 'Python parser should be present in publishing script');
+  const parser = script.slice(start + marker.length, end);
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'pmobile-cert-'));
+  const reportPath = path.join(dir, 'verification.txt');
+  try {
+    fs.writeFileSync(reportPath, report, 'utf8');
+    return execFileSync('python3', ['-c', parser, reportPath], {encoding: 'utf8'}).trim();
+  } finally { fs.rmSync(dir, {recursive:true, force:true}); }
+}
+
+test('OTA APK: reconhece V3.0 Signer: certificate SHA-256 digest', () => {
+  const cert = 'd73f1b234895f85b8e96321b95000cb18947b7c335e1b949b148e77a095c4a98';
+  const report = [
+    'Verifies',
+    'V3.0 Signer: certificate SHA-256 digest: ' + cert,
+    'V3.0 Signer: certificate SHA-1 digest: fbb6ef123455abcdefab1234567890ffabcdefab',
+    'V3.0 Signer: certificate MD5 digest: aabbccddeeff00112233445566778899'
+  ].join('\n');
+  assert.equal(readCertFromApksignerReport(report), cert);
+});
+
+test('OTA APK: tolera certificados repetidos e rejeita certificados conflitantes', () => {
+  const cert = 'd73f1b234895f85b8e96321b95000cb18947b7c335e1b949b148e77a095c4a98';
+  const other = 'a'.repeat(64);
+  assert.equal(readCertFromApksignerReport('V2 Signer: certificate SHA-256 digest: ' + cert +
+      '\nV3.0 Signer: certificate SHA-256 digest: ' + cert), cert);
+  assert.equal(readCertFromApksignerReport('V2 Signer: certificate SHA-256 digest: ' + cert +
+      '\nV3.0 Signer: certificate SHA-256 digest: ' + other), '');
+  assert.equal(readCertFromApksignerReport('V3.0 Signer: certificate SHA-1 digest: ' + cert.slice(0,40)), '');
+});
