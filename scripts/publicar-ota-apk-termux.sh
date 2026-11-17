@@ -71,7 +71,7 @@ with open(sys.argv[1], encoding='utf-8', errors='replace') as f:
     lines = f.read().splitlines()
 candidates = []
 for line in lines:
-    if re.search(r'certificate\\s+SHA[\\s-]*256\\s+digest\\s*:', line, re.IGNORECASE):
+    if re.search(r'certificate\s+SHA[\s-]*256\s+digest\s*:', line, re.IGNORECASE):
         digest = re.sub(r'[^0-9a-f]', '', line.split(':', 1)[1].lower())
         if len(digest) == 64:
             candidates.append(digest)
