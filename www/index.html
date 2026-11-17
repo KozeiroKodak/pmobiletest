@@ -909,6 +909,18 @@
                   <section class="ota-novidades" id="otaNovidades" hidden><h3>O que vem nesta atualização</h3><p id="otaNotas"></p></section>
                   <p class="ota-recuperacao" id="otaRecuperacao" hidden></p>
                   <div class="ota-acoes"><button class="botao-aba ota-primario" id="otaVerificar" type="button" onclick="procurarAtualizacoesOta()">Verificar atualizações</button><button class="botao-aba ota-primario" id="otaBaixar" type="button" onclick="baixarAtualizacaoOta()" hidden>Baixar atualização</button><button class="botao-aba ota-primario" id="otaAplicar" type="button" onclick="aplicarAtualizacaoOta()" hidden>Reiniciar e aplicar</button></div>
+                  <section class="ota-native-card" id="otaNativeCard" aria-label="Atualização do aplicativo Android" hidden>
+                    <h3>Atualização do aplicativo Android</h3>
+                    <p>APK principal do PMobile · <strong id="otaNativeVersao">—</strong></p>
+                    <p id="otaNativeStatus" role="status" aria-live="polite"></p>
+                    <small id="otaNativeProgress" hidden></small>
+                    <div class="ota-acoes">
+                      <button type="button" class="botao-aba ota-primario" id="otaNativeBaixar" onclick="baixarAtualizacaoNativaOta()" hidden>Baixar APK pelo OTA</button>
+                      <button type="button" class="botao-aba ota-primario" id="otaNativeInstalar" onclick="instalarAtualizacaoNativaOta()" hidden>Instalar atualização Android</button>
+                      <a class="botao-aba ota-primario" id="otaNativeLink" href="#" rel="noopener noreferrer" target="_blank" hidden>Abrir APK assinado do OTA</a>
+                    </div>
+                    <p id="otaNativeHelp"></p>
+                  </section>
                   <p class="ota-rodape" id="otaRodape">O download acontece em segundo plano. O aplicativo só reinicia quando você escolhe aplicar.</p><small class="ota-ultima" id="otaUltima"></small>
                 </section>
                 </div></details>
