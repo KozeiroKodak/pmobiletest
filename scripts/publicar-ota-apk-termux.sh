@@ -33,7 +33,7 @@ if [ "$sha" != "$head" ]; then
     || fail "Nao foi possivel verificar a distancia entre o build e main."
   # Alteracoes somente no manifesto web e neste script de assinatura nao mudam o APK.
   # Aceitar somente arquivos sem efeito no binario do build validado.
-  other_changes="$(printf '%s\n' "$changed" | grep -Ev '^(ota/manifest[.]json|scripts/publicar-ota-apk-termux[.]sh)$' || true)"
+  other_changes="$(printf '%s\n' "$changed" | grep -Ev '^(ota/manifest[.]json|scripts/publicar-ota-apk-termux[.]sh|tests/native-ota-publish[.]test[.]cjs|[.]github/workflows/validate-native-ota[.]yml)$' || true)"
   [ -z "$other_changes" ] || fail "Build anterior a main atual com alteracoes de codigo: $other_changes. Recompile."
 fi
 gh run download "$run" --repo "$repo" --name pmobile-principal-unsigned --dir "$workspace"

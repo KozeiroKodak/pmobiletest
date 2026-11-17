@@ -20,7 +20,9 @@ test('OTA APK: script assina e publica somente uma vez', () => {
 
 test('OTA APK: so reutiliza build com alteracoes fora do codigo Android', () => {
   assert.match(script, /compare\/\$sha\.\.\.\$head/);
-  assert.match(script, /\^\(ota\/manifest\[\.\]json\|scripts\/publicar-ota-apk-termux\[\.\]sh\)\$/);
+  assert.match(script, /ota\/manifest\[\.\]json\|scripts\/publicar-ota-apk-termux\[\.\]sh/);
+  assert.match(script, /tests\/native-ota-publish\[\.\]test\[\.\]cjs/);
+  assert.match(script, /workflows\/validate-native-ota\[\.\]yml/);
   assert.match(script, /other_changes[\s\S]*fail "Build anterior a main atual com alteracoes de codigo/);
 });
 
