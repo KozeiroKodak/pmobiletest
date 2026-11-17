@@ -2686,6 +2686,8 @@ if (document.readyState === "loading") {
 
 function procurarAtualizacoesOta() {
     window.PMobileAtualizacoes?.executar("procurarAtualizacoes");
+    // APKs anteriores ainda podem descobrir o novo APK pelo OTA web.
+    window.PMobileAtualizacoes?.verificarManifestoApkCompatibilidade();
 }
 
 // Central de atualizações: usa a ponte nativa quando disponível e mantém

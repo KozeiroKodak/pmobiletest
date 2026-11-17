@@ -26,7 +26,14 @@ info="$(gh run view "$run" --repo "$repo" --json status,conclusion,headSha)"
 sha="$(printf %s "$info" | python -c 'import sys,json;x=json.load(sys.stdin);assert x["status"]=="completed" and x["conclusion"]=="success";print(x["headSha"])')" \
   || fail "Build ainda nao aprovado."
 head="$(gh api "repos/$repo/git/ref/heads/main" --jq .object.sha)"
-[ "$sha" = "$head" ] || fail "Build anterior a main atual; compile a versao mais nova."
+if [ "$sha" != "$head" ]; then
+  # O OTA web pode gerar um commit apenas no seu manifesto depois do build nativo.
+  # Permitir somente este avanco; nenhuma outra mudanca de codigo e aceita.
+  changed="$(gh api "repos/$repo/compare/$sha...$head" --jq '.files[].filename')" \
+    || fail "Nao foi possivel verificar a distancia entre o build e main."
+  [ "$changed" = "ota/manifest.json" ] \
+    || fail "Build anterior a main atual com alteracoes de codigo. Recompile."
+fi
 gh run download "$run" --repo "$repo" --name pmobile-principal-unsigned --dir "$workspace"
 unsigned="$workspace/app-release-unsigned.apk"
 metadata="$workspace/output-metadata.json"
