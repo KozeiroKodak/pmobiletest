@@ -330,6 +330,7 @@ function mostrarTelaSistema(
 // Estado visual separado da autenticação: nunca avançar sem clicar em Iniciar.
 let pmobileInicioEmAndamento = false;
 let pmobileSessaoOffline = false;
+let pmobileSessaoVerificando = true;
 
 function atualizarBoasVindasPmobile() {
     const usuario = window.usuarioPmobileAtual;
@@ -338,8 +339,8 @@ function atualizarBoasVindasPmobile() {
     const situacao = document.getElementById("inicioUsuarioStatus");
     const trocar = document.getElementById("inicioTrocarUsuario");
     const avatar = document.getElementById("inicioPerfilAvatar");
-    if (nome) nome.textContent = autenticado ? (usuario.nome || usuario.usuario) : "Nenhum usuário conectado";
-    if (situacao) situacao.textContent = !autenticado ? "Toque em Iniciar para fazer login."
+    if (nome) nome.textContent = autenticado ? (usuario.nome || usuario.usuario) : (pmobileSessaoVerificando ? "Verificando sessão..." : "Nenhum usuário conectado");
+    if (situacao) situacao.textContent = !autenticado ? (pmobileSessaoVerificando ? "Restaurando seu acesso..." : "Toque em Iniciar para fazer login.")
         : (pmobileSessaoOffline || !navigator.onLine) ? "Sessão restaurada offline" : "Sessão autenticada";
     if (trocar) trocar.hidden = !autenticado;
     if (avatar) {
@@ -769,7 +770,7 @@ function restaurarSessaoPmobile(dadosUsuario, senha, opcoes = {}) {
 }
 
 
-async function tentarRestaurarLoginPmobile() {
+async function executarRestauracaoLoginPmobile() {
 
     const checkbox = document.getElementById("loginManterLogin");
     const salvo = await obterLoginPmobileSalvo();
@@ -840,6 +841,21 @@ async function tentarRestaurarLoginPmobile() {
 
 }
 
+
+let pmobileRestauracaoPendente = null;
+async function tentarRestaurarLoginPmobile() {
+    // Evita duas requisições concorrentes reabrirem as boas-vindas após Iniciar.
+    if (pmobileRestauracaoPendente) return pmobileRestauracaoPendente;
+    const atual=executarRestauracaoLoginPmobile();
+    pmobileRestauracaoPendente=atual;
+    try {
+        return await atual;
+    } finally {
+        if(pmobileRestauracaoPendente===atual)pmobileRestauracaoPendente=null;
+        pmobileSessaoVerificando=false;
+        atualizarBoasVindasPmobile();
+    }
+}
 
 function abrirCriacaoSenha(usuario, dadosUsuario, credencial) {
 

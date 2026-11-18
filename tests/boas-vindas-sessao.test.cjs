@@ -75,3 +75,15 @@ test("copias www de OTA mantidas identicas",()=>{
     assert.equal(read(file),read("www/"+file),"Copia WWW: "+file);
   }
 });
+
+test("restauracao concorrente reusa uma unica validacao e nao navega",async()=>{
+ const wrapper=section("let pmobileRestauracaoPendente = null;","\nfunction abrirCriacaoSenha(");
+ let calls=0,complete;
+ const pending=new Promise(resolve=>{complete=resolve;});
+ const context={pmobileSessaoVerificando:true,executarRestauracaoLoginPmobile:()=>{calls++;return pending;},atualizarBoasVindasPmobile:()=>{}};
+ const both=vm.runInNewContext(wrapper+"\nPromise.all([tentarRestaurarLoginPmobile(),tentarRestaurarLoginPmobile()]);",context);
+ assert.equal(calls,1,"apenas uma consulta ao servidor");
+ complete();
+ await both;
+ assert.equal(context.pmobileSessaoVerificando,false,"verificacao encerrou");
+});
