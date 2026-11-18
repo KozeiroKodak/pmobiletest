@@ -1,8 +1,9 @@
-PMobile / Correção do painel inferior de sincronização.
+PMobile — novo visual de boas-vindas, modelo 9 aprovado.
 
-- Removido o status do OneDrive do rodapé geral de sincronização.
-- Falhas do OneDrive não alteram o título, cor ou estado deste painel.
-- Preservados os indicadores de conexão, inventário, contagens e conferências.
-- A integração e os alertas de OneDrive continuam exclusivamente na aba Importação de rastreios.
-- Nenhuma alteração de dados, níveis de acesso ou Supabase.
-- Teste de regressão confirma que falhas do OneDrive não afetam o painel.
+- Foto do próprio usuário ampliada no fundo da tela de abertura, com degradê roxo e detalhes dourados.
+- A imagem só aparece quando há sessão ativa, foto disponível e "Manter login" realmente salvo para a mesma conta.
+- Sem login, com "Manter login" desativado ou após "Trocar usuário", permanece o visual padrão e sem foto de fundo.
+- Logo original CBA DIESEL LOGÍSTICA reutilizado sem qualquer alteração da arte.
+- Nome, sessão, botão Iniciar e Trocar usuário preservados. A tela não entra no aplicativo automaticamente.
+- Nenhuma alteração no Supabase, senhas, permissões, OneDrive, OTA estrutural ou inventário.
+- Versão visual distribuída pelo OTA web, sem necessidade de novo APK.

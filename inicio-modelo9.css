@@ -1,0 +1,194 @@
+/* PMobile / boas-vindas modelo 9 — identidade CBA e fundo do usuario mantido.
+ * Este CSS só altera #inicio. Login, Home, OTA e sincronizadores ficam intactos.
+ * Imagem original do usuario não é editada: só recebe filtro CSS.
+ */
+#inicio {
+  position: relative;
+  isolation: isolate;
+}
+#inicio #inicioMarcaModelo9[hidden],
+#inicio #inicioBoasVindas[hidden],
+#inicio #inicioSessaoMantida[hidden] { display:none !important; }
+#inicio .inicio-fundo-foto {
+  position:absolute;
+  inset:0;
+  z-index:0;
+  display:none;
+  pointer-events:none;
+  overflow:hidden;
+}
+#inicio .inicio-fundo-foto img {
+  display:block;
+  width:100%;
+  height:100%;
+  max-width:none;
+  max-height:none;
+  object-fit:cover;
+  object-position:33% center;
+  filter: blur(2px) contrast(.9) saturate(.85);
+  transform:scale(1.035);
+}
+#inicio .inicio-fundo-foto img[hidden] { display:none !important; }
+#inicio.inicio-com-foto .inicio-fundo-foto { display:block; }
+#inicio.inicio-modelo9 {
+  background:#140e1f !important;
+  color:#f8f1fc;
+  min-height:calc(100dvh - var(--status-altura,24px) - 48px);
+  padding:clamp(18px,5vh,52px) clamp(18px,5vw,42px) 32px;
+  gap:0;
+  overflow:hidden;
+}
+#inicio.inicio-modelo9::before {
+  content:"";
+  position:absolute;inset:0;z-index:1;
+  pointer-events:none;
+  background:linear-gradient(160deg,rgba(31,10,46,.45),rgba(35,10,54,.66) 55%,rgba(36,7,56,.94) 100%);
+}
+#inicio.inicio-modelo9::after {
+  content:"";
+  position:absolute;inset:0;z-index:1;
+  pointer-events:none;
+  background:
+    radial-gradient(ellipse 130% 47% at -31% -34%,transparent 69%,rgba(247,210,126,.78) 69.35%,transparent 69.7%),
+    radial-gradient(ellipse 132% 46% at 133% 133%,transparent 70%,rgba(231,187,94,.68) 70.32%,transparent 70.68%),
+    linear-gradient(150deg,rgba(232,196,124,.06),transparent 38%,rgba(104,27,146,.14) 76%,transparent);
+}
+#inicio.inicio-modelo9 > :not(.inicio-fundo-foto) {
+  position:relative;
+  z-index:2;
+}
+#inicio.inicio-modelo9 > h1,
+#inicio.inicio-modelo9 > p {display:none !important;}
+#inicio .inicio-marca-modelo9 {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
+  text-align:center;
+  margin:0 auto 20px;
+  max-width:100%;
+}
+#inicio .inicio-marca-logo {
+  display:block;
+  width:clamp(120px,25vw,160px);
+  height:clamp(120px,25vw,160px);
+  object-fit:contain;
+  border-radius:50%;
+  filter:drop-shadow(0 7px 15px rgba(0,0,0,.37));
+}
+#inicio .inicio-marca-titulo {
+  color:#f9dfa5;
+  font-size:clamp(31px,8.5vw,48px);
+  font-weight:850;
+  line-height:1.05;
+  letter-spacing:.045em;
+  text-shadow:0 2px 13px rgba(10,0,20,.32);
+}
+#inicio .inicio-marca-subtitulo {
+  color:#f8f1fc;
+  font-size:clamp(17px,5vw,23px);
+  letter-spacing:.30em;
+  font-weight:650;
+}
+#inicio .inicio-marca-descricao {
+  color:#e0d3e6;
+  font-size:clamp(11px,2.7vw,14px);
+  line-height:1.55;
+  margin:6px auto 0;
+  max-width:340px;
+}
+#inicio.inicio-modelo9 .inicio-identidade {
+  gap:9px;
+  margin:20px auto 16px;
+  max-width:420px;
+}
+#inicio.inicio-com-foto #inicioPerfilAvatar {display:none !important;}
+#inicio.inicio-modelo9 #inicioPerfilAvatar:not([hidden]) {
+  width:88px!important;height:88px!important;
+  border-color:#e8c47c!important;
+  margin:0 auto 4px!important;
+}
+#inicio.inicio-modelo9 #inicioBoasVindas {
+  font-size:clamp(18px,4.7vw,24px);
+  line-height:1.3;
+  font-weight:550;
+  color:#fff;
+  text-shadow:0 2px 12px rgba(0,0,0,.38);
+}
+#inicio.inicio-modelo9 #inicioUsuarioNome {
+  color:#f9dfa5;
+  font-size:clamp(22px,6vw,30px);
+  font-weight:770;
+  line-height:1.24;
+  text-shadow:0 2px 16px rgba(0,0,0,.32);
+}
+#inicio.inicio-modelo9 #inicioUsuarioStatus {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  color:#f1e5fb;
+  font-size:12px;
+  border:1px solid rgba(232,196,124,.72);
+  background:rgba(41,13,60,.65);
+  border-radius:100px;
+  padding:7px 17px;
+  margin-top:7px;
+}
+#inicio.inicio-modelo9 #inicioBotaoIniciar {
+  width:min(100%,410px);
+  min-height:58px;
+  margin:23px auto 8px;
+  border:1px solid #f9dfa5!important;
+  border-radius:15px!important;
+  background:linear-gradient(125deg,#fbe6ae,#dcaa4a)!important;
+  color:#25162a!important;
+  box-shadow:0 5px 22px rgba(235,183,72,.24);
+  font-size:17px;
+  font-weight:800;
+}
+#inicio.inicio-modelo9 #inicioBotaoIniciar::before {
+  content:"▶";
+  font-size:.82em;
+  margin-right:12px;
+}
+#inicio.inicio-modelo9 #inicioSessaoMantida {
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  color:#f6e8f9;
+  font-size:14px;
+  padding:8px 0;
+  margin:7px auto 0;
+}
+#inicio.inicio-modelo9 #inicioSessaoMantida:not([hidden]) {display:inline-flex;}
+#inicio.inicio-modelo9 #inicioSessaoMantida::before {
+  content:"✓";
+  display:inline-grid;place-items:center;
+  width:20px;height:20px;border-radius:5px;
+  background:#e8c47c;color:#24152e;
+  font-weight:900;
+}
+#inicio.inicio-modelo9 #inicioTrocarUsuario {
+  display:block;
+  min-height:34px;
+  margin:10px auto 0!important;
+  padding:4px 12px!important;
+  text-decoration:underline;
+  text-underline-offset:4px;
+  font-size:14px;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  color:#e3d7e8!important;
+}
+#inicio.inicio-modelo9 #inicioTrocarUsuario[hidden] {display:none !important;}
+@media (max-height:660px) {
+  #inicio.inicio-modelo9 {justify-content:flex-start;padding-top:18px;padding-bottom:22px;}
+  #inicio .inicio-marca-logo {width:94px;height:94px;}
+  #inicio .inicio-marca-modelo9 {gap:4px;margin-bottom:5px;}
+  #inicio.inicio-modelo9 .inicio-identidade {margin:7px auto;}
+  #inicio.inicio-modelo9 #inicioBotaoIniciar {min-height:48px;margin-top:11px;}
+}
+@media (prefers-reduced-motion:reduce) {
+  #inicio .inicio-fundo-foto img {transition:none!important;}
+}
