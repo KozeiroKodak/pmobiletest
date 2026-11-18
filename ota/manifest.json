@@ -1,10 +1,10 @@
 {
-  "webVersion": "0.0.419",
+  "webVersion": "0.0.420",
   "nativeMinVersion": "1.05",
-  "package": "https://github.com/KozeiroKodak/pmobiletest/releases/download/ota-web-0.0.419/pmobile-web-0.0.419.zip",
-  "sha256": "0d2a8c8c8345b7b6c01a25c9961958046e7aad06acdf99c96794f050b17a75e3",
+  "package": "https://github.com/KozeiroKodak/pmobiletest/releases/download/ota-web-0.0.420/pmobile-web-0.0.420.zip",
+  "sha256": "21f7c359cd5e4d2ff9aadf2689f299b823ad9e896d580e86559393401be400ed",
   "mandatory": false,
-  "sizeBytes": 621852,
-  "publishedAt": "2026-11-18T00:36:30.913764+00:00",
+  "sizeBytes": 627053,
+  "publishedAt": "2026-11-18T03:07:27.332895+00:00",
   "releaseNotes": "PMobile: nova identidade visual CBA DIESEL LOGÍSTICA.\n\n- Nova paleta roxo profundo, dourado metálico e prata, conforme prévia interativa aprovada.\n- Tela inicial com cartões em duas colunas, adaptados ao celular.\n- Pesquisa, Contagem manual, Transportes, Reservas, Configurações, Dados locais e Central OTA com nova identidade.\n- Arte original CBA preservada e aplicada ao cabeçalho e à identificação do login, inclusive offline.\n- Permissões, funções, dados, integração Supabase e cores de alerta/sucesso preservados.\n- Atualização apenas visual via OTA web: não exige reinstalar o APK."
 }
