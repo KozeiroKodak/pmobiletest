@@ -7,7 +7,10 @@
 const DB="pmobile-fotos-perfil-v1", STORE="fotos", MAX_FILE=10*1024*1024, MAX_BG=1250000;
 const DEFAULT={x:50,y:50,zoom:100,degrade:55};
 const $=id=>document.getElementById(id);
-const clamp=(v,min,max)=>Math.min(max,Math.max(min,Number(v)||min));
+const clamp=(v,min,max)=>{
+ const number=Number(v);
+ return Math.min(max,Math.max(min,Number.isFinite(number)?Math.round(number):min));
+};
 const opts=o=>({
  x:clamp(o?.x??50,0,100),y:clamp(o?.y??50,0,100),
  zoom:clamp(o?.zoom??100,100,200),degrade:clamp(o?.degrade??55,20,85)
@@ -15,6 +18,43 @@ const opts=o=>({
 let profileKey=null,screenBlob=null,background=null,backgroundURL=null,avatarBlob=null,revision=0,loading=false;
 let mode="perfil",workingBlob=null,workingURL=null,newImage=false,working=opts(DEFAULT),saving=false;
 const imageNodes=()=>[$("inicioFotoTelaCheia"),$("inicioFotoCompletaMobile")].filter(Boolean);
+// A posição precisa usar a sobra real de pixels depois do COVER + zoom.
+// object-position sozinho não desloca a imagem na direção sem overflow,
+// mesmo quando transform:scale() amplia visualmente a foto.
+function calcularEnquadramento(iw,ih,fw,fh,settings){
+ const sourceW=Number(iw),sourceH=Number(ih),frameW=Number(fw),frameH=Number(fh);
+ if(![sourceW,sourceH,frameW,frameH].every(v=>Number.isFinite(v)&&v>0))return null;
+ const o=opts(settings),scale=Math.max(frameW/sourceW,frameH/sourceH)*o.zoom/100;
+ const width=sourceW*scale,height=sourceH*scale;
+ const excessX=Math.max(0,width-frameW),excessY=Math.max(0,height-frameH);
+ return {width,height,left:-excessX*o.x/100,top:-excessY*o.y/100,excessX,excessY};
+}
+function aplicarEnquadramentoImagem(img,frame,settings){
+ if(!img||!frame||!img.naturalWidth||!img.naturalHeight)return null;
+ const geo=calcularEnquadramento(img.naturalWidth,img.naturalHeight,
+    frame.clientWidth,frame.clientHeight,settings);
+ if(!geo)return null;
+ // A área da imagem acompanha o tamanho real com overflow; não há
+ // efeito duplo de object-position + transform e a prévia corresponde ao recorte.
+ img.style.width=geo.width+"px";
+ img.style.height=geo.height+"px";
+ img.style.left=geo.left+"px";
+ img.style.top=geo.top+"px";
+ img.style.objectFit="fill";
+ img.style.objectPosition="center";
+ img.style.transform="none";
+ return geo;
+}
+function aplicarFundoNaTela(){
+ const user=current(),root=$("inicio"),frame=root?.querySelector?.(".inicio-fundo-foto");
+ if(!user||user.key!==profileKey||!frame)return;
+ const settings=opts(background?.settings||DEFAULT);
+ for(const img of imageNodes()){
+  if(img.hidden)continue;
+  aplicarEnquadramentoImagem(img,frame,settings);
+ }
+}
+
 function current(){
  const u=window.usuarioPmobileAtual,c=window.credencialPmobileAtual;
  if(!u?.usuario||!c)return null;
@@ -100,7 +140,13 @@ function updateScreen(){
   root.style.setProperty("--pm-fundo-zoom",String(settings.zoom/100));
   root.style.setProperty("--pm-fundo-escuro",String(settings.degrade/100));
  }
- window.PMobileInicioModelo9?.verificar?.();
+ const verification=window.PMobileInicioModelo9?.verificar?.();
+ // O modelo 9 aplica o estado de sessão assincronamente; quando o
+ // contêiner sair de display:none, recalculamos seu tamanho real.
+ if(verification&&typeof verification.then==="function"){
+  verification.then(aplicarFundoNaTela).catch(e=>console.warn("Posição do fundo:",e));
+ }
+ aplicarFundoNaTela();
 }
 function clear(){
  revision++;profileKey=null;avatarBlob=null;background=null;
@@ -223,12 +269,14 @@ function updatePreview(){
   if(value)value.textContent=String(o[field[1]])+"%";
  }
  const img=$("pmEditorPreviewImagem");
- if(img){
-  img.style.objectPosition=o.x+"% "+o.y+"%";
-  img.style.transform="scale("+(o.zoom/100)+")";
- }
  const preview=$("pmEditorPreview");
  if(preview)preview.style.setProperty("--pm-editor-degrade",String(o.degrade/100));
+ const geo=aplicarEnquadramentoImagem(img,preview,o);
+ // Em zoom 100% pode não existir sobra vertical; avisar em vez de
+ // fingir que o eixo Y está mudando o enquadramento.
+ if(geo&&geo.excessY<.5&&o.y!==50){
+  status("Para deslocar a foto na vertical, aumente o zoom.");
+ }
 }
 function renderEditor(){
  const isAvatar=mode==="perfil";
@@ -333,6 +381,16 @@ function init(){
    working[attr]=Number(e.target.value);updatePreview();
   });
  }
+ const previewImage=$("pmEditorPreviewImagem");
+ previewImage?.addEventListener("load",updatePreview);
+ const root=$("inicio");
+ if(root&&typeof MutationObserver!=="undefined"){
+  const monitor=new MutationObserver(()=>aplicarFundoNaTela());
+  monitor.observe(root,{attributes:true,attributeFilter:["class"]});
+ }
+ for(const img of imageNodes())img.addEventListener("load",aplicarFundoNaTela);
+ window.addEventListener("resize",()=>{updatePreview();aplicarFundoNaTela();});
+ window.addEventListener("orientationchange",()=>{updatePreview();aplicarFundoNaTela();});
  const frame=$("pmEditorPreview");
  let drag=null;
  frame?.addEventListener("pointerdown",event=>{
@@ -342,9 +400,12 @@ function init(){
  });
  frame?.addEventListener("pointermove",event=>{
   if(!drag)return;
-  const w=frame.clientWidth||250,h=frame.clientHeight||350;
-  working.x=clamp(drag.h-((event.clientX-drag.x)/w)*100,0,100);
-  working.y=clamp(drag.v-((event.clientY-drag.y)/h)*100,0,100);
+  const img=$("pmEditorPreviewImagem");
+  const geo=calcularEnquadramento(img?.naturalWidth,img?.naturalHeight,
+    frame.clientWidth,frame.clientHeight,working);
+  if(!geo)return;
+  if(geo.excessX>.5)working.x=clamp(drag.h-((event.clientX-drag.x)/geo.excessX)*100,0,100);
+  if(geo.excessY>.5)working.y=clamp(drag.v-((event.clientY-drag.y)/geo.excessY)*100,0,100);
   updatePreview();
  });
  const stop=()=>{drag=null;};
@@ -366,6 +427,7 @@ function init(){
  renderEditor();refresh(true);
 }
 window.PMobileEditorFotos=Object.freeze({
+ calcularEnquadramento,
  atualizar:()=>refresh(true),
  editarFundo:()=>{choose("fundo");window.PMobilePerfilFotos?.abrir?.();},
  editarPerfil:()=>{choose("perfil");window.PMobilePerfilFotos?.abrir?.();}

@@ -126,3 +126,20 @@
  #pmPerfilFotoDialog .pm-editor-frame{height:190px;min-height:170px;}
  #pmPerfilFotoDialog .pm-editor-frame.pm-editor-perfil{height:170px;min-height:170px;width:170px;}
 }
+
+/* BugHunter Y-axis: a prévia do fundo usa a proporção vertical do celular.
+ * Geometria de deslocamento, em pixels, é aplicada pelo perfil-editor.js.
+ * Regras de avatar circular e visual do PC permanecem independentes. */
+#pmPerfilFotoDialog #pmEditorPreview.pm-editor-frame:not(.pm-editor-perfil) {
+  width:min(100%,225px,25dvh);
+  height:auto;
+  min-height:0;
+  max-height:none;
+  aspect-ratio:9 / 17;
+}
+#pmPerfilFotoDialog #pmEditorPreviewImagem {
+  object-fit:fill;
+  object-position:center;
+  transform:none;
+  will-change:top,left;
+}

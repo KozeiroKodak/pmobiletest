@@ -63,8 +63,8 @@ test("publicação OTA inclui interface e scripts atuais e não exige novo APK",
  for(const file of ["index.html","script.js","perfil-fotos.js","perfil-editor.js","perfil-editor.css"]){
   assert.equal(get(file),get("www/"+file),file);
  }
- assert.match(html,/src="perfil-editor\.js\?v=1\.0"/);
- assert.match(html,/href="perfil-editor\.css\?v=1\.0"/);
+ assert.match(html,/src="perfil-editor\.js\?v=1\.1-eixos"/);
+ assert.match(html,/href="perfil-editor\.css\?v=1\.1-eixos"/);
  const styles=[...html.matchAll(/href="([^"]+\.css)(?:\?[^"]*)?"/g)].map(m=>m[1]);
  assert.equal(styles.at(-1),"cba-theme.css");
  new vm.Script(editor);
