@@ -1,10 +1,10 @@
 {
-  "webVersion": "0.0.421",
+  "webVersion": "0.0.422",
   "nativeMinVersion": "1.05",
-  "package": "https://github.com/KozeiroKodak/pmobiletest/releases/download/ota-web-0.0.421/pmobile-web-0.0.421.zip",
-  "sha256": "b3789c703e3ecd4048cd8be0ff375b3ca2ebf7eee5d26251f7b7f4b208a94004",
+  "package": "https://github.com/KozeiroKodak/pmobiletest/releases/download/ota-web-0.0.422/pmobile-web-0.0.422.zip",
+  "sha256": "6d9ff2c778218a59578ca9e2e00cfa6446cad5a3151eba2063144bfedf51fc0f",
   "mandatory": false,
-  "sizeBytes": 627131,
-  "publishedAt": "2026-11-18T03:10:08.038310+00:00",
-  "releaseNotes": "PMobile: fotos de perfil individuais (primeira etapa).\n\n- Cada usuário pode selecionar, visualizar, trocar ou remover sua própria foto.\n- Acesso à foto pela tela inicial, inclusive usuários do nível 2, sem criar acesso administrativo.\n- A seção Configurações > Conta também permite editar a foto quando disponível ao perfil.\n- Imagens JPG/PNG/WebP são redimensionadas, recortadas e convertidas para JPEG antes de serem salvas.\n- As fotos permanecem separadas por conta no IndexedDB do aparelho e sobrevivem às atualizações OTA web.\n- Nesta etapa, as fotos não são enviadas ao Supabase e não aparecem automaticamente em outros dispositivos.\n- Login, hierarquia, dados do inventário e estrutura OTA preservados."
+  "sizeBytes": 627195,
+  "publishedAt": "2026-11-18T03:19:52.549109+00:00",
+  "releaseNotes": "PMobile: correção BugHunter — retorno da tela de login.\n\n- Corrigida a seta Voltar na tela de login: a tela PMOBILE - ESTOQUE volta centralizada corretamente.\n- A função voltarInicio() deixa de impor display:block e devolve o layout responsivo definido no CSS.\n- Teste de regressão automático verifica a navegação e a centralização estrutural.\n- Layout CBA, fotos de perfil, autenticação, níveis de usuários e dados preservados.\n- Atualização via OTA web; sem necessidade de reinstalar o APK."
 }
