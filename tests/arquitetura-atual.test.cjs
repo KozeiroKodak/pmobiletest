@@ -15,7 +15,14 @@ test('fila antiga conserva IDs e só remove registros depois de confirmação do
 });
 test('entrada atual resolve recursos e não conserva estrutura lateral removida',()=>{
  const html=read('index.html');assert.doesNotMatch(html,/<aside\b[^>]*id="sistema"/);
- for(const [,url]of html.matchAll(/(?:src|href)="([^"#]+)"/g))if(!/^https?:|^\/\//.test(url))assert.ok(fs.existsSync(path.resolve(root,url.split(/[?#]/)[0])),url);
+ for(const [,url]of html.matchAll(/(?:src|href)="([^"#]+)"/g)) {
+  if(url.startsWith("data:image/webp;base64,")) {
+   const embedded=Buffer.from(url.slice("data:image/webp;base64,".length),"base64");
+   assert.deepEqual(embedded,fs.readFileSync(path.join(root,"android/app/src/main/res/drawable-nodpi/pmobile_identity.webp")),"Apenas o logo CBA original pode ser embutido no HTML.");
+   continue;
+  }
+  if(!/^https?:|^\/\//.test(url))assert.ok(fs.existsSync(path.resolve(root,url.split(/[?#]/)[0])),url);
+ }
  for(const file of ['style.css',...(!entregas?['implementacoes/home.css']:[])])assert.doesNotMatch(read(file),/\.sidebar-[\w-]+|--sidebar-(?:largura|mobile)|#sistema\b/);
  if(!entregas){const htmlMirror=read('www/index.html');assert.equal(html,htmlMirror);assert.match(read('script.js'),/function voltarTelaAnteriorPmobile/);}
 });

@@ -2,7 +2,14 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const root=path.resolve(__dirname,'..'),read=p=>fs.readFileSync(path.join(root,p),'utf8');
 test('entradas unificadas existem, sem assets ausentes ou identificadores duplicados',()=>{
  const html=read('index.html'),ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(x=>x[1]);assert.equal(ids.length,new Set(ids).size);
- for(const [,url]of html.matchAll(/(?:src|href)="([^"#]+)"/g))if(!/^https?:|^\/\//.test(url))assert.ok(fs.existsSync(path.join(root,url.split('?')[0])),url);
+ for(const [,url]of html.matchAll(/(?:src|href)="([^"#]+)"/g)) {
+  if(url.startsWith("data:image/webp;base64,")) {
+   const embedded=Buffer.from(url.slice("data:image/webp;base64,".length),"base64");
+   assert.deepEqual(embedded,fs.readFileSync(path.join(root,"android/app/src/main/res/drawable-nodpi/pmobile_identity.webp")),"Logo embutido deve ser exatamente o original CBA.");
+   continue;
+  }
+  if(!/^https?:|^\/\//.test(url))assert.ok(fs.existsSync(path.join(root,url.split('?')[0])),url);
+ }
  const scripts=[...html.matchAll(/<script src="([^"?]+)/g)].map(x=>x[1]).filter(x=>!x.startsWith('http'));
  assert.equal(scripts.length,new Set(scripts).size);new vm.Script(scripts.map(read).join('\n;\n'));
  for(const p of ['locais-v3.js','configuracoes-v3.js','valorestotal2.js','implementacoes/locais-v3.css','implementacoes/configuracoes-v3.css','implementacoes/valorestotal2.css'])for(const prefix of ['', 'www/'])assert.equal(fs.existsSync(path.join(root,prefix+p)),false,prefix+p);
