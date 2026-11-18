@@ -390,7 +390,9 @@ function voltarInicio() {
     }
 
     if (inicio) {
-        inicio.style.display = "block";
+        // Restaurar o display:flex definido em inicio.css. 'block' quebra
+        // a centralização do título e botão ao voltar da tela de login.
+        inicio.style.display = "";
     }
 
 }

@@ -1,9 +1,7 @@
-PMobile: fotos de perfil individuais (primeira etapa).
+PMobile: correção BugHunter — retorno da tela de login.
 
-- Cada usuário pode selecionar, visualizar, trocar ou remover sua própria foto.
-- Acesso à foto pela tela inicial, inclusive usuários do nível 2, sem criar acesso administrativo.
-- A seção Configurações > Conta também permite editar a foto quando disponível ao perfil.
-- Imagens JPG/PNG/WebP são redimensionadas, recortadas e convertidas para JPEG antes de serem salvas.
-- As fotos permanecem separadas por conta no IndexedDB do aparelho e sobrevivem às atualizações OTA web.
-- Nesta etapa, as fotos não são enviadas ao Supabase e não aparecem automaticamente em outros dispositivos.
-- Login, hierarquia, dados do inventário e estrutura OTA preservados.
+- Corrigida a seta Voltar na tela de login: a tela PMOBILE - ESTOQUE volta centralizada corretamente.
+- A função voltarInicio() deixa de impor display:block e devolve o layout responsivo definido no CSS.
+- Teste de regressão automático verifica a navegação e a centralização estrutural.
+- Layout CBA, fotos de perfil, autenticação, níveis de usuários e dados preservados.
+- Atualização via OTA web; sem necessidade de reinstalar o APK.
