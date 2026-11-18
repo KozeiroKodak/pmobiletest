@@ -1,10 +1,10 @@
 {
-  "webVersion": "0.0.424",
+  "webVersion": "0.0.425",
   "nativeMinVersion": "1.05",
-  "package": "https://github.com/KozeiroKodak/pmobiletest/releases/download/ota-web-0.0.424/pmobile-web-0.0.424.zip",
-  "sha256": "3d1df690e8e82f3145414c78cb9652e2eba37ebdcf3ffd318d2fc167fd2b8b29",
+  "package": "https://github.com/KozeiroKodak/pmobiletest/releases/download/ota-web-0.0.425/pmobile-web-0.0.425.zip",
+  "sha256": "e4c92d146d9a7f7193d8c032580ee570d336bc3c9b6efb38614e3aac99793bde",
   "mandatory": false,
-  "sizeBytes": 629920,
-  "publishedAt": "2026-11-18T04:44:36.281158+00:00",
-  "releaseNotes": "PMobile / Boas-vindas personalizadas e fotos sincronizadas.\n\n- A tela PMOBILE - ESTOQUE permanece sempre na abertura; nenhuma restauracao de login navega sozinha.\n- Nome e foto do usuario autenticado aparecem na abertura, com Iniciar abaixo e opcao Trocar usuario.\n- Login normal, primeiro acesso, login mantido e sessao offline seguem o mesmo fluxo.\n- O botao Iniciar valida se existe sessao antes de liberar somente as abas permitidas.\n- Restauracao de login protegida contra chamadas concorrentes; o aplicativo nao retorna sozinho para a abertura apos o toque.\n- Fotos JPG/PNG/WebP vinculadas ao ID do usuario no Supabase via RPC credenciado, com cache offline individual e fila local.\n- Login, credenciais, niveis de usuario e estrutura OTA preservados. Sem alteracoes nos usuarios existentes."
+  "sizeBytes": 629849,
+  "publishedAt": "2026-11-18T15:47:44.332652+00:00",
+  "releaseNotes": "PMobile / Correção do painel inferior de sincronização.\n\n- Removido o status do OneDrive do rodapé geral de sincronização.\n- Falhas do OneDrive não alteram o título, cor ou estado deste painel.\n- Preservados os indicadores de conexão, inventário, contagens e conferências.\n- A integração e os alertas de OneDrive continuam exclusivamente na aba Importação de rastreios.\n- Nenhuma alteração de dados, níveis de acesso ou Supabase.\n- Teste de regressão confirma que falhas do OneDrive não afetam o painel."
 }
