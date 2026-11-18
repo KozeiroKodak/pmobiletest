@@ -1,10 +1,10 @@
 {
-  "webVersion": "0.0.422",
+  "webVersion": "0.0.423",
   "nativeMinVersion": "1.05",
-  "package": "https://github.com/KozeiroKodak/pmobiletest/releases/download/ota-web-0.0.422/pmobile-web-0.0.422.zip",
-  "sha256": "6d9ff2c778218a59578ca9e2e00cfa6446cad5a3151eba2063144bfedf51fc0f",
+  "package": "https://github.com/KozeiroKodak/pmobiletest/releases/download/ota-web-0.0.423/pmobile-web-0.0.423.zip",
+  "sha256": "0b7e5d2a8d4c589590c24446e53d5f2c6d662ac476ad52080cea4cca95a8f249",
   "mandatory": false,
-  "sizeBytes": 627195,
-  "publishedAt": "2026-11-18T03:19:52.549109+00:00",
-  "releaseNotes": "PMobile: correção BugHunter — retorno da tela de login.\n\n- Corrigida a seta Voltar na tela de login: a tela PMOBILE - ESTOQUE volta centralizada corretamente.\n- A função voltarInicio() deixa de impor display:block e devolve o layout responsivo definido no CSS.\n- Teste de regressão automático verifica a navegação e a centralização estrutural.\n- Layout CBA, fotos de perfil, autenticação, níveis de usuários e dados preservados.\n- Atualização via OTA web; sem necessidade de reinstalar o APK."
+  "sizeBytes": 629757,
+  "publishedAt": "2026-11-18T04:40:37.637318+00:00",
+  "releaseNotes": "PMobile / Boas-vindas personalizadas e fotos sincronizadas.\n\n- A tela PMOBILE - ESTOQUE e exibida SEMPRE ao abrir ou recarregar o aplicativo, mesmo com login salvo.\n- Login normal, primeiro acesso e restauracao de sessao mostram a foto, nome e botao Iniciar. Nenhuma dessas etapas abre abas automaticamente.\n- Iniciar abre apenas as funcoes permitidas se a sessao estiver autenticada; do contrario, abre o login.\n- Trocar usuario encerra a sessao atual e permite entrar com outra conta.\n- Fotos JPG/PNG/WebP otimizadas sao gravadas individualmente no Supabase, usando as credenciais do usuario e uma tabela privada com RLS.\n- Cache por usuario no aparelho preserva a imagem offline; alteracoes offline ficam pendentes para sincronizar ao reconectar.\n- Identidade CBA, niveis, senhas, tokens, inventario e estruturas OTA preservadas.\n- Nova bateria de testes de regressao para navegacao, isolamento de conta e OTA."
 }
