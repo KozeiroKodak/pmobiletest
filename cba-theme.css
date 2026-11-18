@@ -1,0 +1,553 @@
+/* PMobile — Identidade CBA DIESEL LOGÍSTICA
+ * Camada visual de tema; carregada depois de TODOS os CSS existentes.
+ * Arte original/ícone Android não são modificados.
+ * Cores semânticas de operação (sucesso, erro, alerta, ERP, rastreio)
+ * continuam nos módulos responsáveis, não são substituídas pelo dourado.
+ *
+ * Identidade aprovada na prévia: roxo profundo + ouro metálico + prata.
+ * Reversão: remover somente esta referência do index.html.
+ */
+:root {
+  color-scheme: dark;
+  --cba-roxo: #140e1f;
+  --cba-roxo-alt: #241531;
+  --cba-painel: #281d37;
+  --cba-cartao: #342442;
+  --cba-ouro: #e8c47c;
+  --cba-ouro-claro: #f9dfa5;
+  --cba-prata: #d0c6d8;
+  --cba-texto: #f8f1fc;
+  --cba-secundario: #b8abc7;
+  --cba-borda: #59466b;
+  --cba-botao-texto: #25162a;
+
+  /* Alias já utilizados pelos módulos existentes, incluindo os antigos. */
+  --pm-acento: var(--cba-ouro);
+  --pm-acento-hover: var(--cba-ouro-claro);
+  --pm-acento-suave: rgba(232,196,124,.12);
+  --pm-brilho: rgba(232,196,124,.16);
+  --verde: var(--cba-ouro); /* apenas alias de marca legado */
+  --verde-hover: var(--cba-ouro-claro);
+  --fundo: var(--cba-roxo);
+  --fundo-status: #110b19;
+  --fundo-painel: var(--cba-painel);
+  --fundo-hover: var(--cba-cartao);
+  --fundo-ativo: #40304f;
+  --fundo-card: var(--cba-painel);
+  --borda: var(--cba-borda);
+  --borda-clara: #76648b;
+  --texto: var(--cba-texto);
+  --texto-secundario: var(--cba-secundario);
+  --texto-fraco: #a194b2;
+  accent-color: var(--cba-ouro);
+}
+
+html, body, #aplicacao, #conteudoPrincipal, .tela-sistema {
+  background-color: var(--cba-roxo);
+  color: var(--cba-texto);
+}
+body { accent-color: var(--cba-ouro); }
+.cabecalho-caminho, .cot-kicker, .home-apps-kicker { color: var(--cba-ouro) !important; }
+.cabecalho-pagina h1, .home-apps-cabecalho h1 { color: var(--cba-texto); }
+.cabecalho-pagina > p:not(.cabecalho-caminho) { color: var(--cba-secundario); }
+:where(button,input,select,textarea,summary,a):focus-visible {
+  outline: 2px solid var(--cba-ouro-claro) !important;
+  outline-offset: 2px;
+}
+input, select, textarea { accent-color: var(--cba-ouro); }
+input:focus, select:focus, textarea:focus { border-color: var(--cba-ouro) !important; }
+:where(.tela-sistema,.login-pmobile) :is(input,select,textarea):not([type="checkbox"]):not([type="radio"]) {
+  color: var(--cba-texto);
+}
+.painel, .painel-reservas, .rastreio-painel, .painel-locais,
+.painel-solicitacoes, .rastreio-importacao-painel, .arquivos-teste-painel {
+  background-color: var(--cba-painel);
+  border-color: var(--cba-borda);
+}
+.botao-principal:not(.botao-perigo), #inicio button,
+#pesquisa .pesquisa-buscar, #dadosLocais .pesquisa-buscar {
+  background: linear-gradient(135deg,var(--cba-ouro-claro),var(--cba-ouro)) !important;
+  border-color: var(--cba-ouro) !important;
+  color: var(--cba-botao-texto) !important;
+}
+.botao-principal:not(.botao-perigo):hover,
+#inicio button:hover, #pesquisa .pesquisa-buscar:hover {
+  background: var(--cba-ouro-claro) !important;
+}
+.botao-secundario:not(.botao-perigo) {
+  background: var(--cba-cartao);
+  color: var(--cba-texto);
+  border-color: var(--cba-borda);
+}
+.botao-secundario:not(.botao-perigo):hover { background: #453354; }
+
+/* HOME — cartões como a prévia CBA: duas colunas, ícones acima do texto.
+   Mantém os mesmos botões, IDs e onClick do PMobile. */
+#homeSistema {
+  background:
+    radial-gradient(ellipse 80% 42% at 100% 0%,rgba(232,196,124,.095),transparent 78%),
+    linear-gradient(175deg,#241531,#140e1f 48%) !important;
+}
+#homeSistema::before { border-color: rgba(232,196,124,.15) !important; }
+#homeSistema::after {
+  background: linear-gradient(90deg,transparent,rgba(232,196,124,.16),transparent) !important;
+  border-color: rgba(232,196,124,.14) !important;
+}
+#homeSistema .home-apps-cabecalho {
+  border-bottom-color: rgba(208,198,216,.22);
+}
+#homeSistema .home-apps-cabecalho::after {
+  background: var(--cba-ouro);
+  box-shadow: 0 0 16px rgba(232,196,124,.21);
+}
+#homeSistema .home-apps-kicker { color: var(--cba-ouro) !important; }
+#homeSistema .home-apps-cabecalho p:last-child { color: var(--cba-secundario); }
+#homeSistema .home-apps-grade {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 11px;
+}
+#homeSistema .home-app-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  position: relative;
+  gap: 11px;
+  min-width: 0;
+  min-height: 132px;
+  padding: 14px;
+  border: 1px solid var(--cba-borda) !important;
+  border-radius: 15px;
+  color: var(--cba-texto);
+  background: linear-gradient(135deg,#342442,#281d37) !important;
+  box-shadow: 0 7px 21px rgba(0,0,0,.18);
+}
+#homeSistema .home-app-card[hidden] { display:none !important; }
+#homeSistema .home-app-card:hover {
+  background: linear-gradient(140deg,#423051,#30213e) !important;
+  border-color: var(--cba-ouro) !important;
+}
+#homeSistema .home-app-card:hover::before { border-left-color: var(--cba-ouro) !important; }
+#homeSistema .home-app-icone {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(232,196,124,.38) !important;
+  border-radius: 12px;
+  background: rgba(232,196,124,.11) !important;
+  filter: none;
+  font-size: 1.35rem;
+}
+#homeSistema .home-app-card:hover .home-app-icone {
+  background: rgba(232,196,124,.18) !important;
+  border-color: var(--cba-ouro) !important;
+}
+#homeSistema .home-app-conteudo {
+  gap: 4px;
+  width: 100%;
+  padding-right: 7px;
+}
+#homeSistema .home-app-conteudo strong {
+  color: var(--cba-texto);
+  font-weight: 720;
+  font-size: .91rem;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+}
+#homeSistema .home-app-conteudo small {
+  display: block;
+  font-size: .72rem;
+  line-height: 1.4;
+  color: var(--cba-secundario);
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+#homeSistema .home-app-seta {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  color: var(--cba-ouro);
+  opacity: .65;
+}
+#homeSistema .home-app-card:hover .home-app-seta { color: var(--cba-ouro-claro) !important; }
+#homeSistema .home-app-card-sair {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  min-height: 75px;
+  opacity: .9;
+}
+#homeSistema .home-app-card-sair .home-app-icone {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+}
+#homeSistema .home-app-card-sair .home-app-conteudo { flex: 1; }
+#homeSistema .home-app-card-sair .home-app-seta { position: static; }
+#homeSistema .home-app-card-sair:hover {
+  border-color: #c18a99 !important;
+  background: linear-gradient(135deg,#382437,#281d37) !important;
+}
+#homeSistema .home-app-card-sair:hover::before { border-left-color: #c18a99 !important; }
+@media (max-width:700px) {
+  #homeSistema .home-apps-grade { grid-template-columns:repeat(2,minmax(0,1fr));gap:10px; }
+  #homeSistema .home-app-card { min-height:133px; padding:12px; border-radius:13px; }
+  #homeSistema .home-app-icone { width:39px;height:39px;flex-basis:39px;font-size:1.24rem; }
+  #homeSistema .home-app-conteudo strong { font-size:.82rem; }
+  #homeSistema .home-app-conteudo small { font-size:.67rem; }
+  #homeSistema .home-app-card-sair { min-height:74px; }
+}
+@media (max-width:350px) {
+  #homeSistema .home-app-card { padding:10px;min-height:142px; }
+  #homeSistema .home-app-conteudo small { display:block !important;font-size:.64rem; }
+}
+
+/* Login e formulário de primeiro acesso — mesmos controles e validações. */
+.login-pmobile.login-pmobile {
+  --login-fundo: var(--cba-roxo);
+  --login-painel: var(--cba-painel);
+  --login-painel-borda: var(--cba-borda);
+  --login-texto: var(--cba-texto);
+  --login-secundario: var(--cba-secundario);
+  --login-borda: #76648b;
+  --login-campo: #1d1428;
+  --login-destaque: var(--cba-ouro);
+}
+.login-pmobile.login-pmobile,
+.login-pmobile .login-pmobile-topo { background: var(--cba-roxo); }
+.login-pmobile .login-pmobile-topo { border-bottom-color: var(--cba-borda); }
+.login-pmobile .login-pmobile-topo strong { color: var(--cba-ouro-claro); }
+.login-pmobile .login-pmobile-logo {
+  background: var(--cba-cartao);
+  border-color: var(--cba-borda);
+  color: var(--cba-ouro);
+}
+.login-pmobile .login-entrar {
+  background: linear-gradient(135deg,var(--cba-ouro-claro),var(--cba-ouro)) !important;
+  border-color: var(--cba-ouro) !important;
+  color: var(--cba-botao-texto) !important;
+}
+.login-pmobile .login-entrar:hover { background: var(--cba-ouro-claro) !important; }
+.login-pmobile .login-entrar:active { background: #d7ac5c !important; }
+.login-pmobile .login-senha-campo:focus-within,
+.login-pmobile .login-pmobile-form > input:focus {
+  background: #291d38;
+  border-color: var(--cba-ouro) !important;
+}
+#inicio { background: var(--cba-roxo); }
+
+/* Pesquisa e pesquisa da contagem local. Dados seguem as fontes reais. */
+#pesquisa .pesquisa, #dadosLocais .pesquisa,
+#pesquisa .pesquisa-card, #dadosLocais .pesquisa-card,
+#pesquisa .pesquisa-resultados, #dadosLocais .pesquisa-resultados {
+  background-color: var(--cba-painel);
+  border-color: var(--cba-borda);
+}
+#pesquisa .pesquisa-topo, #dadosLocais .pesquisa-topo {
+  border-color: var(--cba-borda);
+}
+#pesquisa .pesquisa-icone, #dadosLocais .pesquisa-icone,
+#pesquisa .pesquisa-lupa, #dadosLocais .pesquisa-lupa,
+#pesquisa .pesquisa-vazio span, #dadosLocais .pesquisa-vazio span {
+  color: var(--cba-ouro) !important;
+}
+#pesquisa .pesquisa-tipos button.ativo, #dadosLocais .pesquisa-tipos button.ativo,
+#pesquisa .pesquisa-tipos button[aria-pressed="true"] {
+  border-color: var(--cba-ouro) !important;
+  background: var(--cba-cartao) !important;
+  color: var(--cba-ouro-claro) !important;
+}
+#pesquisa .pesquisa-campo, #dadosLocais .pesquisa-campo,
+#pesquisa .pesquisa-select, #dadosLocais .pesquisa-select {
+  background: #1d1429;
+  border-color: var(--cba-borda);
+  color: var(--cba-texto);
+}
+:is(#pesquisa,#dadosLocais) .pesquisa-buscar {
+  background: linear-gradient(135deg,var(--cba-ouro-claro),var(--cba-ouro)) !important;
+  border-color: var(--cba-ouro) !important;
+  color: var(--cba-botao-texto) !important;
+}
+:is(#pesquisa,#dadosLocais) .pesquisa-card:hover { border-color: var(--cba-ouro) !important; }
+
+/* Contagem manual: ação de pesquisar/salvar dourada.
+   Não recolorir .erp-ok, .erp-analise, .erp-indisponivel ou alertas. */
+#contagemManual .contagem, #dadosLocais .contagem {
+  background: var(--cba-painel) !important;
+  border-color: var(--cba-borda) !important;
+}
+#contagemManual .contagem-topo,
+#contagemManual .contagem-resultados,
+#dadosLocais .contagem-topo { border-color: var(--cba-borda); }
+#contagemManual .contagem-icone, #dadosLocais .contagem-icone {
+  background: var(--cba-cartao) !important;
+  color: var(--cba-ouro) !important;
+  border-color: var(--cba-borda);
+}
+#contagemManual .contagem-selo, #dadosLocais .contagem-selo {
+  background: #3a2b48 !important;
+  color: var(--cba-ouro-claro) !important;
+}
+#contagemManual .contagem-campo, #dadosLocais .contagem-campo {
+  background: #21172f !important;
+  border-color: var(--cba-borda) !important;
+}
+#contagemManual .contagem-campo span { color: var(--cba-ouro); }
+#contagemManual .contagem-tipos button.ativo,
+#dadosLocais .contagem-tipos button.ativo {
+  background: var(--cba-cartao) !important;
+  color: var(--cba-ouro-claro) !important;
+  border-color: var(--cba-ouro) !important;
+}
+#contagemManual .botao-buscar-contagem-manual,
+#contagemManual .contagem-salvar,
+#dadosLocais .botao-buscar-contagem-manual,
+#dadosLocais .contagem-salvar {
+  background: linear-gradient(135deg,var(--cba-ouro-claro),var(--cba-ouro)) !important;
+  color: var(--cba-botao-texto) !important;
+  border-color: var(--cba-ouro) !important;
+}
+#contagemManual .botao-config-contagem-manual,
+#dadosLocais .botao-config-contagem-manual {
+  background: var(--cba-cartao) !important;
+  color: var(--cba-ouro-claro) !important;
+  border-color: var(--cba-borda) !important;
+}
+:is(#contagemManual,#dadosLocais) .contagem-lista-titulo > span {
+  background: var(--cba-cartao) !important;
+  color: var(--cba-ouro-claro) !important;
+}
+
+/* Transportes, rastreio, cotações e reservas. Sem mexer nas cores de status
+   ATRASADO / CANCELADO / TRANSPORTE / COLETADO. */
+#opcoesCotacoes, #cotacoesRegiao, #cotacoesDetalhe {
+  background: radial-gradient(circle at 85% 5%,rgba(232,196,124,.085),transparent 38%),var(--cba-roxo) !important;
+}
+.cot-wrap::before { border-color: rgba(232,196,124,.13) !important; }
+.cot-sub::after {
+  background: var(--cba-ouro) !important;
+  box-shadow: 0 0 12px rgba(232,196,124,.2) !important;
+}
+.cot-kicker,.cot-back { color: var(--cba-ouro) !important; }
+.cot-card,.cot-row {
+  background: linear-gradient(135deg,var(--cba-cartao),var(--cba-painel)) !important;
+  border-color: var(--cba-borda) !important;
+  color: var(--cba-texto);
+}
+.cot-card:hover,.cot-row:hover { border-color: var(--cba-ouro) !important; }
+.cot-icon {
+  background: rgba(232,196,124,.11) !important;
+  border-color: rgba(232,196,124,.42) !important;
+}
+.cot-search { background: #21172e;border-color:var(--cba-borda);color:var(--cba-texto); }
+.cot-search:focus { border-color:var(--cba-ouro) !important; }
+.rastreio-painel,.rastreio-card,.reserva-item,.painel-reservas {
+  background-color: var(--cba-painel);
+  border-color: var(--cba-borda);
+}
+.rastreio-card:hover,.reserva-item:hover { border-color: rgba(232,196,124,.42) !important; }
+.rastreio-filtros input,.rastreio-filtros select,
+.reservas-paginacao button:not(.botao-perigo) {
+  background-color:#21172e;
+  border-color:var(--cba-borda);
+  color:var(--cba-texto);
+}
+.rastreio-etiqueta,.cot-arrow { color:var(--cba-ouro); }
+
+/* Gerenciamento e configurações — hub, administração, OTA e dados locais. */
+#configuracoes .configuracoes-hub,
+#dadosLocais .configuracoes-hub { color: var(--cba-texto); }
+:is(#configuracoes,#dadosLocais) .configuracoes-etiqueta {
+  color: var(--cba-ouro) !important;
+}
+:is(#configuracoes,#dadosLocais) .configuracoes-card,
+:is(#configuracoes,#dadosLocais) .configuracoes-linhas,
+:is(#configuracoes,#dadosLocais) .configuracoes-admin {
+  background: linear-gradient(135deg,var(--cba-cartao),var(--cba-painel)) !important;
+  border-color: var(--cba-borda) !important;
+  color: var(--cba-texto);
+}
+:is(#configuracoes,#dadosLocais) .configuracoes-card:hover,
+:is(#configuracoes,#dadosLocais) .configuracoes-linha:hover {
+  background: #3d2b4e !important;
+  border-color: var(--cba-ouro) !important;
+}
+:is(#configuracoes,#dadosLocais) .configuracoes-icone {
+  background: #483450 !important;
+  border-color: #80665b !important;
+  color: var(--cba-ouro) !important;
+}
+:is(#configuracoes,#dadosLocais) .configuracoes-canto,
+:is(#configuracoes,#dadosLocais) .configuracoes-seta { color: var(--cba-ouro) !important; }
+:is(#configuracoes,#dadosLocais) .configuracoes-textos strong { color: var(--cba-texto); }
+:is(#configuracoes,#dadosLocais) .configuracoes-textos small { color: var(--cba-secundario); }
+#configuracoes .configuracoes-linha,
+#dadosLocais .configuracoes-linha {
+  color: var(--cba-texto);
+  border-color: var(--cba-borda);
+}
+#configuracoes .configuracoes-voltar { color: var(--cba-ouro-claro); border-color: var(--cba-borda); }
+#configuracoes .configuracoes-painel-sistema,
+#configuracoes .configuracoes-painel-admin,
+#configuracoes .configuracoes-painel-importacao,
+#configuracoes #painelConfiguracoesUsuario {
+  background: var(--cba-painel) !important;
+  border-color: var(--cba-borda) !important;
+}
+#configuracoes .configuracoes-accordion[open] > summary {
+  background: rgba(232,196,124,.075) !important;
+  box-shadow: inset 3px 0 0 var(--cba-ouro) !important;
+}
+#configuracoes .configuracoes-accordion summary:hover {
+  background: rgba(232,196,124,.055) !important;
+}
+
+/* Central OTA mantém nomes, IDs e métodos de atualização originais. */
+#configuracoes .ota-painel {
+  color: var(--cba-texto);
+  border-color: var(--cba-borda) !important;
+  background: radial-gradient(ellipse at 92% 0%,rgba(232,196,124,.1),transparent 55%),#1f152c !important;
+}
+#configuracoes .ota-simbolo {
+  color: var(--cba-ouro);
+  background: var(--cba-cartao);
+  border-color: var(--cba-borda);
+}
+#configuracoes .ota-selo { color:var(--cba-ouro-claro);border-color:var(--cba-borda); }
+#configuracoes .ota-painel h2,
+#configuracoes .ota-situacao strong { color: var(--cba-texto); }
+#configuracoes .ota-intro,
+#configuracoes .ota-situacao p,
+#configuracoes .ota-novidades p { color: var(--cba-secundario); }
+#configuracoes .ota-versoes { border-color: var(--cba-borda); }
+#configuracoes .ota-versoes dt { color: var(--cba-secundario); }
+#configuracoes .ota-versoes dd { color: var(--cba-ouro-claro); }
+#configuracoes .ota-progresso progress,
+#configuracoes .ota-progresso progress::-webkit-progress-value {
+  accent-color: var(--cba-ouro);
+  background: var(--cba-ouro);
+}
+#configuracoes .ota-progresso progress::-webkit-progress-bar { background: #3b2d47; }
+#configuracoes .ota-etapas li { border-color: var(--cba-borda); }
+#configuracoes .ota-etapas li[data-situacao=atual] {
+  color: var(--cba-ouro-claro);
+  border-color: var(--cba-ouro);
+}
+#configuracoes .ota-etapas li[data-situacao=concluida] {
+  color: #9bd7c4; /* conclusão operacional: verde preservado */
+  border-color: #4cae93;
+}
+#configuracoes .ota-novidades,
+#configuracoes .ota-native-card {
+  background: #281d37;
+  border-color: var(--cba-borda);
+}
+#configuracoes .ota-acoes .ota-primario,
+#configuracoes .ota-native-card .ota-primario {
+  background: linear-gradient(135deg,var(--cba-ouro-claro),var(--cba-ouro)) !important;
+  border-color: var(--cba-ouro) !important;
+  color: var(--cba-botao-texto) !important;
+}
+#configuracoes .ota-painel[data-estado=error] .ota-situacao strong {
+  color: #ffcb9e; /* erro mantém significado */
+}
+
+/* Locais e dados locais: recolorir contêineres, sem trocar avisos,
+   pendências, confirmações ou indicadores de estoque. */
+#locais .painel-locais,
+#dadosLocais .painel,
+#dadosLocais .configuracoes-painel-sistema {
+  background: var(--cba-painel);
+  border-color: var(--cba-borda);
+}
+#locais .aba-locais,
+#dadosLocais .aba-locais { color:var(--cba-secundario);border-color:var(--cba-borda); }
+#locais .aba-locais.ativo,
+#dadosLocais .aba-locais.ativo {
+  background: var(--cba-cartao) !important;
+  border-color: var(--cba-ouro) !important;
+  color: var(--cba-ouro-claro) !important;
+}
+#locais .local-alterado-card,
+#locais .local-vazio-area-card,
+#locais .local-derivado-card,
+#dadosLocais .local-alterado-card,
+#dadosLocais .local-vazio-area-card {
+  background-color: var(--cba-painel);
+  border-color: var(--cba-borda);
+}
+#locais .local-alterado-card:hover,
+#locais .local-vazio-area-card:hover { border-color: var(--cba-ouro); }
+
+/* Indicadores e filtros do frete geral — sem mexer em flags de status. */
+#valoresTotal .valores-hero {
+  background:
+    radial-gradient(circle at 90% 0%,rgba(232,196,124,.13),transparent 50%),
+    linear-gradient(135deg,#332440,#1a1025 72%) !important;
+  border-color: var(--cba-borda) !important;
+}
+#valoresTotal .valores-hero::after { border-color: rgba(232,196,124,.23) !important; }
+#valoresTotal .valores-eyebrow,
+#valoresTotal #valoresTotalMensais > h3 { color: var(--cba-ouro) !important; }
+#valoresTotal .valores-hero p,
+#valoresTotal .valores-kpi-label { color: var(--cba-secundario) !important; }
+#valoresTotal .valores-painel {
+  background: linear-gradient(180deg,#2d203c,#191123) !important;
+  border-color: var(--cba-borda);
+}
+#valoresTotal .valores-kpi {
+  background: var(--cba-painel) !important;
+  border-color: var(--cba-borda) !important;
+}
+#valoresTotal .valores-kpi.destaque {
+  background: linear-gradient(140deg,#3f2c50,#2e213d) !important;
+  border-color: #b8945f !important;
+}
+#valoresTotal .valores-kpi.destaque strong { color:var(--cba-ouro-claro) !important; }
+#valoresTotal #valoresTotalMensais details[open] { border-color:var(--cba-ouro) !important; }
+#valoresTotal .valores-atualizar,
+#valoresTotal button[onclick="carregarValoresTotal()"] {
+  background:var(--cba-cartao) !important;
+  border-color:var(--cba-ouro) !important;
+  color:var(--cba-ouro-claro) !important;
+}
+
+/* Barra de sincronização: somente acabamento; LEDs/estados mantidos. */
+.pm-sync-center,
+.pm-sync-center .sync-details {
+  background:#1d1429;
+  color:var(--cba-texto);
+  border-color:var(--cba-borda);
+}
+.pm-sync-center .sync-toggle { background:#1d1429;color:var(--cba-texto); }
+.pm-sync-center .sync-detail-row { border-bottom-color:var(--cba-borda); }
+.pm-sync-center .sync-action {
+  background:var(--cba-cartao);
+  border-color:var(--cba-borda);
+  color:var(--cba-ouro-claro);
+}
+#rmexpress .rmexpress-cabecalho button,
+#rmexpressTentar {
+  background:var(--cba-cartao);
+  border-color:var(--cba-borda);
+  color:var(--cba-ouro-claro);
+}
+#rmexpressStatus:not(.erro) { color:var(--cba-secundario); }
+
+/* Acessibilidade e integridade de exibição.
+   [hidden] não pode ser desfeito pelo display do novo layout. */
+#homeSistema [hidden], #configuracoes [hidden], #dadosLocais [hidden] {
+  display:none !important;
+}
+@media (prefers-reduced-motion:reduce) {
+  #homeSistema .home-app-card,
+  #homeSistema .home-app-icone,
+  #homeSistema .home-app-seta { transition:none !important; }
+}
