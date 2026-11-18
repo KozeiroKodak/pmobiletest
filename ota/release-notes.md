@@ -1,7 +1,10 @@
-PMobile: correção BugHunter — retorno da tela de login.
+PMobile / Boas-vindas personalizadas e fotos sincronizadas.
 
-- Corrigida a seta Voltar na tela de login: a tela PMOBILE - ESTOQUE volta centralizada corretamente.
-- A função voltarInicio() deixa de impor display:block e devolve o layout responsivo definido no CSS.
-- Teste de regressão automático verifica a navegação e a centralização estrutural.
-- Layout CBA, fotos de perfil, autenticação, níveis de usuários e dados preservados.
-- Atualização via OTA web; sem necessidade de reinstalar o APK.
+- A tela PMOBILE - ESTOQUE e exibida SEMPRE ao abrir ou recarregar o aplicativo, mesmo com login salvo.
+- Login normal, primeiro acesso e restauracao de sessao mostram a foto, nome e botao Iniciar. Nenhuma dessas etapas abre abas automaticamente.
+- Iniciar abre apenas as funcoes permitidas se a sessao estiver autenticada; do contrario, abre o login.
+- Trocar usuario encerra a sessao atual e permite entrar com outra conta.
+- Fotos JPG/PNG/WebP otimizadas sao gravadas individualmente no Supabase, usando as credenciais do usuario e uma tabela privada com RLS.
+- Cache por usuario no aparelho preserva a imagem offline; alteracoes offline ficam pendentes para sincronizar ao reconectar.
+- Identidade CBA, niveis, senhas, tokens, inventario e estruturas OTA preservadas.
+- Nova bateria de testes de regressao para navegacao, isolamento de conta e OTA.

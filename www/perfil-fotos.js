@@ -1,7 +1,5 @@
-/* PMobile - fotos de perfil locais por conta (sem alterar autenticação ou Supabase).
- * Persistência IndexedDB para sobreviver a recarga e atualização OTA web.
- * O armazenamento compartilhado entre dispositivos exige integração backend
- * com autenticação por usuário; esta etapa não expõe bucket público.
+/* PMobile - fotos individuais: cache offline IndexedDB e sincronizacao privada no Supabase.
+ * O backend autoriza por credenciais do autenticador atual, sem bucket publico.
  */
 (function () {
   "use strict";
@@ -20,7 +18,7 @@
   }
   function initials(name) {
     const words=String(name||"?").trim().split(/\s+/).filter(Boolean);
-    return ((words[0]||"?").slice(0,1)+(words.length>1?words[words.length-1].slice(0,1):"")).toLocaleUpperCase("pt-BR");
+    return words.length ? ((words[0]||"?").slice(0,1)+(words.length>1?words[words.length-1].slice(0,1):"")).toLocaleUpperCase("pt-BR") : "👤";
   }
   function openDb() {
     return new Promise((resolve,reject)=>{
@@ -62,9 +60,38 @@
     const remove=$("pmPerfilFotoRemover");
     if(remove)remove.disabled=!imageUrl||busy;
   }
+  // A foto é exibida apenas para a identidade da sessão ativa.
+  async function rpcPhoto(name,user,base64) {
+    const client=window.clienteSupabase,credential=window.credencialPmobileAtual;
+    if(!client || !credential || !navigator.onLine)throw new Error("Servidor indisponível para sincronizar a foto.");
+    const args={p_usuario:user.user,p_credencial:credential};
+    if(name==="pmobile_foto_perfil_salvar")args.p_imagem_base64=base64;
+    const {data,error}=await client.rpc(name,args);
+    if(error)throw error;
+    return data;
+  }
+  function fromBase64(str){
+    const raw=atob(str);
+    if(raw.length<100||raw.length>MAX_JPEG)throw new Error("Foto recebida fora do limite.");
+    const bytes=new Uint8Array(raw.length);
+    for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
+    if(bytes[0]!==255||bytes[1]!==216||bytes[2]!==255)throw new Error("Foto recebida não é JPEG.");
+    return new Blob([bytes],{type:"image/jpeg"});
+  }
+  function toBase64(blob){
+    return new Promise((resolve,reject)=>{
+      const reader=new FileReader();
+      reader.onload=()=>resolve(String(reader.result).split(",")[1]||"");
+      reader.onerror=()=>reject(reader.error||new Error("Falha ao preparar foto."));
+      reader.readAsDataURL(blob);
+    });
+  }
+  async function remoteWrite(user,blob){
+    const result=await rpcPhoto("pmobile_foto_perfil_salvar",user,blob?await toBase64(blob):null);
+    if(result!==true)throw new Error("Servidor não autorizou a alteração da foto.");
+  }
   async function refresh(force=false){
-    const next=current();
-    const key=next?.key||null;
+    const next=current(),key=next?.key||null;
     identity=next;
     const home=$("pmPerfilHome");
     if(home)home.hidden=!next;
@@ -77,11 +104,45 @@
     const ticket=++revision;
     setPhoto(null);
     if(!key)return;
+    let cached=null,pending=null,synced=false;
     try{
-      const blob=await database("readonly",os=>os.get(key));
-      if(ticket===revision&&current()?.key===key)setPhoto(blob);
+      [cached,pending,synced]=await Promise.all([
+        database("readonly",os=>os.get(key)),
+        database("readonly",os=>os.get("pending:"+key)),
+        database("readonly",os=>os.get("synced:"+key))
+      ]);
+      if(ticket!==revision||current()?.key!==key)return;
+      setPhoto(cached);
+    }catch(err){if(ticket===revision)status("Foto local indisponível: "+String(err.message||err));}
+    if(!navigator.onLine||!window.clienteSupabase||!window.credencialPmobileAtual)return;
+    try{
+      if(pending==="set"&&cached instanceof Blob){
+        await remoteWrite(next,cached);
+        await database("readwrite",os=>os.delete("pending:"+key));
+        await database("readwrite",os=>os.put(true,"synced:"+key));
+      } else if(pending==="remove"){
+        await remoteWrite(next,null);
+        await database("readwrite",os=>os.delete("pending:"+key));
+        await database("readwrite",os=>os.put(true,"synced:"+key));
+      }
+      const remote=await rpcPhoto("pmobile_foto_perfil_ler",next);
+      if(ticket!==revision||current()?.key!==key)return;
+      if(typeof remote==="string"&&remote.length){
+        const blob=fromBase64(remote);
+        await database("readwrite",os=>os.put(blob,key));
+        await database("readwrite",os=>os.put(true,"synced:"+key));
+        if(ticket===revision&&current()?.key===key)setPhoto(blob);
+      }else if(cached instanceof Blob&&!synced&&!pending){
+        // Migração de foto antiga apenas local; servidor ainda não tem imagem.
+        await remoteWrite(next,cached);
+        await database("readwrite",os=>os.put(true,"synced:"+key));
+        status("Sua foto local foi sincronizada com o Supabase.");
+      }else if(synced||pending==="remove"){
+        await database("readwrite",os=>os.delete(key));
+        if(ticket===revision&&current()?.key===key)setPhoto(null);
+      }
     }catch(err){
-      if(ticket===revision)status("Não foi possível carregar a foto: "+String(err.message||err));
+      if(ticket===revision)status("Foto disponível localmente. Falha na sincronização: "+String(err.message||err));
     }
   }
   function show(){
@@ -90,7 +151,7 @@
     identity=user;
     const dialog=$("pmPerfilFotoDialog");
     if(!dialog)return;
-    status("A imagem é salva somente neste aparelho, para esta conta.");
+    status("A foto pertence à sua conta e sincroniza com o Supabase quando há conexão.");
     if(typeof dialog.showModal==="function"){if(!dialog.open)dialog.showModal();}
     else dialog.setAttribute("open","");
     refresh(false);
@@ -134,17 +195,21 @@
   async function save(file){
     if(busy)return;
     const user=current();
-    if(!user)return status("Faça login para salvar uma foto.");
+    if(!user)return status("Entre com sua conta para salvar uma foto.");
     busy=true;status("Preparando sua foto...");
     try{
       const blob=await optimize(file);
-      if(current()?.key!==user.key)throw new Error("A conta mudou durante o envio.");
-      await database("readwrite",os=>os.put(blob,user.key));
+      if(current()?.key!==user.key)throw new Error("A conta mudou durante a operação.");
+      const online=!!(window.clienteSupabase&&window.credencialPmobileAtual&&navigator.onLine);
+      if(online)await remoteWrite(user,blob);
       if(current()?.key!==user.key)throw new Error("A conta mudou antes da confirmação.");
+      await database("readwrite",os=>os.put(blob,user.key));
+      await database("readwrite",os=>os.put(online?true:"set",(online?"synced:":"pending:")+user.key));
+      if(online)await database("readwrite",os=>os.delete("pending:"+user.key));
       identity=user;displayedKey=user.key;++revision;setPhoto(blob);
-      status("Foto salva neste aparelho. Nenhuma informação de acesso foi alterada.");
-      window.dispatchEvent(new CustomEvent("pmobile:foto-perfil-alterada",{detail:{usuario:user.user,local:true}}));
-    }catch(err){status("Não foi possível salvar: "+String(err.message||err));}
+      status(online?"Foto salva no Supabase e disponível em outros dispositivos.":"Foto salva neste aparelho. Sincronização pendente até voltar a conexão.");
+      window.dispatchEvent(new CustomEvent("pmobile:foto-perfil-alterada",{detail:{usuario:user.user,remota:online}}));
+    }catch(err){status("Não foi possível salvar a foto: "+String(err.message||err));}
     finally{busy=false;setPhotoUrlButtons();}
   }
   function setPhotoUrlButtons(){
@@ -156,15 +221,20 @@
   async function remove(){
     if(busy)return;
     const user=current();
-    if(!user)return status("Faça login para remover sua foto.");
-    if(!window.confirm("Remover a foto deste perfil neste aparelho?"))return;
+    if(!user)return status("Entre para remover sua foto.");
+    if(!window.confirm("Remover a foto deste perfil em todos os dispositivos?"))return;
     busy=true;status("Removendo foto...");
     try{
+      const online=!!(window.clienteSupabase&&window.credencialPmobileAtual&&navigator.onLine);
+      if(online)await remoteWrite(user,null);
+      if(current()?.key!==user.key)throw new Error("A conta mudou durante a operação.");
       await database("readwrite",os=>os.delete(user.key));
-      if(current()?.key===user.key){identity=user;displayedKey=user.key;++revision;setPhoto(null);}
-      status("Foto removida deste aparelho.");
-      window.dispatchEvent(new CustomEvent("pmobile:foto-perfil-alterada",{detail:{usuario:user.user,local:true}}));
-    }catch(err){status("Não foi possível remover: "+String(err.message||err));}
+      await database("readwrite",os=>os.put(online?true:"remove",(online?"synced:":"pending:")+user.key));
+      if(online)await database("readwrite",os=>os.delete("pending:"+user.key));
+      identity=user;displayedKey=user.key;++revision;setPhoto(null);
+      status(online?"Foto removida da conta no Supabase.":"Foto removida localmente. Exclusão do servidor pendente até reconectar.");
+      window.dispatchEvent(new CustomEvent("pmobile:foto-perfil-alterada",{detail:{usuario:user.user,remota:online}}));
+    }catch(err){status("Não foi possível remover a foto: "+String(err.message||err));}
     finally{busy=false;setPhotoUrlButtons();}
   }
   function init(){
@@ -185,8 +255,9 @@
       if(trigger){event.preventDefault();show();}
     });
     window.addEventListener("pmobile:sessao-alterada",()=>refresh());
-    window.addEventListener("pageshow",()=>refresh());
-    document.addEventListener("visibilitychange",()=>{if(!document.hidden)refresh();});
+    window.addEventListener("pageshow",()=>refresh(true));
+    window.addEventListener("online",()=>refresh(true));
+    document.addEventListener("visibilitychange",()=>{if(!document.hidden)refresh(true);});
     refresh(true);
   }
   window.PMobilePerfilFotos=Object.freeze({abrir:show,atualizarInterface:()=>refresh(true)});

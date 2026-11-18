@@ -327,41 +327,82 @@ function mostrarTelaSistema(
 //
 // ============================================================
 
-async function abrirSistema() {
+// Estado visual separado da autenticação: nunca avançar sem clicar em Iniciar.
+let pmobileInicioEmAndamento = false;
+let pmobileSessaoOffline = false;
 
-    const salvo = await obterLoginPmobileSalvo();
-
-    if (salvo) {
-        await tentarRestaurarLoginPmobile();
-        return;
+function atualizarBoasVindasPmobile() {
+    const usuario = window.usuarioPmobileAtual;
+    const autenticado = !!(usuario && usuario.usuario && window.credencialPmobileAtual);
+    const nome = document.getElementById("inicioUsuarioNome");
+    const situacao = document.getElementById("inicioUsuarioStatus");
+    const trocar = document.getElementById("inicioTrocarUsuario");
+    const avatar = document.getElementById("inicioPerfilAvatar");
+    if (nome) nome.textContent = autenticado ? (usuario.nome || usuario.usuario) : "Nenhum usuário conectado";
+    if (situacao) situacao.textContent = !autenticado ? "Toque em Iniciar para fazer login."
+        : (pmobileSessaoOffline || !navigator.onLine) ? "Sessão restaurada offline" : "Sessão autenticada";
+    if (trocar) trocar.hidden = !autenticado;
+    if (avatar) {
+        avatar.disabled = !autenticado;
+        avatar.title = autenticado ? "Ver ou alterar minha foto" : "Entre para configurar seu perfil";
     }
-
-    const inicio = document.getElementById("inicio");
-    const login = document.getElementById("loginPmobile");
-    const aplicacao = document.getElementById("aplicacao");
-
-    if (inicio) {
-        inicio.style.display = "none";
-    }
-
-    if (aplicacao) {
-        aplicacao.style.display = "none";
-    }
-
-    if (login) {
-        login.style.display = "block";
-
-        const usuario = document.getElementById("loginUsuario");
-
-        if (usuario) {
-            setTimeout(function() {
-                usuario.focus();
-            }, 0);
-        }
-    }
-
 }
 
+function mostrarBoasVindasPmobile() {
+    const inicio=document.getElementById("inicio");
+    const login=document.getElementById("loginPmobile");
+    const criarSenha=document.getElementById("criarSenhaPmobile");
+    const aplicacao=document.getElementById("aplicacao");
+    if(inicio)inicio.style.display=""; // mantém flex de inicio.css
+    if(login)login.style.display="none";
+    if(criarSenha)criarSenha.style.display="none";
+    if(aplicacao)aplicacao.style.display="none";
+    atualizarBoasVindasPmobile();
+}
+
+function abrirLoginPmobile() {
+    const inicio=document.getElementById("inicio");
+    const login=document.getElementById("loginPmobile");
+    const aplicacao=document.getElementById("aplicacao");
+    if(inicio)inicio.style.display="none";
+    if(aplicacao)aplicacao.style.display="none";
+    if(login)login.style.display="block";
+    const usuario=document.getElementById("loginUsuario");
+    if(usuario)setTimeout(()=>usuario.focus(),0);
+}
+
+function abrirAplicacaoAutenticadaPmobile() {
+    if(!window.usuarioPmobileAtual?.usuario||!window.credencialPmobileAtual)return false;
+    const inicio=document.getElementById("inicio");
+    const login=document.getElementById("loginPmobile");
+    const aplicacao=document.getElementById("aplicacao");
+    if(inicio)inicio.style.display="none";
+    if(login)login.style.display="none";
+    if(aplicacao)aplicacao.style.display="block";
+    atualizarVisibilidadeConfiguracoes();
+    mostrarTelaSistema("homeSistema",null);
+    if(typeof iniciarInventarioLocalPmobile==="function")setTimeout(iniciarInventarioLocalPmobile,0);
+    return true;
+}
+
+async function abrirSistema() {
+    if(pmobileInicioEmAndamento)return;
+    pmobileInicioEmAndamento=true;
+    try {
+        if(abrirAplicacaoAutenticadaPmobile())return;
+        const salvo=await obterLoginPmobileSalvo();
+        if(salvo){
+            await tentarRestaurarLoginPmobile();
+            if(abrirAplicacaoAutenticadaPmobile())return;
+        }
+        abrirLoginPmobile();
+    } finally { pmobileInicioEmAndamento=false; }
+}
+
+function trocarUsuarioPmobile() {
+    sairPmobile();
+    abrirLoginPmobile();
+}
 
 // ============================================================
 // LOGIN — SENHA / PRIMEIRO ACESSO
@@ -424,11 +465,11 @@ function sairPmobile() {
     }
 
     if (login) {
-        login.style.display = "block";
+        login.style.display = "none";
     }
 
     if (inicio) {
-        inicio.style.display = "none";
+        inicio.style.display = "";
     }
 
     if (campoSenha) {
@@ -445,7 +486,7 @@ function sairPmobile() {
 
     if (campoUsuario) {
         campoUsuario.value = "";
-        campoUsuario.focus();
+        // Foco aplicado apenas ao exibir login.
     }
 
     if (status) {
@@ -453,7 +494,9 @@ function sairPmobile() {
         status.classList.remove("erro");
     }
 
+    pmobileSessaoOffline=false;
     atualizarVisibilidadeConfiguracoes();
+    mostrarBoasVindasPmobile();
 
 }
 
@@ -714,31 +757,15 @@ async function obterLoginPmobileSalvo() {
 }
 
 
-function restaurarSessaoPmobile(dadosUsuario, senha) {
-
-    usuarioPmobileAtual = dadosUsuario;
-    window.usuarioPmobileAtual = dadosUsuario;
-    credencialPmobileAtual = senha;
-    window.credencialPmobileAtual = senha;
-
+function restaurarSessaoPmobile(dadosUsuario, senha, opcoes = {}) {
+    usuarioPmobileAtual=dadosUsuario;
+    window.usuarioPmobileAtual=dadosUsuario;
+    credencialPmobileAtual=senha;
+    window.credencialPmobileAtual=senha;
+    pmobileSessaoOffline=opcoes.offline===true;
     atualizarVisibilidadeConfiguracoes();
-
-    const inicio = document.getElementById("inicio");
-    const login = document.getElementById("loginPmobile");
-    const criarSenha = document.getElementById("criarSenhaPmobile");
-    const aplicacao = document.getElementById("aplicacao");
-
-    if (inicio) inicio.style.display = "none";
-    if (login) login.style.display = "none";
-    if (criarSenha) criarSenha.style.display = "none";
-    if (aplicacao) aplicacao.style.display = "block";
-
-    mostrarTelaSistema("homeSistema", null);
-
-    if (typeof iniciarInventarioLocalPmobile === "function") {
-        setTimeout(iniciarInventarioLocalPmobile, 0);
-    }
-
+    // Restaurar a identidade não autoriza abrir a Home.
+    mostrarBoasVindasPmobile();
 }
 
 
@@ -756,13 +783,13 @@ async function tentarRestaurarLoginPmobile() {
     }
 
     if (!navigator.onLine) {
-        restaurarSessaoPmobile(salvo.dadosUsuario, salvo.senha);
+        restaurarSessaoPmobile(salvo.dadosUsuario, salvo.senha, {offline:true});
         console.log("📴 PMOBILE iniciou offline com login mantido.");
         return;
     }
 
     if (!window.clienteSupabase) {
-        restaurarSessaoPmobile(salvo.dadosUsuario, salvo.senha);
+        restaurarSessaoPmobile(salvo.dadosUsuario, salvo.senha, {offline:true});
         console.log("📴 Supabase indisponível; mantendo sessão salva.");
         return;
     }
@@ -807,7 +834,7 @@ async function tentarRestaurarLoginPmobile() {
             erro
         );
 
-        restaurarSessaoPmobile(salvo.dadosUsuario, salvo.senha);
+        restaurarSessaoPmobile(salvo.dadosUsuario, salvo.senha, {offline:true});
 
     }
 
@@ -1253,35 +1280,8 @@ async function entrarInterface(event) {
             }
         );
 
-        const inicio =
-            document.getElementById("inicio");
-
-        const login =
-            document.getElementById("loginPmobile");
-
-        const aplicacao =
-            document.getElementById("aplicacao");
-
-        if (inicio) {
-            inicio.style.display = "none";
-        }
-
-        if (login) {
-            login.style.display = "none";
-        }
-
-        if (aplicacao) {
-            aplicacao.style.display = "block";
-        }
-
-        mostrarTelaSistema(
-            "homeSistema",
-            null
-        );
-
-        if (typeof iniciarInventarioLocalPmobile === "function") {
-            setTimeout(iniciarInventarioLocalPmobile, 0);
-        }
+        pmobileSessaoOffline=false;
+        mostrarBoasVindasPmobile();
 
     } catch (erro) {
 
@@ -2855,6 +2855,14 @@ window.PMobileModulos?.registrarAcao("importar-estoque",abrirImportacao);
 window.PMobileModulos?.registrarAcao("conferencias",abrirConferencias);
 
 window.PMOBILE_OK = true;
+
+// Boot apenas restaura a identidade; nunca abre funções sem Iniciar.
+document.addEventListener("DOMContentLoaded", function () {
+    mostrarBoasVindasPmobile();
+    tentarRestaurarLoginPmobile().catch(erro=>console.warn("Restauração de sessão:",erro));
+});
+window.addEventListener("online",atualizarBoasVindasPmobile);
+window.addEventListener("offline",atualizarBoasVindasPmobile);
 
 // ============================================================
 // TECLA ESC — RETORNO ENTRE ABAS

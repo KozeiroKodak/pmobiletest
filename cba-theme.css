@@ -585,3 +585,52 @@ input:focus, select:focus, textarea:focus { border-color: var(--cba-ouro) !impor
     flex-basis: 44px; width: 44px; height: 44px; border-radius: 11px;
   }
 }
+
+/* Boas-vindas persistentes: avatar, nome e botao Iniciar.
+ * Carregamento de sessao nao altera a visibilidade das abas.
+ */
+#inicio {gap:8px;}
+#inicio .inicio-identidade {
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:10px;width:100%;max-width:360px;margin:22px auto 6px;
+}
+#inicio #inicioPerfilAvatar {
+  display:grid!important;place-items:center;
+  flex:0 0 auto;width:108px!important;min-width:0!important;height:108px!important;
+  min-height:0!important;margin:0 auto 6px!important;padding:4px!important;
+  border:2px solid var(--cba-ouro,#e8c47c)!important;border-radius:50%!important;
+  color:var(--cba-ouro-claro,#f9dfa5)!important;
+  background:var(--cba-cartao,#342442)!important;
+  box-shadow:0 5px 24px rgba(0,0,0,.35);cursor:pointer;
+}
+#inicio #inicioPerfilAvatar:disabled {cursor:default;opacity:.78;}
+#inicio .inicio-foto-circular {
+  width:100%;height:100%;border-radius:50%;overflow:hidden;
+  background:var(--cba-cartao,#342442);
+}
+#inicio .inicio-foto-circular img {
+  width:100%;height:100%;object-fit:cover;border-radius:50%;
+}
+#inicio .inicio-foto-circular [data-pm-profile-initials] {font-size:2.25rem;}
+#inicio #inicioUsuarioNome {
+  font-size:clamp(19px,4.8vw,23px);line-height:1.3;
+  color:var(--cba-ouro-claro,#f9dfa5);font-weight:730;
+  max-width:100%;overflow-wrap:anywhere;
+}
+#inicio #inicioUsuarioStatus {
+  font-size:12px;line-height:1.5;
+  color:var(--cba-secundario,#b8abc7);
+}
+#inicio #inicioBotaoIniciar {width:min(100%,350px);margin-top:17px;}
+#inicio #inicioTrocarUsuario {
+  margin:0 auto!important;min-height:38px;
+  padding:7px 14px;border:1px solid transparent!important;
+  background:transparent!important;color:var(--cba-prata,#d0c6d8)!important;
+  text-decoration:underline;text-underline-offset:4px;
+}
+#inicio #inicioTrocarUsuario:hover {color:var(--cba-ouro-claro,#f9dfa5)!important;}
+#inicio #inicioTrocarUsuario[hidden] {display:none!important;}
+@media (max-width:380px) {
+  #inicio #inicioPerfilAvatar {width:94px!important;height:94px!important;}
+  #inicio .inicio-identidade {margin-top:16px;}
+}

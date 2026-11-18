@@ -73,14 +73,22 @@
 <div id="inicio">
 
     <h1>PMOBILE - ESTOQUE</h1>
+    <p>Relação de estoque e contagem CBA DIESEL RS.</p>
 
-    <p>
-        Relação de estoque e contagem CBA DIESEL RS.
-    </p>
+    <section class="inicio-identidade" aria-label="Usuário atual">
+      <button type="button" id="inicioPerfilAvatar" data-pm-open-profile disabled
+          aria-label="Ver foto do usuário" title="Entre para configurar sua foto">
+        <span class="pm-foto-rosto inicio-foto-circular">
+          <img data-pm-profile-photo alt="Foto do usuário conectado" hidden>
+          <span data-pm-profile-initials aria-hidden="true">👤</span>
+        </span>
+      </button>
+      <strong id="inicioUsuarioNome">Verificando sessão...</strong>
+      <small id="inicioUsuarioStatus" aria-live="polite">Preparando boas-vindas</small>
+    </section>
 
-    <button onclick="abrirSistema()">
-        Iniciar
-    </button>
+    <button type="button" id="inicioBotaoIniciar" onclick="abrirSistema()">Iniciar</button>
+    <button type="button" id="inicioTrocarUsuario" onclick="trocarUsuarioPmobile()" hidden>Trocar usuário</button>
 
 </div>
 
@@ -952,7 +960,7 @@
             <div class="painel configuracoes-modulo" id="painelConfiguracoesUsuario" style="display: none;">
                 <details class="configuracoes-accordion"><summary><span class="home-app-icone" aria-hidden="true">👤</span><span class="home-app-conteudo"><strong>Conta</strong><small>Informações da sessão</small></span><span class="home-app-seta">›</span></summary><div class="configuracoes-conteudo">
                 <div class="configuracoes-perfil"><button type="button" class="configuracoes-avatar pm-perfil-conta-botao" data-pm-open-profile aria-label="Alterar minha foto de perfil" title="Alterar minha foto"><img data-pm-profile-photo alt="" hidden><span data-pm-profile-initials>?</span></button><div id="resumoContaPmobile"></div></div>
-                <div class="pm-perfil-conta-acoes"><button type="button" data-pm-open-profile>Editar foto de perfil</button><small>Foto disponível neste aparelho</small></div>
+                <div class="pm-perfil-conta-acoes"><button type="button" data-pm-open-profile>Editar foto de perfil</button><small>Foto da conta sincronizada com Supabase</small></div>
                 </div></details>
             </div>
             </div>
@@ -1262,7 +1270,7 @@
      CONTROLE GERAL
      ========================================================= -->
 
-<script src="script.js?v=0.0.405-credenciais"></script>
+<script src="script.js?v=boas-vindas-1.0"></script>
 
 <!-- Foto de perfil individual; dados salvos apenas no dispositivo por enquanto. -->
 <dialog id="pmPerfilFotoDialog" aria-labelledby="pmPerfilFotoTitulo">
@@ -1270,7 +1278,7 @@
   <div class="pm-foto-rosto pm-profile-modal-avatar"><img data-pm-profile-photo alt="Foto do perfil" hidden><span data-pm-profile-initials>?</span></div>
   <div class="pm-profile-identity"><div id="pmPerfilNome"></div><div id="pmPerfilUsuario"></div></div>
   <p>Escolha uma foto JPG, PNG ou WebP (até 6 MB). Ela será recortada para formato quadrado e otimizada automaticamente.</p>
-  <p>Por enquanto, a foto fica armazenada neste aparelho. Não será enviada ao Supabase nem exibida em outros dispositivos.</p>
+  <p>A foto é salva com sua conta no Supabase e aparece nos seus dispositivos. Offline, as alterações ficam pendentes para sincronização.</p>
   <input id="pmPerfilFotoArquivo" type="file" accept="image/jpeg,image/png,image/webp" aria-label="Escolher foto de perfil">
   <div class="pm-profile-actions">
     <button type="button" id="pmPerfilFotoEscolher">Escolher foto</button>
@@ -1281,7 +1289,7 @@
 </dialog>
 <!-- Central de sincronização -->
 
-<script src="perfil-fotos.js?v=perfil-1.0"></script>
+<script src="perfil-fotos.js?v=perfil-remoto-2.0"></script>
 <script src="sync-center.js?v=1.0.3"></script>
 
 <script src="cotacoes.js?v=0.0.403-modulos"></script>
