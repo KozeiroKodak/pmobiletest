@@ -27,7 +27,8 @@ function calcularEnquadramento(iw,ih,fw,fh,settings){
  const o=opts(settings),scale=Math.max(frameW/sourceW,frameH/sourceH)*o.zoom/100;
  const width=sourceW*scale,height=sourceH*scale;
  const excessX=Math.max(0,width-frameW),excessY=Math.max(0,height-frameH);
- return {width,height,left:-excessX*o.x/100,top:-excessY*o.y/100,excessX,excessY};
+ return {width,height,left:excessX===0||o.x===0?0:-excessX*o.x/100,
+  top:excessY===0||o.y===0?0:-excessY*o.y/100,excessX,excessY};
 }
 function aplicarEnquadramentoImagem(img,frame,settings){
  if(!img||!frame||!img.naturalWidth||!img.naturalHeight)return null;
