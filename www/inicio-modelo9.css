@@ -192,3 +192,107 @@
 @media (prefers-reduced-motion:reduce) {
   #inicio .inicio-fundo-foto img {transition:none!important;}
 }
+
+/* BUG-UI / Modelo 9 — Android portrait refinado.
+ * A imagem original nao e editada: apenas sao alterados o enquadramento e
+ * as camadas de apresentacao. Em telas amplas, manter a composicao desktop.
+ */
+#inicio .inicio-foto-mobile-integral {display:none!important;}
+@media (max-width:700px) {
+  #inicio.inicio-modelo9 {
+    padding:20px max(18px,env(safe-area-inset-left)) 26px max(18px,env(safe-area-inset-right));
+    justify-content:center;
+  }
+  /* Fundo cobre a tela; a fotografia completa fica mesclada sobre ele,
+     evitando cortar o rosto da pessoa nas laterais em retrato. */
+  #inicio .inicio-fundo-foto img#inicioFotoTelaCheia {
+    object-position:28% 49%;
+    filter:blur(13px) contrast(.93) saturate(.86);
+    transform:scale(1.10);
+    opacity:.84;
+  }
+  #inicio .inicio-fundo-foto img.inicio-foto-mobile-integral:not([hidden]) {
+    position:absolute;
+    inset:0;
+    display:block!important;
+    width:100%;
+    height:100%;
+    max-width:none;
+    max-height:none;
+    object-fit:contain;
+    object-position:center 46%;
+    transform:none;
+    filter:contrast(.98) saturate(.86) brightness(.85);
+    opacity:.84;
+    -webkit-mask-image:linear-gradient(to bottom,transparent 2%,#000 21%,#000 78%,transparent 98%);
+    mask-image:linear-gradient(to bottom,transparent 2%,#000 21%,#000 78%,transparent 98%);
+  }
+  #inicio.inicio-modelo9::before {
+    background:linear-gradient(180deg,
+      rgba(23,10,36,.49) 0%,
+      rgba(33,11,49,.55) 29%,
+      rgba(41,10,60,.65) 54%,
+      rgba(35,7,55,.80) 79%,
+      rgba(23,6,38,.98) 100%);
+  }
+  #inicio .inicio-marca-modelo9 {
+    gap:5px;
+    margin:0 auto 18px;
+    width:min(100%,380px);
+  }
+  #inicio .inicio-marca-logo {
+    width:clamp(106px,30vw,126px);
+    height:clamp(106px,30vw,126px);
+    object-fit:contain;
+    border-radius:50%;
+    flex-shrink:0;
+    filter:drop-shadow(0 6px 18px rgba(0,0,0,.45));
+  }
+  #inicio .inicio-marca-titulo {
+    font-size:clamp(31px,8.8vw,43px);
+    letter-spacing:.04em;
+  }
+  #inicio .inicio-marca-subtitulo {
+    font-size:clamp(16px,4.6vw,21px);
+    letter-spacing:.25em;
+  }
+  #inicio .inicio-marca-descricao {
+    max-width:320px;
+    margin-top:6px;
+    font-size:12px;
+    line-height:1.4;
+  }
+  #inicio.inicio-modelo9 .inicio-identidade {
+    margin:13px auto 10px;
+    gap:8px;
+    max-width:360px;
+  }
+  #inicio.inicio-modelo9 #inicioUsuarioNome {
+    font-size:clamp(21px,5.8vw,28px);
+    line-height:1.28;
+  }
+  #inicio.inicio-modelo9 #inicioBotaoIniciar {
+    width:min(100%,370px);
+    min-height:55px;
+    margin:18px auto 5px;
+    border-radius:13px!important;
+  }
+  #inicio.inicio-modelo9 #inicioSessaoMantida {
+    margin-top:5px;
+    font-size:13px;
+  }
+  #inicio.inicio-modelo9 #inicioTrocarUsuario {
+    margin-top:6px!important;
+  }
+}
+@media (max-width:700px) and (max-height:720px) {
+  #inicio.inicio-modelo9 {justify-content:center;padding-top:12px;padding-bottom:12px;}
+  #inicio .inicio-marca-logo {width:86px;height:86px;}
+  #inicio .inicio-marca-modelo9 {margin-bottom:5px;gap:3px;}
+  #inicio.inicio-modelo9 .inicio-identidade {margin:6px auto;gap:5px;}
+  #inicio.inicio-modelo9 #inicioBotaoIniciar {min-height:46px;margin-top:8px;}
+  #inicio.inicio-modelo9 #inicioUsuarioNome {font-size:21px;}
+}
+@media (max-width:700px) and (max-height:570px) {
+  #inicio.inicio-modelo9 {justify-content:flex-start;overflow-y:auto;}
+}

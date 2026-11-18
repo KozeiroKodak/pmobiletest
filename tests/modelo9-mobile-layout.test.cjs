@@ -1,0 +1,42 @@
+const {test}=require("node:test");
+const assert=require("node:assert/strict");
+const fs=require("node:fs");
+const path=require("node:path");
+const root=path.resolve(__dirname,"..");
+const get=p=>fs.readFileSync(path.join(root,p),"utf8");
+test("BUG logo Android: identidade original embutida no HTML para OTA offline",()=>{
+  const html=get("index.html");
+  const match=html.match(/<img class="inicio-marca-logo" src="data:image\/webp;base64,([A-Za-z0-9+/=]+)"/);
+  assert.ok(match,"logo CBA deve usar data URI no HTML e funcionar sem .webp no zip OTA");
+  const icon=fs.readFileSync(path.join(root,"android/app/src/main/res/drawable-nodpi/pmobile_identity.webp"));
+  assert.deepEqual(Buffer.from(match[1],"base64"),icon,"arte CBA original byte por byte");
+  assert.doesNotMatch(html,/src="cba-identidade\.webp"/);
+  assert.ok(get(".github/workflows/ota-publish.yml").includes('*.html|*.css|*.js'),"o pacote OTA usa apenas arquivos da camada web");
+});
+test("mobile possui enquadramento completo sobre camada desfocada e somente com sessão",()=>{
+ const html=get("index.html");
+ const css=get("inicio-modelo9.css");
+ const js=get("inicio-modelo9.js");
+ assert.match(html,/id="inicioFotoCompletaMobile" class="inicio-foto-mobile-integral"\s+data-pm-profile-photo/);
+ assert.match(css,/@media\s*\(max-width:700px\)/);
+ assert.match(css, /object-fit:contain/);
+ assert.match(css, /object-position:center 46%/);
+ assert.match(css, /blur\(13px\)/);
+ assert.match(css, /mask-image:linear-gradient/);
+ assert.match(css, /#inicio\.inicio-com-foto \.inicio-fundo-foto/);
+ assert.match(js,/savedUser !== latest\.username/);
+ assert.match(js,/saved\.senha !== latest\.credential/);
+ assert.match(html,/id="inicioBotaoIniciar" onclick="abrirSistema\(\)"/);
+});
+test("mobile ajustado sem modificar o layout desktop e cópias WWW em paridade",()=>{
+ const css=get("inicio-modelo9.css");
+ const html=get("index.html");
+ const beforeMobile=css.slice(0,css.indexOf("BUG-UI / Modelo 9"));
+ assert.match(beforeMobile,/object-position:33% center/);
+ assert.match(css,/#inicio \.inicio-foto-mobile-integral \{display:none!important;\}/);
+ assert.equal(html,get("www/index.html"));
+ assert.equal(css,get("www/inicio-modelo9.css"));
+ assert.equal(get("inicio-modelo9.js"),get("www/inicio-modelo9.js"));
+ const sheets=[...html.matchAll(/href="([^"]+\.css)(?:\?[^"]*)?"/g)].map(m=>m[1]);
+ assert.equal(sheets.at(-1),"cba-theme.css","tema CBA deve continuar como último CSS");
+});
