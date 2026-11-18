@@ -1,9 +1,8 @@
-PMobile / Boas-vindas personalizadas e fotos sincronizadas.
+PMobile / Correção do painel inferior de sincronização.
 
-- A tela PMOBILE - ESTOQUE permanece sempre na abertura; nenhuma restauracao de login navega sozinha.
-- Nome e foto do usuario autenticado aparecem na abertura, com Iniciar abaixo e opcao Trocar usuario.
-- Login normal, primeiro acesso, login mantido e sessao offline seguem o mesmo fluxo.
-- O botao Iniciar valida se existe sessao antes de liberar somente as abas permitidas.
-- Restauracao de login protegida contra chamadas concorrentes; o aplicativo nao retorna sozinho para a abertura apos o toque.
-- Fotos JPG/PNG/WebP vinculadas ao ID do usuario no Supabase via RPC credenciado, com cache offline individual e fila local.
-- Login, credenciais, niveis de usuario e estrutura OTA preservados. Sem alteracoes nos usuarios existentes.
+- Removido o status do OneDrive do rodapé geral de sincronização.
+- Falhas do OneDrive não alteram o título, cor ou estado deste painel.
+- Preservados os indicadores de conexão, inventário, contagens e conferências.
+- A integração e os alertas de OneDrive continuam exclusivamente na aba Importação de rastreios.
+- Nenhuma alteração de dados, níveis de acesso ou Supabase.
+- Teste de regressão confirma que falhas do OneDrive não afetam o painel.
