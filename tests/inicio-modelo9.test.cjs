@@ -29,7 +29,7 @@ function harness(opts={}) {
   const window={usuarioPmobileAtual:user,credencialPmobileAtual:opts.credential===null?null:"segredo"};
   const saved=opts.saved===null?null:opts.saved||{usuario:"teste",senha:"segredo",dadosUsuario:{id:12,usuario:"teste"}};
   const ctx={window,document:{readyState:"loading",getElementById:id=>nodes[id]||null,addEventListener(){}},
-    obterLoginPmobileSalvo:opts.loader||async()=>saved,console};
+    obterLoginPmobileSalvo:opts.loader || (async()=>saved),console};
   vm.runInNewContext(source,ctx);
   return {window,nodes,rootEl,classes,check:window.PMobileInicioModelo9.verificar};
 }
