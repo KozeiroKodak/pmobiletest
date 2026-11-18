@@ -1,10 +1,10 @@
 {
-  "webVersion": "0.0.425",
+  "webVersion": "0.0.426",
   "nativeMinVersion": "1.05",
-  "package": "https://github.com/KozeiroKodak/pmobiletest/releases/download/ota-web-0.0.425/pmobile-web-0.0.425.zip",
-  "sha256": "e4c92d146d9a7f7193d8c032580ee570d336bc3c9b6efb38614e3aac99793bde",
+  "package": "https://github.com/KozeiroKodak/pmobiletest/releases/download/ota-web-0.0.426/pmobile-web-0.0.426.zip",
+  "sha256": "48616bdf8810ba142eb09bd5b36367f9f8fd482539c204ff6fd59ca1d12b4b5a",
   "mandatory": false,
-  "sizeBytes": 629849,
-  "publishedAt": "2026-11-18T15:47:44.332652+00:00",
-  "releaseNotes": "PMobile / Correção do painel inferior de sincronização.\n\n- Removido o status do OneDrive do rodapé geral de sincronização.\n- Falhas do OneDrive não alteram o título, cor ou estado deste painel.\n- Preservados os indicadores de conexão, inventário, contagens e conferências.\n- A integração e os alertas de OneDrive continuam exclusivamente na aba Importação de rastreios.\n- Nenhuma alteração de dados, níveis de acesso ou Supabase.\n- Teste de regressão confirma que falhas do OneDrive não afetam o painel."
+  "sizeBytes": 633672,
+  "publishedAt": "2026-11-18T16:29:53.869448+00:00",
+  "releaseNotes": "PMobile — novo visual de boas-vindas, modelo 9 aprovado.\n\n- Foto do próprio usuário ampliada no fundo da tela de abertura, com degradê roxo e detalhes dourados.\n- A imagem só aparece quando há sessão ativa, foto disponível e \"Manter login\" realmente salvo para a mesma conta.\n- Sem login, com \"Manter login\" desativado ou após \"Trocar usuário\", permanece o visual padrão e sem foto de fundo.\n- Logo original CBA DIESEL LOGÍSTICA reutilizado sem qualquer alteração da arte.\n- Nome, sessão, botão Iniciar e Trocar usuário preservados. A tela não entra no aplicativo automaticamente.\n- Nenhuma alteração no Supabase, senhas, permissões, OneDrive, OTA estrutural ou inventário.\n- Versão visual distribuída pelo OTA web, sem necessidade de novo APK."
 }
