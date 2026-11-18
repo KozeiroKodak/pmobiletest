@@ -5,7 +5,7 @@
   "use strict";
   const DB_NAME="pmobile-fotos-perfil-v1", STORE="fotos", MAX_INPUT=6*1024*1024;
   const PHOTO_SIZE=384, MAX_JPEG=320*1024;
-  let identity=null, displayedKey=null, imageUrl=null, revision=0, busy=false;
+  let identity=null, displayedKey=null, imageUrl=null, imageBlob=null, revision=0, busy=false;
   const $=id=>document.getElementById(id);
   const all=selector=>Array.from(document.querySelectorAll(selector));
   const status=message=>{const node=$("pmPerfilFotoStatus");if(node)node.textContent=message;};
@@ -47,6 +47,7 @@
     }finally{db.close();}
   }
   function setPhoto(blob){
+    imageBlob=blob instanceof Blob&&blob.size>0?blob:null;
     if(imageUrl){URL.revokeObjectURL(imageUrl);imageUrl=null;}
     if(blob instanceof Blob&&blob.size>0)imageUrl=URL.createObjectURL(blob);
     all("[data-pm-profile-photo]").forEach(img=>{
@@ -59,6 +60,7 @@
     });
     const remove=$("pmPerfilFotoRemover");
     if(remove)remove.disabled=!imageUrl||busy;
+    window.dispatchEvent(new CustomEvent("pmobile:foto-perfil-pronta",{detail:{usuario:identity?.user||null,chave:identity?.key||null,temFoto:!!imageBlob}}));
   }
   // A foto é exibida apenas para a identidade da sessão ativa.
   async function rpcPhoto(name,user,base64) {
@@ -198,7 +200,8 @@
     if(!user)return status("Entre com sua conta para salvar uma foto.");
     busy=true;status("Preparando sua foto...");
     try{
-      const blob=await optimize(file);
+      const blob=file?.__pmobileEditada===true ? file : await optimize(file);
+      if(!(blob instanceof Blob)||blob.type!=="image/jpeg"||blob.size<100||blob.size>MAX_JPEG)throw new Error("Foto de perfil inválida.");
       if(current()?.key!==user.key)throw new Error("A conta mudou durante a operação.");
       const online=!!(window.clienteSupabase&&window.credencialPmobileAtual&&navigator.onLine);
       if(online)await remoteWrite(user,blob);
@@ -209,7 +212,8 @@
       identity=user;displayedKey=user.key;++revision;setPhoto(blob);
       status(online?"Foto salva no Supabase e disponível em outros dispositivos.":"Foto salva neste aparelho. Sincronização pendente até voltar a conexão.");
       window.dispatchEvent(new CustomEvent("pmobile:foto-perfil-alterada",{detail:{usuario:user.user,remota:online}}));
-    }catch(err){status("Não foi possível salvar a foto: "+String(err.message||err));}
+      return true;
+    }catch(err){status("Não foi possível salvar a foto: "+String(err.message||err));return false;}
     finally{busy=false;setPhotoUrlButtons();}
   }
   function setPhotoUrlButtons(){
@@ -234,7 +238,8 @@
       identity=user;displayedKey=user.key;++revision;setPhoto(null);
       status(online?"Foto removida da conta no Supabase.":"Foto removida localmente. Exclusão do servidor pendente até reconectar.");
       window.dispatchEvent(new CustomEvent("pmobile:foto-perfil-alterada",{detail:{usuario:user.user,remota:online}}));
-    }catch(err){status("Não foi possível remover a foto: "+String(err.message||err));}
+      return true;
+    }catch(err){status("Não foi possível remover a foto: "+String(err.message||err));return false;}
     finally{busy=false;setPhotoUrlButtons();}
   }
   function init(){
@@ -260,7 +265,17 @@
     document.addEventListener("visibilitychange",()=>{if(!document.hidden)refresh(true);});
     refresh(true);
   }
-  window.PMobilePerfilFotos=Object.freeze({abrir:show,atualizarInterface:()=>refresh(true)});
+  window.PMobilePerfilFotos=Object.freeze({
+    abrir:show,
+    atualizarInterface:()=>refresh(true),
+    obterFotoAtual:()=>imageBlob,
+    removerFoto:remove,
+    salvarEditada:async(blob)=>{
+      if(!(blob instanceof Blob)||blob.type!=="image/jpeg"||blob.size<100||blob.size>MAX_JPEG)throw new Error("Recorte de perfil inválido.");
+      blob.__pmobileEditada=true;
+      return save(blob);
+    }
+  });
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});
   else init();
 })();

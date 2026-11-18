@@ -17,7 +17,7 @@ test("mobile possui enquadramento completo sobre camada desfocada e somente com 
  const html=get("index.html");
  const css=get("inicio-modelo9.css");
  const js=get("inicio-modelo9.js");
- assert.match(html,/id="inicioFotoCompletaMobile" class="inicio-foto-mobile-integral"\s+data-pm-profile-photo/);
+ assert.match(html,/id="inicioFotoCompletaMobile" class="inicio-foto-mobile-integral"\s+data-pm-background-photo/);
  assert.match(css,/@media\s*\(max-width:700px\)/);
  assert.match(css, /object-fit:contain/);
  assert.match(css, /object-position:center 46%/);

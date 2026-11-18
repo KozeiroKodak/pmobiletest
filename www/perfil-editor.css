@@ -1,0 +1,128 @@
+/* PMobile — editor de duas imagens; escopo exclusivo ao perfil e boas-vindas. */
+#pmPerfilFotoDialog{
+ width:min(94vw,510px);max-height:min(88dvh,820px);padding:0;
+ overflow-x:hidden;overscroll-behavior:contain;
+}
+#pmPerfilFotoDialog .pm-editor-layout{
+ padding:20px 18px 16px;display:flex;flex-direction:column;gap:13px;
+}
+#pmPerfilFotoDialog .pm-editor-abas{
+ display:grid;grid-template-columns:1fr 1fr;gap:7px;
+ border:1px solid #59466b;background:#1c1128;padding:4px;border-radius:11px;
+}
+#pmPerfilFotoDialog .pm-editor-abas button{
+ border:1px solid transparent;background:transparent;color:#d0c6d8;
+ border-radius:8px;padding:10px 7px;min-height:43px;font-weight:650;
+}
+#pmPerfilFotoDialog .pm-editor-abas button.ativo{
+ background:#51375c;border-color:#e8c47c;color:#f9dfa5;
+}
+#pmPerfilFotoDialog .pm-editor-frame{
+ width:min(100%,260px);height: min(46dvh,340px);
+ min-height:195px;overflow:hidden;position:relative;
+ border:2px solid #7d5b7f;border-radius:14px;
+ background:radial-gradient(circle at 35% 30%,#443255,#150e22);
+ margin:0 auto;touch-action:none;cursor:grab;
+}
+#pmPerfilFotoDialog .pm-editor-frame:active{cursor:grabbing}
+#pmPerfilFotoDialog .pm-editor-frame.pm-editor-perfil{
+ width:min(100%,235px);height:235px;min-height:235px;
+ border:3px solid #e8c47c;border-radius:50%;
+}
+#pmPerfilFotoDialog #pmEditorPreviewImagem{
+ display:block;width:100%;height:100%;object-fit:cover;max-width:none;
+ position:absolute;inset:0;transform-origin:center center;
+}
+#pmPerfilFotoDialog #pmEditorPreviewImagem[hidden]{display:none!important}
+#pmPerfilFotoDialog .pm-editor-preview-overlay{
+ position:absolute;inset:0;pointer-events:none;
+ background:linear-gradient(to bottom,rgba(25,8,36,.25),rgba(33,8,49,var(--pm-editor-degrade,.55)));
+}
+#pmPerfilFotoDialog .pm-editor-perfil .pm-editor-preview-overlay{
+ background:transparent;
+}
+#pmPerfilFotoDialog #pmEditorPreviewPlaceholder{
+ position:absolute;inset:0;display:grid;place-items:center;padding:20px;
+ font-size:12px;text-align:center;color:#e0cadf;
+}
+#pmPerfilFotoDialog #pmEditorPreviewPlaceholder[hidden]{display:none!important}
+#pmPerfilFotoDialog .pm-editor-campos{display:grid;gap:10px}
+#pmPerfilFotoDialog .pm-editor-campo{display:block;min-width:0}
+#pmPerfilFotoDialog .pm-editor-campo>span{display:flex;justify-content:space-between;gap:8px;margin-bottom:5px;color:#f0e5f4;font-size:12px}
+#pmPerfilFotoDialog .pm-editor-campo output{color:#f9dfa5;font-variant-numeric:tabular-nums}
+#pmPerfilFotoDialog .pm-editor-campo input[type=range]{
+ appearance:auto;display:block;width:100%;height:20px;margin:0;
+ accent-color:#e8c47c;background:transparent;
+}
+#pmPerfilFotoDialog #pmEditorLinhaDegrade[hidden]{display:none!important}
+#pmPerfilFotoDialog .pm-editor-actions{
+ display:grid;grid-template-columns:1fr 1fr;gap:8px;
+}
+#pmPerfilFotoDialog .pm-editor-actions button{min-height:43px}
+#pmPerfilFotoDialog #pmEditorSalvar{
+ background:linear-gradient(130deg,#f9dfa5,#e8c47c);
+ color:#25162a;border-color:#e8c47c;font-weight:800;
+}
+#pmPerfilFotoDialog #pmEditorSelecionar{
+ border-color:#876b84;color:#f9dfa5;
+}
+#pmPerfilFotoDialog #pmEditorRemover{
+ color:#ffb9be;border-color:#915c70;background:#342034;
+}
+#pmPerfilFotoDialog #pmEditorStatus{
+ color:#d0c6d8;font-size:12px;line-height:1.45;min-height:2.8em;
+}
+#pmPerfilFotoDialog #pmEditorArquivo{display:none!important}
+#pmPerfilFotoDialog>.pm-profile-modal-avatar,
+#pmPerfilFotoDialog>.pm-profile-identity,
+#pmPerfilFotoDialog>p,
+#pmPerfilFotoDialog>.pm-profile-actions,
+#pmPerfilFotoDialog>#pmPerfilFotoArquivo,
+#pmPerfilFotoDialog>#pmPerfilFotoStatus{
+ display:none!important;
+}
+#pmPerfilFotoDialog>h2{
+ font-size:17px;margin:0;padding:17px 18px 0;
+ color:#f9dfa5;
+}
+#pmPerfilFotoDialog #pmPerfilFotoFechar{
+ display:block;width:calc(100% - 36px);margin:0 18px 15px;
+}
+#inicio.inicio-modelo9{
+ --pm-fundo-x:50%;--pm-fundo-y:50%;
+ --pm-fundo-zoom:1;--pm-fundo-escuro:.55;
+}
+#inicio.inicio-modelo9 .inicio-fundo-foto img#inicioFotoTelaCheia{
+ object-position:var(--pm-fundo-x) var(--pm-fundo-y);
+ transform:scale(var(--pm-fundo-zoom));
+}
+#inicio.inicio-modelo9::before{
+ background:linear-gradient(to bottom,
+   rgba(26,10,39,.34),
+   rgba(30,9,46,.48) 45%,
+   rgba(23,6,38,var(--pm-fundo-escuro)) 78%,
+   rgba(23,6,38,.95));
+}
+@media(max-width:700px){
+ #inicio.inicio-modelo9 .inicio-fundo-foto img#inicioFotoTelaCheia{
+  object-fit:cover;
+  object-position:var(--pm-fundo-x) var(--pm-fundo-y);
+  filter:blur(12px) contrast(.94) saturate(.9);
+  transform:scale(calc(var(--pm-fundo-zoom) * 1.04));
+ }
+ #inicio.inicio-modelo9 .inicio-fundo-foto img.inicio-foto-mobile-integral:not([hidden]){
+  object-fit:cover;object-position:var(--pm-fundo-x) var(--pm-fundo-y);
+  transform:scale(var(--pm-fundo-zoom));opacity:.87;
+  filter:contrast(1) saturate(.93) brightness(.88);
+  -webkit-mask-image:none;mask-image:none;
+ }
+ #pmPerfilFotoDialog .pm-editor-layout{padding:12px 14px;}
+ #pmPerfilFotoDialog .pm-editor-frame{height:min(37dvh,285px)}
+ #pmPerfilFotoDialog .pm-editor-frame.pm-editor-perfil{
+  width:200px;height:200px;min-height:200px;
+ }
+}
+@media(max-height:625px){
+ #pmPerfilFotoDialog .pm-editor-frame{height:190px;min-height:170px;}
+ #pmPerfilFotoDialog .pm-editor-frame.pm-editor-perfil{height:170px;min-height:170px;width:170px;}
+}

@@ -359,6 +359,8 @@ function mostrarBoasVindasPmobile() {
     if(criarSenha)criarSenha.style.display="none";
     if(aplicacao)aplicacao.style.display="none";
     atualizarBoasVindasPmobile();
+    // Identidade pronta: o editor e o avatar podem atualizar sem abrir abas.
+    window.dispatchEvent(new Event("pmobile:sessao-alterada"));
 }
 
 function abrirLoginPmobile() {

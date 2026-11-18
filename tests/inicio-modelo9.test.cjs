@@ -90,7 +90,7 @@ test("o novo tema não adiciona navegação automática nem altera permissões",
   const html=get("index.html");
   assert.match(html,/id="inicioBotaoIniciar" onclick="abrirSistema\(\)"/);
   assert.match(html,/id="loginManterLogin"/);
-  assert.match(html,/id="inicioFotoTelaCheia" data-pm-profile-photo/);
+  assert.match(html,/id="inicioFotoTelaCheia" data-pm-background-photo/);
   assert.match(html,/id="inicioMarcaModelo9"/);
   assert.match(html,/href="inicio-modelo9.css\?v=1.1-mobile"/);
   assert.match(html,/src="inicio-modelo9.js\?v=1.0"/);
