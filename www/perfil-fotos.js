@@ -13,8 +13,10 @@
   const status=message=>{const node=$("pmPerfilFotoStatus");if(node)node.textContent=message;};
   function current() {
     const u=window.usuarioPmobileAtual;
-    if(!u||!u.usuario||u.id===undefined||u.id===null)return null;
-    return {key:String(u.id),user:String(u.usuario),name:String(u.nome||u.usuario)};
+    if(!u||!u.usuario)return null;
+    // Identidade estável: ID preferencial; login como alternativa para contas legadas.
+    const key=u.id===undefined||u.id===null ? "login:"+String(u.usuario).trim().toLocaleLowerCase("pt-BR") : String(u.id);
+    return {key,user:String(u.usuario),name:String(u.nome||u.usuario)};
   }
   function initials(name) {
     const words=String(name||"?").trim().split(/\s+/).filter(Boolean);

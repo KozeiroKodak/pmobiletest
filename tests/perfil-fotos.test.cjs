@@ -19,7 +19,7 @@ test('perfil disponível sem expor novo cartão no menu restrito de nível 2',()
 test('persistência isolada e foto otimizada antes da gravação',()=>{
  const js=get('perfil-fotos.js');
  assert.match(js,/indexedDB\.open\(DB_NAME,1\)/);
- assert.match(js,/key:String\(u\.id\)/);
+ assert.match(js,/u\.id===undefined\|\|u\.id===null/);
  assert.match(js,/os\.put\(blob,user\.key\)/);
  assert.match(js,/os\.delete\(user\.key\)/);
  assert.match(js,/canvas\.toBlob/);
