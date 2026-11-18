@@ -1,10 +1,10 @@
 {
-  "webVersion": "0.0.427",
+  "webVersion": "0.0.428",
   "nativeMinVersion": "1.05",
-  "package": "https://github.com/KozeiroKodak/pmobiletest/releases/download/ota-web-0.0.427/pmobile-web-0.0.427.zip",
-  "sha256": "79c8a9908a57acab450e6ab8df922752a506e2ce35b0c06e1fa3d0f364aa5628",
+  "package": "https://github.com/KozeiroKodak/pmobiletest/releases/download/ota-web-0.0.428/pmobile-web-0.0.428.zip",
+  "sha256": "3be24a535c02d1aae9724127e1091fa60be50b05c3577c715951b992095fac80",
   "mandatory": false,
-  "sizeBytes": 642067,
-  "publishedAt": "2026-11-18T18:07:54.576653+00:00",
-  "releaseNotes": "PMobile — BugHunter: correção responsiva da tela de boas-vindas modelo 9.\n\n- Corrigido o logo CBA que aparecia como texto no Android: arquivo original incorporado ao HTML, pois o pacote OTA web não inclui imagens .webp separadas.\n- Arte CBA original preservada byte a byte, sem redesenho ou substituição.\n- Layout mobile refinado com duas camadas da foto: fundo desfocado para preencher a tela e imagem integral mesclada para reduzir cortes do rosto.\n- Ajustados o espaçamento vertical, tamanho do logo, títulos e botão Iniciar em telas estreitas, inclusive celulares menores.\n- Layout desktop, opção Manter login, autenticação, permissões, fotos dos usuários e Supabase preservados.\n- Aplicação apenas visual, distribuída pelo OTA web sem reinstalar APK."
+  "sizeBytes": 650447,
+  "publishedAt": "2026-11-18T19:35:39.754589+00:00",
+  "releaseNotes": "PMobile — editor de fotos de perfil e fundo independente.\n\n- Nova interface em Configurações de perfil e na foto da tela inicial: abas Foto de perfil e Plano de fundo.\n- Escolha JPG/PNG/WebP, visualize antes de salvar e ajuste por arrasto, posição horizontal, vertical e zoom.\n- Fundo permite também controlar o degradê roxo. O editor salva o enquadramento por conta.\n- Foto circular salva em JPEG 384px, sem alterar a foto de fundo; o fundo salva imagem otimizada em resolução maior.\n- Fundo privado e preferências vinculados ao usuário no Supabase por funções RPC credenciadas, com cache e fila offline por conta.\n- Sem foto de fundo específica, o avatar permanece como alternativa. Sem Manter login ativo, nenhuma imagem de fundo aparece.\n- Tela de boas-vindas não abre as abas automaticamente; permissões, login, OneDrive e identidade CBA preservados.\n- OTA web, sem novo APK. Testes de regressão para separação de fotos, RLS, navegação e empacotamento."
 }
