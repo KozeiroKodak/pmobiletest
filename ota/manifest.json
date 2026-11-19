@@ -1,10 +1,10 @@
 {
-  "webVersion": "0.0.429",
+  "webVersion": "0.0.430",
   "nativeMinVersion": "1.05",
-  "package": "https://github.com/KozeiroKodak/pmobiletest/releases/download/ota-web-0.0.429/pmobile-web-0.0.429.zip",
-  "sha256": "f074a2ccc6ca011633fe46388c411180c3702b5060db018b69f7c94dfe0fe8ee",
+  "package": "https://github.com/KozeiroKodak/pmobiletest/releases/download/ota-web-0.0.430/pmobile-web-0.0.430.zip",
+  "sha256": "f5764c0f3d3dfa20a7ced7b461db33a77b78944155cab390dd40d673d6f328bc",
   "mandatory": false,
-  "sizeBytes": 651712,
-  "publishedAt": "2026-11-18T22:25:28.720989+00:00",
+  "sizeBytes": 651804,
+  "publishedAt": "2026-11-19T02:19:42.906850+00:00",
   "releaseNotes": "PMobile / BugHunter: corrigir eixo vertical do editor de fotos (OTA).\n\n- Corrigido o controle Posição vertical: com zoom acima de 100%, a foto agora desloca a área real de recorte, e não apenas o texto do slider.\n- O eixo horizontal usa o mesmo cálculo e o arrastar respeita a sobra de pixels da imagem.\n- Percentuais são arredondados para números inteiros (sem casas decimais extensas).\n- A prévia do plano de fundo usa formato vertical próximo ao do celular.\n- A tela de boas-vindas reaplica o mesmo recorte após salvar, reabrir ou girar o aparelho.\n- Se não houver sobra vertical no zoom atual, o editor orienta aumentar o zoom.\n- Fotos e ajustes existentes, dados do Supabase, conta, hierarquias e sistema OTA preservados.\n- Adicionados testes causais de regressão comparando Y=100%, Y=53% e zoom 165%."
 }
