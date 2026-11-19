@@ -8,21 +8,21 @@ const time=t=>{if(!t)return "Não registrada";const d=new Date(t);return isNaN(d
 async function snapshot(){
  const s=window.estadoSincronizacaoPmobile||{};
  const online=navigator.onLine&&s.internetConfirmada!==false;
- let count=null,blocked=0,inventory=null,stamp=null,driver=null,unknown=0;
- if(typeof lerContagensManuais==="function"){try{const list=await lerContagensManuais();if(Array.isArray(list)){count=list.filter(x=>!x.sincronizado&&!x.bloqueadoPorLimpeza).length;blocked=list.filter(x=>!x.sincronizado&&x.bloqueadoPorLimpeza).length;}}catch(e){lastError=String(e.message||e);}}
+ let count=null,blocked=0,inventory=null,stamp=null,driver=null,unknown=0,verificationError="";
+ if(typeof lerContagensManuais==="function"){try{const list=await lerContagensManuais();if(Array.isArray(list)){count=list.filter(x=>!x.sincronizado&&!x.bloqueadoPorLimpeza).length;blocked=list.filter(x=>!x.sincronizado&&x.bloqueadoPorLimpeza).length;}}catch(e){verificationError="Contagens manuais: não foi possível verificar as pendências.";}}
  if(typeof obterMateriaisLocais==="function"){try{const a=obterMateriaisLocais();if(Array.isArray(a))inventory=a.length;}catch(e){}}
  if(typeof obterDataUltimaSincronizacao==="function"){try{stamp=await obterDataUltimaSincronizacao();}catch(e){}}
  if(APP==="coletas"&&window.PMColetasOffline){try{const all=await window.PMColetasOffline.listar();const user=String((typeof sessaoMotorista==="function" ? sessaoMotorista()?.usuario : null)||window.usuarioPmobileAtual?.usuario||"");const own=all.filter(x=>x.usuario===user);driver=own.filter(x=>x.estado==="pendente"||x.estado==="enviando").length;unknown=own.filter(x=>x.estado==="incerto").length;}catch(e){lastError=String(e.message||e);}}
  let conferences=null;
- if(APP==="pmobile"&&typeof obterConferenciasPendentes==="function"){try{const a=await obterConferenciasPendentes();if(Array.isArray(a))conferences=a.length;}catch(e){}}
+ if(APP==="pmobile"&&typeof obterConferenciasPendentes==="function"){try{const a=await obterConferenciasPendentes();if(Array.isArray(a))conferences=a.length;}catch(e){verificationError="Conferências: não foi possível verificar as pendências.";}}
  const pending=(count||0)+(driver||0)+(conferences||0);
- let state=busy?"busy":!online?"offline":unknown||blocked||s.erro||lastError?"error":pending?"pending":(APP!=="coletas"&&inventory===0)||((APP!=="coletas")&&count===null)?"attention":"ok";
+ let state=busy?"busy":!online?"offline":unknown||blocked||s.erro||lastError||verificationError?"error":pending?"pending":(APP!=="coletas"&&(inventory===null||inventory===0||count===null||conferences===null))?"attention":"ok";
  // Não declarar sucesso se os módulos críticos ainda não foram verificados.
  
  if(state==="ok"&&APP==="coletas"&&driver===null)state="attention";
- return {online,count,blocked,inventory,stamp,driver,unknown,conferences,pending,state};
+ return {online,count,blocked,inventory,stamp,driver,unknown,conferences,pending,state,verificationError};
 }
-const labels={ok:["Tudo sincronizado","Registros confirmados"],attention:["Sincronização requer atenção","Verifique os detalhes"],pending:["Operações pendentes","Aguardando confirmação do servidor"],offline:["Modo offline","Dados locais disponíveis, quando carregados"],busy:["Sincronizando...","Verificando operações"],error:["Sincronização requer revisão","Existem falhas ou registros a verificar"]};
+const labels={ok:["Sem pendências locais","Filas locais verificadas"],attention:["Sincronização requer atenção","Verifique os detalhes"],pending:["Operações pendentes","Aguardando confirmação do servidor"],offline:["Modo offline","Dados locais disponíveis, quando carregados"],busy:["Sincronizando...","Verificando operações"],error:["Sincronização requer revisão","Existem falhas ou registros a verificar"]};
 let root,button,panel;
 function detailRow(label,value){const row=el("div","sync-detail-row");row.append(el("span","",label),el("strong","",String(value)));return row;}
 async function render(){
@@ -44,7 +44,7 @@ async function render(){
  if(d.blocked)panel.append(detailRow("Contagens bloqueadas — revisar",d.blocked));
  if(d.stamp)panel.append(detailRow("Último inventário",time(d.stamp)));
  if(lastAttempt)panel.append(detailRow("Última tentativa",time(lastAttempt)));
- if(lastError)panel.append(el("p","sync-error",lastError.slice(0,220)));
+ if(d.verificationError||lastError)panel.append(el("p","sync-error",(d.verificationError||lastError).slice(0,220)));
  if(d.unknown||d.blocked)panel.append(el("p","sync-note","Operações em revisão não são reenviadas automaticamente."));
  const action=el("button","sync-action",busy?"Sincronizando...":"↻  Sincronizar agora");
  action.type="button";action.disabled=busy||!d.online;action.addEventListener("click",retry);panel.append(action);
@@ -57,7 +57,10 @@ async function retry(){
  busy=true;lastAttempt=Date.now();lastError="";await render();
  try{
  if(APP==="coletas"&&window.PMColetasOffline)await window.PMColetasOffline.enviar();
- if(APP!=="coletas"&&typeof atualizarContagensManuais==="function")await atualizarContagensManuais();
+ if(APP!=="coletas"){
+   if(typeof atualizarContagensManuais!=="function"||await atualizarContagensManuais()!==true)
+     lastError="Contagens manuais: consulta ao servidor não confirmada.";
+ }
  if(typeof sincronizarMateriaisLocaisComSupabase==="function") {
    const result=await sincronizarMateriaisLocaisComSupabase(false);
    if(result&&!result.sucesso&&!result.ignorada)lastError="Inventário: atualização não confirmada.";

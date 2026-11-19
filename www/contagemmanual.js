@@ -771,7 +771,7 @@ let intervaloSincronizacaoContagensManuais = null;
 let sincronizacaoContagensManuaisEmAndamento = false;
 
 async function atualizarContagensManuais() {
-    if (sincronizacaoContagensManuaisEmAndamento) return;
+    if (sincronizacaoContagensManuaisEmAndamento) return false;
     sincronizacaoContagensManuaisEmAndamento = true;
 
     try {
@@ -795,6 +795,7 @@ async function atualizarContagensManuais() {
                 : pendentes ? "Sincronização pendente — verificando novamente em 10 segundos."
                 : "Sincronizado com o Supabase.";
         }
+        return true;
     } catch (erro) {
         console.warn("Sincronização da contagem manual falhou:", erro);
         const status = document.getElementById("statusContagemManual");
@@ -802,6 +803,7 @@ async function atualizarContagensManuais() {
             status.textContent =
                 "⚠️ Não foi possível consultar o Supabase. Tentando novamente.";
         }
+        return false;
     } finally {
         sincronizacaoContagensManuaisEmAndamento = false;
     }
