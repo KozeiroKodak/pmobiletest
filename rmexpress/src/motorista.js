@@ -58,7 +58,7 @@ export function iniciarMotorista(){
   let dadosCache=false;
   let atualizadoEm=null;
   let categoriaAtiva="todas";
-  const perfilAtivo=()=>Boolean(sessao && ["RMMOTORISTAS","RMADMIN"].includes(sessao.nivel));
+  const perfilAtivo=()=>Boolean(sessao && ["RMMOTORISTAS","RMADMIN","ADMIN"].includes(sessao.nivel));
 
   function status(texto,erro=false){
     for(const id of ["statusMotoristaReal","statusRoteiroMotorista"]){
@@ -258,7 +258,7 @@ export function iniciarMotorista(){
   }
   async function entrar(novaSessao){
     sair();
-    if(!novaSessao || !["RMMOTORISTAS","RMADMIN"].includes(novaSessao.nivel))return;
+    if(!novaSessao || !["RMMOTORISTAS","RMADMIN","ADMIN"].includes(novaSessao.nivel))return;
     sessao=novaSessao;
     desenhar();
     return carregar();

@@ -997,3 +997,63 @@ body,.app-shell,.main{background:var(--fundo);color:var(--texto)}
 @media(max-width:620px){
   .environment-actions .btn,.proxima-acoes .btn{white-space:normal}
 }
+
+
+/* Seleção administrativa pós-login: motoristas comuns nunca veem esta tela. */
+.selecao-modo {
+  min-height:100dvh;
+  width:100%;
+  margin:0 auto;
+  padding:clamp(24px,5vh,54px) max(18px,env(safe-area-inset-left)) 36px;
+  background:radial-gradient(ellipse at top,rgba(34,91,108,.28),transparent 65%),#09151a;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:12px;color:var(--texto);
+}
+.selecao-modo>*{width:min(100%,490px)}
+.modo-marca {display:flex;align-items:center;gap:13px;margin-bottom:14px;font-size:19px}
+.modo-marca .brand-mark {width:44px;height:44px;display:grid;place-items:center;border-radius:12px;font-weight:900}
+.modo-sobretitulo{font-size:11px;letter-spacing:.14em;color:var(--pm-acento);font-weight:750}
+.selecao-modo h1{font-size:clamp(29px,7vw,40px);letter-spacing:-.04em;line-height:1.15;margin:0}
+.modo-subtitulo{font-size:14px;line-height:1.6;color:var(--texto-secundario);margin-bottom:11px}
+.modo-subtitulo strong{color:var(--texto)}
+.modo-opcoes{display:grid;gap:13px}
+.modo-card{
+ width:100%;display:grid;grid-template-columns:53px 1fr 18px;align-items:center;
+ gap:15px;text-align:left;padding:19px 17px;min-height:108px;
+ border:1px solid rgba(87,220,235,.3);border-radius:17px;
+ background:linear-gradient(125deg,rgba(87,220,235,.08),transparent 65%),#14252b;
+ color:var(--texto);cursor:pointer;transition:background .15s,border-color .15s;
+}
+.modo-card:not(:disabled):hover{background:#1b343b;border-color:var(--pm-acento)}
+.modo-card:disabled{opacity:.48;cursor:wait}
+.modo-card .modo-icone{width:53px;height:53px;display:grid;place-items:center;font-size:26px;border-radius:13px;background:#183943;border:1px solid #39606a}
+.modo-card strong,.modo-card small{display:block}
+.modo-card strong{font-size:17px;margin-bottom:6px}
+.modo-card small{font-size:12px;color:var(--muted);line-height:1.45}
+.modo-seta{font-size:24px;color:var(--pm-acento)}
+.modo-estado{min-height:2.8em;font-size:12px;color:var(--muted);line-height:1.5}
+.modo-sair{
+ width:min(100%,490px);min-height:42px;
+ border:1px solid var(--borda-clara);border-radius:10px;
+ background:transparent;color:var(--texto);cursor:pointer;
+}
+.modo-sair:hover{background:var(--fundo-hover)}
+.topbar-direita{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.topbar .modo-alternar{
+ border:1px solid var(--borda-clara);background:#173941;color:#d7faff;
+ border-radius:12px;padding:11px 14px;min-height:43px;
+ font-weight:700;font-size:12px;cursor:pointer;white-space:normal;
+}
+.topbar .modo-alternar:hover{border-color:var(--pm-acento);background:#1d4954}
+#aplicacao[data-modo="motorista"] .home-admin-group {display:none!important}
+#aplicacao[data-modo="administrativo"] .home-app-card[data-view="painel"],
+#aplicacao[data-modo="administrativo"] .home-app-card[data-view="entregas"],
+#aplicacao[data-modo="administrativo"] .home-app-card[data-view="roteiros"] {display:none!important}
+@media(max-width:620px){
+ .selecao-modo{justify-content:flex-start;padding-top:clamp(28px,8vh,85px)}
+ .modo-card{min-height:100px;padding:16px 14px}
+ .topbar-direita{width:100%;justify-content:space-between}
+ .topbar .modo-alternar{flex:1 1 auto}
+ .topbar .connection{flex:0 1 auto}
+}
+@media(prefers-reduced-motion:reduce){.modo-card{transition:none}}

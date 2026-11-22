@@ -8,7 +8,7 @@ const PERFIS_GERENCIA=new Set(["ADMIN","RMADMIN"]);
 // RMADMIN só opera como motorista se constar na lista autorizada pelo Supabase.
 export function podeAtuarComoMotorista(perfil,motoristas=[]){
   if(!perfil)return false;
-  if(perfil.nivel==="RMMOTORISTAS")return true;
+  if(perfil.nivel==="RMMOTORISTAS"||perfil.nivel==="ADMIN")return true;
   return perfil.nivel==="RMADMIN" && motoristas.some(m=>String(m.id)===String(perfil.id));
 }
 const LIMITE=60;
@@ -178,6 +178,7 @@ export function iniciarGerencia({aoAlterarSessao=()=>{},aoSessaoMotorista=()=>{}
         aviso("Acesso autorizado. Consultando notas disponíveis...");
         await carregarMotoristas();
         if(podeAtuarComoMotorista(perfil,motoristas))await aoSessaoMotorista(sessao);
+        else await aoSessaoMotorista(null);
         await carregarContadores();
         await carregarNotas(true);
         await historico.carregar();

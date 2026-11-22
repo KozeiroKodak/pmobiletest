@@ -1,6 +1,7 @@
 import { iniciarNotificacoes } from './src/notificacoes.js';
 import { estaIntegradoPmobile, iniciarIntegracaoPmobile } from './src/integracao.js';
 import { iniciarAcesso } from "./src/acesso.js";
+import {ehAdministrador,podeAbrirArea,MODOS} from "./src/modos.js";
 import { STATUS_ENTREGA, filtrarEntregas, resumirEntregas } from "./src/domain.js";
 import { iniciarGerencia } from "./src/gerencia.js";
 import { iniciarMotorista } from "./src/motorista.js";
@@ -14,6 +15,7 @@ const $ = id => document.getElementById(id);
 const storage = (() => { try { return window.localStorage; } catch { return null; } })();
 let demo = lerDemo(storage);
 let sessaoPmobile = null;
+let modoAtual = null;
 const ROTULOS = Object.freeze({
   pendente: "Pendente",
   em_rota: "Em rota",
@@ -29,7 +31,9 @@ function html(valor) {
 
 function abrirAba(nome) {
   if (!["inicio","painel","entregas","roteiros","gerencia","central"].includes(nome)) return;
-  if (["gerencia","central"].includes(nome) && !["ADMIN","RMADMIN"].includes(sessaoPmobile?.nivel)) return;
+  if (!podeAbrirArea(sessaoPmobile,modoAtual,nome,{
+    motoristaHabilitado:motorista.estaAtivo(),demo:!!demo&&!sessaoPmobile
+  })) return;
   document.querySelectorAll(".view").forEach(view => { view.hidden = view.id !== "view-" + nome; });
   document.querySelectorAll("[data-view]").forEach(botao => {
     const ativo = botao.dataset.view === nome;
@@ -41,10 +45,37 @@ function abrirAba(nome) {
   window.scrollTo(0,0);
 }
 
+function aplicarModo(modo) {
+  const admin=ehAdministrador(sessaoPmobile);
+  const motoristaHabilitado=Boolean(motorista.estaAtivo()||(!sessaoPmobile&&demo));
+  if(modo===MODOS.ADMINISTRATIVO&&!admin)return false;
+  if(modo===MODOS.MOTORISTA&&!motoristaHabilitado&&sessaoPmobile?.nivel!=="RMMOTORISTAS")return false;
+  modoAtual=modo;
+  $("aplicacao").dataset.modo=modo;
+  for (const destino of ["painel","entregas","roteiros"]){
+    const cartao=document.querySelector('[data-view="'+destino+'"]');
+    if(cartao)cartao.hidden=modo!==MODOS.MOTORISTA;
+  }
+  const gestao=admin&&modo===MODOS.ADMINISTRATIVO;
+  $("grupoGestao").hidden=!gestao;
+  $("tabGerencia").hidden=!gestao;
+  $("tabCentral").hidden=!gestao;
+  $("tituloPrincipal").textContent=gestao?"Gestão de entregas":"Minha jornada";
+  $("descricaoModoAtual").textContent=gestao
+    ?"Distribua notas e acompanhe os motoristas."
+    :"Suas entregas, rotas e andamento do dia.";
+  $("etiquetaModoAtual").textContent=gestao?"ACESSO ADMINISTRATIVO":"MODO MOTORISTA";
+  $("alternarModo").hidden=!admin;
+  $("alternarModo").textContent=gestao?"↔ Ir para Modo Motorista":"↔ Ir para Administrativo";
+  abrirAba("inicio");
+  return true;
+}
+
+
 // Called by the Android back dispatcher; false preserves the system exit at Home.
 window.voltarAndroidPmentregas = function() {
   if (!$('painelNotificacoes').hidden) { notificacoes.fechar(); return true; }
-  if (!$('loginPmobile').hidden) { $('voltarInicioAcesso').click(); return true; }
+  if (acesso?.voltar()) return true;
   if (!$('aplicacao').hidden && $('view-inicio').hidden) { abrirAba('inicio'); return true; }
   return false;
 };
@@ -221,6 +252,7 @@ document.querySelectorAll("[data-view]").forEach(botao =>
   botao.addEventListener("click",()=>abrirAba(botao.dataset.view))
 );
 $("voltarMenu").addEventListener("click",()=>abrirAba("inicio"));
+$("alternarModo").addEventListener("click",()=>acesso.alternarModo());
 $("verEntregas").addEventListener("click",()=>abrirAba("entregas"));
 $("verRoteiroProxima").addEventListener("click",()=>abrirAba("roteiros"));
 $("iniciarDemo").addEventListener("click",ativarDemo);
@@ -240,7 +272,8 @@ const central=iniciarCentral();
 $("tabCentral").hidden=true;
 const acesso=iniciarAcesso({
   aoCancelar(){gerencia.sair();},
-  aoDemonstrar(){if(!demo)ativarDemo();else renderizar();}
+  aoDemonstrar(){if(!demo)ativarDemo();else renderizar();},
+  aoSelecionarModo:aplicarModo
 });
 const notificacoes=iniciarNotificacoes({abrirArea:abrirAba,gerenciarDispositivo:!estaIntegradoPmobile()});
 const gerencia=iniciarGerencia({
@@ -249,19 +282,25 @@ const gerencia=iniciarGerencia({
     if(sessao)return central.entrar(sessao);
     central.sair();
   },
-  aoSessaoMotorista(sessao){
-    if(!sessao) { motorista.sair();return; }
-    return motorista.entrar(sessao);
+  async aoSessaoMotorista(sessao){
+    if(!sessao){
+      motorista.sair();
+      acesso.definirMotoristaHabilitado(false);
+      return;
+    }
+    await motorista.entrar(sessao);
+    acesso.definirMotoristaHabilitado(motorista.estaAtivo());
   },
   aoAlterarSessao(perfil){
     sessaoPmobile = perfil;
+    modoAtual = null;
     acesso.definirSessao(perfil);
     if(perfil){
       demo = null;
       limparDemo(storage);
       mensagem("Sessão PMobile iniciada. A demonstração foi desligada para separar dados reais de exemplos.");
-      $("tabCentral").hidden=!["ADMIN","RMADMIN"].includes(perfil.nivel);
-      $("grupoGestao").hidden=!["ADMIN","RMADMIN"].includes(perfil.nivel);
+      $("tabCentral").hidden=true;
+      $("grupoGestao").hidden=true;
       abrirAba("inicio");
     }else{
       $("tabCentral").hidden=true;

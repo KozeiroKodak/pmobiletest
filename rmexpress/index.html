@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#09151a">
   <meta name="description" content="PMEntregas: jornada do motorista com entregas reais atribuídas, roteiros e gerência RMExpress.">
   <title>PMEntregas · Jornada do motorista</title>
-  <link rel="stylesheet" href="./style.css?v=0.0.11">
+  <link rel="stylesheet" href="./style.css?v=0.0.12">
 </head>
 <body>
   <section id="inicio" aria-labelledby="tituloInicioAcesso">
@@ -36,6 +36,25 @@
     </div>
   </section>
 
+  <section id="selecaoModo" class="selecao-modo" aria-labelledby="tituloSelecaoModo" hidden>
+    <div class="modo-marca"><div class="brand-mark" aria-hidden="true">PM</div><strong>PMEntregas</strong></div>
+    <p class="modo-sobretitulo">ACESSO RESTRITO · ADMINISTRAÇÃO</p>
+    <h1 id="tituloSelecaoModo">Como deseja trabalhar?</h1>
+    <p class="modo-subtitulo">Olá, <strong id="nomeSelecaoModo"></strong>. Escolha sua área de trabalho.</p>
+    <div class="modo-opcoes">
+      <button type="button" id="selecionarModoMotorista" class="modo-card" disabled>
+        <span class="modo-icone" aria-hidden="true">🚚</span>
+        <span><strong>Modo Motorista</strong><small>Minhas entregas, roteiro e jornada</small></span><span class="modo-seta" aria-hidden="true">›</span>
+      </button>
+      <button type="button" id="selecionarModoAdministrativo" class="modo-card">
+        <span class="modo-icone" aria-hidden="true">🗂️</span>
+        <span><strong>Acesso Administrativo</strong><small>Distribuir notas e acompanhar a operação</small></span><span class="modo-seta" aria-hidden="true">›</span>
+      </button>
+    </div>
+    <p id="mensagemSelecaoModo" class="modo-estado" role="status" aria-live="polite"></p>
+    <button type="button" id="sairSelecaoModo" class="modo-sair">Sair desta conta</button>
+  </section>
+
   <div class="app-shell" id="aplicacao" hidden>
     <header class="topbar">
       <div class="identity">
@@ -43,7 +62,7 @@
         <div class="brand-mark" aria-hidden="true">PM</div>
         <div><strong>PMEntregas</strong><small>Operação logística</small></div>
       </div>
-      <div class="connection" id="connection" role="status" aria-live="polite">Verificando conexão</div>
+      <div class="topbar-direita"><button type="button" id="alternarModo" class="modo-alternar" hidden aria-label="Alternar entre modo administrativo e motorista">↔ Alternar modo</button><div class="connection" id="connection" role="status" aria-live="polite">Verificando conexão</div></div>
     </header>
 
     <main class="main">
@@ -58,9 +77,9 @@
       <section class="view home-hub" id="view-inicio" aria-labelledby="tituloPrincipal">
         <div class="home-apps">
           <header class="home-apps-cabecalho">
-            <div class="home-apps-kicker">PMENTREGAS / OPERAÇÃO LOGÍSTICA</div>
+            <div class="home-apps-kicker" id="etiquetaModoAtual">PMENTREGAS / OPERAÇÃO LOGÍSTICA</div>
             <h1 id="tituloPrincipal">Central de entregas</h1>
-            <p>Selecione uma área para continuar.</p>
+            <p id="descricaoModoAtual">Selecione uma área para continuar.</p>
           </header>
           <nav class="home-apps-grade" aria-label="Áreas do PMEntregas">
             <button type="button" class="home-app-card" data-view="painel"  title="Abrir Painel"><span class="home-app-icone" aria-hidden="true">📊</span><span class="home-app-conteudo"><strong>Painel</strong><small>Resumo da jornada e progresso</small></span><span class="home-app-seta" aria-hidden="true">›</span></button>
@@ -267,6 +286,6 @@
 
     </main>
   </div>
-  <script type="module" src="./app.js?v=0.0.11"></script>
+  <script type="module" src="./app.js?v=0.0.12"></script>
 </body>
 </html>
