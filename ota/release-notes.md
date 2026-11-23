@@ -1,7 +1,8 @@
-PMobile / Opções de Cotações: novo importador de planilhas por transportadora.
+PMobile / Cotações: consulta própria para importações manuais e histórico de versões.
 
-- Botão Adicionar manualmente abre o importador de Excel ou CSV, sem digitação de registros.
-- Importação exige somente UF, Destino e TDA, mostra prévia e bloqueia duplicidades antes do envio.
-- Cada importação permanece isolada até completar todos os lotes; nova lista só substitui a anterior da mesma transportadora após confirmação.
-- Cotações por Região passa a exibir destinos importados, com TDA, além dos rastreios existentes.
-- Nenhuma planilha foi enviada e não foram modificados os registros de Rastreio existentes.
+- Nova terceira opção Importações manuais ao lado de Cotações por Região e Adicionar manualmente.
+- Consulte transportadoras, cidades, TDA, arquivo de origem, data de importação e versões anteriores.
+- Novas importações criam versões; as anteriores continuam salvas no Supabase, sem sobrescrever o histórico.
+- Tabelas de cotações permanecem separadas dos rastreios operacionais e protegidas com RLS.
+- Consulta disponível para perfis autorizados e histórico completo apenas para ADMIN.
+- Nenhuma planilha foi importada nem registros existentes foram apagados.

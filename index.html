@@ -62,6 +62,7 @@
 <link rel="stylesheet" href="perfil-fotos.css?v=perfil-1.0">
 <link rel="stylesheet" href="inicio-modelo9.css?v=1.1-mobile">
 <link rel="stylesheet" href="perfil-editor.css?v=1.1-eixos">
+<link rel="stylesheet" href="cotacoes-historico.css?v=0.0.433">
 <link rel="stylesheet" href="cba-theme.css?v=cba-1.0">
 </head>
 
@@ -1098,6 +1099,8 @@
           <p class="cot-kicker">PMOBILE</p><h1>Opções de Cotações</h1><p class="cot-sub">Consulte opções de transporte disponíveis.</p>
           <button class="cot-card" onclick="abrirCotacoesRegiao()" type="button"><span class="cot-icon">🌎</span><span><strong>Cotações por Região</strong><small>Consulte as transportadoras que atendem cada região.</small></span><span class="cot-arrow">›</span></button>
           <button class="cot-card cot-importacao-atalho" onclick="abrirImportacaoCotacoes()" type="button"><span class="cot-icon">📥</span><span><strong>Adicionar manualmente</strong><small>Importar planilha Excel com cidades atendidas por transportadora.</small></span><span class="cot-arrow">›</span></button>
+          
+          <button class="cot-card cot-importacao-atalho" type="button" onclick="abrirHistoricoCotacoes()"><span class="cot-icon">📚</span><span><strong>Importações manuais</strong><small>Consultar transportadoras, cidades, TDA e versões anteriores armazenadas no Supabase.</small></span><span class="cot-arrow">›</span></button>
           <div id="cotImportacaoPainel" class="cot-importacao" hidden>
             <h2>Importar cidades da transportadora</h2>
             <p>Selecione uma planilha revisada. Somente UF, Destino e TDA serão lidos; nada será enviado antes da confirmação. É necessário acesso administrativo.</p>
@@ -1108,8 +1111,40 @@
             <div id="cotImportacaoPrevia" class="cot-importacao-previa"></div>
             <button type="button" id="cotImportacaoConfirmar" class="cot-importacao-confirmar" onclick="confirmarImportacaoCotacoes()" disabled>Confirmar importação no Supabase</button>
             <p id="cotImportacaoStatus" class="cot-importacao-status" role="status" aria-live="polite">Aguardando planilha revisada.</p>
-            <p class="cot-importacao-nota">Uma nova importação substitui somente a lista anterior da mesma transportadora depois que todas as linhas forem conferidas e gravadas.</p>
+            <p class="cot-importacao-nota">Cada importação cria uma nova versão. As versões anteriores permanecem salvas e podem ser consultadas em Importações manuais. Os dados de Rastreio não são modificados.</p>
           </div></div>
+        </section>
+        
+        <section id="cotacoesImportadas" class="tela-sistema" style="display:none">
+          <div class="cot-wrap">
+            <button class="cot-back" type="button" onclick="voltarOpcoesCotacoes()">← Opções de Cotações</button>
+            <p class="cot-kicker">PMOBILE / COTAÇÕES</p>
+            <h1>Importações manuais</h1>
+            <p class="cot-sub">Consulte os registros armazenados separadamente no Supabase. Nenhum dado original do Rastreio ou das importações anteriores é alterado nesta tela.</p>
+            <p id="cotHistoricoStatus" class="cot-historico-status" role="status" aria-live="polite"></p>
+            <div id="cotHistoricoPainelLista">
+              <div id="cotHistoricoLista" class="cot-list"></div>
+              <div id="cotHistoricoPaginacao" class="cot-historico-navegacao" hidden>
+                <button type="button" id="cotHistoricoAnterior" onclick="mudarPaginaHistorico(-1)" disabled>← Anterior</button>
+                <button type="button" id="cotHistoricoProximo" onclick="mudarPaginaHistorico(1)" disabled>Próxima →</button>
+              </div>
+            </div>
+            <div id="cotHistoricoDetalhe" hidden>
+              <button class="cot-historico-botao" type="button" onclick="voltarListaImportacoes()">← Voltar à lista de importações</button>
+              <h2 id="cotHistoricoTitulo"></h2>
+              <p id="cotHistoricoDescricao" class="cot-historico-aviso"></p>
+              <div class="cot-historico-busca">
+                <input type="search" id="cotHistoricoBusca" placeholder="Pesquisar destino ou UF" autocomplete="off" aria-label="Pesquisar cidades desta importação" onkeydown="if(event.key==='Enter')buscarDestinosImportados()">
+                <button class="cot-historico-botao" type="button" onclick="buscarDestinosImportados()">Pesquisar</button>
+              </div>
+              <div id="cotHistoricoTabela" class="cot-historico-tabela"></div>
+              <div class="cot-historico-navegacao">
+                <button type="button" id="cotHistoricoDestinosAnterior" onclick="paginaDestinosImportados(-1)" disabled>← Anterior</button>
+                <span id="cotHistoricoPaginaDestino">Página 1</span>
+                <button type="button" id="cotHistoricoDestinosProximo" onclick="paginaDestinosImportados(1)" disabled>Próxima →</button>
+              </div>
+            </div>
+          </div>
         </section>
         <section id="cotacoesRegiao" class="tela-sistema" style="display:none">
           <div class="cot-wrap"><button class="cot-back" onclick="voltarOpcoesCotacoes()" type="button">← Opções de Cotações</button>
@@ -1359,6 +1394,7 @@
 
 <script src="cotacoes.js?v=0.0.432-cidades"></script>
 <script src="cotacoes-importacao.js?v=0.0.432"></script>
+<script src="cotacoes-historico.js?v=0.0.433"></script>
 <script src="dados-locais/pesquisa-local.js?v=8.0"></script>
 <script src="dados-locais/estoque-local.js?v=8.0"></script>
 <script src="dados-locais/reservas-local.js?v=8.0"></script>

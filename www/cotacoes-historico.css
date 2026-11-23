@@ -1,0 +1,33 @@
+/* PMobile — consultas de planilhas por transportadora (leitura, sem edição). */
+#cotacoesImportadas{
+ width:100%;max-width:100%;min-width:0;overflow-x:clip;box-sizing:border-box;
+ min-height:calc(100dvh - var(--status-altura));
+ background:radial-gradient(circle at 85% 5%,rgba(232,196,124,.085),transparent 38%),var(--cba-roxo,var(--fundo))!important;
+}
+#cotacoesImportadas .cot-wrap{
+ width:100%;max-width:1040px;min-width:0;box-sizing:border-box;
+ padding:24px clamp(12px,4vw,56px) 100px;
+}
+#cotacoesImportadas [hidden]{display:none!important}
+.cot-historico-item{margin-top:11px}
+.cot-historico-descricao{min-width:0;flex:1;display:grid;gap:5px}
+.cot-historico-descricao strong{font-size:.93rem}
+.cot-historico-descricao small{color:var(--texto-secundario);font-size:.78rem;overflow-wrap:anywhere}
+.cot-historico-navegacao{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-top:16px}
+.cot-historico-navegacao button,.cot-historico-botao{
+ min-height:42px;padding:10px 14px;border-radius:10px;
+ border:1px solid var(--cba-borda,var(--borda-clara,rgba(255,255,255,.2)));
+ background:var(--cba-cartao,var(--fundo-painel));color:var(--cba-texto,var(--texto));font:inherit;font-weight:650;cursor:pointer
+}
+.cot-historico-navegacao button:disabled{opacity:.4;cursor:not-allowed}
+.cot-historico-navegacao span{font-size:.85rem;color:var(--texto-secundario)}
+.cot-historico-busca{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.cot-historico-busca input{flex:1;min-width:180px;min-height:46px;padding:10px 13px;border:1px solid var(--borda-clara,rgba(255,255,255,.2));border-radius:10px;background:var(--fundo-painel);color:var(--texto);font:inherit;font-size:16px}
+.cot-historico-busca button{min-height:46px}
+.cot-historico-tabela{overflow-x:auto;margin-top:18px}
+.cot-historico-tabela .cot-importacao-tabela{min-width:340px}
+.cot-historico-status{margin:15px 0;color:var(--texto-secundario);font-size:.84rem}
+.cot-historico-status[data-erro=sim]{color:#ffaaaa}
+.cot-historico-aviso{font-size:.83rem;color:var(--texto-secundario)}
+#cotHistoricoDetalhe h2{font-size:clamp(1.4rem,5vw,1.85rem);overflow-wrap:anywhere}
+@media(max-width:700px){#cotacoesImportadas .cot-wrap{padding:20px 12px 90px}.cot-historico-busca button{width:100%}}
