@@ -138,7 +138,7 @@ async function confirmarImportacaoCotacoes(){
   preview([]);
   window.dispatchEvent(new CustomEvent("pmobile:cotacoes-atualizadas"));
  }catch(e){
-  status("Importação não concluída: "+(e.message||e)+". Nenhuma lista anterior ativa foi substituída. Revise e tente importar novamente.",true);
+  status("Importação sem confirmação final: "+(e.message||e)+". Se a rede caiu durante a finalização, a lista pode ter sido publicada. Consulte Cotações por Região antes de reenviar.",true);
  }finally{processando=false;atualizarBotao();}
 }
 window.abrirImportacaoCotacoes=abrirImportacaoCotacoes;
