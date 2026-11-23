@@ -1,10 +1,10 @@
 {
-  "webVersion": "0.0.430",
+  "webVersion": "0.0.431",
   "nativeMinVersion": "1.05",
-  "package": "https://github.com/KozeiroKodak/pmobiletest/releases/download/ota-web-0.0.430/pmobile-web-0.0.430.zip",
-  "sha256": "f5764c0f3d3dfa20a7ced7b461db33a77b78944155cab390dd40d673d6f328bc",
+  "package": "https://github.com/KozeiroKodak/pmobiletest/releases/download/ota-web-0.0.431/pmobile-web-0.0.431.zip",
+  "sha256": "719d2e10f96453349e61782632c5779aff02db4ad4a1d1601b82f64012eecbc8",
   "mandatory": false,
-  "sizeBytes": 651804,
-  "publishedAt": "2026-11-19T02:19:42.906850+00:00",
+  "sizeBytes": 654808,
+  "publishedAt": "2026-11-23T02:46:09.691383+00:00",
   "releaseNotes": "PMobile / Sincronização: indicação fiel às filas verificadas.\n\n- A central não mostra sucesso quando a fila de conferências não pôde ser lida.\n- A tentativa manual informa à central quando a consulta de contagens falha ou já está em andamento.\n- O estado sem pendências descreve apenas as filas locais verificadas; não promete confirmação remota sem prova.\n- Nenhum registro de produção ou regra de envio foi alterado."
 }
