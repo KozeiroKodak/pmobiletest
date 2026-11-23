@@ -75,7 +75,7 @@ async function prepararArquivoCotacoes(){
   let origem=null;
   for(const nomeAba of abas){
    const matriz=window.XLSX.utils.sheet_to_json(livro.Sheets[nomeAba],{
-    header:1,raw:false,defval:"",blankrows:false
+    header:1,raw:false,defval:"",blankrows:true
    });
    for(let pos=0;pos<Math.min(50,matriz.length);pos++){
     const nomes=(matriz[pos]||[]).map(v=>chave(v).replace(/[^A-Z0-9]/g,""));
