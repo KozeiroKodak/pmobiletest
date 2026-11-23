@@ -115,7 +115,7 @@ async function confirmarImportacaoCotacoes(){
  const usuario=window.usuarioPmobileAtual?.usuario;
  const credencial=window.credencialPmobileAtual;
  if(!usuario||!credencial){status("Faça login novamente para importar.",true);return;}
- if(!window.confirm("Confirmar "+linhas.length.toLocaleString("pt-BR")+" cidades para "+transportadora+"? Se esta transportadora já tiver dados importados, a nova lista substituirá a anterior somente após a importação completa."))return;
+ if(!window.confirm("Confirmar "+linhas.length.toLocaleString("pt-BR")+" cidades para "+transportadora+"? Se já houver dados desta transportadora, a nova lista ficará ativa após concluir o envio. A versão anterior continuará guardada no histórico."))return;
  processando=true;atualizarBotao();
  try{
   const comum={p_usuario:usuario,p_credencial:credencial};
@@ -132,7 +132,7 @@ async function confirmarImportacaoCotacoes(){
   const total=await rpc("pmobile_cotacoes_importar_finalizar_v1",{
    ...comum,p_importacao_id:id,p_esperado:linhas.length
   });
-  status("Importação concluída: "+total+" cidades de "+transportadora+". Os registros antigos dessa transportadora foram substituídos; os de outras transportadoras não foram alterados.",false);
+  status("Importação concluída: "+total+" cidades de "+transportadora+". A versão anterior desta transportadora foi preservada no histórico. Nenhuma outra transportadora foi alterada.",false);
   linhas=[];nomeArquivo="";
   if($("cotImportacaoArquivo"))$("cotImportacaoArquivo").value="";
   preview([]);
