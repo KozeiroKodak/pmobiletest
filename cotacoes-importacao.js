@@ -109,7 +109,7 @@ async function prepararArquivoCotacoes(){
    if(extraidas.length>limite)throw Error("Limite de "+limite.toLocaleString("pt-BR")+" localidades por arquivo.");
   }
   if(!extraidas.length)throw Error("Nenhum destino válido foi encontrado.");
-  if(falhas.length)throw Error("Corrija "+falhas.length+" problema(s) na planilha. "+falhas.slice(0,4).join(" "));
+  if(falhas.length){const repetidas=falhas.some(x=>x.includes("cidade duplicada"));throw Error("Corrija "+falhas.length+" problema(s) na planilha. "+falhas.slice(0,4).join(" ")+(repetidas?" Localidades com UF e Destino iguais podem ter códigos IBGE distintos na origem; confira antes de excluir ou alterar a TDA.":""));}
   linhas=extraidas;nomeArquivo=arquivo.name;preview(linhas);
   const aviso=excluidas?" "+excluidas+" localidade(s) marcadas como NÃO ATENDEMOS foram excluídas.":"";
   status("Aba "+nomeAba+", cabeçalho na linha "+primeira+": "+linhas.length+" destinos preparados. Outras colunas ignoradas."+aviso+" Nada foi enviado; confira a prévia e informe a transportadora para confirmar.",false);
