@@ -1,10 +1,10 @@
 {
-  "webVersion": "0.0.431",
+  "webVersion": "0.0.432",
   "nativeMinVersion": "1.05",
-  "package": "https://github.com/KozeiroKodak/pmobiletest/releases/download/ota-web-0.0.431/pmobile-web-0.0.431.zip",
-  "sha256": "719d2e10f96453349e61782632c5779aff02db4ad4a1d1601b82f64012eecbc8",
+  "package": "https://github.com/KozeiroKodak/pmobiletest/releases/download/ota-web-0.0.432/pmobile-web-0.0.432.zip",
+  "sha256": "7c49ed9aa353da607b0cf941e3be2de6cefc6c83fb694f0f6500282bceedb315",
   "mandatory": false,
-  "sizeBytes": 654808,
-  "publishedAt": "2026-11-23T02:46:09.691383+00:00",
-  "releaseNotes": "PMobile / Sincronização: indicação fiel às filas verificadas.\n\n- A central não mostra sucesso quando a fila de conferências não pôde ser lida.\n- A tentativa manual informa à central quando a consulta de contagens falha ou já está em andamento.\n- O estado sem pendências descreve apenas as filas locais verificadas; não promete confirmação remota sem prova.\n- Nenhum registro de produção ou regra de envio foi alterado."
+  "sizeBytes": 659636,
+  "publishedAt": "2026-11-23T19:55:22.084860+00:00",
+  "releaseNotes": "PMobile / Opções de Cotações: novo importador de planilhas por transportadora.\n\n- Botão Adicionar manualmente abre o importador de Excel ou CSV, sem digitação de registros.\n- Importação exige somente UF, Destino e TDA, mostra prévia e bloqueia duplicidades antes do envio.\n- Cada importação permanece isolada até completar todos os lotes; nova lista só substitui a anterior da mesma transportadora após confirmação.\n- Cotações por Região passa a exibir destinos importados, com TDA, além dos rastreios existentes.\n- Nenhuma planilha foi enviada e não foram modificados os registros de Rastreio existentes."
 }
