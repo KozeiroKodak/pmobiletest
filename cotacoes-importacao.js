@@ -67,19 +67,40 @@ async function prepararArquivoCotacoes(){
   if(!window.XLSX?.read||!window.XLSX?.utils?.sheet_to_json)throw Error("Leitor de Excel indisponível.");
   status("Analisando arquivo localmente...",false);
   const livro=window.XLSX.read(await arquivo.arrayBuffer(),{type:"array",cellDates:false});
-  const nomeAba=livro.SheetNames.find(n=>chave(n)==="CIDADES ATENDIDAS")||livro.SheetNames[0];
-  if(!nomeAba)throw Error("A planilha não contém abas.");
-  const matriz=window.XLSX.utils.sheet_to_json(livro.Sheets[nomeAba],{header:1,raw:false,defval:"",blankrows:false});
-  if(matriz.length<2)throw Error("A planilha não contém cidades.");
-  const cab=matriz[0].map(chave);
-  if(cab.length!==3||cab[0]!=="UF"||cab[1]!=="DESTINO"||cab[2]!=="TDA")
-   throw Error("Formato inválido. A primeira linha deve conter somente UF | Destino | TDA, nessa ordem.");
+  if(!Array.isArray(livro.SheetNames)||!livro.SheetNames.length)throw Error("A planilha não contém abas.");
+  // Planilhas de origem podem incluir título, observações, outras colunas e outras abas.
+  // Importar EXCLUSIVAMENTE UF, Destino e TDA, identificados pelos nomes do cabeçalho.
+  const abaPreferida=n=>/^(CIDADES ATENDIDAS|IMPORTACAO PMOBILE)$/.test(chave(n));
+  const abas=[...livro.SheetNames].sort((a,b)=>Number(abaPreferida(b))-Number(abaPreferida(a)));
+  let origem=null;
+  for(const nomeAba of abas){
+   const matriz=window.XLSX.utils.sheet_to_json(livro.Sheets[nomeAba],{
+    header:1,raw:false,defval:"",blankrows:true
+   });
+   for(let pos=0;pos<Math.min(50,matriz.length);pos++){
+    const nomes=(matriz[pos]||[]).map(v=>chave(v).replace(/[^A-Z0-9]/g,""));
+    const col={uf:nomes.indexOf("UF"),destino:nomes.indexOf("DESTINO"),tda:nomes.indexOf("TDA")};
+    if(col.uf>=0&&col.destino>=0&&col.tda>=0){
+     origem={nomeAba,matriz,primeira:pos+1,col};
+     break;
+    }
+   }
+   if(origem)break;
+  }
+  if(!origem)throw Error("Cabeçalho UF, Destino e TDA não encontrado. Verifique os nomes dessas colunas na planilha.");
+  const {matriz,col,primeira,nomeAba}=origem;
   const vistos=new Set(),falhas=[],extraidas=[];
-  for(let i=1;i<matriz.length;i++){
-   const r=matriz[i],uf=chave(r[0]),destino=normal(r[1]),tda=normal(r[2]);
+  let excluidas=0;
+  for(let i=primeira;i<matriz.length;i++){
+   const r=matriz[i]||[];
+   const uf=chave(r[col.uf]),destino=normal(r[col.destino]),tda=normal(r[col.tda]);
    if(!uf&&!destino&&!tda)continue;
+   // A planilha original da Transcelo identifica localidades expressamente não atendidas.
+   // Não transformá-las em cidades atendidas; informar o total excluído antes do envio.
+   if(r.some(c=>/\bNAO\s+ATENDEMOS\b/.test(chave(c)))){excluidas++;continue;}
+   if(uf==="UF"&&chave(destino)==="DESTINO"&&chave(tda)==="TDA")continue;
    if(!/^[A-Z]{2}$/.test(uf)||destino.length<2||destino.length>180||tda.length>100){
-    falhas.push("Linha "+(i+1)+": campos inválidos.");continue;
+    falhas.push("Linha "+(i+1)+": confira UF, Destino e TDA.");continue;
    }
    const id=uf+"|"+chave(destino);
    if(vistos.has(id)){falhas.push("Linha "+(i+1)+": cidade duplicada ("+destino+" / "+uf+").");continue;}
@@ -88,9 +109,10 @@ async function prepararArquivoCotacoes(){
    if(extraidas.length>limite)throw Error("Limite de "+limite.toLocaleString("pt-BR")+" localidades por arquivo.");
   }
   if(!extraidas.length)throw Error("Nenhum destino válido foi encontrado.");
-  if(falhas.length)throw Error("Corrija "+falhas.length+" problema(s) na planilha. "+falhas.slice(0,4).join(" "));
+  if(falhas.length){const repetidas=falhas.some(x=>x.includes("cidade duplicada"));throw Error("Corrija "+falhas.length+" problema(s) na planilha. "+falhas.slice(0,4).join(" ")+(repetidas?" Localidades com UF e Destino iguais podem ter códigos IBGE distintos na origem; confira antes de excluir ou alterar a TDA.":""));}
   linhas=extraidas;nomeArquivo=arquivo.name;preview(linhas);
-  status("Arquivo validado, mas ainda não enviado. Informe a transportadora e clique em Confirmar importação.",false);
+  const aviso=excluidas?" "+excluidas+" localidade(s) marcadas como NÃO ATENDEMOS foram excluídas.":"";
+  status("Aba "+nomeAba+", cabeçalho na linha "+primeira+": "+linhas.length+" destinos preparados. Outras colunas ignoradas."+aviso+" Nada foi enviado; confira a prévia e informe a transportadora para confirmar.",false);
  }catch(e){
   linhas=[];nomeArquivo="";preview([]);
   status("Não foi possível preparar o arquivo: "+(e.message||e),true);

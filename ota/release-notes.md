@@ -1,8 +1,8 @@
-PMobile / Cotações: consulta própria para importações manuais e histórico de versões.
+PMobile / Importador de Cotações: aceitar planilhas com cabeçalhos deslocados e colunas extras.
 
-- Nova terceira opção Importações manuais ao lado de Cotações por Região e Adicionar manualmente.
-- Consulte transportadoras, cidades, TDA, arquivo de origem, data de importação e versões anteriores.
-- Novas importações criam versões; as anteriores continuam salvas no Supabase, sem sobrescrever o histórico.
-- Tabelas de cotações permanecem separadas dos rastreios operacionais e protegidas com RLS.
-- Consulta disponível para perfis autorizados e histórico completo apenas para ADMIN.
-- Nenhuma planilha foi importada nem registros existentes foram apagados.
+- Localiza UF, Destino e TDA nas primeiras 50 linhas, inclusive quando o cabeçalho não é a primeira linha.
+- Ignora colunas adicionais e outras abas; somente os três campos autorizados podem ser enviados ao Supabase.
+- Não importa localidades identificadas explicitamente como NÃO ATENDEMOS; informa quantidade antes da confirmação.
+- Validação reforçada para a planilha da Transcelo original e sua versão editada.
+- A planilha Alfa conserva duplicações: localidades com UF e Destino idênticos, mesmo com IBGE distinto, exigem conferência manual. Nenhuma TDA será escolhida automaticamente.
+- Nenhum registro de Rastreio ou importação foi modificado por esta correção.
