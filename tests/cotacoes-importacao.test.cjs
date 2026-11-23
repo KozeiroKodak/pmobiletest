@@ -26,8 +26,11 @@ function simular(matriz,falharNoLote){
   usuarioPmobileAtual:{usuario:'admin',nivel:'ADMIN'},
   credencialPmobileAtual:'credencial-de-teste',
   XLSX:{
-   read:()=>({SheetNames:['Cidades atendidas'],Sheets:{'Cidades atendidas':{}}}),
-   utils:{sheet_to_json:()=>matriz}
+   read:()=>{
+    const abas=Array.isArray(matriz)?{'Cidades atendidas':matriz}:matriz;
+    return {SheetNames:Object.keys(abas),Sheets:abas};
+   },
+   utils:{sheet_to_json:conteudo=>conteudo}
   },
   confirm:()=>true,
   dispatchEvent(){},
@@ -63,11 +66,57 @@ test('planilha válida prepara e só envia após confirmação',async()=>{
  assert.equal(t.chamadas[1].args.p_linhas[1].tda,'-');
  assert.equal(t.element('cotImportacaoConfirmar').disabled,true);
 });
-test('arquivo com dados extras é bloqueado sem enviar nada',async()=>{
+test('arquivo com coluna CEP extra é aceito sem importar a coluna',async()=>{
  const t=simular([['UF','Destino','TDA','CEP'],['RS','CANOAS','0','92000000']]);
  await t.window.prepararArquivoCotacoes();
- assert.equal(t.element('cotImportacaoConfirmar').disabled,true);
+ assert.equal(t.element('cotImportacaoConfirmar').disabled,false);
+ assert.equal(t.chamadas.length,0);
  await t.window.confirmarImportacaoCotacoes();
+ const lote=t.chamadas.find(x=>x.name==='pmobile_cotacoes_importar_lote_v1');
+ assert.ok(lote);
+ assert.deepEqual(Object.keys(lote.args.p_linhas[0]),['uf','destino','tda']);
+ assert.equal(lote.args.p_linhas[0].tda,'0');
+});
+test('Transcelo original: título, cabeçalho na linha 5, quinze colunas e exclusão explícita',async()=>{
+ const linhas=[
+  ['TRANSCELO — RELAÇÃO DE CIDADES ATENDIDAS'],
+  ['Fonte: imagem enviada'],
+  ['CEP e código municipal'],
+  [],
+  ['UF','Destino','Código município','CEP','TDA','Filial / Agência','SEG','TER','QUA','QUI','SEX','Turno 1','Turno 2','Atendimento','Observações'],
+  ['RS','ALTO FELIZ','4300570','95773000','-','SÃO SEBASTIÃO DO CAÍ','SEG','TER','QUA','QUI','SEX','X','','ATENDE',''],
+  ['RS','*MONTE ALVERNE','','','','','','','','','','','','NÃO ATENDEMOS',''],
+  ['RS','SANTA CRUZ DO SUL','4316808','96800000','','LAJEADO','SEG','TER','QUA','QUI','SEX','X','X','ATENDE','']
+ ];
+ const t=simular({'Transportadora':[['Campo','Informação']],'Cidades atendidas':linhas,
+ 'Conferência':[['Pontos para conferência']]});
+ await t.window.prepararArquivoCotacoes();
+ assert.equal(t.chamadas.length,0);
+ assert.equal(t.element('cotImportacaoConfirmar').disabled,false);
+ assert.match(t.element('cotImportacaoStatus').textContent,/cabeçalho na linha 5/);
+ assert.match(t.element('cotImportacaoStatus').textContent,/1 localidade/);
+ await t.window.confirmarImportacaoCotacoes();
+ const lote=t.chamadas.find(x=>x.name==='pmobile_cotacoes_importar_lote_v1');
+ assert.equal(lote.args.p_linhas.length,2);
+ assert.equal(lote.args.p_linhas[0].destino,'ALTO FELIZ');
+ assert.equal(lote.args.p_linhas[1].destino,'SANTA CRUZ DO SUL');
+ assert.equal(lote.args.p_linhas[0].tda,'-');
+ assert.equal(lote.args.p_linhas[1].tda,'');
+});
+test('Transcelo editada: cabeçalho na linha 3',async()=>{
+ const t=simular([['TRANSCELO — RELAÇÃO DE CIDADES ATENDIDAS'],[],['UF','Destino','TDA'],
+  ['RS','ALTO FELIZ','-'],['RS','CANOAS','']]);
+ await t.window.prepararArquivoCotacoes();
+ assert.equal(t.element('cotImportacaoConfirmar').disabled,false);
+ assert.match(t.element('cotImportacaoStatus').textContent,/cabeçalho na linha 3/);
+ assert.equal(t.chamadas.length,0);
+});
+test('Alfa exportada: repetição de UF e Destino com TDAs diferentes é bloqueada',async()=>{
+ const t=simular([['UF','Destino','TDA'],
+  ['RS','ALTO ALEGRE','-'],['RS','ALTO ALEGRE',86.32]]);
+ await t.window.prepararArquivoCotacoes();
+ assert.equal(t.element('cotImportacaoConfirmar').disabled,true);
+ assert.match(t.element('cotImportacaoStatus').textContent,/duplicada/);
  assert.equal(t.chamadas.length,0);
 });
 test('cidade repetida é sinalizada antes da gravação',async()=>{
