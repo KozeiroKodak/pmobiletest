@@ -66,10 +66,10 @@ async function prepararArquivoCotacoes(){
   if(!/\.(xlsx|xls|csv)$/i.test(arquivo.name))throw Error("Selecione um arquivo Excel ou CSV.");
   if(!window.XLSX?.read||!window.XLSX?.utils?.sheet_to_json)throw Error("Leitor de Excel indisponível.");
   status("Analisando arquivo localmente...",false);
-  const livro=XLSX.read(await arquivo.arrayBuffer(),{type:"array",cellDates:false});
+  const livro=window.XLSX.read(await arquivo.arrayBuffer(),{type:"array",cellDates:false});
   const nomeAba=livro.SheetNames.find(n=>chave(n)==="CIDADES ATENDIDAS")||livro.SheetNames[0];
   if(!nomeAba)throw Error("A planilha não contém abas.");
-  const matriz=XLSX.utils.sheet_to_json(livro.Sheets[nomeAba],{header:1,raw:false,defval:"",blankrows:false});
+  const matriz=window.XLSX.utils.sheet_to_json(livro.Sheets[nomeAba],{header:1,raw:false,defval:"",blankrows:false});
   if(matriz.length<2)throw Error("A planilha não contém cidades.");
   const cab=matriz[0].map(chave);
   if(cab.length!==3||cab[0]!=="UF"||cab[1]!=="DESTINO"||cab[2]!=="TDA")
