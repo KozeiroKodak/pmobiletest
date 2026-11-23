@@ -1,0 +1,23 @@
+/* PMobile / Cotações: apenas importação de planilhas, sem digitação de destinos no aplicativo. */
+.cot-importacao-atalho{margin-top:12px}
+.cot-importacao[hidden]{display:none!important}
+.cot-importacao{margin-top:18px;padding:20px;border:1px solid var(--borda-clara,rgba(255,255,255,.12));border-radius:16px;background:var(--fundo-painel,rgba(30,24,42,.85))}
+.cot-importacao h2{font-size:1.25rem;line-height:1.35;margin:0 0 8px}
+.cot-importacao p{color:var(--texto-secundario);line-height:1.5}
+.cot-importacao-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;margin:18px 0}
+.cot-importacao-campo{display:grid;align-content:start;gap:7px;font-size:.86rem}
+.cot-importacao-campo span{font-weight:650}
+.cot-importacao-campo input{min-width:0;width:100%;min-height:48px;padding:10px 13px;border-radius:10px;border:1px solid var(--borda-clara,rgba(255,255,255,.2));background:var(--fundo,#18121f);color:var(--texto,#fff);font:inherit;font-size:16px}
+.cot-importacao-campo input[type=file]{padding:10px;font-size:.8rem}
+.cot-importacao-campo input:focus-visible,.cot-importacao-confirmar:focus-visible{outline:2px solid var(--verde,#e8c47c);outline-offset:2px}
+.cot-importacao-confirmar{padding:13px 16px;border:0;border-radius:11px;background:var(--verde,#e8c47c);color:var(--fundo,#17111e);font:inherit;font-weight:700;cursor:pointer}
+.cot-importacao-confirmar:disabled{opacity:.45;cursor:not-allowed}
+.cot-importacao-status{margin:15px 0 0;min-height:23px;font-size:.86rem}
+.cot-importacao-status[data-erro=sim]{color:#f7a2a2}
+.cot-importacao-resumo{font-weight:650}
+.cot-importacao-previa{max-width:100%;overflow:auto}
+.cot-importacao-tabela{width:100%;border-collapse:collapse;text-align:left;font-size:.8rem;margin:12px 0}
+.cot-importacao-tabela th,.cot-importacao-tabela td{padding:8px 10px;border-bottom:1px solid var(--borda-clara,rgba(255,255,255,.1));overflow-wrap:anywhere}
+.cot-importacao-tabela th{font-weight:750}
+.cot-importacao-nota{font-size:.77rem}
+@media(max-width:700px){.cot-importacao{padding:15px}.cot-importacao-grid{grid-template-columns:minmax(0,1fr)}}
