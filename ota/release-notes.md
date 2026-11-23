@@ -1,6 +1,7 @@
-PMobile / Sincronização: indicação fiel às filas verificadas.
+PMobile / Opções de Cotações: novo importador de planilhas por transportadora.
 
-- A central não mostra sucesso quando a fila de conferências não pôde ser lida.
-- A tentativa manual informa à central quando a consulta de contagens falha ou já está em andamento.
-- O estado sem pendências descreve apenas as filas locais verificadas; não promete confirmação remota sem prova.
-- Nenhum registro de produção ou regra de envio foi alterado.
+- Botão Adicionar manualmente abre o importador de Excel ou CSV, sem digitação de registros.
+- Importação exige somente UF, Destino e TDA, mostra prévia e bloqueia duplicidades antes do envio.
+- Cada importação permanece isolada até completar todos os lotes; nova lista só substitui a anterior da mesma transportadora após confirmação.
+- Cotações por Região passa a exibir destinos importados, com TDA, além dos rastreios existentes.
+- Nenhuma planilha foi enviada e não foram modificados os registros de Rastreio existentes.
