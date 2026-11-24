@@ -1,0 +1,33 @@
+/* Pesquisa de localidades exclusivamente das planilhas de cotação ativas. */
+#cotacoesPesquisaImportadas{
+ width:100%;max-width:100%;min-width:0;overflow-x:clip;box-sizing:border-box;
+ min-height:calc(100dvh - var(--status-altura));
+ background:radial-gradient(circle at 85% 5%,rgba(232,196,124,.085),transparent 38%),var(--cba-roxo,var(--fundo))!important;
+}
+#cotacoesPesquisaImportadas .cot-wrap{
+ width:100%;max-width:1040px;min-width:0;box-sizing:border-box;
+ overflow-wrap:anywhere;padding:24px clamp(12px,4vw,56px) 100px;
+}
+#cotacoesPesquisaImportadas [hidden]{display:none!important}
+.cot-pesq-import-linha{margin:0;cursor:pointer}
+.cot-pesq-import-linha span{flex:1;min-width:0}
+.cot-pesq-import-linha small{text-align:right;max-width:42%;flex-shrink:0}
+.cot-pesq-import-mais{width:100%;min-height:48px;margin:14px 0 0;
+ background:var(--cba-cartao,var(--fundo-painel));color:var(--cba-texto,var(--texto));
+ border:1px solid var(--cba-borda,var(--borda-clara));border-radius:12px;
+ font:inherit;font-weight:650;cursor:pointer}
+.cot-pesq-import-mais:disabled{opacity:.45;cursor:wait}
+.cot-pesq-import-mais:focus-visible{outline:2px solid var(--cba-ouro,#e8c47c);outline-offset:2px}
+.cot-pesq-import-total{margin-top:12px;font-size:.8rem;color:var(--texto-secundario)}
+.cot-pesq-import-status[data-erro=sim]{color:#ffa9a9}
+.cot-pesq-import-voltar{margin-top:8px}
+.cot-pesq-import-titulo{font-size:clamp(1.5rem,6vw,2rem);margin:12px 0;overflow-wrap:anywhere}
+.cot-pesq-import-transportadora{cursor:default}
+.cot-pesq-import-transportadora strong{font-size:.91rem;font-weight:650}
+.cot-pesq-import-transportadora:hover{transform:none}
+.cot-pesq-import-descricao{color:var(--texto-secundario);font-size:.88rem;line-height:1.5}
+@media(max-width:700px){
+ #cotacoesPesquisaImportadas .cot-wrap{padding:20px 12px 90px}
+ .cot-pesq-import-linha{padding:12px}
+ .cot-pesq-import-linha small{max-width:43%}
+}

@@ -63,6 +63,7 @@
 <link rel="stylesheet" href="inicio-modelo9.css?v=1.1-mobile">
 <link rel="stylesheet" href="perfil-editor.css?v=1.1-eixos">
 <link rel="stylesheet" href="cotacoes-historico.css?v=0.0.433">
+<link rel="stylesheet" href="cotacoes-pesquisa-importada.css?v=0.0.435">
 <link rel="stylesheet" href="cba-theme.css?v=cba-1.0">
 </head>
 
@@ -1098,6 +1099,8 @@
           <div class="cot-wrap"><button class="cot-back" onclick="mostrarTelaSistema('homeSistema')" type="button">← Voltar</button>
           <p class="cot-kicker">PMOBILE</p><h1>Opções de Cotações</h1><p class="cot-sub">Consulte opções de transporte disponíveis.</p>
           <button class="cot-card" onclick="abrirCotacoesRegiao()" type="button"><span class="cot-icon">🌎</span><span><strong>Cotações por Região</strong><small>Consulte as transportadoras que atendem cada região.</small></span><span class="cot-arrow">›</span></button>
+          <button class="cot-card cot-importacao-atalho" type="button" onclick="abrirPesquisaImportacoes()"><span class="cot-icon">🔎</span><span><strong>Pesquisar via importação</strong><small>Veja todas as cidades importadas e as transportadoras que as atendem.</small></span><span class="cot-arrow">›</span></button>
+
           <button class="cot-card cot-importacao-atalho" onclick="abrirImportacaoCotacoes()" type="button"><span class="cot-icon">📥</span><span><strong>Adicionar manualmente</strong><small>Importar planilha Excel com cidades atendidas por transportadora.</small></span><span class="cot-arrow">›</span></button>
           
           <button class="cot-card cot-importacao-atalho" type="button" onclick="abrirHistoricoCotacoes()"><span class="cot-icon">📚</span><span><strong>Importações manuais</strong><small>Consultar transportadoras, cidades, TDA e versões anteriores armazenadas no Supabase.</small></span><span class="cot-arrow">›</span></button>
@@ -1115,6 +1118,28 @@
           </div></div>
         </section>
         
+                <section id="cotacoesPesquisaImportadas" class="tela-sistema" style="display:none">
+          <div class="cot-wrap">
+            <button class="cot-back" type="button" onclick="voltarOpcoesCotacoes()">← Opções de Cotações</button>
+            <p class="cot-kicker">PMOBILE / COTAÇÕES</p>
+            <h1>Pesquisar via importação</h1>
+            <p class="cot-sub">Pesquise as cidades atendidas nas planilhas ativas. Selecione uma cidade para consultar todas as transportadoras disponíveis.</p>
+            <p id="cotPesqImportStatus" class="cot-status cot-pesq-import-status" role="status" aria-live="polite">Consultando cidades...</p>
+            <div id="cotPesqImportBuscador">
+              <label class="cot-label" for="cotPesqImportBusca">PESQUISAR CIDADE OU UF</label>
+              <input id="cotPesqImportBusca" class="cot-search" type="search" placeholder="🔎 Digite uma cidade ou UF..." autocomplete="off" oninput="programarPesquisaCidadesImportadas()" onkeydown="if(event.key==='Enter')pesquisarCidadesImportadas()">
+              <p id="cotPesqImportContagem" class="cot-pesq-import-total">Carregando...</p>
+              <div id="cotPesqImportLista" class="cot-list"></div>
+              <button id="cotPesqImportMais" type="button" class="cot-pesq-import-mais" onclick="carregarMaisCidadesImportadas()" hidden>Carregar mais cidades</button>
+            </div>
+            <div id="cotPesqImportDetalhe" hidden>
+              <button type="button" class="cot-back cot-pesq-import-voltar" onclick="voltarCidadesImportadas()">← Voltar às cidades</button>
+              <h2 id="cotPesqImportCidadeTitulo" class="cot-pesq-import-titulo"></h2>
+              <p class="cot-pesq-import-descricao">Transportadoras que atendem esta cidade, com TDA conforme a planilha importada.</p>
+              <div id="cotPesqImportTransportadoras" class="cot-list"></div>
+            </div>
+          </div>
+        </section>
         <section id="cotacoesImportadas" class="tela-sistema" style="display:none">
           <div class="cot-wrap">
             <button class="cot-back" type="button" onclick="voltarOpcoesCotacoes()">← Opções de Cotações</button>
@@ -1395,6 +1420,7 @@
 <script src="cotacoes.js?v=0.0.432-cidades"></script>
 <script src="cotacoes-importacao.js?v=0.0.432"></script>
 <script src="cotacoes-historico.js?v=0.0.433"></script>
+<script src="cotacoes-pesquisa-importada.js?v=0.0.435"></script>
 <script src="dados-locais/pesquisa-local.js?v=8.0"></script>
 <script src="dados-locais/estoque-local.js?v=8.0"></script>
 <script src="dados-locais/reservas-local.js?v=8.0"></script>
