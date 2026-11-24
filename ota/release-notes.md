@@ -1,8 +1,8 @@
-PMobile / Home Android — correção da rolagem indevida.
-
-- Corrigido o excesso de altura da tela Estoque (Home) quando todos os cartões cabem na área útil.
-- Durante a Home móvel, a altura mínima de #aplicacao e #conteudoPrincipal considera a barra fixa de status; o body não soma mais 48px de preenchimento.
-- A Home continua usando min-height, sem travar altura: em aparelhos menores ou modo paisagem, a rolagem permanece disponível quando o conteúdo realmente ultrapassar o espaço visível.
-- Ao abrir a Home, o scroll residual é reiniciado; ao mudar de aba, sair ou abrir login, o ajuste específico é desativado.
-- O tema CBA, o logotipo, a imagem de perfil, os cartões e a barra de status mantêm a aparência e o funcionamento existentes.
-- Sem mudanças no Supabase, dados, permissões, rastreios ou telas internas.
+PMobile — Recuperação de tokens e senhas: horário do último acesso validado.
+- Cada conta agora mostra “Último acesso” com data e horário de Brasília, consultados diretamente do campo existente usuarios.ultimo_acesso_em.
+- A própria autenticação do PMobile já atualiza esse horário; não foi necessário inserir um novo rastreador nem mudar o login.
+- Inclui restaurações de sessão confirmadas online; não é presença em tempo real.
+- Se o campo estiver vazio, mostra “não registrado”. A emissão de novas credenciais provisórias, pelo fluxo já existente, apaga o horário até o próximo login.
+- Nova RPC somente de leitura com validação de ADMIN. A RPC anterior permanece disponível para clientes antigos.
+- Nenhuma senha, token, hash ou credencial é retornada ao frontend; somente metadados já autorizados.
+- Não modifica permissões, hierarquia, dados de usuários ou fluxos de emissão e recuperação.
