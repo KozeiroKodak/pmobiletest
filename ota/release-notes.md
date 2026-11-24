@@ -1,8 +1,8 @@
-PMobile / Cotações — Detalhes instantâneos na Pesquisa via importação.
+PMobile / Home Android — correção da rolagem indevida.
 
-- Corrigido gargalo ao selecionar cidade: a tela não faz mais segunda requisição ao Supabase para buscar transportadoras.
-- A lista carrega 80 cidades por página já com as transportadoras e TDAs; os dados do bloco ficam em memória, como na aba Cotações por Região.
-- Detalhe de cidade carregada abre imediatamente, inclusive se a conexão móvel cair após carregar a lista.
-- Filtro por cidade/UF permanece global no Supabase e continua paginado; atualizações de importações invalidam o cache de consulta.
-- SQL da consulta nova é somente leitura das versões ATIVAS e valida os mesmos perfis autorizados (ADMIN e NIVEL2).
-- Histórico, Rastreios, importações e permissões já existentes não foram alterados.
+- Corrigido o excesso de altura da tela Estoque (Home) quando todos os cartões cabem na área útil.
+- Durante a Home móvel, a altura mínima de #aplicacao e #conteudoPrincipal considera a barra fixa de status; o body não soma mais 48px de preenchimento.
+- A Home continua usando min-height, sem travar altura: em aparelhos menores ou modo paisagem, a rolagem permanece disponível quando o conteúdo realmente ultrapassar o espaço visível.
+- Ao abrir a Home, o scroll residual é reiniciado; ao mudar de aba, sair ou abrir login, o ajuste específico é desativado.
+- O tema CBA, o logotipo, a imagem de perfil, os cartões e a barra de status mantêm a aparência e o funcionamento existentes.
+- Sem mudanças no Supabase, dados, permissões, rastreios ou telas internas.

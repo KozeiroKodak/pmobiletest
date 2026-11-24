@@ -287,6 +287,10 @@ function mostrarTelaSistema(
 
     }
 
+    // A Home usa a área útil sem somar padding do body à barra fixa.
+    // Desativa o ajuste ao entrar em qualquer outra aba.
+    document.body?.classList?.toggle("pmobile-home-ativa", idTela === "homeSistema");
+    if (idTela === "homeSistema") window.scrollTo?.(0, 0);
 
     // ========================================================
     // DESTACAR ITEM DA HOME
@@ -360,6 +364,7 @@ function mostrarBoasVindasPmobile() {
     if(login)login.style.display="none";
     if(criarSenha)criarSenha.style.display="none";
     if(aplicacao)aplicacao.style.display="none";
+    document.body?.classList?.remove("pmobile-home-ativa");
     atualizarBoasVindasPmobile();
     // Identidade pronta: o editor e o avatar podem atualizar sem abrir abas.
     window.dispatchEvent(new Event("pmobile:sessao-alterada"));
@@ -371,6 +376,7 @@ function abrirLoginPmobile() {
     const aplicacao=document.getElementById("aplicacao");
     if(inicio)inicio.style.display="none";
     if(aplicacao)aplicacao.style.display="none";
+    document.body?.classList?.remove("pmobile-home-ativa");
     if(login)login.style.display="block";
     const usuario=document.getElementById("loginUsuario");
     if(usuario)setTimeout(()=>usuario.focus(),0);
@@ -446,6 +452,7 @@ function voltarInicio() {
 
 function sairPmobile() {
 
+    document.body?.classList?.remove("pmobile-home-ativa");
     usuarioPmobileAtual = null;
     credencialPmobileAtual = null;
     window.credencialPmobileAtual = null;
