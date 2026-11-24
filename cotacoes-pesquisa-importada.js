@@ -3,7 +3,7 @@
 "use strict";
 const $=id=>document.getElementById(id);
 const estado={pesquisa:"",offset:0,limite:80,total:0,carregando:false,sequencia:0,
- cidades:[],selecionado:null,temporizador:null};
+ cidades:[],cache:new Map(),selecionado:null,temporizador:null};
 const normal=v=>String(v==null?"":v).trim();
 function status(texto,erro=false){
  const el=$("cotPesqImportStatus");
@@ -63,16 +63,21 @@ function mostrarDetalhe(visivel){
 }
 async function carregarCidades(acrescentar=false){
  if(estado.carregando)return;
- if(!acrescentar){estado.cidades=[];estado.offset=0;limpar($("cotPesqImportLista"));}
+ if(!acrescentar){estado.cidades=[];estado.cache.clear();estado.offset=0;limpar($("cotPesqImportLista"));}
  const seq=++estado.sequencia;
  estado.carregando=true;atualizarControle();
  status("Consultando cidades das planilhas importadas...");
  try{
-  const registros=await consulta("pmobile_cotacoes_cidades_ativas_v1",{
+  const registros=await consulta("pmobile_cotacoes_cidades_detalhadas_v2",{
    ...credenciais(),p_busca:estado.pesquisa,p_limit:estado.limite,p_offset:estado.offset
   });
   if(seq!==estado.sequencia)return;
   const validos=registros.filter(r=>/^[A-Z]{2}$/.test(normal(r.uf).toUpperCase())&&normal(r.destino));
+  if(validos.some(r=>!Array.isArray(r.transportadoras)))
+   throw Error("Resposta incompleta do catálogo. Atualize o PMobile antes de consultar.");
+  for(const r of validos){
+   estado.cache.set(normal(r.uf).toUpperCase()+"|"+normal(r.destino),r.transportadoras);
+  }
   estado.total=registros.length?(Number(registros[0].total_cidades)||0):(acrescentar?estado.cidades.length:0);
   estado.cidades.push(...validos);
   estado.offset+=registros.length;
@@ -97,6 +102,7 @@ async function abrirPesquisaImportacoes(){
  if(estado.temporizador)clearTimeout(estado.temporizador);
  estado.pesquisa="";
  estado.selecionado=null;
+ estado.cache.clear();
  estado.carregando=false;
  estado.total=0;
  ++estado.sequencia;
@@ -116,36 +122,34 @@ function programarPesquisaCidadesImportadas(){
  if(estado.temporizador)clearTimeout(estado.temporizador);
  estado.temporizador=setTimeout(pesquisarCidadesImportadas,300);
 }
-async function abrirCidadeImportada(uf,destino){
+function abrirCidadeImportada(uf,destino){
  if(!/^[A-Z]{2}$/.test(uf)||!normal(destino))return;
  if(estado.temporizador)clearTimeout(estado.temporizador);
+ const rows=estado.cache.get(uf+"|"+normal(destino));
+ if(!Array.isArray(rows)){
+  status("Os dados desta cidade ainda não estão disponíveis. Atualize a lista e tente novamente.",true);
+  return;
+ }
  estado.selecionado={uf,destino};
  estado.carregando=false;
- const seq=++estado.sequencia;
+ ++estado.sequencia;
  const title=$("cotPesqImportCidadeTitulo");
  if(title)title.textContent=destino+" / "+uf;
  const lista=$("cotPesqImportTransportadoras");
  limpar(lista);
  mostrarDetalhe(true);
- status("Consultando transportadoras que atendem esta cidade...");
- try{
-  const rows=await consulta("pmobile_cotacoes_transportadoras_cidade_v1",{
-   ...credenciais(),p_uf:uf,p_destino:destino
-  });
-  if(seq!==estado.sequencia)return;
-  if(!rows.length){if(lista)lista.appendChild(elemento("p","Nenhuma transportadora ativa para esta cidade.","cot-empty"));}
-  for(const r of rows){
-   const item=elemento("div",undefined,"cot-row cot-pesq-import-transportadora");
-   const bloco=elemento("span");
-   bloco.appendChild(elemento("strong","🚛 "+normal(r.transportadora)));
-   item.appendChild(bloco);
-   item.appendChild(elemento("small",normal(r.tda)?"TDA: "+normal(r.tda):"TDA não informada"));
-   if(lista)lista.appendChild(item);
-  }
-  status(rows.length+" transportadora(s) atendem "+destino+" / "+uf+".");
- }catch(e){
-  if(seq===estado.sequencia)status("Não foi possível consultar transportadoras: "+(e.message||e),true);
+ if(!rows.length){
+  if(lista)lista.appendChild(elemento("p","Nenhuma transportadora ativa para esta cidade.","cot-empty"));
  }
+ for(const r of rows){
+  const item=elemento("div",undefined,"cot-row cot-pesq-import-transportadora");
+  const bloco=elemento("span");
+  bloco.appendChild(elemento("strong","🚛 "+normal(r.transportadora)));
+  item.appendChild(bloco);
+  item.appendChild(elemento("small",normal(r.tda)?"TDA: "+normal(r.tda):"TDA não informada"));
+  if(lista)lista.appendChild(item);
+ }
+ status(rows.length+" transportadora(s) atendem "+destino+" / "+uf+".");
 }
 function voltarCidadesImportadas(){
  ++estado.sequencia;
@@ -161,7 +165,7 @@ document.addEventListener("click",e=>{
 window.addEventListener("pmobile:cotacoes-atualizadas",()=>{
  const tela=$("cotacoesPesquisaImportadas");
  if(tela&&getComputedStyle(tela).display!=="none"){
-  estado.selecionado=null;mostrarDetalhe(false);pesquisarCidadesImportadas();
+  estado.selecionado=null;estado.cache.clear();mostrarDetalhe(false);pesquisarCidadesImportadas();
  }
 });
 window.abrirPesquisaImportacoes=abrirPesquisaImportacoes;

@@ -6,7 +6,8 @@ const fs=require('node:fs');
 const path=require('node:path');
 const source=fs.readFileSync(path.join(__dirname,'..','cotacoes-pesquisa-importada.js'),'utf8');
 const mockCities=(n,start=0,total=120)=>Array.from({length:n},(_,i)=>({
- uf:'RS',destino:'DESTINO '+(start+i),total_transportadoras:2,total_cidades:total
+ uf:'RS',destino:'DESTINO '+(start+i),total_transportadoras:2,total_cidades:total,
+ transportadoras:[{transportadora:'Transcelo',tda:'-'},{transportadora:'Fritz',tda:''}]
 }));
 function setup({unauthorized=false, empty=false}={}){
  const els=new Map(),listeners={},calls=[];
@@ -25,14 +26,11 @@ function setup({unauthorized=false, empty=false}={}){
   addEventListener(name,fn){listeners[name]=fn},
   clienteSupabase:{rpc:async(nome,args)=>{
    calls.push({nome,args});
-   if(nome==='pmobile_cotacoes_cidades_ativas_v1'){
+   if(nome==='pmobile_cotacoes_cidades_detalhadas_v2'){
     if(empty)return {data:[]};
-    if(args.p_busca==='CANOAS')return {data:[{uf:'RS',destino:'CANOAS',total_transportadoras:3,total_cidades:1}]};
+    if(args.p_busca==='CANOAS')return {data:[{uf:'RS',destino:'CANOAS',total_transportadoras:3,total_cidades:1,transportadoras:[{transportadora:'Transcelo',tda:'-'}]}]};
     const offset=args.p_offset||0;
     return {data:mockCities(Math.min(80,120-offset),offset,120)};
-   }
-   if(nome==='pmobile_cotacoes_transportadoras_cidade_v1'){
-    return {data:[{transportadora:'Transcelo',tda:'-'},{transportadora:'Fritz',tda:''}]};
    }
    return {error:{message:'RPC inesperada: '+nome}};
   }}
@@ -46,7 +44,7 @@ test('abre quarta tela e consulta 80 cidades ativas inicialmente',async()=>{
  await t.win.abrirPesquisaImportacoes();
  assert.equal(t.win.screen,'cotacoesPesquisaImportadas');
  assert.equal(t.calls.length,1);
- assert.equal(t.calls[0].nome,'pmobile_cotacoes_cidades_ativas_v1');
+ assert.equal(t.calls[0].nome,'pmobile_cotacoes_cidades_detalhadas_v2');
  assert.equal(t.calls[0].args.p_offset,0);
  assert.equal(t.el('cotPesqImportLista').children.length,80);
  assert.equal(t.el('cotPesqImportMais').hidden,false);
@@ -71,19 +69,18 @@ test('busca consulta servidor, não filtra apenas as 80 primeiras cidades',async
  assert.equal(t.el('cotPesqImportLista').children.length,1);
  assert.equal(t.el('cotPesqImportLista').children[0].dataset.cotCidadeDestino,'CANOAS');
 });
-test('clicar cidade solicita transportadoras ativas por UF e nome',async()=>{
+test('tocar na cidade abre transportadoras pré-carregadas sem segunda RPC, mesmo offline',async()=>{
  const t=setup();
  await t.win.abrirPesquisaImportacoes();
+ const anterior=t.calls.length;
+ t.win.clienteSupabase.rpc=async()=>{throw Error('rede móvel desconectada');};
  t.listeners.click({target:{closest:()=>({dataset:{cotCidadeUf:'RS',cotCidadeDestino:'DESTINO 4'}})}});
- await new Promise(resolve=>setTimeout(resolve,0));
- const q=t.calls.find(x=>x.nome==='pmobile_cotacoes_transportadoras_cidade_v1');
- assert.ok(q);
- assert.equal(q.args.p_uf,'RS');
- assert.equal(q.args.p_destino,'DESTINO 4');
+ assert.equal(t.calls.length,anterior);
  assert.equal(t.el('cotPesqImportDetalhe').hidden,false);
  assert.equal(t.el('cotPesqImportTransportadoras').children.length,2);
  assert.match(t.el('cotPesqImportTransportadoras').children[0].children[1].textContent,/TDA: -/);
  assert.match(t.el('cotPesqImportTransportadoras').children[1].children[1].textContent,/não informada/);
+ assert.match(t.el('cotPesqImportStatus').textContent,/2 transportadora/);
  t.win.voltarCidadesImportadas();
  assert.equal(t.el('cotPesqImportBuscador').hidden,false);
  assert.equal(t.el('cotPesqImportLista').children.length,80);
@@ -101,5 +98,22 @@ test('sem credenciais não faz leitura do Supabase',async()=>{
  assert.match(t.el('cotPesqImportStatus').textContent,/Faça login/);
 });
 test('módulo somente leitura não chama escrita ou rastreios',()=>{
- assert.doesNotMatch(source,/pmobile_rastreio_listar|pmobile_cotacoes_importar_|\.insert\(|\.update\(|\.delete\(/);
+ assert.doesNotMatch(source,/pmobile_rastreio_listar|pmobile_cotacoes_importar_|pmobile_cotacoes_transportadoras_cidade_v1|\.insert\(|\.update\(|\.delete\(/);
+});
+
+test('importação atualizada invalida o cache e carrega novos dados',async()=>{
+ const t=setup();
+ await t.win.abrirPesquisaImportacoes();
+ assert.equal(t.calls.length,1);
+ t.listeners['pmobile:cotacoes-atualizadas']();
+ await new Promise(resolve=>setTimeout(resolve,0));
+ assert.equal(t.calls.length,2);
+ assert.equal(t.calls[1].nome,'pmobile_cotacoes_cidades_detalhadas_v2');
+});
+test('resposta sem transportadoras não abre detalhes inconsistentes',async()=>{
+ const t=setup();
+ t.win.clienteSupabase.rpc=async()=>({data:[{uf:'RS',destino:'CANOAS',total_transportadoras:1,total_cidades:1}]});
+ await t.win.abrirPesquisaImportacoes();
+ assert.match(t.el('cotPesqImportStatus').textContent,/Resposta incompleta/);
+ assert.equal(t.el('cotPesqImportLista').children.length,0);
 });
