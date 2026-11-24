@@ -1,10 +1,10 @@
 {
-  "webVersion": "0.0.437",
+  "webVersion": "0.0.438",
   "nativeMinVersion": "1.05",
-  "package": "https://github.com/KozeiroKodak/pmobiletest/releases/download/ota-web-0.0.437/pmobile-web-0.0.437.zip",
-  "sha256": "998b555c3e0445cd8234fc0072bb1eb96a20c30b653ca8460fc16c881ccb98eb",
+  "package": "https://github.com/KozeiroKodak/pmobiletest/releases/download/ota-web-0.0.438/pmobile-web-0.0.438.zip",
+  "sha256": "3459e8be5e60a36e06a0e468cd7289b65daae710cc0f5e435a350b225a4422a0",
   "mandatory": false,
-  "sizeBytes": 669164,
-  "publishedAt": "2026-11-24T04:15:16.968016+00:00",
-  "releaseNotes": "PMobile / Home Android — correção da rolagem indevida.\n\n- Corrigido o excesso de altura da tela Estoque (Home) quando todos os cartões cabem na área útil.\n- Durante a Home móvel, a altura mínima de #aplicacao e #conteudoPrincipal considera a barra fixa de status; o body não soma mais 48px de preenchimento.\n- A Home continua usando min-height, sem travar altura: em aparelhos menores ou modo paisagem, a rolagem permanece disponível quando o conteúdo realmente ultrapassar o espaço visível.\n- Ao abrir a Home, o scroll residual é reiniciado; ao mudar de aba, sair ou abrir login, o ajuste específico é desativado.\n- O tema CBA, o logotipo, a imagem de perfil, os cartões e a barra de status mantêm a aparência e o funcionamento existentes.\n- Sem mudanças no Supabase, dados, permissões, rastreios ou telas internas."
+  "sizeBytes": 669420,
+  "publishedAt": "2026-11-24T18:46:56.168008+00:00",
+  "releaseNotes": "PMobile — Recuperação de tokens e senhas: horário do último acesso validado.\n- Cada conta agora mostra “Último acesso” com data e horário de Brasília, consultados diretamente do campo existente usuarios.ultimo_acesso_em.\n- A própria autenticação do PMobile já atualiza esse horário; não foi necessário inserir um novo rastreador nem mudar o login.\n- Inclui restaurações de sessão confirmadas online; não é presença em tempo real.\n- Se o campo estiver vazio, mostra “não registrado”. A emissão de novas credenciais provisórias, pelo fluxo já existente, apaga o horário até o próximo login.\n- Nova RPC somente de leitura com validação de ADMIN. A RPC anterior permanece disponível para clientes antigos.\n- Nenhuma senha, token, hash ou credencial é retornada ao frontend; somente metadados já autorizados.\n- Não modifica permissões, hierarquia, dados de usuários ou fluxos de emissão e recuperação."
 }
