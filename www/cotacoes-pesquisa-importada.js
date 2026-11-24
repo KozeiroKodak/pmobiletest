@@ -73,7 +73,7 @@ async function carregarCidades(acrescentar=false){
   });
   if(seq!==estado.sequencia)return;
   const validos=registros.filter(r=>/^[A-Z]{2}$/.test(normal(r.uf).toUpperCase())&&normal(r.destino));
-  estado.total=registros.length?(Number(registros[0].total_cidades)||0):0;
+  estado.total=registros.length?(Number(registros[0].total_cidades)||0):(acrescentar?estado.cidades.length:0);
   estado.cidades.push(...validos);
   estado.offset+=registros.length;
   adicionarCidades(validos);
@@ -97,6 +97,9 @@ async function abrirPesquisaImportacoes(){
  if(estado.temporizador)clearTimeout(estado.temporizador);
  estado.pesquisa="";
  estado.selecionado=null;
+ estado.carregando=false;
+ estado.total=0;
+ ++estado.sequencia;
  const input=$("cotPesqImportBusca");if(input)input.value="";
  mostrarDetalhe(false);
  await carregarCidades(false);
@@ -117,6 +120,7 @@ async function abrirCidadeImportada(uf,destino){
  if(!/^[A-Z]{2}$/.test(uf)||!normal(destino))return;
  if(estado.temporizador)clearTimeout(estado.temporizador);
  estado.selecionado={uf,destino};
+ estado.carregando=false;
  const seq=++estado.sequencia;
  const title=$("cotPesqImportCidadeTitulo");
  if(title)title.textContent=destino+" / "+uf;
