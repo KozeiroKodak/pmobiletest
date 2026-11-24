@@ -381,3 +381,26 @@
         transition: none;
     }
 }
+
+/* Android / Home: a barra fixa já tem sua altura subtraída de #homeSistema.
+   As alturas mínimas globais de 100vh + padding-bottom de body criavam
+   scroll fantasma mesmo quando todos os cartões cabiam na tela.
+   Apenas enquanto a Home estiver ativa, usar a área útil visível.
+   min-height (não height fixo) permite rolagem REAL em telas baixas. */
+@media (max-width: 700px) {
+  body.pmobile-home-ativa {
+    padding-bottom: 0;
+  }
+
+  body.pmobile-home-ativa #aplicacao,
+  body.pmobile-home-ativa #conteudoPrincipal {
+    min-height: calc(100vh - var(--status-altura, 52px));
+    min-height: calc(100dvh - var(--status-altura, 52px));
+  }
+
+  body.pmobile-home-ativa #homeSistema {
+    min-height: calc(100vh - var(--status-altura, 52px));
+    min-height: calc(100dvh - var(--status-altura, 52px));
+    height: auto;
+  }
+}
