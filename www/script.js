@@ -73,6 +73,7 @@ const TELAS_NIVEL2_PMOBILE = new Set([
     "cotacoesRegiao",
     "cotacoesDetalhe",
     "cotacoesImportadas",
+    "cotacoesPesquisaImportadas",
     "reservas"
 ]);
 
