@@ -56,9 +56,9 @@ test("lista e emissão mostram os segredos apenas para ADMIN e os limpam ao sair
     window:{usuarioPmobileAtual:{id:6,usuario:"pmadmin",nivel:"ADMIN"},
       clienteSupabase:{rpc:async(name,args)=>{
         calls.push({name,args});
-        if(name==="pmobile_admin_listar_credenciais")return {data:[
-          {id:6,nome:"ADMIN",usuario:"pmadmin",nivel:"ADMIN",ativo:true,senha_definida:true},
-          {id:27,nome:"OPERADOR",usuario:"operador",nivel:"NIVEL2",ativo:true,senha_definida:false}
+        if(name==="pmobile_admin_listar_credenciais_v2")return {data:[
+          {id:6,nome:"ADMIN",usuario:"pmadmin",nivel:"ADMIN",ativo:true,senha_definida:true,ultimo_acesso_em:"2026-11-24T18:40:00Z"},
+          {id:27,nome:"OPERADOR",usuario:"operador",nivel:"NIVEL2",ativo:true,senha_definida:false,ultimo_acesso_em:null}
         ]};
         if(name==="pmobile_admin_gerar_credenciais")return {data:[{
           nome:"OPERADOR",usuario:"operador",token:"token-exemplo-unico",
@@ -79,7 +79,12 @@ test("lista e emissão mostram os segredos apenas para ADMIN e os limpam ao sair
   assert.equal(get("listaCredenciaisAdmin").children.length,2);
   assert.equal(get("listaCredenciaisAdmin").children[0].children.length,1,"admin sem botão reset");
   assert.equal(get("listaCredenciaisAdmin").children[1].children.length,2,"operador com botão");
+  assert.equal(calls[0].name,"pmobile_admin_listar_credenciais_v2");
   assert.equal(calls[0].args.p_admin_usuario,"pmadmin");
+  assert.match(get("listaCredenciaisAdmin").children[0].children[0].children[4].textContent,
+    /Último acesso: 24\/11\/2026.*15:40/);
+  assert.match(get("listaCredenciaisAdmin").children[1].children[0].children[4].textContent,
+    /Último acesso: não registrado/);
   await ctx.gerarCredenciaisProvisoriasAdmin(27,"operador");
   assert.equal(get("credenciaisTokenAdmin").value,"token-exemplo-unico");
   assert.equal(get("credenciaisSenhaAdmin").value,"primeira-senha-exemplo");
@@ -92,4 +97,17 @@ test("lista e emissão mostram os segredos apenas para ADMIN e os limpam ao sair
   await ctx.carregarListaCredenciaisAdmin();
   await ctx.gerarCredenciaisProvisoriasAdmin(27,"operador");
   assert.equal(calls.length,before,"NIVEL2 não deve chamar RPCs");
+});
+
+test("último acesso reaproveita coluna existente, sem mexer na autenticação ou expor hashes",()=>{
+  const novo=read("sql/pmobile_ultimo_acesso_admin_v2.sql");
+  assert.match(novo,/ultimo_acesso_em timestamptz/);
+  assert.match(novo,/u\.ultimo_acesso_em/);
+  assert.match(novo,/a\.nivel='ADMIN'/);
+  assert.match(novo,/Acesso administrativo negado/);
+  assert.match(novo,/revoke all on function public\.pmobile_admin_listar_credenciais_v2/);
+  assert.doesNotMatch(novo,/\bUPDATE\s+public\.usuarios\b|senha_hash\s*=|token_hash\s*=/i);
+  assert.match(codigo,/function formatarUltimoAcessoPmobile\(/);
+  assert.match(codigo,/timeZone: "America\/Sao_Paulo"/);
+  assert.match(html,/restauração automática de sessão/);
 });
