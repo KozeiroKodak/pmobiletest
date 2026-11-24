@@ -62,7 +62,7 @@ test('versão web e Android usam os mesmos scripts e a mesma folha',()=>{
  }
  const html=read('index.html');
  assert.match(html,/implementacoes\/home\.css\?v=0\.0\.437-scroll/);
- assert.match(html,/script\.js\?v=0\.0\.437-home/);
+ assert.match(html,/script\.js\?v=0\.0\.438-ultimo-acesso/);
  const links=[...html.matchAll(/<link[^>]*rel="stylesheet"[^>]*href="([^"]+)"/g)].map(m=>m[1]);
  assert.match(links.at(-1),/cba-theme\.css/);
 });
