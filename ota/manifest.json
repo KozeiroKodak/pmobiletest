@@ -1,10 +1,10 @@
 {
-  "webVersion": "0.0.435",
+  "webVersion": "0.0.436",
   "nativeMinVersion": "1.05",
-  "package": "https://github.com/KozeiroKodak/pmobiletest/releases/download/ota-web-0.0.435/pmobile-web-0.0.435.zip",
-  "sha256": "c4363faf778114a866e9abf0abc16e78a5af92fd0ecfb0282a90f50ee889d6e0",
+  "package": "https://github.com/KozeiroKodak/pmobiletest/releases/download/ota-web-0.0.436/pmobile-web-0.0.436.zip",
+  "sha256": "41457ccaba77e63572c4b61ee3dc8ef6fa3ddb4c54ef52e46f2d3c7712b9040a",
   "mandatory": false,
-  "sizeBytes": 668581,
-  "publishedAt": "2026-11-24T03:46:59.604129+00:00",
-  "releaseNotes": "PMobile / Cotações — Pesquisa por cidades das importações.\n\n- Nova opção \"Pesquisar via importação\" em Opções de Cotações, separada de Cotações por Região.\n- Exibe cidades/UF presentes nas planilhas ativas do Supabase, com carregamento progressivo e busca no banco.\n- Ao selecionar uma cidade, mostra as transportadoras que atendem e suas TDAs, inclusive quando não informadas.\n- Agrupa nomes equivalentes com diferenças de acentos ou espaços na mesma UF sem alterar registros originais.\n- O histórico de versões anteriores não entra na pesquisa ativa; segue preservado em \"Importações manuais\".\n- Alteração de consulta somente leitura: nenhuma planilha, Rastreio, cadastro de usuário ou permissão foi modificado."
+  "sizeBytes": 668713,
+  "publishedAt": "2026-11-24T04:04:36.209027+00:00",
+  "releaseNotes": "PMobile / Cotações — Detalhes instantâneos na Pesquisa via importação.\n\n- Corrigido gargalo ao selecionar cidade: a tela não faz mais segunda requisição ao Supabase para buscar transportadoras.\n- A lista carrega 80 cidades por página já com as transportadoras e TDAs; os dados do bloco ficam em memória, como na aba Cotações por Região.\n- Detalhe de cidade carregada abre imediatamente, inclusive se a conexão móvel cair após carregar a lista.\n- Filtro por cidade/UF permanece global no Supabase e continua paginado; atualizações de importações invalidam o cache de consulta.\n- SQL da consulta nova é somente leitura das versões ATIVAS e valida os mesmos perfis autorizados (ADMIN e NIVEL2).\n- Histórico, Rastreios, importações e permissões já existentes não foram alterados."
 }
