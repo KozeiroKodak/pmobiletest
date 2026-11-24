@@ -2214,13 +2214,24 @@ function limparCredenciaisAdminVisiveis() {
     if (nome) nome.textContent = "";
 }
 
+function formatarUltimoAcessoPmobile(valor) {
+    if (!valor) return "Último acesso: não registrado";
+    const data = new Date(valor);
+    if (!Number.isFinite(data.getTime())) return "Último acesso: não registrado";
+    return "Último acesso: " + data.toLocaleString("pt-BR", {
+        timeZone: "America/Sao_Paulo",
+        day: "2-digit", month: "2-digit", year: "numeric",
+        hour: "2-digit", minute: "2-digit", hour12: false
+    });
+}
+
 async function carregarListaCredenciaisAdmin() {
     if (window.usuarioPmobileAtual?.nivel !== "ADMIN" || !credencialPmobileAtual) return;
     const lista = document.getElementById("listaCredenciaisAdmin");
     if (!lista) return;
     lista.textContent = "Consultando usuários...";
     try {
-        const {data,error} = await window.clienteSupabase.rpc("pmobile_admin_listar_credenciais",{
+        const {data,error} = await window.clienteSupabase.rpc("pmobile_admin_listar_credenciais_v2",{
             p_admin_usuario: window.usuarioPmobileAtual.usuario,
             p_admin_credencial: credencialPmobileAtual
         });
@@ -2245,7 +2256,9 @@ async function carregarListaCredenciaisAdmin() {
             ultima.textContent = u.senha_criada_em ?
               "Senha cadastrada em " + new Date(u.senha_criada_em).toLocaleString("pt-BR"):
               "Senha ainda não cadastrada";
-            dados.append(titulo,login,situacao,ultima);
+            const acesso = document.createElement("small");
+            acesso.textContent = formatarUltimoAcessoPmobile(u.ultimo_acesso_em);
+            dados.append(titulo,login,situacao,ultima,acesso);
             card.append(dados);
             if (u.ativo && u.nivel !== "ADMIN") {
                 const emitir = document.createElement("button");
