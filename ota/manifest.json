@@ -1,10 +1,10 @@
 {
-  "webVersion": "0.0.436",
+  "webVersion": "0.0.437",
   "nativeMinVersion": "1.05",
-  "package": "https://github.com/KozeiroKodak/pmobiletest/releases/download/ota-web-0.0.436/pmobile-web-0.0.436.zip",
-  "sha256": "41457ccaba77e63572c4b61ee3dc8ef6fa3ddb4c54ef52e46f2d3c7712b9040a",
+  "package": "https://github.com/KozeiroKodak/pmobiletest/releases/download/ota-web-0.0.437/pmobile-web-0.0.437.zip",
+  "sha256": "998b555c3e0445cd8234fc0072bb1eb96a20c30b653ca8460fc16c881ccb98eb",
   "mandatory": false,
-  "sizeBytes": 668713,
-  "publishedAt": "2026-11-24T04:04:36.209027+00:00",
-  "releaseNotes": "PMobile / Cotações — Detalhes instantâneos na Pesquisa via importação.\n\n- Corrigido gargalo ao selecionar cidade: a tela não faz mais segunda requisição ao Supabase para buscar transportadoras.\n- A lista carrega 80 cidades por página já com as transportadoras e TDAs; os dados do bloco ficam em memória, como na aba Cotações por Região.\n- Detalhe de cidade carregada abre imediatamente, inclusive se a conexão móvel cair após carregar a lista.\n- Filtro por cidade/UF permanece global no Supabase e continua paginado; atualizações de importações invalidam o cache de consulta.\n- SQL da consulta nova é somente leitura das versões ATIVAS e valida os mesmos perfis autorizados (ADMIN e NIVEL2).\n- Histórico, Rastreios, importações e permissões já existentes não foram alterados."
+  "sizeBytes": 669164,
+  "publishedAt": "2026-11-24T04:15:16.968016+00:00",
+  "releaseNotes": "PMobile / Home Android — correção da rolagem indevida.\n\n- Corrigido o excesso de altura da tela Estoque (Home) quando todos os cartões cabem na área útil.\n- Durante a Home móvel, a altura mínima de #aplicacao e #conteudoPrincipal considera a barra fixa de status; o body não soma mais 48px de preenchimento.\n- A Home continua usando min-height, sem travar altura: em aparelhos menores ou modo paisagem, a rolagem permanece disponível quando o conteúdo realmente ultrapassar o espaço visível.\n- Ao abrir a Home, o scroll residual é reiniciado; ao mudar de aba, sair ou abrir login, o ajuste específico é desativado.\n- O tema CBA, o logotipo, a imagem de perfil, os cartões e a barra de status mantêm a aparência e o funcionamento existentes.\n- Sem mudanças no Supabase, dados, permissões, rastreios ou telas internas."
 }
