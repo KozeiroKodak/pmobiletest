@@ -1,0 +1,59 @@
+name: GitHub Mobile OTA notifications
+on:
+  workflow_run:
+    workflows: ["Publish PMOBILE OTA","Build PMOBILETEST Android","PMobile principal - APK para assinatura no Termux"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  actions: read
+  issues: write
+  contents: read
+concurrency:
+  group: mobile-notify-${{ github.event.workflow_run.id || github.run_id }}
+  cancel-in-progress: false
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      OTA_WORKFLOW: "Publish PMOBILE OTA"
+      FINAL_STEP: "Finalize publication"
+      REQUIRE_LOG: "false"
+    steps:
+      - name: Notify owner without modifying publication
+        shell: bash
+        run: |
+          set -euo pipefail
+          event="$GITHUB_EVENT_PATH"
+          if [[ "$GITHUB_EVENT_NAME" == workflow_dispatch ]]; then
+            id="$GITHUB_RUN_ID"
+            title="[GitHub Mobile] Teste de notificações"
+            detail="Teste manual de entrega de notificação."
+          else
+            id="$(jq -r '.workflow_run.id' "$event")"
+            name="$(jq -r '.workflow_run.name' "$event")"
+            result="$(jq -r '.workflow_run.conclusion' "$event")"
+            if [[ "$result" == failure || "$result" == timed_out ]]; then
+              title="[Pipeline] Falha: $name"
+              detail="Resultado: $result. Consulte os logs."
+            elif [[ "$result" == success && "$name" == "$OTA_WORKFLOW" ]]; then
+              jobs="$(gh api --paginate "repos/$GITHUB_REPOSITORY/actions/runs/$id/jobs?filter=latest&per_page=100" | jq -s '[.[].jobs[]]')"
+              job="$(jq -r --arg step "$FINAL_STEP" '[.[] | select(.conclusion == "success" and any(.steps[]?; .name == $step and .conclusion == "success"))][0].id // empty' <<< "$jobs")"
+              [[ -n "$job" ]] || exit 0
+              if [[ "$REQUIRE_LOG" == true ]]; then
+                gh api "repos/$GITHUB_REPOSITORY/actions/jobs/$job/logs" > "$RUNNER_TEMP/ota-log.txt"
+                grep -q 'OTA publicado. SHA-256:' "$RUNNER_TEMP/ota-log.txt" || exit 0
+              fi
+              title="[OTA] Atualização publicada"
+              detail="A etapa final de publicação foi concluída com sucesso."
+            else
+              exit 0
+            fi
+          fi
+          marker="mobile-notify-run-$id"
+          existing="$(gh api --paginate "repos/$GITHUB_REPOSITORY/issues?state=all&per_page=100" | jq -s --arg marker "$marker" '[.[][] | select((.body // "") | contains($marker))] | length')"
+          [[ "$existing" == 0 ]] || exit 0
+          printf '@KozeiroKodak\n\n%s\n\nhttps://github.com/%s/actions/runs/%s\n\n<!-- %s -->\n' "$detail" "$GITHUB_REPOSITORY" "$id" "$marker" > "$RUNNER_TEMP/notice.md"
+          gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body-file "$RUNNER_TEMP/notice.md"
