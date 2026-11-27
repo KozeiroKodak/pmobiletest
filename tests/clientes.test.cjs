@@ -63,7 +63,7 @@ test("cliente só é acessível ao ADMIN; não altera rastreios",()=>{
   assert.match(js,/pmobile_clientes_salvar_decisao/);
   assert.doesNotMatch(js,/pmobile_rastreio_sincronizar|update\(|delete\(|insert\(/);
   assert.match(source,/atualizarPermissaoClientes/);
-  assert.match(source,/data-pm-transporte=\\"clientes\\"/);
+  assert.match(source,/data-pm-transporte="clientes"/);
   assert.match(sql,/revoke all on table public\.pmobile_clientes_decisoes from public,anon,authenticated/);
   assert.match(sql,/u\.nivel='ADMIN'/);
   assert.doesNotMatch(sql,/update public\.rastreios|delete from public\.rastreios/);
