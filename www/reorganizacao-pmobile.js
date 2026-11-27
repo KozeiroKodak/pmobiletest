@@ -49,8 +49,22 @@
        '<button class="home-app-card" type="button" data-pm-transporte="cotacoes">'+
        '<span class="home-app-icone">📋</span><span class="home-app-conteudo"><strong>Opções de Cotações</strong>'+
        '<small>Consulte transportadoras por região</small></span><span class="home-app-seta">›</span></button>'+
+       '<button class="home-app-card" type="button" data-pm-transporte="clientes" hidden style="display:none">'+
+       '<span class="home-app-icone">👥</span><span class="home-app-conteudo"><strong>Clientes</strong>'+
+       '<small>Conferir nomes semelhantes e notas fiscais</small></span><span class="home-app-seta">›</span></button>'+
        '</div></div>';
      conteudo.appendChild(screen);
+     // A área Transportes também é acessível ao NIVEL2; Clientes é somente ADMIN.
+     function atualizarPermissaoClientes(){
+       const botao=screen.querySelector('[data-pm-transporte="clientes"]');
+       if(!botao)return;
+       const liberado=window.usuarioPmobileAtual?.nivel==="ADMIN";
+       botao.hidden=!liberado;
+       botao.style.display=liberado?"":"none";
+     }
+     atualizarPermissaoClientes();
+     window.addEventListener("pmobile:sessao-alterada",atualizarPermissaoClientes);
+     window.addEventListener("pmobile:tela-alterada",atualizarPermissaoClientes);
      screen.addEventListener("click",(e)=>{
        const btn=e.target.closest("[data-pm-transporte]");
        if(btn)executar(btn.dataset.pmTransporte);
