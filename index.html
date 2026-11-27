@@ -64,6 +64,7 @@
 <link rel="stylesheet" href="perfil-editor.css?v=1.1-eixos">
 <link rel="stylesheet" href="cotacoes-historico.css?v=0.0.433">
 <link rel="stylesheet" href="cotacoes-pesquisa-importada.css?v=0.0.435">
+<link rel="stylesheet" href="clientes.css?v=0.0.439">
 <link rel="stylesheet" href="cba-theme.css?v=cba-1.0">
 </head>
 
@@ -348,6 +349,33 @@
           <div class="valores-hero"><div class="valores-eyebrow">PMOBILE</div><h1>Frete geral</h1><p>Totais consolidados e análises por período e transportadora.</p></div>
           <div class="painel valores-painel"><div id="valoresTotalStatus" style="color:#aaa;margin-bottom:18px">Consultando valores...</div><div id="valoresTotalCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px"></div><button type="button" class="botao-aba valores-atualizar" style="margin-top:18px" onclick="carregarValoresTotal()">↻ Atualizar valores</button></div>
         </section>
+
+        <!-- CLIENTES — auditoria de nomes, somente consulta sobre rastreios -->
+        <section id="clientes" class="tela-sistema" style="display: none;">
+            <div class="cabecalho-pagina">
+                <p class="cabecalho-caminho">PMOBILE / TRANSPORTES / CLIENTES</p>
+                <h1>Clientes</h1>
+                <p class="clientes-introducao">Encontre nomes semelhantes por cidade e confira as notas fiscais antes de decidir. Os nomes e as NFs originais nunca serão modificados por esta tela.</p>
+            </div>
+            <div class="painel">
+                <div class="clientes-filtros">
+                    <div class="clientes-campo"><label for="clientesBusca">Cliente, cidade ou número da NF</label>
+                        <input id="clientesBusca" type="search" autocomplete="off" placeholder="Pesquisar nomes ou NF"></div>
+                    <div class="clientes-campo"><label for="clientesCidade">Cidade / região</label>
+                        <select id="clientesCidade"><option value="">Todas as cidades / regiões</option></select></div>
+                    <div class="clientes-campo"><label for="clientesFiltro">Conferência</label>
+                        <select id="clientesFiltro"><option value="pendentes">Pendentes</option>
+                            <option value="todos">Todos os grupos</option>
+                            <option value="conferidos">Revisados</option></select></div>
+                    <button id="clientesAtualizar" type="button" class="clientes-atualizar">Atualizar</button>
+                </div>
+                <p id="clientesStatus" class="clientes-status" role="status" aria-live="polite">Abra a tela para analisar os nomes da planilha.</p>
+                <p id="clientesResumo" class="clientes-resumo"></p>
+                <div id="clientesResultados" aria-label="Grupos de nomes semelhantes"></div>
+                <button id="clientesMais" type="button" class="clientes-mais" hidden>Mostrar mais</button>
+            </div>
+        </section>
+
         <section id="rastreio" class="tela-sistema" style="display: none;">
             <div class="cabecalho-pagina">
                 <p class="cabecalho-caminho">PMOBILE / Rastreio</p>
@@ -1431,6 +1459,8 @@
 <script src="dados-locais/locais-local.js?v=8.0"></script>
 <script src="dados-locais/importacao-local.js?v=8.0"></script>
 <script src="dados-locais.js?v=9.1-icones"></script>
+<script src="clientes-analise.js?v=0.0.439"></script>
+<script src="clientes.js?v=0.0.439"></script>
 <script src="reorganizacao-pmobile.js?v=3.1"></script>
 <script src="rmexpress.js"></script></body>
 
