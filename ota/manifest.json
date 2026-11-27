@@ -1,10 +1,10 @@
 {
-  "webVersion": "0.0.438",
+  "webVersion": "0.0.439",
   "nativeMinVersion": "1.05",
-  "package": "https://github.com/KozeiroKodak/pmobiletest/releases/download/ota-web-0.0.438/pmobile-web-0.0.438.zip",
-  "sha256": "3459e8be5e60a36e06a0e468cd7289b65daae710cc0f5e435a350b225a4422a0",
+  "package": "https://github.com/KozeiroKodak/pmobiletest/releases/download/ota-web-0.0.439/pmobile-web-0.0.439.zip",
+  "sha256": "a44291ceee27d7e2735a85e1cc070d9fe13c967ab2638f5bd8b035a67a629215",
   "mandatory": false,
-  "sizeBytes": 669420,
-  "publishedAt": "2026-11-24T18:46:56.168008+00:00",
-  "releaseNotes": "PMobile — Recuperação de tokens e senhas: horário do último acesso validado.\n- Cada conta agora mostra “Último acesso” com data e horário de Brasília, consultados diretamente do campo existente usuarios.ultimo_acesso_em.\n- A própria autenticação do PMobile já atualiza esse horário; não foi necessário inserir um novo rastreador nem mudar o login.\n- Inclui restaurações de sessão confirmadas online; não é presença em tempo real.\n- Se o campo estiver vazio, mostra “não registrado”. A emissão de novas credenciais provisórias, pelo fluxo já existente, apaga o horário até o próximo login.\n- Nova RPC somente de leitura com validação de ADMIN. A RPC anterior permanece disponível para clientes antigos.\n- Nenhuma senha, token, hash ou credencial é retornada ao frontend; somente metadados já autorizados.\n- Não modifica permissões, hierarquia, dados de usuários ou fluxos de emissão e recuperação."
+  "sizeBytes": 677579,
+  "publishedAt": "2026-11-27T17:29:06.147186+00:00",
+  "releaseNotes": "PMobile — nova aba Clientes (auditoria de nomes e NFs).\n- Em Transportes → Clientes, administradores podem pesquisar nomes semelhantes, filtrar por cidade/região e localizar as notas fiscais relacionadas a cada grafia.\n- Comparação de acentos, pontuação, abreviações e ordem das palavras, com sugestões que exigem conferência humana do CNPJ.\n- Registrar no Supabase as decisões Mesmo cliente, Clientes diferentes ou Pendente, em tabela independente e protegida por validação ADMIN.\n- A integração OneDrive, os nomes de origem, o histórico das NFs e os vínculos de entregas permanecem inalterados.\n- Interface responsiva e compatível com os temas CSS globais, com arquivos espelhados em /www para Android.\n- Testes de regressão incluem exemplos STUMPF, JOAO H C NUNES, M A MECANICA e MOLAS RIO GRANDENSE."
 }
