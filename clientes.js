@@ -190,8 +190,8 @@
  }
  function voltar(id){
    if(id!=="clientes")return false;
-   if(typeof window.abrirTransportesPmobile!=="function")return false;
-   window.abrirTransportesPmobile();return true;
+   if(typeof window.mostrarTelaSistema!=="function")return false;
+   window.mostrarTelaSistema("transportes",null,true);return true;
  }
  function iniciar(){
    const tela=$("clientes");
